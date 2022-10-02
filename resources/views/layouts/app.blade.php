@@ -1,18 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
     <head>
         @include('layouts.header')
     </head>
 
-    <body>
-    <div id='app'></div>
+    <body class="d-flex h-100 text-center text-white bg-dark">
+        <div id='app'></div>
 
-    <div id="wrapper">
-
-        @include('layouts.sidebar')
         @yield('content')
-    </div>
 
-    @yield('js')
+        @yield('js')
     </body>
 </html>
