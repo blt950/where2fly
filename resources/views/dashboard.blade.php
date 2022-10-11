@@ -15,26 +15,38 @@
           <input type="text" class="form-control" id="departure" placeholder="ICAO">
         </div>
         <div class="col-sm-3 text-start">
-            <label for="codeletter">Destination Handling Code</label>
+            <label for="codeletter">Arrival Aircraft Code</label>
             <select class="form-control" id="codeletter">
                 <option disabled selected>Choose</option>
-                <option>A (PIPER/CESSNA)</option>
-                <option>B (CRJ/DHC)</option>
-                <option>C (737-700/A320/ERJ)</option>
-                <option>D (B767/A310)</option>
-                <option>E (B777/B787/A330)</option>
-                <option>F (747-8/A380)</option>
+                <option value="A">A (PIPER/CESSNA)</option>
+                <option value="B">B (CRJ/DHC)</option>
+                <option value="C">C (737-700/A320/ERJ)</option>
+                <option value="D">D (B767/A310)</option>
+                <option value="E">E (B777/B787/A330)</option>
+                <option value="F">F (747-8/A380)</option>
+            </select>
+        </div>
+        <div class="col-sm-2 text-start">
+            <label for="continent">Continent</label>
+            <select class="form-control" id="continent">
+                <option disabled selected>Choose</option>
+                <option value="AF">Africa</option>
+                <option value="AS">Asia</option>
+                <option value="EU">Europe</option>
+                <option value="NA">North America</option>
+                <option value="OC">Oceania</option>
+                <option value="SA">South America</option>
             </select>
         </div>
         <div class="col-sm-2 text-start">
             <label for="airtime">Intended Air Time</label>
             <select class="form-control" id="airtime">
                 <option disabled selected>Choose</option>
-                <option>1 hour or less</option>
-                <option>1-2 hours</option>
-                <option>2-3 hours</option>
-                <option>3-4 hours</option>
-                <option>4-5 hours</option>
+                <option value="1">1 hour or less</option>
+                <option value="2">1-2 hours</option>
+                <option value="3">2-3 hours</option>
+                <option value="4">3-4 hours</option>
+                <option value="5">4-5 hours</option>
             </select>
         </div>
         <div class="col-sm-2 align-self-end">
