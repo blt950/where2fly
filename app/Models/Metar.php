@@ -28,7 +28,7 @@ class Metar extends Model
 
     public function ceilingAtAbove(int $feet){
         $results = [];
-        if(preg_match('/(BKN\d\d\d|OVC\d\d\d)/', $this->metarWithoutRemarks(), $results)){
+        if(preg_match('/(BKN\d\d\d|OVC\d\d\d|VV\d\d\d)/', $this->metarWithoutRemarks(), $results)){
             foreach($results as $r){
                 if((int)substr($r, 3)*100 <= $feet){
                     return true;
@@ -39,23 +39,49 @@ class Metar extends Model
     }
 
     public function foggy(){
-        // FG | HZ
+        $results = [];
+        if(preg_match('/(FG|HZ)/', $this->metarWithoutRemarks(), $results)){
+            return true;
+        }
+        return false;
     }
 
     public function heavyRain(){
-        // +RA +SHRA
+        $results = [];
+        if(preg_match('/(\+RA|\+SHRA)/', $this->metarWithoutRemarks(), $results)){
+            return true;
+        }
+        return false;
     }
 
     public function heavySnow(){
-        // +SN
+        $results = [];
+        if(preg_match('/(\+SN)/', $this->metarWithoutRemarks(), $results)){
+            return true;
+        }
+        return false;
     }
 
     public function thunderstorm(){
-        // TS
+        $results = [];
+        if(preg_match('/(TS)/', $this->metarWithoutRemarks(), $results)){
+            return true;
+        }
+        return false;
     }
 
-    public function rvrAtBelow(){
-        // VV
+    public function rvrAtBelow(int $meters){
+
+        // TODO: Process result
+        $results = [];
+        if(preg_match('/(R\d\d\w?\/M?\d\d\d\d(M|P|V|U|D)?)/', $this->metarWithoutRemarks(), $results)){
+            foreach($results as $r){
+                if((int)substr($r, 3)*100 <= $feet){
+                    return true;
+                }
+            }
+        }
+        return false;        
 
         /*
         R19R/0600N RVR VALUES
