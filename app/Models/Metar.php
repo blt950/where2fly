@@ -28,7 +28,8 @@ class Metar extends Model
 
     public function ceilingAtAbove(int $feet){
         $results = [];
-        if(preg_match('/(BKN\d\d\d|OVC\d\d\d|VV\d\d\d)/', $this->metarWithoutRemarks(), $results)){
+        if(preg_match_all('/(BKN\d\d\d|OVC\d\d\d|VV\d\d\d)/', $this->metarWithoutRemarks(), $results, PREG_SET_ORDER)){
+            $results = array_shift($results); // Remove first occurence which is the whole matched string
             foreach($results as $r){
                 if((int)substr($r, 3)*100 <= $feet){
                     return true;
@@ -70,24 +71,18 @@ class Metar extends Model
         return false;
     }
 
-    public function rvrAtBelow(int $meters){
-
-        // TODO: Process result
+    public function rvrAtBelow(string $rwy, int $meters){
         $results = [];
-        if(preg_match('/(R\d\d\w?\/M?\d\d\d\d(M|P|V|U|D)?)/', $this->metarWithoutRemarks(), $results)){
+        if(preg_match_all('/R(\d\d\w?)\/M?(\d\d\d\d)(M|P|V|U|D)?/', $this->metarWithoutRemarks(), $results, PREG_SET_ORDER)){
             foreach($results as $r){
-                if((int)substr($r, 3)*100 <= $feet){
-                    return true;
+                if($r[1] == $rwy){
+                    if((int)$r[2] <= $meters){
+                        return true;
+                    }
                 }
             }
         }
-        return false;        
-
-        /*
-        R19R/0600N RVR VALUES
-        "R" indicates the group followed by the runway heading (06) 
-        and the visual range in meters. The report might include a 
-        "U" for increasing or "D" for decreasing values.*/
+        return false;
     }
 
     public function funClouds(){
