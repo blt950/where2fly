@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use App\Models\Metar;
+use App\Models\Airport;
 
 class FetchMetars extends Command
 {
@@ -40,10 +41,14 @@ class FetchMetars extends Command
                 $time = Carbon::now()->setHour(substr($d, 7, 2))->setMinute(substr($d, 9, 2))->setSeconds(0);
                 $metar = substr($d, 13, null);
 
-                Metar::updateOrCreate(['icao' => $icao],[
-                    'last_update' => $time,
-                    'metar' => $metar
-                ]);
+                $airport = Airport::where('icao', $icao)->get()->first();
+                if($airport && $airport->id){
+                    Metar::updateOrCreate(['airport_id' => $airport->id],[
+                        'last_update' => $time,
+                        'metar' => $metar
+                    ]);
+                }
+                
             }
             
         }

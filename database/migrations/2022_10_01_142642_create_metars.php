@@ -14,7 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('metars', function (Blueprint $table) {
-            $table->string('icao')->unique();
+            $table->bigIncrements('id');
+            $table->string('airport_id')->unique();
             $table->timestamp('last_update');
             $table->string('metar');
         });
