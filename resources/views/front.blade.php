@@ -9,14 +9,15 @@
   
     <main class="px-3">
       <h1 class="mb-3">What kind of flight do you want?</h1>
-      <form class="row g-3 justify-content-center">
+      <form class="row g-3 justify-content-center" action="{{ route('search') }}" method="POST">
+        @csrf
         <div class="col-sm-2 text-start">
           <label for="departure">Departure</label>
-          <input type="text" class="form-control" id="departure" placeholder="ICAO">
+          <input type="text" class="form-control" id="departure" name="departure" placeholder="ICAO">
         </div>
         <div class="col-sm-3 text-start">
             <label for="codeletter">Arrival Aircraft Code</label>
-            <select class="form-control" id="codeletter">
+            <select class="form-control" id="codeletter" name="codeletter">
                 <option disabled selected>Choose</option>
                 <option value="A">A (PIPER/CESSNA)</option>
                 <option value="B">B (CRJ/DHC)</option>
@@ -28,7 +29,7 @@
         </div>
         <div class="col-sm-2 text-start">
             <label for="continent">Continent</label>
-            <select class="form-control" id="continent">
+            <select class="form-control" id="continent" name="continent">
                 <option disabled selected>Choose</option>
                 <option value="AF">Africa</option>
                 <option value="AS">Asia</option>
@@ -40,7 +41,7 @@
         </div>
         <div class="col-sm-2 text-start">
             <label for="airtime">Intended Air Time</label>
-            <select class="form-control" id="airtime">
+            <select class="form-control" id="airtime" name="airtime">
                 <option disabled selected>Choose</option>
                 <option value="1">1 hour or less</option>
                 <option value="2">1-2 hours</option>

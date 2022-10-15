@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('airports', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('ident', 7);
+            $table->string('icao', 7);
             $table->enum('type', ['balloonport', 'closed', 'heliport', 'large_airport', 'medium_airport', 'seaplane_base', 'small_airport']);
             $table->string('name');
             $table->float('latitude_deg');

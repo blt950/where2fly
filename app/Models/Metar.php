@@ -11,7 +11,10 @@ class Metar extends Model
     public $timestamps = false;
 
     protected $guarded = [];
-    protected $primaryKey = 'icao';
+
+    public function airport(){
+        return $this->belongsTo(Airport::class);
+    }
 
     public function metarWithoutRemarks(){
         return trim(explode("RMK", $this->metar)[0]);
@@ -65,7 +68,7 @@ class Metar extends Model
 
     public function thunderstorm(){
         $results = [];
-        if(preg_match('/(TS)/', $this->metarWithoutRemarks(), $results)){
+        if(preg_match('/(TS|\+TSRA)/', $this->metarWithoutRemarks(), $results)){
             return true;
         }
         return false;
