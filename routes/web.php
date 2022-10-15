@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\TopController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +16,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [SearchController::class, 'index'])->name('front');
+Route::get('/top', [TopController::class, 'index'])->name('top');
 Route::post('/search', [SearchController::class, 'search'])->name('search');

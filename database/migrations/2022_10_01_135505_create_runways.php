@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('runways', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('airport_ref', false, true);
+            $table->bigInteger('airport_id', false, true);
             $table->string('airport_ident', 7);
             $table->integer('length_ft')->nullable();
             $table->integer('width_ft')->nullable();

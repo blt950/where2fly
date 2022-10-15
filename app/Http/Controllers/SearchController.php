@@ -24,7 +24,7 @@ class SearchController extends Controller
      */
     public function search(Request $request){
         $data = request()->validate([
-            'departure' => 'required|exists:App\Models\Airport,id',
+            'departure' => 'required|exists:App\Models\Airport,icao',
             'codeletter' => 'required|string',
             'continent' => 'required|string',
             'airtime' => 'required|between:1,5',

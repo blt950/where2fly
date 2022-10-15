@@ -16,4 +16,12 @@ class Airport extends Model
         return $this->hasOne(Metar::class);
     }
 
+    public function runways(){
+        return $this->hasMany(Runway::class);
+    }
+
+    public function scores(){
+        return $this->hasMany(AirportScore::class);
+    }
+
 }

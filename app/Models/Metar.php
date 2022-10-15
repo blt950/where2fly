@@ -9,6 +9,9 @@ class Metar extends Model
 {
     use HasFactory;
     public $timestamps = false;
+    protected $dates = [
+        'last_updated',
+    ];
 
     protected $guarded = [];
 
@@ -21,12 +24,16 @@ class Metar extends Model
     }
 
     public function windAtAbove(int $knots){
-        $results = [];
-        if(preg_match('/(?!^...)(\d\d)(?=KT)/', $this->metarWithoutRemarks(), $results)){
-            $airportWind = (int)$results[1];
-            return $airportWind >= $knots;
+        if($this->wind_speed){
+            return $this->wind_speed >= $knots;
         }
         return false;
+    }
+
+    public function windGusts(){
+        if($this->wind_gusts){
+            return true;
+        }
     }
 
     public function ceilingAtAbove(int $feet){
@@ -86,9 +93,5 @@ class Metar extends Model
             }
         }
         return false;
-    }
-
-    public function funClouds(){
-        // CB || TCU
     }
 }
