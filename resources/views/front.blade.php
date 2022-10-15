@@ -13,7 +13,7 @@
         @csrf
         <div class="col-sm-2 text-start">
           <label for="departure">Departure</label>
-          <input type="text" class="form-control" id="departure" name="departure" placeholder="ICAO">
+          <input type="text" class="form-control" id="departure" name="departure" placeholder="ICAO" oninput="this.value = this.value.toUpperCase()" maxlength="4">
         </div>
         <div class="col-sm-3 text-start">
             <label for="codeletter">Arrival Aircraft Code</label>

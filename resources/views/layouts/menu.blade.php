@@ -1,9 +1,12 @@
 <header class="mb-auto">
     <div>
-        <h3 class="float-md-start mb-0">Where2Fly <span class="badge text-bg-secondary fs-6">Beta</span></h3>
+        <a href="{{ route('front') }}" class="text-white">
+            <h3 class="float-md-start mb-0">Where2Fly <span class="badge text-bg-secondary fs-6 pt-2">Beta</span></h3>
+        </a>
         
         <nav class="nav nav-masthead justify-content-center float-md-end">
-            <a class="nav-link active" aria-current="page" href="#">Search</a>
+            <a class="nav-link {{ Route::is('front') ? 'active' : '' }}" href="{{ route('front') }}">Search</a>
+            <a class="nav-link {{ Route::is('top') ? 'active' : '' }}" href="{{ route('top') }}">Top List</a>
             <a class="nav-link" href="#">Feedback</a>
         </nav>
     </div>

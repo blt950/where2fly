@@ -13,14 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('metars', function (Blueprint $table) {
+        Schema::create('airport_scores', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('airport_id')->unique();
-            $table->timestamp('last_update');
-            $table->string('metar');
-            $table->float('wind_direction', 4, 1, true)->nullable();
-            $table->unsignedInteger('wind_speed')->nullable();
-            $table->unsignedInteger('wind_gusts')->nullable();
+            $table->string('airport_id');
+            $table->string('reason');
+            $table->tinyInteger('score')->default(1);
         });
     }
 
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('metars');
+        Schema::dropIfExists('airport_scores');
     }
 };
