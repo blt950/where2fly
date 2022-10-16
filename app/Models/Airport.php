@@ -32,6 +32,15 @@ class Airport extends Model
         return $this->hasMany(Controller::class);
     }
 
+    public function longestRunway(){
+        $length = 0;
+        foreach($this->runways as $rwy){
+            if($rwy->length_ft > $length) $length = $rwy->length_ft;
+        }
+
+        return $length;
+    }
+
     public function supportsAircraftCode(string $code){
 
         $reqRwyLength = 0;
@@ -43,16 +52,16 @@ class Airport extends Model
                 $reqRwyLength = 2500;
                 break;
             case "C":
-                $reqRwyLength = 3500;
+                $reqRwyLength = 6000;
                 break;
             case "D":
-                $reqRwyLength = 3700;
+                $reqRwyLength = 6500;
                 break;
             case "E":
-                $reqRwyLength = 5300;
+                $reqRwyLength = 7500;
                 break;
             case "F":
-                $reqRwyLength = 6000;
+                $reqRwyLength = 8000;
                 break;
             default:
                 $reqRwyLength = 0;
