@@ -8,9 +8,17 @@ use App\Models\Airport;
 class TopController extends Controller
 {
     
-    public function index(){
-        $airports = Airport::orderBy('total_score', 'DESC')->limit(20)->get();
-        return view('top', compact('airports'));
+    public function index(Request $request, string $continent = null){
+
+        $airports = collect();
+
+        if($continent){
+            $airports = Airport::where('continent', $continent)->orderBy('total_score', 'DESC')->limit(30)->get();
+        } else {
+            $airports = Airport::orderBy('total_score', 'DESC')->limit(30)->get();
+        }
+        
+        return view('top', compact('airports', 'continent'));
     }
 
 }

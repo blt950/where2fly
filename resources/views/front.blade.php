@@ -28,9 +28,10 @@
             </select>
         </div>
         <div class="col-sm-2 text-start">
-            <label for="continent">Continent</label>
+            <label for="continent">Area</label>
             <select class="form-control" id="continent" name="continent">
                 <option disabled selected>Choose</option>
+                <option value="AF">Domestic Only</option>
                 <option value="AF">Africa</option>
                 <option value="AS">Asia</option>
                 <option value="EU">Europe</option>
