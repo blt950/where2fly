@@ -12,6 +12,18 @@
 <meta name="theme-color" content="#7952b3">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
 
+@if(!empty(Config::get('app.gtag')))
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ Config::get('app.gtag') }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', '{{ Config::get('app.gtag') }}');
+    </script>
+@endif
+
 <style>
     .bd-placeholder-img {
         font-size: 1.125rem;
