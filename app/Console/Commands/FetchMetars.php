@@ -53,6 +53,12 @@ class FetchMetars extends Command
                     if(isset($windResult[3])){
                         $windData['gusting'] = $windResult[3];
                     }
+                } else if(preg_match('/(\d\d\d)(\d\d)G?(\d\d)?MPS/', $metar, $windResult)){
+                    $windData['direction'] = $windResult[1];
+                    $windData['speed'] = round($windResult[2]*1.943844);
+                    if(isset($windResult[3])){
+                        $windData['gusting'] = round($windResult[3]*1.943844);
+                    }
                 }
 
                 $airport = Airport::where('icao', $icao)->get()->first();
