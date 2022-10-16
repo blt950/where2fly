@@ -9,7 +9,7 @@
   
     <main class="px-3">
       <h1 class="mb-3">What kind of flight do you want?</h1>
-      <form class="row g-3 justify-content-center" action="{{ route('search') }}" method="POST">
+      <form class="row g-3 justify-content-center" id="form" action="{{ route('search') }}" method="POST">
         @csrf
         <div class="col-sm-2 text-start">
           <label for="departure">Departure</label>
@@ -28,10 +28,10 @@
             </select>
         </div>
         <div class="col-sm-2 text-start">
-            <label for="continent">Area</label>
+            <label for="continent">Destination Area</label>
             <select class="form-control" id="continent" name="continent">
                 <option disabled selected>Choose</option>
-                <option value="AF">Domestic Only</option>
+                <option value="DO">Domestic Only</option>
                 <option value="AF">Africa</option>
                 <option value="AS">Asia</option>
                 <option value="EU">Europe</option>
@@ -52,10 +52,22 @@
             </select>
         </div>
         <div class="col-sm-2 align-self-end">
-            <button role="submit" href="#" class="btn btn-secondary text-white">Find destination</button>
+            <button role="submit" id="submitBtn" href="#" class="btn btn-secondary text-white">
+                Find destination
+                
+            </button>
         </div>
     </form>
     </main>
+
+    <script>
+        var button = document.getElementById('submitBtn');
+        button.addEventListener('click', function() {
+            button.setAttribute('disabled', '')
+            button.innerHTML = 'Searching ... <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
+            document.getElementById('form').submit()
+        });
+    </script>
   
     @include('layouts.footer')
 </div>
