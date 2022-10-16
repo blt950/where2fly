@@ -121,7 +121,21 @@ class CalcScores extends Command
             // Check if crosswind component is fun at active runway
             if($airport->metar->wind_speed >= 15 && $activeRunwayComponents['crosswind'] > 12){
                 AirportScore::create(['airport_id' => $airport->id, 'reason' => 'METAR_CROSSWIND', 'score' => 1]);
-                 $airportScore++;
+                $airportScore++;
+            }
+
+            // Check VATSIM controllers
+            if($airport->controllers->count()){
+                AirportScore::create(['airport_id' => $airport->id, 'reason' => 'VATSIM_ATC', 'score' => 1]);
+                $airportScore++;
+            }
+
+            // Check if ongoing VATSIM event
+            foreach($airport->events as $event){
+                if(Carbon::now()->gt($event->start_time) && Carbon::now()->lt($event->end_time)){
+                    AirportScore::create(['airport_id' => $airport->id, 'reason' => 'VATSIM_EVENT', 'score' => 1]);
+                    $airportScore++;
+                }
             }
 
             $airport->total_score = $airportScore;

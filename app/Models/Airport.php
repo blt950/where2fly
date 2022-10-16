@@ -24,6 +24,14 @@ class Airport extends Model
         return $this->hasMany(AirportScore::class);
     }
 
+    public function events(){
+        return $this->hasMany(Event::class);
+    }
+
+    public function controllers(){
+        return $this->hasMany(Controller::class);
+    }
+
     public function supportsAircraftCode(string $code){
 
         $reqRwyLength = 0;

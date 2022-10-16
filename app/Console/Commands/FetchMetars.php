@@ -15,7 +15,7 @@ class FetchMetars extends Command
      *
      * @var string
      */
-    protected $signature = 'metars:fetch';
+    protected $signature = 'fetch:metars';
 
     /**
      * The console command description.
