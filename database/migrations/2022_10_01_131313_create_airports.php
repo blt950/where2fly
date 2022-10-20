@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('gps_code')->nullable();
             $table->string('iata_code')->nullable();
             $table->string('local_code')->nullable();
-            $table->unsignedInteger('total_core')->nullable();
+            $table->unsignedInteger('total_score')->nullable();
         });
     }
 
