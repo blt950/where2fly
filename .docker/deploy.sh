@@ -32,7 +32,7 @@ if [ "$ENV" != "init" ]; then
 fi
 
 # Pull latest updates from Git
-git pull origin master
+git pull origin main
 
 # Install dependecies
 if [ "$ENV" = "dev" ]; then 
