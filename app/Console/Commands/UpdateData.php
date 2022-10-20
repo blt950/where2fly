@@ -29,6 +29,7 @@ class UpdateData extends Command
     public function handle()
     {
 
+        $processTime = microtime(true);
         $this->info("> Calling all relevant data update commands...");
 
         $this->info(">> fetch:metars running");
@@ -37,10 +38,10 @@ class UpdateData extends Command
         $this->info(">> fetch:vatsim running");
         Artisan::call('fetch:vatsim');
 
-        $this->info(">> calc:score running");
-        Artisan::call('calc:score');
+        $this->info(">> calc:scores running");
+        Artisan::call('calc:scores');
 
-        $this->info("> Done with all commands!");
+        $this->info("> Done with all commands in ".round(microtime(true) - $processTime)." seconds!");
 
     }
 }
