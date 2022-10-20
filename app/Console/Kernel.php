@@ -15,20 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        
-        /*
-        // Update VATSIM data
-        $schedule->command('fetch:vatsim')->everyFifteenMinutes();
-
-        // Update METAR data
-        $schedule->command('fetch:metar')->hourlyAt(05);
-        $schedule->command('fetch:metar')->hourlyAt(25);
-
-        // Calculate scores
-        $schedule->command('calc:scores')->hourlyAt(15);
-        $schedule->command('calc:scores')->hourlyAt(40);
-        */
-    
+        // Update data
+        $schedule->command('update:data')->hourlyAt(15);
+        $schedule->command('update:data')->hourlyAt(40);
     }
 
     /**
