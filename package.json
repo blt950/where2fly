@@ -5,6 +5,9 @@
         "build": "vite build"
     },
     "devDependencies": {
+
+    },
+    "dependencies": {
         "@popperjs/core": "^2.10.2",
         "axios": "^0.27",
         "bootstrap": "^5.2.0",
@@ -13,8 +16,5 @@
         "postcss": "^8.1.14",
         "sass": "^1.32.11",
         "vite": "^3.0.0"
-    },
-    "dependencies": {
-
     }
 }
