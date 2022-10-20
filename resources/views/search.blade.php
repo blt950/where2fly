@@ -52,7 +52,11 @@
                             </ul>
                             <div class="tab-content" id="myTabContent">
                                 <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab" tabindex="0">{{ $airport->metar->metar }}</div>
-                                <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">{{ $tafs[$airport->icao] }}</div>
+                                @isset($tafs[$airport->icao])
+                                    <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">{{ $tafs[$airport->icao] }}</div>
+                                @else
+                                    <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">N/A</div>
+                                @endif
                             </div>
                         </td>
                     </tr>
