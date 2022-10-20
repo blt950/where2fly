@@ -70,6 +70,7 @@ class SearchController extends Controller
 
         // Fetch TAF
         $tafs = [];
+        /*
         foreach($suggestedAirports as $a){
             $response = Http::get('https://api.met.no/weatherapi/tafmetar/1.0/taf.txt?icao='.$a->icao);
             if($response->successful()){
@@ -87,6 +88,7 @@ class SearchController extends Controller
                 $tafs[$a->icao] = $data->last(); 
             }
         }
+        */
 
         return view('search', compact('suggestedAirports', 'distances', 'airtimes', 'tafs'));
     }
