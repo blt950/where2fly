@@ -31,7 +31,7 @@ class UpdateData extends Command
 
         $this->info("> Calling all relevant data update commands...");
 
-        Artisan::call('fetch:metar');
+        Artisan::call('fetch:metars');
         Artisan::call('fetch:vatsim');
         Artisan::call('calc:score');
 
