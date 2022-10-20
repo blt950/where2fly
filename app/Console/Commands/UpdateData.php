@@ -31,8 +31,13 @@ class UpdateData extends Command
 
         $this->info("> Calling all relevant data update commands...");
 
+        $this->info(">> fetch:metars running");
         Artisan::call('fetch:metars');
+
+        $this->info(">> fetch:vatsim running");
         Artisan::call('fetch:vatsim');
+
+        $this->info(">> calc:score running");
         Artisan::call('calc:score');
 
         $this->info("> Done with all commands!");
