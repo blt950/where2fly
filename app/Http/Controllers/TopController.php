@@ -14,13 +14,15 @@ class TopController extends Controller
         $airports = collect();
 
         if($continent){
-            $airports = Airport::where('continent', $continent)->orderBy('total_score', 'DESC')->limit(30)->get();
+            $airports = Airport::where('continent', $continent)->orderBy('total_score', 'DESC')->with('scores', 'metar', 'runways')->limit(30)->get();
         } else {
-            $airports = Airport::orderBy('total_score', 'DESC')->limit(30)->get();
+            $airports = Airport::orderBy('total_score', 'DESC')->with('scores', 'metar', 'runways')->limit(30)->get();
         }
 
         // Fetch TAF
         $tafs = [];
+        /*
+        
         foreach($airports as $a){
             $response = Http::get('https://api.met.no/weatherapi/tafmetar/1.0/taf.txt?icao='.$a->icao);
             if($response->successful()){
@@ -37,7 +39,7 @@ class TopController extends Controller
 
                 $tafs[$a->icao] = $data->last(); 
             }
-        }
+        }*/
         
         return view('top', compact('airports', 'continent', 'tafs'));
     }
