@@ -52,7 +52,14 @@ class FetchMetars extends Command
             $upsertData = [];
             foreach(Airport::whereIn('icao', $airportsFilter)->get() as $airport){
                 $d = $airportsData[strtoupper($airport->icao)];
-                $time = Carbon::now()->setHour(substr($d, 7, 2))->setMinute(substr($d, 9, 2))->setSeconds(0);
+
+                // Don't add the METAR if it's not from today
+                $metarDate = (int)substr($d, 5, 2);
+                if($metarDate != date('d')){
+                    continue;
+                }
+
+                $time = Carbon::now()->setDay($metarDate)->setHour(substr($d, 7, 2))->setMinute(substr($d, 9, 2))->setSeconds(0);
                 $metar = substr($d, 13, null);
 
                 // Fetch the wind direction and speed
