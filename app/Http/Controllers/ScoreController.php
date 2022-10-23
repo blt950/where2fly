@@ -17,7 +17,7 @@ class ScoreController extends Controller
         'METAR_RVR' => ['icon' => 'fa-arrows-left-right', 'desc' => 'Poor Runway Vertical Range'],
         'METAR_CROSSWIND' => ['icon' => 'fa-xmark', 'desc' => 'Crosswind'],
         'VATSIM_ATC' => ['icon' => 'fa-tower-cell', 'desc' => 'VATSIM ATC Online'],
-        'VATSIM_EVENT' => ['icon' => 'fa-calendar', 'desc' => 'VATSIM Event Scheduled'],
+        'VATSIM_EVENT' => ['icon' => 'fa-calendar', 'desc' => 'VATSIM Event Ongoing'],
     ];
-
+    
 }
