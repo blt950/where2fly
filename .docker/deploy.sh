@@ -28,7 +28,7 @@ run_php -v
 
 # Turn maintenance mode on, unless it's the initial run
 if [ "$ENV" != "init" ]; then 
-    run_php artisan down --render="errors.maintenance"
+    run_php artisan down
 fi
 
 # Pull latest updates from Git
