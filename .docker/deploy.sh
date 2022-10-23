@@ -63,7 +63,7 @@ run_php artisan optimize:clear
 if [ "$ENV" = "dev" ]; then
 
     # Create front-end assets
-    npm run dev
+    npx vite build
 
 elif [ "$ENV" = "init" ]; then
 
@@ -71,12 +71,12 @@ elif [ "$ENV" = "init" ]; then
     run_php artisan key:generate
 
     # Create front-end assets
-    npm run dev
+    npx vite build
 
 else
 
     # Create front-end assets
-    npm run prod
+    npx vite build
 
 fi
 
