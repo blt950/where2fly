@@ -40,9 +40,12 @@ class CalcScores extends Command
         AirportScore::truncate();
         DB::table('airports')->update(['total_score' => null]);
 
-        // Grab relevant aerodromes for calculations
-        $airports = Airport::where('type', '!=', 'closed')->has('metar')->get();
+        // Get airports with score, but no longer metar and set//update 0 score.
 
+        // Grab relevant aerodromes for calculations
+        $airports = Airport::where('type', '!=', 'closed')->has('metar')->with('metar', 'runways', 'controllers', 'events')->get();
+
+        $airportScoreInsert = [];
         foreach($airports as $airport){
 
             // Skip airport with old metars
@@ -54,37 +57,37 @@ class CalcScores extends Command
             $airportScore = 0;
 
             if($airport->metar->windAtAbove(15)){
-                AirportScore::create(['airport_id' => $airport->id, 'reason' => 'METAR_WINDY', 'score' => 1]);
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_WINDY', 'score' => 1];
                 $airportScore++;
             }
 
             if($airport->metar->windGusts()){
-                AirportScore::create(['airport_id' => $airport->id, 'reason' => 'METAR_GUSTS', 'score' => 1]);
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_GUSTS', 'score' => 1];
                 $airportScore++;
             }
 
             if($airport->metar->ceilingAtAbove(300)){
-                AirportScore::create(['airport_id' => $airport->id, 'reason' => 'METAR_CEILING', 'score' => 1]);
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_CEILING', 'score' => 1];
                 $airportScore++;
             }
 
             if($airport->metar->foggy()){
-                AirportScore::create(['airport_id' => $airport->id, 'reason' => 'METAR_FOGGY', 'score' => 1]);
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_FOGGY', 'score' => 1];
                 $airportScore++;
             }
 
             if($airport->metar->heavyRain()){
-                AirportScore::create(['airport_id' => $airport->id, 'reason' => 'METAR_HEAVY_RAIN', 'score' => 1]);
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_HEAVY_RAIN', 'score' => 1];
                 $airportScore++;
             }
 
             if($airport->metar->heavySnow()){
-                AirportScore::create(['airport_id' => $airport->id, 'reason' => 'METAR_HEAVY_SNOW', 'score' => 1]);
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_HEAVY_SNOW', 'score' => 1];
                 $airportScore++;
             }
 
             if($airport->metar->thunderstorm()){
-                AirportScore::create(['airport_id' => $airport->id, 'reason' => 'METAR_THUNDERSTORM', 'score' => 1]);
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_THUNDERSTORM', 'score' => 1];
                 $airportScore++;
             }
 
@@ -95,7 +98,7 @@ class CalcScores extends Command
                     ( !empty($runway->le_ident) && $airport->metar->rvrAtBelow($runway->le_ident, 700) ) ||
                     ( !empty($runway->he_ident) && $airport->metar->rvrAtBelow($runway->he_ident, 700) )
                 ){
-                    AirportScore::create(['airport_id' => $airport->id, 'reason' => 'METAR_RVR', 'score' => 1]);
+                    $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_RVR', 'score' => 1];
                     $airportScore++;
                 }
 
@@ -120,20 +123,20 @@ class CalcScores extends Command
 
             // Check if crosswind component is fun at active runway
             if($airport->metar->wind_speed >= 15 && $activeRunwayComponents['crosswind'] > 12){
-                AirportScore::create(['airport_id' => $airport->id, 'reason' => 'METAR_CROSSWIND', 'score' => 1]);
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_CROSSWIND', 'score' => 1];
                 $airportScore++;
             }
 
             // Check VATSIM controllers
             if($airport->controllers->count()){
-                AirportScore::create(['airport_id' => $airport->id, 'reason' => 'VATSIM_ATC', 'score' => 1]);
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_ATC', 'score' => 1];
                 $airportScore++;
             }
 
             // Check if ongoing VATSIM event
             foreach($airport->events as $event){
                 if(Carbon::now()->gt($event->start_time) && Carbon::now()->lt($event->end_time)){
-                    AirportScore::create(['airport_id' => $airport->id, 'reason' => 'VATSIM_EVENT', 'score' => 1]);
+                    $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_EVENT', 'score' => 1];
                     $airportScore++;
                 }
             }
@@ -142,6 +145,8 @@ class CalcScores extends Command
             $airport->save();
 
         }
+
+        AirportScore::insert($airportScoreInsert);
 
         $this->info("Calculations of ".$airports->count()." aerodromes finished in ".round(microtime(true) - $processTime)." seconds");
 

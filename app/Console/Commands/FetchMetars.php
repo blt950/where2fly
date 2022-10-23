@@ -39,8 +39,19 @@ class FetchMetars extends Command
         if($response->successful()){
             $data = collect(preg_split("/\r\n|\n|\r/", $response->body()));
 
+            // Fetch all airports
+            $airportsFilter = [];
+            $airportsData = [];
             foreach($data as $d){
                 $icao = substr($d, 0, 4);
+                $airportsFilter[] = $icao;
+                $airportsData[$icao] = $d;
+            }
+
+            // Get the relevant airports
+            $upsertData = [];
+            foreach(Airport::whereIn('icao', $airportsFilter)->get() as $airport){
+                $d = $airportsData[strtoupper($airport->icao)];
                 $time = Carbon::now()->setHour(substr($d, 7, 2))->setMinute(substr($d, 9, 2))->setSeconds(0);
                 $metar = substr($d, 13, null);
 
@@ -61,18 +72,22 @@ class FetchMetars extends Command
                     }
                 }
 
-                $airport = Airport::where('icao', $icao)->get()->first();
-                if($airport && $airport->id){
-                    Metar::updateOrCreate(['airport_id' => $airport->id],[
-                        'last_update' => $time,
-                        'metar' => $metar,
-                        'wind_direction' => $windData['direction'],
-                        'wind_speed' => $windData['speed'],
-                        'wind_gusts' => $windData['gusting']
-                    ]);
-                }
-                
+                $upsertData[] = [
+                    'airport_id' => (int)$airport->id,
+                    'last_update' => $time,
+                    'metar' => $metar,
+                    'wind_direction' => (int)$windData['direction'],
+                    'wind_speed' => (int)$windData['speed'],
+                    'wind_gusts' => (int)$windData['gusting']
+                ];
             }
+
+            // Update the data
+            Metar::upsert(
+                $upsertData,
+                ['airport_id'],
+                ['last_update', 'metar', 'wind_direction', 'wind_speed', 'wind_gusts']
+            );
             
         }
 
