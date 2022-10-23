@@ -68,29 +68,7 @@ class SearchController extends Controller
 
         $suggestedAirports = $suggestedAirports->sortByDesc('total_score')->slice(1, 10);
 
-        // Fetch TAF
-        $tafs = [];
-        /*
-        foreach($suggestedAirports as $a){
-            $response = Http::get('https://api.met.no/weatherapi/tafmetar/1.0/taf.txt?icao='.$a->icao);
-            if($response->successful()){
-                $data = collect(preg_split("/\r\n|\n|\r/", $response->body()));
-
-                if(empty($response->body())){
-                    $tafs[$a->icao] = "N/A";
-                    continue;
-                }
-
-                $data = $data->filter(function($value, $key){
-                    return !empty($value);
-                });
-
-                $tafs[$a->icao] = $data->last(); 
-            }
-        }
-        */
-
-        return view('search', compact('suggestedAirports', 'distances', 'airtimes', 'tafs'));
+        return view('search', compact('suggestedAirports', 'distances', 'airtimes'));
     }
 
     public static function aircraftNmPerHour(string $actCode){
