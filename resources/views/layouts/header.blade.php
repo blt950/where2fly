@@ -5,7 +5,7 @@
 <meta name="author" content="">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<title>@yield('title', 'Home') | {{ config('app.name') }}</title>
+<title> {{ config('app.name') }} | @yield('title', 'Home')</title>
 
 <!-- Favicons -->
 <!-- Todo -->

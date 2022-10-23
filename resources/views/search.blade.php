@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Search')
+@section('title', 'Results')
 @section('content')
 
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
@@ -39,7 +39,8 @@
                             @endforeach
                         </td>
                         <td>
-                            {{ $airport->longestRunway() }}ft
+                            {{ $airport->longestRunway() }}ft<br>
+                            {{ round($airport->longestRunway()* .3048) }}m
                         </td>
                         <td>
                             <ul class="nav nav-pills mb-3" style="font-size: 0.75rem" id="pills-tab" role="tablist">
