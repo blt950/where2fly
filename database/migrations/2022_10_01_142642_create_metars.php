@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('airport_id')->unique();
             $table->timestamp('last_update');
             $table->string('metar');
-            $table->float('wind_direction', 4, 1, true)->nullable();
+            $table->integer('wind_direction')->nullable();
             $table->unsignedInteger('wind_speed')->nullable();
             $table->unsignedInteger('wind_gusts')->nullable();
         });
