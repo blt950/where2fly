@@ -47,7 +47,7 @@
                                     <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $airport->id }}" type="button" role="tab" aria-controls="metar-pane-{{ $airport->id }}" aria-selected="true">METAR</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" type="button" role="tab" aria-controls="taf-pane-{{ $airport->id }}" aria-selected="false">TAF</button>
+                                    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" data-taf-button="true" data-airport-icao="{{ $airport->icao }}" type="button" role="tab" aria-controls="taf-pane-{{ $airport->id }}" aria-selected="false">TAF</button>
                                 </li>
                             </ul>
                             <div class="tab-content" id="myTabContent">
@@ -66,9 +66,7 @@
         </table>
     </main>
 
-    <script>
-
-    </script>
+    @include('scripts.taf')
   
     @include('layouts.footer')
 </div>

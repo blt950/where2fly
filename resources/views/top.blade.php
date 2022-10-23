@@ -47,18 +47,20 @@
                         <td>
                             <ul class="nav nav-pills mb-3" style="font-size: 0.75rem" id="pills-tab" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $airport->id }}" type="button" role="tab" aria-controls="metar-pane-{{ $airport->id }}" aria-selected="true">METAR</button>
+                                    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $airport->id }}" type="button" role="tab">METAR</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" type="button" role="tab" aria-controls="taf-pane-{{ $airport->id }}" aria-selected="false">TAF</button>
+                                    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" data-taf-button="true" data-airport-icao="{{ $airport->icao }}" type="button" role="tab">TAF</button>
                                 </li>
                             </ul>
                             <div class="tab-content" id="myTabContent">
-                                <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab" tabindex="0">{{ $airport->metar->metar }}</div>
+                                <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">{{ $airport->metar->metar }}</div>
                                 @isset($tafs[$airport->icao])
-                                    <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">{{ $tafs[$airport->icao] }}</div>
+                                    <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$airport->icao] }}</div>
                                 @else
-                                    <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">N/A</div>
+                                    <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">
+                                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                                    </div>
                                 @endif
                             </div>
                         </td>
@@ -68,6 +70,8 @@
             </tbody>
         </table>
     </main>
+
+    @include('scripts.taf')
   
     @include('layouts.footer')
 </div>
