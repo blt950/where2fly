@@ -52,9 +52,8 @@
             </select>
         </div>
         <div class="col-sm-2 align-self-end">
-            <button role="submit" id="submitBtn" href="#" class="btn btn-secondary text-white">
+            <button role="button" id="submitBtn" href="#" class="btn btn-secondary text-white">
                 Find destination
-                
             </button>
         </div>
     </form>
