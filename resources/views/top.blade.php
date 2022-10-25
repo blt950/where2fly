@@ -41,7 +41,7 @@
                             <th scope="row">{{ $count }}</th>
                             <td>{{ $airport->icao }}</td>
                             <td>{{ $airport->name }}</td>
-                            <td>{{ $airport->iso_country }}</td>
+                            <td><img src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16px" title="{{ getCountryName($airport->iso_country) }}"></img></td>
                             <td class="fs-5">
                                 @foreach($airport->scores as $score)
                                     <i class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}" title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}"></i>

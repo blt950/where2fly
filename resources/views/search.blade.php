@@ -34,7 +34,7 @@
                             <th scope="row">{{ $count }}</th>
                             <td>{{ $airport->icao }}</td>
                             <td>{{ $airport->name }}</td>
-                            <td>{{ $airport->iso_country }}</td>
+                            <td><img src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16px" title="{{ getCountryName($airport->iso_country) }}"></img></td>
                             <td>{{ $distances[$airport->icao] }}nm</td>
                             <td>{{ $airtimes[$airport->icao] }}h</td>
                             <td class="fs-5">
