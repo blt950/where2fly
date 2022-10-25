@@ -19,5 +19,7 @@ class ScoreController extends Controller
         'VATSIM_ATC' => ['icon' => 'fa-tower-cell', 'desc' => 'VATSIM ATC Online'],
         'VATSIM_EVENT' => ['icon' => 'fa-calendar', 'desc' => 'VATSIM Event Ongoing'],
     ];
+
+    
     
 }
