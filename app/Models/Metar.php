@@ -83,7 +83,7 @@ class Metar extends Model
 
     public function rvrAtBelow(string $rwy, int $meters){
         $results = [];
-        if(preg_match_all('/R(\d\d\w?)\/M?(\d\d\d\d)(M|P|V|U|D)?/', $this->metarWithoutRemarks(), $results, PREG_SET_ORDER)){
+        if(preg_match_all('/R(\d\d\w?)\/M?(\d\d\d\d)(M|P|V|U|D)?\s/', $this->metarWithoutRemarks(), $results, PREG_SET_ORDER)){
             foreach($results as $r){
                 if($r[1] == $rwy){
                     if((int)$r[2] <= $meters){
