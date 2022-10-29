@@ -63,3 +63,17 @@ body {
   color: #fff;
   border-bottom-color: #fff;
 }
+
+#slider-airtime {
+  padding: 0 16px;
+}
+
+#slider-airtime .noUi-connect {
+  background: #50709f;
+}
+
+#slider-airtime .noUi-handle {
+  height: 26px;
+  top: -5px;
+  border-radius: 10px;
+}

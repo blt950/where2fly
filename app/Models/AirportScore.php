@@ -14,4 +14,12 @@ class AirportScore extends Model
     public function airport(){
         return $this->belongsTo(Airport::class);
     }
+
+    public function isWeatherScore(){
+        return str_starts_with($this->reason, 'METAR_');
+    }
+
+    public function isVatsimScore(){
+        return str_starts_with($this->reason, 'VATSIM_');
+    }
 }

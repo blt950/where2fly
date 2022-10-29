@@ -1,0 +1,12 @@
+Beta 3:
+- 
+
+Beta 2:
+- Optimized loading times
+- Fixed TAFs
+- Fixed old METARs
+- Added runway lengths in meters
+- Mobile tweaks
+
+Beta 1:
+- Initial release
