@@ -88,6 +88,11 @@ class SearchController extends Controller
                 if($a->vatsimScore() == $b->vatsimScore()) return 0;
                 return ($a->vatsimScore() > $b->vatsimScore()) ? -1 : 1;
             });
+        } else {
+
+            // Let's randomize so it doesn't display database order
+            $suggestedAirports = $suggestedAirports->shuffle();
+
         }
 
         $suggestedAirports = $suggestedAirports->slice(0, 10);
