@@ -29,13 +29,20 @@ class SearchController extends Controller
             'departure' => 'required|exists:App\Models\Airport,icao',
             'codeletter' => 'required|string',
             'continent' => 'required|string',
-            'airtime' => 'required|between:1,5',
+            'airtimeMin' => 'required|between:0,8',
+            'airtimeMax' => 'required|between:0,8',
+            'filterWeather' => 'in:0,1',
+            'filterATC' => 'in:0,1',
         ]);
         
         $departure = Airport::where('icao', $data['departure'])->get()->first();
         $codeletter = $data['codeletter'];
         $continent = $data['continent'];
-        $airtime = (int)$data['airtime'];
+        $airtimeMin = (int)$data['airtimeMin'];
+        $airtimeMax = (int)$data['airtimeMax'];
+        if($airtimeMax == 8) $airtimeMax = 24; // If airtime is 8+ hours, bump it
+        isset($data['filterWeather']) ? $filterWeather = (boolean)$data['filterWeather'] : $filterWeather = false;
+        isset($data['filterATC']) ? $filterATC = (boolean)$data['filterATC'] : $filterATC = false;
 
         // Get airports according to filter
         $airports = collect();
@@ -57,7 +64,7 @@ class SearchController extends Controller
 
             $estimatedAirtime = ($distance / $aircraftNmPerHour) + $this::timeClimbDescend($codeletter);
 
-            if($estimatedAirtime >= $airtime - 1 && $estimatedAirtime <= $airtime){
+            if($estimatedAirtime >= $airtimeMin && $estimatedAirtime <= $airtimeMax){
                 if($destination->supportsAircraftCode($codeletter)){
                     $suggestedAirports->push($destination);
                     $distances[$destination->icao] = round($distance);
@@ -66,7 +73,24 @@ class SearchController extends Controller
             }
         }
 
-        $suggestedAirports = $suggestedAirports->sortByDesc('total_score')->slice(1, 10);
+        // Some ranking filters are applied, we need to run custom ranking
+        if($filterWeather && $filterATC){
+            $suggestedAirports = $suggestedAirports->sortByDesc('total_score');
+        } elseif($filterWeather && !$filterATC){
+
+            $suggestedAirports = $suggestedAirports->sort(function ($a, $b) {
+                if($a->weatherScore() == $b->weatherScore()) return 0;
+                return ($a->weatherScore() > $b->weatherScore()) ? -1 : 1;
+            });
+        } elseif(!$filterWeather && $filterATC){
+
+            $suggestedAirports = $suggestedAirports->sort(function ($a, $b) {
+                if($a->vatsimScore() == $b->vatsimScore()) return 0;
+                return ($a->vatsimScore() > $b->vatsimScore()) ? -1 : 1;
+            });
+        }
+
+        $suggestedAirports = $suggestedAirports->slice(0, 10);
 
         return view('search', compact('suggestedAirports', 'distances', 'airtimes'));
     }

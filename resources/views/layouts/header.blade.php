@@ -47,5 +47,6 @@
 </style>
 
 @vite('resources/js/app.js')
+@vite('resources/js/nouislider.js')
 
 @yield('css')

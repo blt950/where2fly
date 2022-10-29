@@ -32,6 +32,40 @@ class Airport extends Model
         return $this->hasMany(Controller::class);
     }
 
+    public function hasWeatherScore(){
+        foreach($this->scores as $s){
+            if($s->isWeatherScore()) return true;
+        }
+        return false;
+    }
+
+    public function weatherScore(){
+        $score = 0;
+        foreach($this->scores as $s){
+            if($s->isWeatherScore()){
+                $score++;
+            }
+        }
+        return $score;
+    }
+
+    public function hasVatsimScore(){
+        foreach($this->scores as $s){
+            if($s->isVatsimScore()) return true;
+        }
+        return false;
+    }
+
+    public function vatsimScore(){
+        $score = 0;
+        foreach($this->scores as $s){
+            if($s->isVatsimScore()){
+                $score++;
+            }
+        }
+        return $score;
+    }
+
     public function longestRunway(){
         $length = 0;
         foreach($this->runways as $rwy){
