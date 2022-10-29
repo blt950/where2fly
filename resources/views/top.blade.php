@@ -41,10 +41,10 @@
                             <th scope="row">{{ $count }}</th>
                             <td>{{ $airport->icao }}</td>
                             <td>{{ $airport->name }}</td>
-                            <td><img src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16px" title="{{ getCountryName($airport->iso_country) }}"></img></td>
+                            <td><img src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16px" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}"></img></td>
                             <td class="fs-5">
                                 @foreach($airport->scores as $score)
-                                    <i class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}" title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}"></i>
+                                    <i class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}" data-bs-toggle="tooltip" data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}"></i>
                                 @endforeach
                             </td>
                             <td>{{ $airport->longestRunway() }}ft<br>{{ round($airport->longestRunway()* .3048) }}m</td>
@@ -88,6 +88,13 @@
         </div>
 
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+        }, false);
+    </script>
 
     @include('scripts.taf')
   

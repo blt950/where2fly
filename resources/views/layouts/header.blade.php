@@ -46,6 +46,8 @@
     }
 </style>
 
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+
 @vite('resources/js/app.js')
 @vite('resources/js/nouislider.js')
 
