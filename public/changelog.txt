@@ -1,5 +1,11 @@
 Beta 3:
-- 
+- Added new search ranking options, no need to search for bad weather only anymore
+- Added possibility to search for 6+ hour flights
+- Added country flags to results
+- Added tooltips over countries and icons
+- Fixed results showing #2 and above, rather than #1 (also explains some obvious missing airports on bad days)
+- Fixed proper search error if fields are missed
+- Fixed breaking action misintepreted as RVR
 
 Beta 2:
 - Optimized loading times
