@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 class ScoreController extends Controller
 {
     public static $score_types = [
-        'METAR_SIGHT' => ['icon' => 'fa-eye-slash', 'desc' => 'Reduced sight'],
+        'METAR_SIGHT' => ['icon' => 'fa-eye-slash', 'desc' => 'Reduced Sight'],
         'METAR_WINDY' => ['icon' => 'fa-wind', 'desc' => 'Windy'],
         'METAR_CEILING' => ['icon' => 'fa-arrows-up-to-line', 'desc' => 'Low Ceiling'],
         'METAR_GUSTS' => ['icon' => 'fa-arrows-turn-right', 'desc' => 'Gusting Wind'],
