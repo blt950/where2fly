@@ -39,7 +39,11 @@
                             <td>{{ $airtimes[$airport->icao] }}h</td>
                             <td class="fs-5">
                                 @foreach($airport->scores as $score)
-                                    <i class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}" data-bs-toggle="tooltip" data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}"></i>
+                                    @if($filteredScores && in_array($score->reason, $filteredScores))
+                                        <i class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}" data-bs-toggle="tooltip" data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}"></i>
+                                    @else
+                                        <i class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}" data-bs-toggle="tooltip" data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}"></i>
+                                    @endif
                                 @endforeach
                             </td>
                             <td>
@@ -67,6 +71,13 @@
                         </tr>
                         @php $count++; @endphp
                     @endforeach
+                    @if($count == 1)
+                        <tr>
+                            <th colspan="9" class="text-center text-danger">
+                                <i class="fas fa-exclamation-triangle"></i> No results matched your criteria
+                            </th>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>

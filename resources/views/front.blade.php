@@ -21,22 +21,6 @@
                 @enderror
             </div>
 
-            <div class="col-sm-3 text-start">
-                <label for="codeletter">Arrival Aircraft Code</label>
-                <select class="form-control" id="codeletter" name="codeletter">
-                    <option disabled selected>Choose</option>
-                    <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A (PIPER/CESSNA)</option>
-                    <option value="B" {{ old('codeletter') == "B" ? "selected" : "" }}>B (CRJ/DHC)</option>
-                    <option value="C" {{ old('codeletter') == "C" ? "selected" : "" }}>C (737-700/A320/ERJ)</option>
-                    <option value="D" {{ old('codeletter') == "D" ? "selected" : "" }}>D (B767/A310)</option>
-                    <option value="E" {{ old('codeletter') == "E" ? "selected" : "" }}>E (B777/B787/A330)</option>
-                    <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F (747-8/A380)</option>
-                </select>
-                @error('codeletter')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
-            </div>
-
             <div class="col-sm-2 text-start">
                 <label for="continent">Destination Area</label>
                 <select class="form-control" id="continent" name="continent">
@@ -50,6 +34,22 @@
                     <option value="SA" {{ old('continent') == "SA" ? "selected" : "" }}>South America</option>
                 </select>
                 @error('continent')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-sm-3 text-start">
+                <label for="codeletter">Arrival Aircraft Code</label>
+                <select class="form-control" id="codeletter" name="codeletter">
+                    <option disabled selected>Choose</option>
+                    <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A (PIPER/CESSNA)</option>
+                    <option value="B" {{ old('codeletter') == "B" ? "selected" : "" }}>B (CRJ/DHC)</option>
+                    <option value="C" {{ old('codeletter') == "C" ? "selected" : "" }}>C (737-700/A320/ERJ)</option>
+                    <option value="D" {{ old('codeletter') == "D" ? "selected" : "" }}>D (B767/A310)</option>
+                    <option value="E" {{ old('codeletter') == "E" ? "selected" : "" }}>E (B777/B787/A330)</option>
+                    <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F (747-8/A380)</option>
+                </select>
+                @error('codeletter')
                     <div class="text-danger">{{ $message }}</div>
                 @enderror
             </div>
@@ -91,6 +91,9 @@
                 <button role="button" id="submitBtn" href="#" class="btn btn-lg btn-primary text-white">
                     Find destination
                 </button>
+            </div>
+            <div class="col-sm-12 align-self-end">
+                <a href="{{ route('front.advanced') }}">Advanced Search</a>
             </div>
         </div>
 

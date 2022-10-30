@@ -14,7 +14,7 @@ class ScoreController extends Controller
         'METAR_HEAVY_RAIN' => ['icon' => 'fa-cloud-showers-heavy', 'desc' => 'Heavy Rain'],
         'METAR_HEAVY_SNOW' => ['icon' => 'fa-snowflake', 'desc' => 'Heavy Snow'],
         'METAR_THUNDERSTORM' => ['icon' => 'fa-cloud-bolt', 'desc' => 'Thunderstorm'],
-        'METAR_RVR' => ['icon' => 'fa-arrows-left-right', 'desc' => 'Poor Runway Vertical Range'],
+        'METAR_RVR' => ['icon' => 'fa-arrows-left-right', 'desc' => 'Runway Visual Range'],
         'METAR_CROSSWIND' => ['icon' => 'fa-xmark', 'desc' => 'Crosswind'],
         'VATSIM_ATC' => ['icon' => 'fa-tower-cell', 'desc' => 'VATSIM ATC Online'],
         'VATSIM_EVENT' => ['icon' => 'fa-calendar', 'desc' => 'VATSIM Event Ongoing'],

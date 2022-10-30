@@ -75,6 +75,10 @@ class Airport extends Model
         return $length;
     }
 
+    public function hasVisualCondition(){
+        return $this->metar->isVisualCondition();
+    }
+
     public function supportsAircraftCode(string $code){
 
         $reqRwyLength = 0;
