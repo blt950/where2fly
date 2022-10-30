@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 class ScoreController extends Controller
 {
     public static $score_types = [
+        'METAR_SIGHT' => ['icon' => 'fa-eye-slash', 'desc' => 'Reduced sight'],
         'METAR_WINDY' => ['icon' => 'fa-wind', 'desc' => 'Windy'],
         'METAR_CEILING' => ['icon' => 'fa-arrows-up-to-line', 'desc' => 'Low Ceiling'],
         'METAR_GUSTS' => ['icon' => 'fa-arrows-turn-right', 'desc' => 'Gusting Wind'],
@@ -18,6 +19,7 @@ class ScoreController extends Controller
         'METAR_CROSSWIND' => ['icon' => 'fa-xmark', 'desc' => 'Crosswind'],
         'VATSIM_ATC' => ['icon' => 'fa-tower-cell', 'desc' => 'VATSIM ATC Online'],
         'VATSIM_EVENT' => ['icon' => 'fa-calendar', 'desc' => 'VATSIM Event Ongoing'],
+        'VATSIM_POPULAR' => ['icon' => 'fa-fire', 'desc' => 'VATSIM Popular Airport'],
     ];
 
     

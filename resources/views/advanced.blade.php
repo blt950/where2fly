@@ -117,7 +117,7 @@
             </div>
 
             <div class="col-sm-2 text-start">
-                <label>Met Condition</label>
+                <label>Meteo Condition</label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="metcondition" value="ANY" id="met-any" checked>
                     <label class="form-check-label" for="met-any">

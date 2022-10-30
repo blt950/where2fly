@@ -70,7 +70,7 @@ class SearchController extends Controller
         foreach($airports as $destination){
             // Is it within the intended airtime?
             $aircraftNmPerHour = $this::aircraftNmPerHour($codeletter);
-            $distance = $this::distance($departure->latitude_deg, $departure->longitude_deg, $destination->latitude_deg, $destination->longitude_deg, "N");
+            $distance = distance($departure->latitude_deg, $departure->longitude_deg, $destination->latitude_deg, $destination->longitude_deg, "N");
 
             $estimatedAirtime = ($distance / $aircraftNmPerHour) + $this::timeClimbDescend($codeletter);
 
@@ -175,7 +175,7 @@ class SearchController extends Controller
 
             // Is it within the intended airtime?
             $aircraftNmPerHour = $this::aircraftNmPerHour($codeletter);
-            $distance = $this::distance($departure->latitude_deg, $departure->longitude_deg, $destination->latitude_deg, $destination->longitude_deg, "N");
+            $distance = distance($departure->latitude_deg, $departure->longitude_deg, $destination->latitude_deg, $destination->longitude_deg, "N");
 
             $estimatedAirtime = ($distance / $aircraftNmPerHour) + $this::timeClimbDescend($codeletter);
 
@@ -265,24 +265,5 @@ class SearchController extends Controller
 
         return $addMinutes;
 
-    }
-
-
-    public static function distance($lat1, $lon1, $lat2, $lon2, $unit) {
-
-        $theta = $lon1 - $lon2;
-        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
-        $dist = acos($dist);
-        $dist = rad2deg($dist);
-        $miles = $dist * 60 * 1.1515;
-        $unit = strtoupper($unit);
-      
-        if ($unit == "K") {
-            return ($miles * 1.609344);
-        } else if ($unit == "N") {
-            return ($miles * 0.8684);
-        } else {
-            return $miles;
-        }
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Airport;
 use App\Models\AirportScore;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class CalcScores extends Command
 {
@@ -37,10 +38,14 @@ class CalcScores extends Command
         $this->info("Starting calculations of aerodrome scores");
 
         // Clean old scores
-        AirportScore::truncate();
         DB::table('airports')->update(['total_score' => null]);
 
-        // Get airports with score, but no longer metar and set//update 0 score.
+        // Fetch VATSIM data
+        $vatsimRequest = Http::get('https://data.vatsim.net/v3/vatsim-data.json');
+        $vatsimPilots = null;
+        if($vatsimRequest->successful()){
+            $vatsimPilots = json_decode($vatsimRequest->body(), false)->pilots;
+        }
 
         // Grab relevant aerodromes for calculations
         $airports = Airport::where('type', '!=', 'closed')->has('metar')->with('metar', 'runways', 'controllers', 'events')->get();
@@ -55,6 +60,11 @@ class CalcScores extends Command
 
             // Start scoring the airport
             $airportScore = 0;
+
+            if(!$airport->metar->sightAtAbove(5000)){
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_SIGHT', 'score' => 1];
+                $airportScore++;
+            }
 
             if($airport->metar->windAtAbove(15)){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_WINDY', 'score' => 1];
@@ -133,6 +143,21 @@ class CalcScores extends Command
                 $airportScore++;
             }
 
+            // Check if many pilots are departing this airport
+            if($vatsimPilots){
+                $movements = 0;
+                foreach($vatsimPilots as $vp){
+                    if(distance($airport->latitude_deg, $airport->longitude_deg, $vp->latitude, $vp->longitude, "N") <= 5){
+                        $movements++;
+                    }
+                }
+
+                if($movements >= 10){
+                    $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_POPULAR', 'score' => 1];
+                    $airportScore++;
+                }
+            }
+
             // Check if ongoing VATSIM event
             foreach($airport->events as $event){
                 if(Carbon::now()->gt($event->start_time) && Carbon::now()->lt($event->end_time)){
@@ -146,6 +171,7 @@ class CalcScores extends Command
 
         }
 
+        AirportScore::truncate();
         AirportScore::insert($airportScoreInsert);
 
         $this->info("Calculations of ".$airports->count()." aerodromes finished in ".round(microtime(true) - $processTime)." seconds");
