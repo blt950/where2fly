@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\Airport;
+use App\Http\Controllers\ScoreController;
 
 class SearchController extends Controller
 {
@@ -19,6 +20,15 @@ class SearchController extends Controller
     }
 
     /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+    */
+    public function indexAdvanced(){
+        return view('advanced');
+    }
+
+    /**
      * Search for a flight
      *
      * @param  \Illuminate\Http\Request  $request
@@ -27,8 +37,8 @@ class SearchController extends Controller
     public function search(Request $request){
         $data = request()->validate([
             'departure' => 'required|exists:App\Models\Airport,icao',
-            'codeletter' => 'required|string',
             'continent' => 'required|string',
+            'codeletter' => 'required|string',
             'airtimeMin' => 'required|between:0,8',
             'airtimeMax' => 'required|between:0,8',
             'filterWeather' => 'in:0,1',
@@ -36,8 +46,8 @@ class SearchController extends Controller
         ]);
         
         $departure = Airport::where('icao', $data['departure'])->get()->first();
-        $codeletter = $data['codeletter'];
         $continent = $data['continent'];
+        $codeletter = $data['codeletter'];
         $airtimeMin = (int)$data['airtimeMin'];
         $airtimeMax = (int)$data['airtimeMax'];
         if($airtimeMax == 8) $airtimeMax = 24; // If airtime is 8+ hours, bump it
@@ -98,6 +108,104 @@ class SearchController extends Controller
         $suggestedAirports = $suggestedAirports->slice(0, 10);
 
         return view('search', compact('suggestedAirports', 'distances', 'airtimes'));
+    }
+
+    /**
+     * Search for a flight
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function searchAdvanced(Request $request){
+
+        $data = request()->validate([
+            'departure' => 'required|exists:App\Models\Airport,icao',
+            'continent' => 'required|string',
+            'codeletter' => 'required|string',
+            'rwyLengthMin' => 'required|between:0,16000',
+            'rwyLengthMax' => 'required|between:0,16000',
+            'airtimeMin' => 'required|between:0,24',
+            'airtimeMax' => 'required|between:0,24',
+            'elevationMin' => 'required|between:-2000,18000',
+            'elevationMax' => 'required|between:-2000,18000',
+            'scores' => 'sometimes|array',
+            'metcondition' => 'required|in:IFR,VFR,ANY'
+        ]);
+
+        $departure = Airport::where('icao', $data['departure'])->get()->first();
+        $continent = $data['continent'];
+        $codeletter = $data['codeletter'];
+        $rwyLengthMin = (int)$data['rwyLengthMin'];
+        $rwyLengthMax = (int)$data['rwyLengthMax'];
+        $airtimeMin = (int)$data['airtimeMin'];
+        $airtimeMax = (int)$data['airtimeMax'];
+        $elevationMin = (int)$data['elevationMin'];
+        $elevationMax = (int)$data['elevationMax'];
+        isset($data['scores']) ? $filteredScores = $data['scores'] : $filteredScores = null;
+        $metcon = $data['metcondition'];
+
+        // Get airports according to filter
+        $airports = collect();
+        if($continent == "DO"){
+            // Domestic airports only
+            $airports = Airport::where('type', '!=', 'closed')->where('iso_country', $departure->iso_country)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
+        } else {
+            $airports = Airport::where('type', '!=', 'closed')->where('continent', $continent)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
+        }
+
+
+        // Check eligable airports
+        $suggestedAirports = collect();
+        $distances = [];
+        $airtimes = [];
+        $scoreboard = [];
+        foreach($airports as $destination){
+
+            // Check destination METAR and filtered Metcon
+            if($metcon == "VFR" && !$destination->hasVisualCondition()){
+                continue;
+            } elseif($metcon == "IFR" && $destination->hasVisualCondition()){
+                continue;
+            }
+
+            // If score filter is enabled, disqualify airports who does not meet the requirement
+            if($filteredScores && $destination->scores->whereIn('reason', $filteredScores)->count() == 0){
+                continue;
+            }
+
+            // Is it within the intended airtime?
+            $aircraftNmPerHour = $this::aircraftNmPerHour($codeletter);
+            $distance = $this::distance($departure->latitude_deg, $departure->longitude_deg, $destination->latitude_deg, $destination->longitude_deg, "N");
+
+            $estimatedAirtime = ($distance / $aircraftNmPerHour) + $this::timeClimbDescend($codeletter);
+
+            if($estimatedAirtime >= $airtimeMin && $estimatedAirtime <= $airtimeMax){
+                if($destination->longestRunway() > 0 && $destination->longestRunway() >= $rwyLengthMin && $destination->longestRunway() <= $rwyLengthMax){
+                    if($destination->elevation_ft >= $elevationMin && $destination->elevation_ft <= $elevationMax){
+                        $suggestedAirports->push($destination);
+                        $distances[$destination->icao] = round($distance);
+                        $airtimes[$destination->icao] = round($estimatedAirtime, 1);
+                    }
+                }
+            }
+
+            // Sort the suggested airports based on the intended filters
+            $suggestedAirports = $suggestedAirports->shuffle(); // Shuffle the results before sort as slim results will quickly show airports from close by location
+            $suggestedAirports = $suggestedAirports->sort(function($a, $b) use ($filteredScores){
+
+                $aScore = $a->scores->whereIn('reason', $filteredScores)->count();
+                $bScore = $b->scores->whereIn('reason', $filteredScores)->count();
+
+                if($aScore == $bScore) return 0;
+                return ($aScore > $bScore) ? -1 : 1;
+
+            });
+
+            $suggestedAirports = $suggestedAirports->splice(0,10);
+
+        }
+
+        return view('search', compact('suggestedAirports', 'distances', 'airtimes', 'filteredScores'));
     }
 
     public static function aircraftNmPerHour(string $actCode){

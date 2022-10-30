@@ -64,16 +64,23 @@ body {
   border-bottom-color: #fff;
 }
 
-#slider-airtime {
+#slider-airtime, #slider-rwy, #slider-elevation {
   padding: 0 16px;
+
+  .noUi-connect {
+    background: #50709f;
+  }
+
+  .noUi-handle {
+    height: 26px;
+    top: -5px;
+    border-radius: 10px;
+    box-shadow: none;
+  }
 }
 
-#slider-airtime .noUi-connect {
-  background: #50709f;
-}
-
-#slider-airtime .noUi-handle {
-  height: 26px;
-  top: -5px;
-  border-radius: 10px;
+.form-check-label{
+  .fa{
+    width: 18px;
+  }
 }
