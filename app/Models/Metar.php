@@ -43,6 +43,22 @@ class Metar extends Model
         return false;
     }
 
+    public function sightBelow(int $meters){
+        // Check sight
+        $results = [];
+        if(preg_match('/\s(\d\d\d\d)\s/', $this->metarWithoutRemarks(), $results)){
+            if((int)$results[1] < $meters) return true;
+        }
+
+        // Check american sight. 10SM == 9999
+        $results = [];
+        if(preg_match('/\s(\d\d?)SM\s/', $this->metarWithoutRemarks(), $results)){
+            if((int)$results[1]*1609.344 < $meters) return true;
+        }
+
+        return false;
+    }
+
     public function windAtAbove(int $knots){
         if($this->wind_speed){
             return $this->wind_speed >= $knots;

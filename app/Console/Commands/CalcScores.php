@@ -61,7 +61,7 @@ class CalcScores extends Command
             // Start scoring the airport
             $airportScore = 0;
 
-            if(!$airport->metar->sightAtAbove(5000)){
+            if($airport->metar->sightBelow(5000)){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_SIGHT', 'score' => 1];
                 $airportScore++;
             }
