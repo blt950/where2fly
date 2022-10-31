@@ -39,7 +39,7 @@
                             <td>{{ $airtimes[$airport->icao] }}h</td>
                             <td class="fs-5">
                                 @foreach($airport->scores as $score)
-                                    @if($filteredScores && in_array($score->reason, $filteredScores))
+                                    @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
                                         <i class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}" data-bs-toggle="tooltip" data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}"></i>
                                     @else
                                         <i class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}" data-bs-toggle="tooltip" data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}"></i>
