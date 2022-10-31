@@ -141,7 +141,7 @@
 
         <div class="row g-3 mt-1 justify-content-center">
             <div class="col-sm-12 align-self-end">
-                <button role="button" id="submitBtn" href="#" class="btn btn-lg btn-primary text-white">
+                <button role="button" type="submit" submitBtn" href="#" class="btn btn-lg btn-primary text-white">
                     Find destination
                 </button>
             </div>
