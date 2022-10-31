@@ -44,7 +44,12 @@
                             <td><img src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16px" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}"></img></td>
                             <td class="fs-5">
                                 @foreach($airport->scores as $score)
-                                    <i class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}" data-bs-toggle="tooltip" data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}"></i>
+                                    <i 
+                                        class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                        data-bs-html="true"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
+                                    ></i>
                                 @endforeach
                             </td>
                             <td>{{ $airport->longestRunway() }}ft<br>{{ round($airport->longestRunway()* .3048) }}m</td>
