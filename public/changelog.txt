@@ -1,3 +1,9 @@
+Beta 4:
+- Added advanced search
+- Added hot airport parameter for airports with 10+ movements
+- Added reduced sight parameter
+- Added more VATSIM data: Which ATC is online and what event is running until when
+
 Beta 3:
 - Added new search ranking options, no need to search for bad weather only anymore
 - Added possibility to search for 6+ hour flights
