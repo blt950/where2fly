@@ -85,7 +85,11 @@ class SearchController extends Controller
 
         // Some ranking filters are applied, we need to run custom ranking
         if($filterWeather && $filterATC){
-            $suggestedAirports = $suggestedAirports->sortByDesc('total_score');
+            
+            $suggestedAirports = $suggestedAirports->sort(function ($a, $b) {
+                if($a->scores->count() == $b->scores->count()) return 0;
+                return ($a->scores->count() > $b->scores->count()) ? -1 : 1;
+            });
         } elseif($filterWeather && !$filterATC){
 
             $suggestedAirports = $suggestedAirports->sort(function ($a, $b) {

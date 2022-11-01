@@ -37,9 +37,6 @@ class CalcScores extends Command
         $processTime = microtime(true);
         $this->info("Starting calculations of aerodrome scores");
 
-        // Clean old scores
-        DB::table('airports')->update(['total_score' => null]);
-
         // Fetch VATSIM data
         $vatsimRequest = Http::get('https://data.vatsim.net/v3/vatsim-data.json');
         $vatsimPilots = null;
@@ -58,47 +55,36 @@ class CalcScores extends Command
                 continue;
             }
 
-            // Start scoring the airport
-            $airportScore = 0;
-
             if($airport->metar->sightBelow(5000)){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_SIGHT', 'score' => 1, 'data' => null];
-                $airportScore++;
             }
 
             if($airport->metar->windAtAbove(15)){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_WINDY', 'score' => 1, 'data' => null];
-                $airportScore++;
             }
 
             if($airport->metar->windGusts()){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_GUSTS', 'score' => 1, 'data' => null];
-                $airportScore++;
             }
 
             if($airport->metar->ceilingAtAbove(300)){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_CEILING', 'score' => 1, 'data' => null];
-                $airportScore++;
             }
 
             if($airport->metar->foggy()){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_FOGGY', 'score' => 1, 'data' => null];
-                $airportScore++;
             }
 
             if($airport->metar->heavyRain()){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_HEAVY_RAIN', 'score' => 1, 'data' => null];
-                $airportScore++;
             }
 
             if($airport->metar->heavySnow()){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_HEAVY_SNOW', 'score' => 1, 'data' => null];
-                $airportScore++;
             }
 
             if($airport->metar->thunderstorm()){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_THUNDERSTORM', 'score' => 1, 'data' => null];
-                $airportScore++;
             }
 
             $activeRunwayComponents = ['headwind' => 0, 'crosswind' => 0];
@@ -109,7 +95,7 @@ class CalcScores extends Command
                     ( !empty($runway->he_ident) && $airport->metar->rvrAtBelow($runway->he_ident, 700) )
                 ){
                     $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_RVR', 'score' => 1, 'data' => null];
-                    $airportScore++;
+
                 }
 
                 // Calculate headwind component on active runway
@@ -134,7 +120,6 @@ class CalcScores extends Command
             // Check if crosswind component is fun at active runway
             if($airport->metar->wind_speed >= 15 && $activeRunwayComponents['crosswind'] > 12){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_CROSSWIND', 'score' => 1, 'data' => null];
-                $airportScore++;
             }
 
             // Check VATSIM controllers
@@ -155,7 +140,6 @@ class CalcScores extends Command
                 });
 
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_ATC', 'score' => 1, 'data' => $stations->join(', ')];
-                $airportScore++;
             }
 
             // Check if many pilots are departing this airport
@@ -169,7 +153,7 @@ class CalcScores extends Command
 
                 if($movements >= 10){
                     $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_POPULAR', 'score' => 1, 'data' => null];
-                    $airportScore++;
+
                 }
             }
 
@@ -177,12 +161,9 @@ class CalcScores extends Command
             foreach($airport->events as $event){
                 if(Carbon::now()->gt($event->start_time) && Carbon::now()->lt($event->end_time)){
                     $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_EVENT', 'score' => 1, 'data' => $event->event.' until '.Carbon::parse($event->end_time)->format('H:i\z')];
-                    $airportScore++;
+
                 }
             }
-
-            $airport->total_score = $airportScore;
-            $airport->save();
 
         }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\Airport;
+use App\Models\AirportScore;
 
 class TopController extends Controller
 {
@@ -14,9 +15,30 @@ class TopController extends Controller
         $airports = collect();
 
         if($continent){
-            $airports = Airport::where('continent', $continent)->orderBy('total_score', 'DESC')->with('scores', 'metar', 'runways')->limit(30)->get();
+            $airportScores = AirportScore::select('airport_id', \DB::raw("count(airport_scores.id) as id_count"))
+                                ->groupBy('airport_id')
+                                ->orderByDesc('id_count')
+                                ->join('airports', 'airport_scores.airport_id', '=', 'airports.id')
+                                ->where('airports.continent', $continent)
+                                ->with('airport', 'airport.metar', 'airport.runways', 'airport.scores')
+                                ->limit(30)
+                                ->get();
+            $airports = collect();
+            foreach($airportScores as $as){
+                $airports->push($as->airport);
+            }
+
         } else {
-            $airports = Airport::orderBy('total_score', 'DESC')->with('scores', 'metar', 'runways')->limit(30)->get();
+            $airportScores = AirportScore::select('airport_id', \DB::raw("count(airport_scores.id) as id_count"))
+                                ->groupBy('airport_id')->orderByDesc('id_count')
+                                ->with('airport', 'airport.metar', 'airport.runways', 'airport.scores')
+                                ->limit(30)
+                                ->get();
+            
+            $airports = collect();
+            foreach($airportScores as $as){
+                $airports->push($as->airport);
+            }
         }
         
         return view('top', compact('airports', 'continent'));
