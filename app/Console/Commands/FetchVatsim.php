@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Airport;
 use App\Models\Controller;
 use App\Models\Event;
+use Carbon\Carbon;
 
 class FetchVatsim extends Command
 {
@@ -35,8 +36,8 @@ class FetchVatsim extends Command
         $processTime = microtime(true);
         $this->info("Fetching and processing VATSIM data");
 
-        Event::truncate();
-        Controller::truncate();
+        $upsertEventsData = [];
+        $upsertControllerData = [];
 
         $this->info("Fetching events...");
         $response = Http::get('https://my.vatsim.net/api/v1/events/all');
@@ -46,12 +47,12 @@ class FetchVatsim extends Command
             foreach($data as $event){
                 if(count($event->airports)){
                     foreach($event->airports as $airport){
-                        Event::create([
+                        $upsertEventsData[] = [
                             'airport_id' => Airport::where('icao', $airport->icao)->get()->first()->id,
                             'event' => $event->name,
-                            'start_time' => $event->start_time,
-                            'end_time' => $event->end_time
-                        ]);
+                            'start_time' => Carbon::parse($event->start_time),
+                            'end_time' => Carbon::parse($event->end_time)
+                        ];
                     }
                 }
             }
@@ -66,16 +67,29 @@ class FetchVatsim extends Command
             foreach($data as $controller){
                 $callsign = substr($controller->callsign, 0, 4);
                 if(Airport::where('icao', $callsign)->get()->count()){
-                    Controller::create([
+                    $upsertControllerData[] = [
                         'airport_id' => Airport::where('icao', $callsign)->get()->first()->id,
                         'callsign' => $controller->callsign,
-                        'logon_time' => $controller->logon_time,
-                    ]);
+                        'logon_time' => Carbon::parse($controller->logon_time),
+                    ];
                 }
             }
 
         }
 
+        Event::truncate();
+        Event::upsert(
+            $upsertEventsData, 
+            ['airport_id'],
+            ['event', 'start_time', 'end_time']
+        );
+
+        Controller::truncate();
+        Controller::upsert(
+            $upsertControllerData,
+            ['airport_id'],
+            ['callsign', 'logon_time']
+        );
 
         $this->info("Fetching of VATSIM data finished in ".round(microtime(true) - $processTime)." seconds");
 
