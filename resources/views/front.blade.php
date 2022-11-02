@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('resources')
+    @vite('resources/js/nouislider.js')
+@endsection
+
 @section('title', 'Search')
 @section('content')
 
@@ -88,12 +92,12 @@
 
         <div class="row g-3 mt-1 justify-content-center">
             <div class="col-sm-12 align-self-end">
-                <button type="submit" id="submitBtn" class="btn btn-lg btn-primary text-white">
+                <button type="submit" id="submitBtn" class="btn btn-lg btn-primary">
                     Find destination
                 </button>
             </div>
             <div class="col-sm-12 align-self-end">
-                <a href="{{ route('front.advanced') }}">Advanced Search</a>
+                <a class="text-primary" href="{{ route('front.advanced') }}">Advanced Search</a>
             </div>
         </div>
 

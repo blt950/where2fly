@@ -1,7 +1,7 @@
 <header class="mb-auto">
     <div>
         <a href="{{ route('front') }}" class="text-white">
-            <h3 class="float-md-start mb-0">Where2Fly <span class="badge text-bg-secondary fs-6 pt-2">Beta 5</span></h3>
+            <h3 class="float-md-start mb-0">Where2Fly <span class="badge text-bg-primary fs-6 pt-2">Beta 5</span></h3>
         </a>
         
         <nav class="nav nav-masthead justify-content-center float-md-end">
