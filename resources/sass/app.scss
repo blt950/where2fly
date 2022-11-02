@@ -8,20 +8,6 @@
 @import 'bootstrap/scss/bootstrap';
 
 /*
- * Globals
- */
-
-
-/* Custom default button */
-.btn-secondary,
-.btn-secondary:hover,
-.btn-secondary:focus {
-  color: #333;
-  text-shadow: none; /* Prevent inheritance from `body` */
-}
-
-
-/*
  * Base structure
  */
 
@@ -37,6 +23,20 @@ body {
   max-width: 72em;
 }
 
+img.flag{
+  border: 1px solid #efefef;
+}
+
+
+.btn-primary{
+  box-shadow: 0px 0px 10px darken(#bdb517, 20%);
+  border: 2px solid darken($primary, 15%);
+
+  &:hover{
+    box-shadow: 0px 0px 6px #bdb517;
+    border: 2px solid darken($primary, 15%);
+  }
+}
 
 /*
  * Header
@@ -61,20 +61,20 @@ body {
 
 .nav-masthead .active {
   color: #fff;
-  border-bottom-color: #fff;
+  border-bottom-color: $primary;
 }
 
 #slider-airtime, #slider-rwy, #slider-elevation {
   padding: 0 16px;
 
   .noUi-connect {
-    background: #50709f;
+    background: $primary;
   }
 
   .noUi-handle {
     height: 26px;
     top: -5px;
-    border-radius: 10px;
+    border-radius: 3px;
     box-shadow: none;
   }
 }

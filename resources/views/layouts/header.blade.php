@@ -30,25 +30,7 @@
     </script>
 @endif
 
-<style>
-    .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-    }
-
-    @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-            font-size: 3.5rem;
-        }
-    }
-</style>
-
-<script src="https://unpkg.com/@popperjs/core@2"></script>
-
 @vite('resources/js/app.js')
-@vite('resources/js/nouislider.js')
 
+@yield('resources')
 @yield('css')
