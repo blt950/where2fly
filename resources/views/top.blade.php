@@ -41,7 +41,7 @@
                             <th scope="row">{{ $count }}</th>
                             <td>{{ $airport->icao }}</td>
                             <td>{{ $airport->name }}</td>
-                            <td><img src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16px" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}"></img></td>
+                            <td><img src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img></td>
                             <td class="fs-5">
                                 @foreach($airport->scores as $score)
                                     <i 
@@ -54,16 +54,16 @@
                             </td>
                             <td>{{ $airport->longestRunway() }}ft<br>{{ round($airport->longestRunway()* .3048) }}m</td>
                             <td>
-                                <ul class="nav nav-pills mb-3" style="font-size: 0.75rem" id="pills-tab" role="tablist">
+                                <ul class="nav nav-pills mb-3" style="font-size: 0.75rem" role="tablist">
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $airport->id }}" type="button" role="tab">METAR</button>
+                                        <button class="nav-link active" id="home-tab-{{ $airport->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $airport->id }}" type="button" role="tab">METAR</button>
                                     </li>
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" data-taf-button="true" data-airport-icao="{{ $airport->icao }}" type="button" role="tab">TAF</button>
+                                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" data-taf-button="true" data-airport-icao="{{ $airport->icao }}" type="button" role="tab">TAF</button>
                                     </li>
                                 </ul>
-                                <div class="tab-content" id="myTabContent">
-                                    <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHm\Z') }} {{ $airport->metar->metar }}</div>
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $airport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHm\Z') }} {{ $airport->metar->metar }}</div>
                                     @isset($tafs[$airport->icao])
                                         <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$airport->icao] }}</div>
                                     @else
@@ -80,27 +80,11 @@
             </table>
         </div>
 
-        <div class="d-block d-sm-none">
-            <ul style="font-size: 0.7em; list-style-type: none;">
-                @foreach(\App\Http\Controllers\ScoreController::$score_types as $s)
-                    <li>
-                        <i class="fa {{ $s['icon'] }}"></i>
-                        {{ $s['desc'] }}
-                        &nbsp;
-                    </li>
-                @endforeach
-            </ul>
-        </div>
+        @include('layouts.legend')
 
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-        }, false);
-    </script>
-
+    @include('scripts.tooltip')
     @include('scripts.taf')
   
     @include('layouts.footer')

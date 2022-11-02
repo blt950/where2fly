@@ -59,7 +59,7 @@
         <div class="row g-3 mt-1 justify-content-center">
 
             <div class="col-sm-2 text-start">
-                <label for="slider-elevation">Arrival Elevation</label>
+                <label>Arrival Elevation</label>
                 <input type="hidden" id="elevationMin" name="elevationMin" value="0">
                 <input type="hidden" id="elevationMax" name="elevationMax" value="18000">
                 <div id="slider-elevation" class="mt-1 mb-1"></div>
@@ -68,7 +68,7 @@
             
 
             <div class="col-sm-3 text-start">
-                <label for="slider-rwy">Arrival Runway Length</label>
+                <label>Arrival Runway Length</label>
                 <input type="hidden" id="rwyLengthMin" name="rwyLengthMin" value="0">
                 <input type="hidden" id="rwyLengthMax" name="rwyLengthMax" value="1000">
                 <div id="slider-rwy" class="mt-1 mb-1"></div>
@@ -76,7 +76,7 @@
             </div>
 
             <div class="col-sm-3 text-start">
-                <label for="slider-airtime">Intended Air Time</label>
+                <label>Intended Air Time</label>
                 <input type="hidden" id="airtimeMin" name="airtimeMin" value="0">
                 <input type="hidden" id="airtimeMax" name="airtimeMax" value="5">
                 <div id="slider-airtime" class="mt-1 mb-1"></div>
@@ -141,7 +141,7 @@
 
         <div class="row g-3 mt-1 justify-content-center">
             <div class="col-sm-12 align-self-end">
-                <button role="button" type="submit" id="submitBtn" href="#" class="btn btn-lg btn-primary text-white">
+                <button type="submit" id="submitBtn" class="btn btn-lg btn-primary text-white">
                     Find destination
                 </button>
             </div>
@@ -150,14 +150,9 @@
     </form>
     </main>
 
-    <script>
-        var button = document.getElementById('submitBtn');
-        button.addEventListener('click', function() {
-            button.setAttribute('disabled', '')
-            button.innerHTML = 'Searching ... <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
-            document.getElementById('form').submit()
-        });
+    @include('scripts.search')
 
+    <script>
         // Run scripts when DOM is loaded
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -223,13 +218,6 @@
                 airtimeMinInput.value = Math.round(values[0])
                 airtimeMaxInput.value = Math.round(values[1])
             });
-        }, false);
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
         }, false);
     </script>
   

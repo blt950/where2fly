@@ -1,4 +1,4 @@
-<script type="text/javascript" defer>
+<script>
 
     var tafButtons = document.querySelectorAll('[data-taf-button="true"]');
     tafButtons.forEach(element => {
