@@ -52,7 +52,10 @@
                                     ></i>
                                 @endforeach
                             </td>
-                            <td>{{ $airport->longestRunway() }}ft<br>{{ round($airport->longestRunway()* .3048) }}m</td>
+                            <td>
+                                <div class="rwy-feet">{{ $airport->longestRunway() }}</div>
+                                <div class="rwy-meters text-black text-opacity-50">{{ round($airport->longestRunway()* .3048) }}</div>
+                            </td>
                             <td>
                                 <ul class="nav nav-pills mb-3" style="font-size: 0.75rem" role="tablist">
                                     <li class="nav-item" role="presentation">
@@ -84,6 +87,7 @@
 
     </main>
 
+    @include('scripts.measures')
     @include('scripts.tooltip')
     @include('scripts.taf')
   
