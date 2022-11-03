@@ -212,7 +212,7 @@ class SearchController extends Controller
         return view('search', compact('suggestedAirports', 'distances', 'airtimes', 'filteredScores'));
     }
 
-    public static function aircraftNmPerHour(string $actCode){
+    private static function aircraftNmPerHour(string $actCode){
 
         $crzSpeed = 0;
         switch($actCode){
@@ -241,7 +241,7 @@ class SearchController extends Controller
         return $crzSpeed;
     }
 
-    public static function timeClimbDescend(string $actCode){
+    private static function timeClimbDescend(string $actCode){
         
         $addMinutes = 0;
         switch($actCode){
