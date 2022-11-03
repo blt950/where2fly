@@ -55,36 +55,12 @@ class CalcScores extends Command
                 continue;
             }
 
-            if($airport->metar->sightBelow(5000)){
-                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_SIGHT', 'score' => 1, 'data' => null];
-            }
-
             if($airport->metar->windAtAbove(15)){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_WINDY', 'score' => 1, 'data' => null];
             }
 
             if($airport->metar->windGusts()){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_GUSTS', 'score' => 1, 'data' => null];
-            }
-
-            if($airport->metar->ceilingAtAbove(300)){
-                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_CEILING', 'score' => 1, 'data' => null];
-            }
-
-            if($airport->metar->foggy()){
-                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_FOGGY', 'score' => 1, 'data' => null];
-            }
-
-            if($airport->metar->heavyRain()){
-                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_HEAVY_RAIN', 'score' => 1, 'data' => null];
-            }
-
-            if($airport->metar->heavySnow()){
-                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_HEAVY_SNOW', 'score' => 1, 'data' => null];
-            }
-
-            if($airport->metar->thunderstorm()){
-                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_THUNDERSTORM', 'score' => 1, 'data' => null];
             }
 
             $activeRunwayComponents = ['headwind' => 0, 'crosswind' => 0];
@@ -120,6 +96,31 @@ class CalcScores extends Command
             // Check if crosswind component is fun at active runway
             if($airport->metar->wind_speed >= 15 && $activeRunwayComponents['crosswind'] > 12){
                 $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_CROSSWIND', 'score' => 1, 'data' => null];
+            }
+
+
+            if($airport->metar->sightBelow(5000)){
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_SIGHT', 'score' => 1, 'data' => null];
+            }
+            
+            if($airport->metar->ceilingAtAbove(300)){
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_CEILING', 'score' => 1, 'data' => null];
+            }
+
+            if($airport->metar->foggy()){
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_FOGGY', 'score' => 1, 'data' => null];
+            }
+
+            if($airport->metar->heavyRain()){
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_HEAVY_RAIN', 'score' => 1, 'data' => null];
+            }
+
+            if($airport->metar->heavySnow()){
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_HEAVY_SNOW', 'score' => 1, 'data' => null];
+            }
+
+            if($airport->metar->thunderstorm()){
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_THUNDERSTORM', 'score' => 1, 'data' => null];
             }
 
             // Check VATSIM controllers

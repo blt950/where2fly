@@ -5,19 +5,19 @@
 @font-face {
     font-family: 'Work Sans';
     font-weight: normal;
-    src: url('/fonts/WorkSans-Regular.ttf') format('truetype');
+    src: url('../fonts/WorkSans-Regular.ttf') format('truetype');
 }
 
 @font-face {
     font-family: 'Kanit';
     font-weight: normal;
-    src: url('/fonts/Kanit-Regular.ttf') format('truetype');
+    src: url('../fonts/Kanit-Regular.ttf') format('truetype');
 }
 
 @font-face {
     font-family: 'Kanit';
     font-weight: 500;
-    src: url('/fonts/Kanit-Medium.ttf') format('truetype');
+    src: url('../fonts/Kanit-Medium.ttf') format('truetype');
 }
 
 /*
@@ -26,6 +26,8 @@
 
 @import 'variables';
 @import 'bootstrap/scss/bootstrap';
+@import "fontawesome/fontawesome.scss";
+@import "fontawesome/solid.scss";
 
 /*
 * Base structure
