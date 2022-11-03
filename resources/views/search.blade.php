@@ -7,7 +7,7 @@
 
     @include('layouts.menu')
   
-    <main class="px-3">
+    <main>
         <h1 class="mb-3 mt-5">Suggestion Results</h1>
 
         <p class="d-block d-sm-none">Scroll to the sides to see the whole table</p>
@@ -21,10 +21,10 @@
                         <th scope="col">Airport</th>
                         <th scope="col">Country</th>
                         <th scope="col">Distance</th>
-                        <th scope="col">Air Time</th>
-                        <th scope="col">Why</th>
+                        <th scope="col" width="10%">Air Time</th>
+                        <th scope="col" width="12%">Why</th>
                         <th scope="col">Runway</th>
-                        <th scope="col">Details</th>
+                        <th scope="col" width="40%">Details</th>
                     </tr>
                 </thead>
                 <tbody>

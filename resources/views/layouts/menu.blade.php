@@ -1,6 +1,6 @@
 <header class="mb-auto">
     <div>
-        <a href="{{ route('front') }}" class="text-white">
+        <a href="{{ route('front') }}" class="text-decoration-none text-white">
             <h3 class="float-md-start mb-0">Where2Fly <span class="badge text-bg-primary fs-6 pt-2">Beta 5</span></h3>
         </a>
         

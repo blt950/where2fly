@@ -11,7 +11,7 @@
 
     @include('layouts.menu')
   
-    <main class="px-3">
+    <main>
       <h1 class="mb-3">Advanced Search</h1>
       <form id="form" action="{{ route('search.advanced') }}" method="POST">
         @csrf
