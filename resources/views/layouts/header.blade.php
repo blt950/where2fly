@@ -15,7 +15,7 @@
 <link rel="shortcut icon" href="/img/favicon/favicon.ico">
 <meta name="msapplication-TileColor" content="#2b5797">
 <meta name="msapplication-config" content="/img/favicon/browserconfig.xml">
-<meta name="theme-color" content="#ffffff"> <!-- Color for embeds -->
+<meta name="theme-color" content="#d0c605">
 
 
 @if(!empty(Config::get('app.gtag')))
