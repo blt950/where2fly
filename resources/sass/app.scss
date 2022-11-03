@@ -139,7 +139,7 @@ img.flag{
     padding: 0 16px;
     
     .noUi-connect {
-        background: $primary;
+        background: #323121;
     }
     
     .noUi-handle {
@@ -156,8 +156,14 @@ img.flag{
 */
 
 /* Make checkbox dark checkmark */ 
-.form-check-input:checked[type=checkbox]{
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+.form-check-input{
+    &:checked[type=checkbox]{
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+
+    &:checked[type=radio] {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23000'/%3e%3c/svg%3e");
+    }
 }
 
 /* Make icons in checkbox labels equally wide */
