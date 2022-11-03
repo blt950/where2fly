@@ -14,7 +14,10 @@
             <h2>Beta 5</h2>
             <ul>
                 <li>New design</li>
-                <li>Further optimized search times</li>
+                <li>Added new and better paramter icons</li>
+                <li>Added thousands delimiter on values</li>
+                <li>Fixed mobile and tablet optimizations</li>
+                <li>Fixed further optimized search times</li>
             </ul>
 
             <h2>Beta 4</h2>
