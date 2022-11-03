@@ -9,7 +9,13 @@ use App\Models\AirportScore;
 
 class TopController extends Controller
 {
-    
+ 
+    /**
+     * List all top airports
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function index(Request $request, string $continent = null){
 
         $airports = collect();
