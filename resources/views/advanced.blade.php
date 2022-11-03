@@ -157,6 +157,9 @@
     @include('scripts.search')
 
     <script>
+
+        const userLocale = 'de-DE';
+
         // Run scripts when DOM is loaded
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -176,7 +179,7 @@
             var elevationMinInput = document.getElementById('elevationMin');
             var elevationMaxInput = document.getElementById('elevationMax');
             elevationSlider.noUiSlider.on('update', function (values) {
-                elevationSliderText.innerHTML = Math.round(values[0]) + '-' + Math.round(values[1]) + 'ft';
+                elevationSliderText.innerHTML = Math.round(values[0]).toLocaleString(userLocale) + '-' + Math.round(values[1]).toLocaleString(userLocale) + 'ft';
                 elevationMinInput.value = Math.round(values[0])
                 elevationMaxInput.value = Math.round(values[1])
             });
@@ -197,7 +200,7 @@
             var rwyMinInput = document.getElementById('rwyLengthMin');
             var rwyMaxInput = document.getElementById('rwyLengthMax');
             rwySlider.noUiSlider.on('update', function (values) {
-                rwySliderText.innerHTML = Math.round(values[0]) + '-' + Math.round(values[1]) + 'ft / <span class="text-white">' + Math.round(values[0]/3.2808) + '-' + Math.round(values[1]/3.2808) + 'm</span>';
+                rwySliderText.innerHTML = Math.round(values[0]).toLocaleString(userLocale) + '-' + Math.round(values[1]).toLocaleString(userLocale) + 'ft <span class="text-white text-opacity-50"> | ' + Math.round(values[0]/3.2808).toLocaleString(userLocale) + '-' + Math.round(values[1]/3.2808).toLocaleString(userLocale) + 'm</span>';
                 rwyMinInput.value = Math.round(values[0])
                 rwyMaxInput.value = Math.round(values[1])
             });
