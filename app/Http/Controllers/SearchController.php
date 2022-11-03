@@ -115,7 +115,7 @@ class SearchController extends Controller
     }
 
     /**
-     * Search for a flight
+     * Advanced search for a flight
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
@@ -212,6 +212,12 @@ class SearchController extends Controller
         return view('search', compact('suggestedAirports', 'distances', 'airtimes', 'filteredScores'));
     }
 
+    /**
+     *  Calculate aircraft travel nautrical miles per hour
+     *
+     * @param  string $actCode Aircraft code
+     * @return int Cruice speed
+     */
     private static function aircraftNmPerHour(string $actCode){
 
         $crzSpeed = 0;
@@ -241,6 +247,12 @@ class SearchController extends Controller
         return $crzSpeed;
     }
 
+    /**
+     *  Calculate minute addition for climbing the aircraft
+     *
+     * @param  string $actCode Aircraft code
+     * @return int Additional minutes
+     */
     private static function timeClimbDescend(string $actCode){
         
         $addMinutes = 0;
