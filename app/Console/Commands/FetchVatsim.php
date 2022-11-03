@@ -47,12 +47,17 @@ class FetchVatsim extends Command
             foreach($data as $event){
                 if(count($event->airports)){
                     foreach($event->airports as $airport){
-                        $upsertEventsData[] = [
-                            'airport_id' => Airport::where('icao', $airport->icao)->get()->first()->id,
-                            'event' => $event->name,
-                            'start_time' => Carbon::parse($event->start_time),
-                            'end_time' => Carbon::parse($event->end_time)
-                        ];
+
+                        $a = Airport::where('icao', $airport->icao)->get();
+                        if($a->count() && $a->first()->id){
+                            $upsertEventsData[] = [
+                                'airport_id' => $a->first()->id,
+                                'event' => $event->name,
+                                'start_time' => Carbon::parse($event->start_time),
+                                'end_time' => Carbon::parse($event->end_time)
+                            ];
+                        }
+
                     }
                 }
             }

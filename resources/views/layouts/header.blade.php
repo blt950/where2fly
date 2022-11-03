@@ -16,7 +16,7 @@
 <meta name="msapplication-TileColor" content="#2b5797">
 <meta name="msapplication-config" content="/img/favicon/browserconfig.xml">
 <meta name="theme-color" content="#ffffff"> <!-- Color for embeds -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+
 
 @if(!empty(Config::get('app.gtag')))
     <!-- Google tag (gtag.js) -->
