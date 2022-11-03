@@ -79,6 +79,13 @@
                         </tr>
                         @php $count++; @endphp
                     @endforeach
+                    @if($count == 1)
+                        <tr>
+                            <th colspan="9" class="text-center text-danger">
+                                <i class="fas fa-exclamation-triangle"></i> No top airports available in this area, the weather is too nice
+                            </th>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
