@@ -1,86 +1,158 @@
-// Fonts
-@import url('https://fonts.googleapis.com/css?family=Work+Sans');
+/*
+* Fonts
+*/
 
-// Variables
+@font-face {
+    font-family: 'Work Sans';
+    font-weight: normal;
+    src: url('/fonts/WorkSans-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Kanit';
+    font-weight: normal;
+    src: url('/fonts/Kanit-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Kanit';
+    font-weight: 500;
+    src: url('/fonts/Kanit-Medium.ttf') format('truetype');
+}
+
+/*
+* Imports
+*/
+
 @import 'variables';
-
-// Bootstrap
 @import 'bootstrap/scss/bootstrap';
 
 /*
- * Base structure
- */
+* Base structure
+*/
+
+h1, h2, h3, h4, h5, h6, button, p, a, .btn, .badge{
+    font-family: 'Kanit', 'Work Sans', sans-serif;
+}
 
 body {
-  background-image: url("/img/bg.jpg");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: 50% 50%;
-  background-attachment: fixed;
+    background-image: url("/img/bg.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-attachment: fixed;
+}
+
+table{
+    background: #f9f9f9 !important;
 }
 
 .cover-container {
-  max-width: 72em;
+    max-width: 72em;
+}
+
+/*
+* Header
+*/
+
+.nav-masthead{
+    .nav-link {
+        padding: .25rem 0;
+        font-weight: 400;
+        color: rgba(255, 255, 255, .5);
+        background-color: transparent;
+        border-bottom: .25rem solid transparent;
+
+        + .nav-link{
+            margin-left: 1rem;
+        }
+
+        &:hover, &:focus{
+            border-bottom-color: rgba(255, 255, 255, .25);
+        }
+    } 
+
+    .active{
+        color: #fff;
+        border-bottom-color: $primary;
+    }
+}
+
+/*
+* Components
+*/
+
+.badge{
+    font-weight: 400;
 }
 
 img.flag{
-  border: 1px solid #efefef;
+    border: 1px solid #efefef;
+}
+
+.validation-error{
+    color: $primary;
+    background: black;
+    border: 2px solid $primary;
+    padding: 5px 10px;
 }
 
 
 .btn-primary{
-  box-shadow: 0px 0px 10px darken(#bdb517, 20%);
-  border: 2px solid darken($primary, 15%);
-
-  &:hover{
-    box-shadow: 0px 0px 6px #bdb517;
+    box-shadow: 0px 0px 10px darken(#bdb517, 20%);
     border: 2px solid darken($primary, 15%);
-  }
+    font-weight: 500;
+    
+    &:hover{
+        box-shadow: 0px 0px 6px #bdb517;
+        border: 2px solid darken($primary, 15%);
+    }
 }
 
-/*
- * Header
- */
+.nav-pills{
+    .nav-link.active, .show>.nav-link{
+        font-size: 0.9em;
+        padding: 0.5em 1em;
+        color: white;
+        background: $secondary;
+    }
 
-.nav-masthead .nav-link {
-  padding: .25rem 0;
-  font-weight: 700;
-  color: rgba(255, 255, 255, .5);
-  background-color: transparent;
-  border-bottom: .25rem solid transparent;
-}
-
-.nav-masthead .nav-link:hover,
-.nav-masthead .nav-link:focus {
-  border-bottom-color: rgba(255, 255, 255, .25);
-}
-
-.nav-masthead .nav-link + .nav-link {
-  margin-left: 1rem;
-}
-
-.nav-masthead .active {
-  color: #fff;
-  border-bottom-color: $primary;
+    .nav-link, .show>.nav-link{
+        font-size: 0.9em;
+        padding: 0.5em 1em;
+        color: black;
+        background: #f5f5f5;
+    }
 }
 
 #slider-airtime, #slider-rwy, #slider-elevation {
-  padding: 0 16px;
-
-  .noUi-connect {
-    background: $primary;
-  }
-
-  .noUi-handle {
-    height: 26px;
-    top: -5px;
-    border-radius: 3px;
-    box-shadow: none;
-  }
+    padding: 0 16px;
+    
+    .noUi-connect {
+        background: $primary;
+    }
+    
+    .noUi-handle {
+        height: 26px;
+        top: -5px;
+        border-radius: 3px;
+        box-shadow: none;
+    }
 }
 
+
+/*
+* Overrides
+*/
+
+/* Make checkbox dark checkmark */ 
+.form-check-input:checked[type=checkbox]{
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+
+/* Make icons in checkbox labels equally wide */
 .form-check-label{
-  .fa{
-    width: 18px;
-  }
+    .fa{
+        width: 18px;
+    }
 }

@@ -21,7 +21,7 @@
                 <label for="departure">Departure</label>
                 <input type="text" class="form-control" id="departure" name="departure" placeholder="ICAO" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('departure') }}">
                 @error('departure')
-                    <div class="text-danger">{{ $message }}</div>
+                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
@@ -38,7 +38,7 @@
                     <option value="SA" {{ old('continent') == "SA" ? "selected" : "" }}>South America</option>
                 </select>
                 @error('continent')
-                    <div class="text-danger">{{ $message }}</div>
+                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
@@ -54,7 +54,7 @@
                     <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F (747-8/A380)</option>
                 </select>
                 @error('codeletter')
-                    <div class="text-danger">{{ $message }}</div>
+                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
@@ -75,7 +75,7 @@
                         Worst Weather
                     </label>
                     @error('filterWeather')
-                        <div class="text-danger">{{ $message }}</div>
+                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
                 <div class="form-check mb-0">
@@ -84,7 +84,7 @@
                         ATC Coverage
                     </label>
                     @error('filterATC')
-                        <div class="text-danger">{{ $message }}</div>
+                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
             </div>
@@ -92,7 +92,7 @@
 
         <div class="row g-3 mt-1 justify-content-center">
             <div class="col-sm-12 align-self-end">
-                <button type="submit" id="submitBtn" class="btn btn-lg btn-primary">
+                <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
                     Find destination
                 </button>
             </div>
