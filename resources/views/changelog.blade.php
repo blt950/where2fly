@@ -7,7 +7,7 @@
 
     @include('layouts.menu')
   
-    <main class="px-3">
+    <main>
         <h1 class="mb-3 mt-5">Changelog</h1>
         
         <div class="text-start">

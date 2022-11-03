@@ -7,7 +7,7 @@
 
     @include('layouts.menu')
   
-    <main class="px-3">
+    <main>
         <h1 class="mb-3 mt-5">Top Airports Right Now</h1>
         <p>Filter: 
             <a class="btn {{ Route::is('top') ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top') }}">All</a>
@@ -29,9 +29,9 @@
                         <th scope="col">ICAO</th>
                         <th scope="col">Airport</th>
                         <th scope="col">Country</th>
-                        <th scope="col">Why</th>
+                        <th scope="col" width="10%">Why</th>
                         <th scope="col">Runway</th>
-                        <th scope="col">Details</th>
+                        <th scope="col" width="50%">Details</th>
                     </tr>
                 </thead>
                 <tbody>
