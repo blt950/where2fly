@@ -27,7 +27,7 @@
             function revokeCookieConsent(){
                 consentBtn.innerHTML = 'Consent successfully withdrawn!'
                 consentBtn.setAttribute('disabled', '')
-                cookieConsent(false)
+                localStorage.removeItem('cookiesAccepted');
             }
 
             window.addEventListener('DOMContentLoaded', (event) => {

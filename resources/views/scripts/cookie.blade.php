@@ -34,7 +34,7 @@
         banner.remove()
     } else {
         banner.innerHTML = `
-            <p>This site uses cookies for statistics</p>
+            <p>Can I use cookies for statistics? I use them to improve the service <i class="fas fa-smile"></i></p>
             <a href="{{ route('privacy') }}">Privacy Policy</a>
             <br><br>
             <button class="btn btn-sm btn-seconary text-white-50" onclick="cookieConsent(false)">Decline</button>
