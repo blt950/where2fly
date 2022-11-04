@@ -25,5 +25,9 @@ Route::get('/changelog', function (){
     return view('changelog');
 })->name('changelog');
 
+Route::get('/privacy', function (){
+    return view('privacy');
+})->name('privacy');
+
 Route::post('/search', [SearchController::class, 'search'])->name('search');
 Route::post('/advanced/search', [SearchController::class, 'searchAdvanced'])->name('search.advanced');
