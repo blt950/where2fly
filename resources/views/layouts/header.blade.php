@@ -17,19 +17,6 @@
 <meta name="msapplication-config" content="/img/favicon/browserconfig.xml">
 <meta name="theme-color" content="#d0c605">
 
-
-@if(!empty(Config::get('app.gtag')))
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ Config::get('app.gtag') }}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', '{{ Config::get('app.gtag') }}');
-    </script>
-@endif
-
 @vite('resources/js/app.js')
 
 @yield('resources')
