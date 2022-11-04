@@ -10,13 +10,13 @@
     <main>
         <h1 class="mb-3 mt-5">Top Airports Right Now</h1>
         <p>Filter: 
-            <a class="btn {{ Route::is('top') ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top') }}">All</a>
-            <a class="btn {{ $continent == 'AF' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'AF') }}">Africa</a>
-            <a class="btn {{ $continent == 'AS' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'AS') }}">Asia</a>
-            <a class="btn {{ $continent == 'EU' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'EU') }}">Europe</a>
-            <a class="btn {{ $continent == 'NA' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'NA') }}">North America</a>
-            <a class="btn {{ $continent == 'OC' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'OC') }}">Oceania</a>
-            <a class="btn {{ $continent == 'SA' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'SA') }}">South America</a>
+            <a class="btn btn-sm {{ Route::is('top') ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top') }}">All</a>
+            <a class="btn btn-sm {{ $continent == 'AF' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'AF') }}">Africa</a>
+            <a class="btn btn-sm {{ $continent == 'AS' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'AS') }}">Asia</a>
+            <a class="btn btn-sm {{ $continent == 'EU' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'EU') }}">Europe</a>
+            <a class="btn btn-sm {{ $continent == 'NA' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'NA') }}">North America</a>
+            <a class="btn btn-sm {{ $continent == 'OC' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'OC') }}">Oceania</a>
+            <a class="btn btn-sm {{ $continent == 'SA' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'SA') }}">South America</a>
         </p>
             
         <p class="d-block d-sm-none">Scroll to the sides to see the whole table</p>

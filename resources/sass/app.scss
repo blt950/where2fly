@@ -52,11 +52,19 @@ body {
     &:hover{
         border-bottom-color: #ffffff40;
     }
+
+    @include media-breakpoint-between(xs, md) {
+        border-bottom-color: #ffffff40;
+        margin: auto;
+        width: 100%;
+        max-width: 280px;
+    }
 }
 
 table{
     background: #f9f9f9 !important;
 }
+
 
 .cover-container {
     max-width: 72em;

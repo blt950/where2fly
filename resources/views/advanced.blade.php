@@ -12,12 +12,12 @@
     @include('layouts.menu')
   
     <main>
-      <h1 class="mb-3">Advanced Search</h1>
+      <h1 class="mb-3 mt-5">Advanced Search</h1>
       <form id="form" action="{{ route('search.advanced') }}" method="POST">
         @csrf
 
         <div class="row g-3 justify-content-center">
-            <div class="col-sm-2 text-start">
+            <div class="col-sm-3 col-md-3 col-lg-2 text-start">
                 <label for="departure">Departure</label>
                 <input type="text" class="form-control" id="departure" name="departure" placeholder="ICAO" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('departure') }}">
                 @error('departure')
@@ -25,7 +25,7 @@
                 @enderror
             </div>
 
-            <div class="col-sm-3 text-start">
+            <div class="col-sm-4 col-md-3 text-start">
                 <label for="continent">Destination Area</label>
                 <select class="form-control" id="continent" name="continent">
                     <option disabled selected>Choose</option>
@@ -42,7 +42,7 @@
                 @enderror
             </div>
 
-            <div class="col-sm-3 text-start">
+            <div class="col-sm-4 col-md-3 text-start">
                 <label for="codeletter">Aircraft Code</label>
                 <select class="form-control" id="codeletter" name="codeletter">
                     <option disabled selected>Choose</option>
@@ -62,7 +62,7 @@
         </div>
         <div class="row g-3 mt-1 justify-content-center">
 
-            <div class="col-sm-2 text-start">
+            <div class="col-sm-4 col-md-3 col-lg-2 text-start">
                 <label>Arrival Elevation</label>
                 <input type="hidden" id="elevationMin" name="elevationMin" value="0">
                 <input type="hidden" id="elevationMax" name="elevationMax" value="18000">
@@ -71,7 +71,7 @@
             </div>
             
 
-            <div class="col-sm-3 text-start">
+            <div class="col-sm-4 col-md-3 col-lg-3 text-start">
                 <label>Arrival Runway Length</label>
                 <input type="hidden" id="rwyLengthMin" name="rwyLengthMin" value="0">
                 <input type="hidden" id="rwyLengthMax" name="rwyLengthMax" value="1000">
@@ -79,7 +79,7 @@
                 <span id="slider-rwy-text">0-1000'</span>
             </div>
 
-            <div class="col-sm-3 text-start">
+            <div class="col-sm-3 col-md-3 col-lg-3 text-start">
                 <label>Intended Air Time</label>
                 <input type="hidden" id="airtimeMin" name="airtimeMin" value="0">
                 <input type="hidden" id="airtimeMax" name="airtimeMax" value="5">
@@ -90,7 +90,7 @@
         </div>
         <div class="row g-3 mt-3 justify-content-center">
 
-            <div class="col-sm-3 text-start">
+            <div class="col-sm-4 col-md-3 col-lg-3 text-start">
                 <label>Weather parameters</label>
 
                 @foreach(\App\Http\Controllers\ScoreController::$score_types as $k => $s)
@@ -105,7 +105,7 @@
                 @endforeach
             </div>
 
-            <div class="col-sm-3 text-start">
+            <div class="col-sm-4 col-md-3 col-lg-3 text-start">
                 <label>Network parameters</label>
 
                 @foreach(\App\Http\Controllers\ScoreController::$score_types as $k => $s)
@@ -120,7 +120,7 @@
                 @endforeach
             </div>
 
-            <div class="col-sm-2 text-start">
+            <div class="col-sm-3 col-md-3 col-lg-2 text-start">
                 <label>Meteo Condition</label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="metcondition" value="ANY" id="met-any" checked>
@@ -144,7 +144,7 @@
         </div>
 
         <div class="row g-3 mt-1 justify-content-center">
-            <div class="col-sm-12 align-self-end">
+            <div class="col-sm-12 align-self-end mb-5">
                 <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
                     Find destination
                 </button>
