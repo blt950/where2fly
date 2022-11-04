@@ -32,7 +32,7 @@
 
             window.addEventListener('DOMContentLoaded', (event) => {
                 
-                if(consent == 'true'){
+                if(typeof consent !== 'undefined' && consent == 'true'){
                     consentBtn.innerHTML = 'Withdraw my cookie consent'
                 } else {
                     consentBtn.remove()
