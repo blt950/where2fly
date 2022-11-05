@@ -26,6 +26,7 @@ class TopController extends Controller
                                 ->orderByDesc('id_count')
                                 ->join('airports', 'airport_scores.airport_id', '=', 'airports.id')
                                 ->where('airports.continent', $continent)
+                                ->whereIn('airports.type', ['large_airport','medium_airport','seaplane_base','small_airport'])
                                 ->with('airport', 'airport.metar', 'airport.runways', 'airport.scores')
                                 ->limit(30)
                                 ->get();
@@ -37,6 +38,8 @@ class TopController extends Controller
         } else {
             $airportScores = AirportScore::select('airport_id', \DB::raw("count(airport_scores.id) as id_count"))
                                 ->groupBy('airport_id')->orderByDesc('id_count')
+                                ->join('airports', 'airport_scores.airport_id', '=', 'airports.id')
+                                ->whereIn('airports.type', ['large_airport','medium_airport','seaplane_base','small_airport'])
                                 ->with('airport', 'airport.metar', 'airport.runways', 'airport.scores')
                                 ->limit(30)
                                 ->get();
