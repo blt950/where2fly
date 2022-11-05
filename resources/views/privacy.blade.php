@@ -24,8 +24,10 @@
                 An analysis tool that records the user pattern on this site so we better understand how you use our website. The data is used to improve the site and your user experience. On Google's own pages, you can read more about how they collect and protect data.
             </p>
 
-            <p id="consent-txt" class="mb-3 text-info"></p>
-            <button id="consent-btn" class="btn btn-sm btn-danger" onclick="revokeCookieConsent()"></button>
+            @if(!empty(Config::get('app.gtag')))
+                <p id="consent-txt" class="mb-3 text-info"></p>
+                <button id="consent-btn" class="btn btn-sm btn-danger" onclick="revokeCookieConsent()"></button>
+            @endif
             
         </div>
 
