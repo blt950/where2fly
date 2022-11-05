@@ -142,7 +142,8 @@ main{
     color: $primary;
     background-color: black;
     border: 2px solid $primary;
-    max-width: 300px;
+    width: 19rem;
+    max-width: 90%;
     padding: 10px;
 }
 
@@ -193,7 +194,7 @@ img.flag{
     color: $primary;
     background: black;
     border: 2px solid $primary;
-    padding: 5px 10px;
+    padding: .4rem .7rem;
 }
 
 
@@ -225,7 +226,7 @@ img.flag{
 }
 
 #slider-airtime, #slider-rwy, #slider-elevation {
-    padding: 0 16px;
+    padding: 0 1rem;
     
     .noUi-connect {
         background: #323121;
