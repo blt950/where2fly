@@ -73,6 +73,19 @@ body {
 
 table{
     background: #f9f9f9 !important;
+
+    tr .hover-show{
+        height: 1.5rem;
+        display: none;
+
+        @include media-breakpoint-between(xs, lg) {
+            display: block;
+        }
+    }
+
+    tr:hover .hover-show{
+        display: block;
+    }
 }
 
 
@@ -100,6 +113,10 @@ main{
     border: 2px solid $primary;
     max-width: 300px;
     padding: 10px;
+}
+
+.font-work-sans{
+    font-family: 'Work Sans', sans-serif;
 }
 
 /*

@@ -61,14 +61,19 @@
                                 <div class="rwy-meters text-black text-opacity-50">{{ round($airport->longestRunway()* .3048) }}</div>
                             </td>
                             <td>
-                                <ul class="nav nav-pills mb-3" style="font-size: 0.75rem" role="tablist">
-                                    <li class="nav-item" role="presentation">
+                                <div class="d-flex mb-3 nav nav-pills" style="font-size: 0.75rem">
+                                    <div>
                                         <button class="nav-link active" id="home-tab-{{ $airport->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $airport->id }}" type="button" role="tab">METAR</button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
+                                    </div>
+                                    <div>
                                         <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" data-taf-button="true" data-airport-icao="{{ $airport->icao }}" type="button" role="tab">TAF</button>
-                                    </li>
-                                </ul>
+                                    </div>
+                                    <div class="hover-show ms-auto">
+                                        <a class="btn btn-sm float-end font-work-sans text-muted" href="https://www.simbrief.com/system/dispatch.php?orig={{ $departure->icao }}&dest={{ $airport->icao }}" target="_blank">
+                                            <span class="d-none d-lg-inline d-xl-inline">SimBrief</span> <i class="fas fa-up-right-from-square"></i>
+                                        </a>
+                                    </div>
+                                </div>
                                 <div class="tab-content">
                                     <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $airport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHm\Z') }} {{ $airport->metar->metar }}</div>
                                     @isset($tafs[$airport->icao])

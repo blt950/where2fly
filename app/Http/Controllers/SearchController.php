@@ -111,7 +111,7 @@ class SearchController extends Controller
 
         $suggestedAirports = $suggestedAirports->slice(0, 10);
 
-        return view('search', compact('suggestedAirports', 'distances', 'airtimes'));
+        return view('search', compact('suggestedAirports', 'distances', 'airtimes', 'departure'));
     }
 
     /**
