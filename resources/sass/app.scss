@@ -82,7 +82,7 @@ table{
         height: 1.5rem;
         display: none;
 
-        @include media-breakpoint-between(xs, lg) {
+        @include media-breakpoint-between(sm, lg) {
             display: block;
         }
     }
