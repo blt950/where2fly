@@ -42,7 +42,7 @@
                 @enderror
             </div>
 
-            <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
+            <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 text-start">
                 <label for="codeletter">Arrival Aircraft Code</label>
                 <select class="form-control" id="codeletter" name="codeletter">
                     <option disabled selected>Choose</option>
