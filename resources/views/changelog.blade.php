@@ -11,6 +11,18 @@
         <h1 class="mb-3 mt-5">Changelog</h1>
         
         <div class="text-start">
+
+            <h2>v1.0.0</h2>
+            <ul>
+                <li>Hurray! Finally out of beta!</li>
+                <li>Added SimBrief dispatch shortcut on search results</li>
+                <li>Added cookie consent and privacy page</li>
+                <li>Fixed and perfected the responsiveness for smaller devices</li>
+                <li>Fixed the page jumping when tooltips for icons open</li>
+                <li>Fixed search results showing closed or heli aerodromes</li>
+                <li>Fixed an issue with going back would leave search button disabled in some browsers</li>
+            </ul>
+
             <h2>Beta 5</h2>
             <ul>
                 <li>New design</li>
