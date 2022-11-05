@@ -11,29 +11,42 @@
         <h1 class="mb-3 mt-5 text-start">Privacy Policy</h1>
         
         <div class="text-start">
-            <p>When using the websites of Posten Norge and Bring, you agree to allow us to place cookies in your browser.</p>
-            <p>"Cookies" - or cookies - are small text files that are added to your browser's internal memory when you download a website. These are used, among other things, to improve user experience and content, provide us with data for analysis and statistics, personalization and marketing. The most commonly used browsers (Google Chrome, Firefox, Safari, Internet Explorer, Opera etc.) are set up to accept cookies automatically, but you can choose to change the settings yourself so that cookies are not accepted. You do this in the browser's help section and it will then delete all cookies and block new ones, or give notice before a cookie is stored.</p>
+            <p class="font-work-sans">Thank you for using Where2Fly. This is a hobby project, but I'm still striving my best to cover the requirements of GDPR and ePrivacy regulations. In short words, the only tracking cookie is the analytics one, which helps me understand how the page is used. I use this data to optimize the service and prioritze functionalities based on usage.</p>
+            <a href="https://www.cloudflare.com/learning/privacy/what-are-cookies/" target="_blank">Read more about what a cookie is</a>
 
-            <h2>Google Analytics</h2>
-            <p>
-                An analysis tool that records the user pattern on posten.no so we better understand how you use our website. The data is used to improve the site and your user experience. On Google's own pages, you can read more about how they collect and protect data.
+            <h2 class="mt-3">Session Cookies (where2fly_session, XSRF-token)</h2>
+            <p class="font-work-sans">
+                Sessions cookies are strictly required to perform and secure searches, and provide this service. This cookie is deleted when the browser window is closed. They do not collect or store any personal data.
             </p>
-            <button id="consent-btn" class="btn btn-sm btn-danger" onclick="revokeCookieConsent()">Withdraw my cookie consent</button>
+
+            <h2 class="mt-3">Google Analytics (_ga)</h2>
+            <p class="font-work-sans">
+                An analysis tool that records the user pattern on this site so we better understand how you use our website. The data is used to improve the site and your user experience. On Google's own pages, you can read more about how they collect and protect data.
+            </p>
+
+            <p id="consent-txt" class="mb-3 text-info"></p>
+            <button id="consent-btn" class="btn btn-sm btn-danger" onclick="revokeCookieConsent()"></button>
+            
         </div>
 
         <script>
 
             var consentBtn = document.getElementById('consent-btn')
+            var consentTxt = document.getElementById('consent-txt')
             function revokeCookieConsent(){
-                consentBtn.innerHTML = 'Consent successfully withdrawn!'
+                consentBtn.innerHTML = 'Cookies consent successfully reset!'
                 consentBtn.setAttribute('disabled', '')
                 localStorage.removeItem('cookiesAccepted');
             }
 
             window.addEventListener('DOMContentLoaded', (event) => {
                 
-                if(typeof consent !== 'undefined' && consent == 'true'){
-                    consentBtn.innerHTML = 'Withdraw my cookie consent'
+                if(consent == 'true'){
+                    consentTxt.innerHTML = '<i class="fas fa-circle-check"></i> You have accepted analytic cookies'
+                    consentBtn.innerHTML = 'Withdraw and reset cookie consent'
+                } else if(consent == 'false'){
+                    consentTxt.innerHTML = '<i class="fas fa-circle-xmark"></i> You have declined analytic cookies'
+                    consentBtn.innerHTML = 'Reset consent and ask me again'
                 } else {
                     consentBtn.remove()
                 }

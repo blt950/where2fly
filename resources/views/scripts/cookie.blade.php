@@ -35,7 +35,7 @@
     } else {
         banner.innerHTML = `
             <p>Can I use cookies for statistics? I use them to improve the service <i class="fas fa-smile"></i></p>
-            <a href="{{ route('privacy') }}">Privacy Policy</a>
+            <a href="{{ route('privacy') }}">Show more details</a>
             <br><br>
             <button class="btn btn-sm btn-seconary text-white-50" onclick="cookieConsent(false)">Decline</button>
             <button class="btn btn-sm btn-primary" onclick="cookieConsent(true)">Accept</button>
