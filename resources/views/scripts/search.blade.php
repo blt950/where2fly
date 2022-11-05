@@ -5,4 +5,9 @@
         button.innerHTML = 'Searching ... <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
         document.getElementById('form').submit()
     });
+
+    addEventListener('pageshow', (event) => {
+        button.removeAttribute('disabled')
+        button.innerHTML = "Find destination"
+    });
 </script>
