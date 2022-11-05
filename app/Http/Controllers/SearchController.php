@@ -58,9 +58,21 @@ class SearchController extends Controller
         $airports = collect();
         if($continent == "DO"){
             // Domestic airports only
-            $airports = Airport::where('type', '!=', 'closed')->where('iso_country', $departure->iso_country)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
+            $airports = Airport::where('type', '!=', 'closed')
+                        ->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport'])
+                        ->where('iso_country', $departure->iso_country)
+                        ->where('icao', '!=', $departure->icao)
+                        ->has('metar')
+                        ->with('runways', 'scores', 'metar')
+                        ->get();
         } else {
-            $airports = Airport::where('type', '!=', 'closed')->where('continent', $continent)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
+            $airports = Airport::where('type', '!=', 'closed')
+                        ->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport'])
+                        ->where('continent', $continent)
+                        ->where('icao', '!=', $departure->icao)
+                        ->has('metar')
+                        ->with('runways', 'scores', 'metar')
+                        ->get();
         }
     
         // Check eligable airports
@@ -152,9 +164,9 @@ class SearchController extends Controller
         $airports = collect();
         if($continent == "DO"){
             // Domestic airports only
-            $airports = Airport::where('type', '!=', 'closed')->where('iso_country', $departure->iso_country)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
+            $airports = Airport::where('type', '!=', 'closed')->where('type', ['large_airport','medium_airport','seaplane_base','small_airport'])->where('iso_country', $departure->iso_country)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
         } else {
-            $airports = Airport::where('type', '!=', 'closed')->where('continent', $continent)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
+            $airports = Airport::where('type', '!=', 'closed')->where('type', ['large_airport','medium_airport','seaplane_base','small_airport'])->where('continent', $continent)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
         }
 
 
@@ -184,7 +196,7 @@ class SearchController extends Controller
             $estimatedAirtime = ($distance / $aircraftNmPerHour) + $this::timeClimbDescend($codeletter);
 
             if($estimatedAirtime >= $airtimeMin && $estimatedAirtime <= $airtimeMax){
-                if($destination->longestRunway() > 0 && $destination->longestRunway() >= $rwyLengthMin && $destination->longestRunway() <= $rwyLengthMax){
+                if($destination->longestRunway() >= $rwyLengthMin && $destination->longestRunway() <= $rwyLengthMax){
                     if($destination->elevation_ft >= $elevationMin && $destination->elevation_ft <= $elevationMax){
                         $suggestedAirports->push($destination);
                         $distances[$destination->icao] = round($distance);
