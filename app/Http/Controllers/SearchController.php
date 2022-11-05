@@ -209,7 +209,7 @@ class SearchController extends Controller
 
         }
 
-        return view('search', compact('suggestedAirports', 'distances', 'airtimes', 'filteredScores'));
+        return view('search', compact('suggestedAirports', 'distances', 'airtimes', 'filteredScores', 'departure'));
     }
 
     /**
