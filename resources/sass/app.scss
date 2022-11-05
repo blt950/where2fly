@@ -73,8 +73,11 @@ body {
 
 table{
 
+    background: white;
+
     // Add a bit margin to hide horizontal scroll fade
-    @include media-breakpoint-between(xs, sm) {
+    @include media-breakpoint-between(xs, md) {
+        background: transparent;
         margin-right: 2rem;
     }
 
@@ -98,10 +101,11 @@ table{
 }
 
 .table-responsive{
-    background: $white;
+    background: transparent;
 
     // Add horizontal scroll fade on smaller devices
-    @include media-breakpoint-between(xs, sm) {
+    @include media-breakpoint-between(xs, md) {
+        background: white;
         &::after{
             content: '';
             position: absolute;
