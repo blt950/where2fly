@@ -12,6 +12,14 @@
         
         <div class="text-start">
 
+            <h2>v1.0.1</h2>
+            <ul>
+                <li>Changed and increased the default runway length for advanced search, this will give a lot more results</li>
+                <li>Fixed duplicate RVR score coming up per runway rather than active</li>
+                <li>Fixed incorrect crosswind scoring for a lot of airports</li>
+                <li>Fixed missing Kosovo tooltip</li> 
+            </ul>
+
             <h2>v1.0.0</h2>
             <ul>
                 <li>Hurray! Finally out of beta!</li>
