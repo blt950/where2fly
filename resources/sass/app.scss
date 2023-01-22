@@ -34,6 +34,7 @@
 @import 'bootstrap/scss/bootstrap';
 @import "fontawesome/fontawesome.scss";
 @import "fontawesome/solid.scss";
+@import "fontawesome/brands.scss";
 
 /*
 * Base structure
@@ -237,6 +238,13 @@ img.flag{
         top: -5px;
         border-radius: 3px;
         box-shadow: none;
+    }
+}
+
+.alert{
+    &.alert-discord{
+        background-color: #7289DA;
+        border-color: #7289DA;
     }
 }
 
