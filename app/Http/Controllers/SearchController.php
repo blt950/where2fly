@@ -169,7 +169,6 @@ class SearchController extends Controller
             $airports = Airport::where('type', '!=', 'closed')->where('type', ['large_airport','medium_airport','seaplane_base','small_airport'])->where('continent', $continent)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
         }
 
-
         // Check eligable airports
         $suggestedAirports = collect();
         $distances = [];
@@ -205,21 +204,21 @@ class SearchController extends Controller
                 }
             }
 
-            // Sort the suggested airports based on the intended filters
-            $suggestedAirports = $suggestedAirports->shuffle(); // Shuffle the results before sort as slim results will quickly show airports from close by location
-            $suggestedAirports = $suggestedAirports->sort(function($a, $b) use ($filteredScores){
-
-                $aScore = $a->scores->whereIn('reason', $filteredScores)->count();
-                $bScore = $b->scores->whereIn('reason', $filteredScores)->count();
-
-                if($aScore == $bScore) return 0;
-                return ($aScore > $bScore) ? -1 : 1;
-
-            });
-
-            $suggestedAirports = $suggestedAirports->splice(0,10);
-
         }
+
+        // Sort the suggested airports based on the intended filters
+        $suggestedAirports = $suggestedAirports->shuffle(); // Shuffle the results before sort as slim results will quickly show airports from close by location
+        $suggestedAirports = $suggestedAirports->sort(function($a, $b) use ($filteredScores){
+
+            $aScore = $a->scores->whereIn('reason', $filteredScores)->count();
+            $bScore = $b->scores->whereIn('reason', $filteredScores)->count();
+
+            if($aScore == $bScore) return 0;
+            return ($aScore > $bScore) ? -1 : 1;
+
+        });
+
+        $suggestedAirports = $suggestedAirports->splice(0,10);
 
         return view('search', compact('suggestedAirports', 'distances', 'airtimes', 'filteredScores', 'departure'));
     }
