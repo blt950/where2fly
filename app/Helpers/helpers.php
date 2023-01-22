@@ -41,4 +41,17 @@
         }
     }
 
+    if(!function_exists('rwyIdentToHeading')) {
+        
+        function rwyIdentToHeading($ident){
+            $heading = $ident;
+            if(strlen($heading) == 2){
+                $heading .= "0";
+            }
+
+            return floatval($heading);
+        }
+        
+    }
+
 ?>
