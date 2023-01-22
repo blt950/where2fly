@@ -64,14 +64,16 @@ class CalcScores extends Command
             }
 
             $activeRunwayComponents = ['headwind' => 0, 'crosswind' => 0];
+            $airportScoreRVRInserted = false;
             foreach($airport->runways->where('closed', false) as $runway){
                 // Check RVR at runways
                 if(
-                    ( !empty($runway->le_ident) && $airport->metar->rvrAtBelow($runway->le_ident, 700) ) ||
-                    ( !empty($runway->he_ident) && $airport->metar->rvrAtBelow($runway->he_ident, 700) )
+                    $airportScoreRVRInserted == false &&
+                    (( !empty($runway->le_ident) && $airport->metar->rvrAtBelow($runway->le_ident, 700) ) ||
+                    ( !empty($runway->he_ident) && $airport->metar->rvrAtBelow($runway->he_ident, 700) ))
                 ){
                     $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'METAR_RVR', 'score' => 1, 'data' => null];
-
+                    $airportScoreRVRInserted = true;
                 }
 
                 // Calculate headwind component on active runway
