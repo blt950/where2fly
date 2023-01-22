@@ -74,7 +74,7 @@
             <div class="col-sm-4 col-md-3 col-lg-3 text-start">
                 <label>Arrival Runway Length</label>
                 <input type="hidden" id="rwyLengthMin" name="rwyLengthMin" value="0">
-                <input type="hidden" id="rwyLengthMax" name="rwyLengthMax" value="1000">
+                <input type="hidden" id="rwyLengthMax" name="rwyLengthMax" value="17000">
                 <div id="slider-rwy" class="mt-1 mb-1"></div>
                 <span id="slider-rwy-text">0-1000'</span>
             </div>
@@ -186,13 +186,13 @@
 
             var rwySlider = document.getElementById('slider-rwy');
             noUiSlider.create(rwySlider, {
-                start: [{{ old('rwyLengthMin') ? old('rwyLengthMin') : 0 }}, {{ old('rwyLengthMax') ? old('rwyLengthMax') : 10000 }}],
+                start: [{{ old('rwyLengthMin') ? old('rwyLengthMin') : 0 }}, {{ old('rwyLengthMax') ? old('rwyLengthMax') : 17000 }}],
                 step: 500,
                 connect: true,
                 behaviour: 'drag',
                 range: {
                     'min': [0],
-                    'max': [16000]
+                    'max': [17000]
                 }
             });
 
