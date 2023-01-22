@@ -75,13 +75,23 @@ class CalcScores extends Command
                 }
 
                 // Calculate headwind component on active runway
-                if(!empty($airport->metar->wind_direction) && !empty($runway->le_heading) && !empty($runway->he_heading)){
+                if(!empty($airport->metar->wind_direction)){
 
+                    // Fallback to varchar runway identifier if heading is not present in data, which is common.
+                    if(empty($runway->le_heading) && !empty($runway->le_ident)){
+                        $runway->le_heading = rwyIdentToHeading($runway->le_ident);
+                    }
+
+                    if(empty($runway->he_heading) && !empty($runway->he_ident)){
+                        $runway->he_heading = rwyIdentToHeading($runway->he_ident);
+                    }
+
+                    // Set the components
                     $headwindComponentLe = abs($airport->metar->wind_speed * cos(($airport->metar->wind_direction - $runway->le_heading)/180*3.14));
                     $crosswindComponentLe = abs($airport->metar->wind_speed * sin(($airport->metar->wind_direction - $runway->le_heading)/180*pi()));
 
-                    $headwindComponentHe = abs($airport->metar->wind_speed * cos(($airport->metar->wind_direction - $runway->le_heading)/180*3.14));
-                    $crosswindComponentHe = abs($airport->metar->wind_speed * sin(($airport->metar->wind_direction - $runway->le_heading)/180*pi()));
+                    $headwindComponentHe = abs($airport->metar->wind_speed * cos(($airport->metar->wind_direction - $runway->he_heading)/180*3.14));
+                    $crosswindComponentHe = abs($airport->metar->wind_speed * sin(($airport->metar->wind_direction - $runway->he_heading)/180*pi()));
 
                     if($activeRunwayComponents['headwind'] < $headwindComponentLe){
                         $activeRunwayComponents['headwind'] = $headwindComponentLe;
