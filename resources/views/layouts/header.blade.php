@@ -17,7 +17,7 @@
 <meta name="msapplication-config" content="/img/favicon/browserconfig.xml">
 <meta name="theme-color" content="#d0c605">
 
-<script defer data-domain="where2fly.today" src="https://metrics.where2fly.today/js/script.js"></script>
+<script defer data-domain="where2fly.today" src="https://metrics.blt950.com/js/script.js"></script>
 
 @vite('resources/js/app.js')
 
