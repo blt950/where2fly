@@ -12,6 +12,11 @@
         
         <div class="text-start">
 
+            <h2>v1.0.2</h2>
+            <ul>
+                <li>Revised the Privacy Policy and removed tracking cookies</li>
+            </ul>
+
             <h2>v1.0.1</h2>
             <ul>
                 <li>Changed and increased the default runway length for advanced search, this will give a lot more results</li>
