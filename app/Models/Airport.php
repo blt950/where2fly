@@ -113,4 +113,41 @@ class Airport extends Model
 
     }
 
+    public static function allWithFilter($continent, $country, $departureIcao){
+        
+        $returnQuery = Airport::where('type', '!=', 'closed')
+        ->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport']);
+        
+        // If the filter is domestic
+        if($continent == "DO"){
+            $returnQuery= $returnQuery->where('iso_country', $country);
+        } else {
+
+            // Include European and Russian-European airports
+            if($continent == "EU"){
+                $returnQuery = $returnQuery->where('airports.continent', $continent)
+                ->whereNotIn('airports.iso_region', getRussianAsianRegions());
+                              
+            // Include Asian and Russian-Asian airports in a nested query for correct logic grouping
+            } elseif($continent == "AS"){
+                $returnQuery = $returnQuery->where(function($query) use ($continent){
+                    $query->where('airports.continent', $continent)
+                    ->orWhereIn('airports.iso_region', getRussianAsianRegions());
+                });
+
+            // Filter only on continent
+            } else {
+                $returnQuery = $returnQuery->where('airports.continent', $continent);
+            }
+        }
+        
+        // Filter out departure airport, get airports with metar, fetch relevant data and run the query
+        $result = $returnQuery->where('icao', '!=', $departureIcao)
+        ->has('metar')
+        ->with('runways', 'scores', 'metar')
+        ->get();
+
+        return $result;
+    }
+
 }
