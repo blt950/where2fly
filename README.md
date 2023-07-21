@@ -2,6 +2,7 @@
 A web service suggesting where to fly next.
 
 ## Configuration
+- Setup the database `docker exec -it where2fly php artisan migrate`
 - Import the data source Airports & Runways into the SQL directly
 - Remember to setup a cronjob
     ```
