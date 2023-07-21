@@ -164,9 +164,9 @@ class SearchController extends Controller
         $airports = collect();
         if($continent == "DO"){
             // Domestic airports only
-            $airports = Airport::where('type', '!=', 'closed')->where('type', ['large_airport','medium_airport','seaplane_base','small_airport'])->where('iso_country', $departure->iso_country)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
+            $airports = Airport::where('type', '!=', 'closed')->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport'])->where('iso_country', $departure->iso_country)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
         } else {
-            $airports = Airport::where('type', '!=', 'closed')->where('type', ['large_airport','medium_airport','seaplane_base','small_airport'])->where('continent', $continent)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
+            $airports = Airport::where('type', '!=', 'closed')->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport'])->where('continent', $continent)->where('icao', '!=', $departure->icao)->has('metar')->with('runways', 'scores', 'metar')->get();
         }
 
         // Check eligable airports
