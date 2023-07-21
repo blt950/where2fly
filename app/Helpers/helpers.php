@@ -54,4 +54,39 @@
         
     }
 
+    if(!function_exists('getRussianAsianRegions')) {
+        
+        function getRussianAsianRegions(){
+            return [
+                "RU-KAM",
+                "RU-CHU",
+                "RU-MAG",
+                "RU-SAK",
+                "RU-PRI",
+                "RU-KHA",
+                "RU-YEV",
+                "RU-AMU",
+                "RU-SA",
+                "RU-IRK",
+                "RU-ZAB",
+                "RU-BU",
+                "RU-KYA",
+                "RU-TY",
+                "RU-ALT",
+                "RU-AL",
+                "RU-KEM",
+                "RU-KK",
+                "RU-NVS",
+                "RU-TOM",
+                "RU-KHM",
+                "RU-YAN",
+                "RU-OMS",
+                "RU-TYU",
+                "RU-KGN",
+                "RU-SVE",
+                "RU-CHE"
+            ];
+        }
+    }
+
 ?>
