@@ -10,7 +10,7 @@ if [ ! -f "$SELF_SIGNED_KEY" ] || [ ! -f "$SELF_SIGNED_CERT" ]; then
     openssl req -x509 -nodes -days 358000 -newkey rsa:2048 -keyout "$SELF_SIGNED_KEY" -out "$SELF_SIGNED_CERT" -subj "/O=Your vACC/CN=Stands"
 fi
 
-if [ -z "$APP_KEY" ] && [ ! -f "$SERVICE_ROOT/.env" ]; then
+if [ -z "$APP_KEY" ]; then
     php artisan key:generate
 fi
 

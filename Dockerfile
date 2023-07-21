@@ -1,3 +1,17 @@
+# Intermediate build container for front-end resources
+FROM docker.io/library/node:20.3.0-alpine as frontend
+# Easy to prune intermediary containers
+LABEL stage=build
+
+WORKDIR /app
+COPY ./ /app/
+
+RUN npm ci --omit dev && \
+    npx vite build
+
+####################################################################################################
+# Primary container
+
 # Primary container
 FROM docker.io/library/php:8.1.10-apache-bullseye
 
@@ -21,10 +35,15 @@ COPY ./container/configs/apache.conf /etc/apache2/apache2.conf
 # Custom PHP configuration based on $PHP_INI_DIR/php.ini-production
 COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
+# Install PHP extension(s)
+COPY --from=mlocati/php-extension-installer:2.1.30 /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions pdo_mysql
+
 # Install composer
 COPY --from=docker.io/library/composer:latest /usr/bin/composer /usr/bin/composer
 # Copy over the application, static files, plus the ones built/transpiled by Mix in the frontend stage further up
 COPY --chown=www-data:www-data ./ /app/
+COPY --from=frontend --chown=www-data:www-data /app/public/ /app/public/
 
 WORKDIR /app
 
