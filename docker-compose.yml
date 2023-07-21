@@ -3,13 +3,12 @@ version: '3'
 services:
   web:
     container_name: where2fly
-    image: vatsca/apache:php-8.1
+    build: .
+    #image: ghcr.io/blt950/where2fly:latest
     ports:
-        - 5080:80
-        - 5081:443
+        - 8080:80
+        - 8443:443
     extra_hosts:
         - "host.docker.internal:host-gateway"
-        - "vatsca.local:host-gateway"
-    volumes:
-      - ./:/var/www/html
-      - ./apache:/var/www/logs
+    #volumes:
+    #  - ./:/app/
