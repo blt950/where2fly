@@ -154,6 +154,8 @@ main{
     flex-direction: row;
     gap: 1rem;
 
+    overflow-x: scroll;
+
     dt{
         margin-bottom: 1.35rem;
     }
