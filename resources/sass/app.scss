@@ -44,8 +44,13 @@ h1, h2, h3, h4, h5, h6, button, p, a, footer, .btn, .badge{
     font-family: 'Kanit', 'Work Sans', sans-serif;
 }
 
+h1 {
+    text-align: center;
+}
+
 footer{
     font-weight: 300;
+    text-align: center;
 }
 
 body {
@@ -132,6 +137,27 @@ main{
     @include media-breakpoint-between(xs, md) {
         padding-right: .25rem!important;
         padding-left: .25rem!important;
+    }
+}
+
+.departure-container{
+    padding: 1rem;
+    margin-bottom: 1rem;
+
+    color: black;
+    background: #fff;
+
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    gap: 1rem;
+
+    dt{
+        margin-bottom: 1.35rem;
+    }
+
+    dd{
+        margin-bottom: 0;
     }
 }
 
@@ -245,6 +271,7 @@ img.flag{
     &.alert-discord{
         background-color: #7289DA;
         border-color: #7289DA;
+        text-align: center;
     }
 }
 

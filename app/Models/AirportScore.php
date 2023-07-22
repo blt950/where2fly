@@ -23,7 +23,7 @@ class AirportScore extends Model
         return str_starts_with($this->reason, 'VATSIM_');
     }
 
-    public static function getTopAirports($continent = null){
+    public static function getTopAirports($continent = null, $limit = 30){
         
         // Establish the return query
         $returnQuery = AirportScore::select('airport_id', \DB::raw("count(airport_scores.id) as id_count"))
@@ -55,7 +55,7 @@ class AirportScore extends Model
         // Filter airport type, relevant data and run the query
         $result = $returnQuery->whereIn('airports.type', ['large_airport','medium_airport','seaplane_base','small_airport'])
         ->with('airport', 'airport.metar', 'airport.runways', 'airport.scores')
-        ->limit(30)
+        ->limit($limit)
         ->get();
 
         return $result;

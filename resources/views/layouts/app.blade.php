@@ -4,7 +4,7 @@
         @include('layouts.header')
     </head>
 
-    <body class="d-flex h-100 text-center text-white bg-dark">
+    <body class="d-flex h-100 text-white bg-dark">
         @yield('content')
         @yield('js')
     </body>
