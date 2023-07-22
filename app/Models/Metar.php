@@ -40,6 +40,11 @@ class Metar extends Model
             if((int)$results[1]*1609.344 >= $meters) return true;
         }
 
+        // There's no ceiling
+        if(preg_match('/(CAVOK|NSC)/', $this->metarWithoutRemarks(), $results)){
+            return true;
+        }
+
         return false;
     }
 
