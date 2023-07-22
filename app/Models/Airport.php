@@ -69,7 +69,7 @@ class Airport extends Model
     public function longestRunway(){
         $length = 0;
         foreach($this->runways as $rwy){
-            if($rwy->length_ft > $length) $length = $rwy->length_ft;
+            if($rwy->closed == false && $rwy->length_ft > $length) $length = $rwy->length_ft;
         }
 
         return $length;
