@@ -58,7 +58,7 @@
                     </div>
                 </div>
                 <div class="tab-content">
-                    <div class="tab-pane fade show active" id="metar-pane-{{ $departure->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $departure->id }}" tabindex="0">{{ \Carbon\Carbon::parse($departure->metar->last_update)->format('dHm\Z') }} {{ $departure->metar->metar }}</div>
+                    <div class="tab-pane fade show active" id="metar-pane-{{ $departure->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $departure->id }}" tabindex="0">{{ \Carbon\Carbon::parse($departure->metar->last_update)->format('dHi\Z') }} {{ $departure->metar->metar }}</div>
                     @isset($tafs[$departure->icao])
                         <div class="tab-pane fade" id="taf-pane-{{ $departure->id }}" role="tabpanel" tabindex="0">{{ $tafs[$departure->icao] }}</div>
                     @else
@@ -135,7 +135,7 @@
                                         </div>
                                     </div>
                                     <div class="tab-content">
-                                        <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $airport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHm\Z') }} {{ $airport->metar->metar }}</div>
+                                        <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $airport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHi\Z') }} {{ $airport->metar->metar }}</div>
                                         @isset($tafs[$airport->icao])
                                             <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$airport->icao] }}</div>
                                         @else
