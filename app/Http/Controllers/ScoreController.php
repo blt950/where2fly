@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 class ScoreController extends Controller
 {
     public static $score_types = [
@@ -24,5 +22,24 @@ class ScoreController extends Controller
         'VATSIM_EVENT' => ['icon' => 'fa-calendar', 'desc' => 'VATSIM Event Ongoing'],
         'VATSIM_POPULAR' => ['icon' => 'fa-fire', 'desc' => 'VATSIM Popular Airport'],
     ];
-   
+
+    // Get the score types that are weather related
+    public static function getWeatherTypes(){
+        foreach(self::$score_types as $key => $value){
+            if(str_starts_with($key, 'METAR_')){
+                $returnArray[] = $key;
+            }
+        }
+        return $returnArray;
+    }
+
+    // Get the score types that are VATSIM related
+    public static function getVatsimTypes(){
+        foreach(self::$score_types as $key => $value){
+            if(str_starts_with($key, 'VATSIM_')){
+                $returnArray[] = $key;
+            }
+        }
+        return $returnArray;
+    }
 }

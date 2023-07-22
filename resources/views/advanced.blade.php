@@ -19,7 +19,7 @@
         <div class="row g-3 justify-content-center">
             <div class="col-sm-3 col-md-3 col-lg-2 text-start">
                 <label for="departure">Departure</label>
-                <input type="text" class="form-control" id="departure" name="departure" placeholder="ICAO" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('departure') }}">
+                <input type="text" class="form-control" id="departure" name="departure" placeholder="ICAO or blank" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('departure') }}">
                 @error('departure')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
@@ -144,7 +144,7 @@
         </div>
 
         <div class="row g-3 mt-1 justify-content-center">
-            <div class="col-sm-12 align-self-end mb-5">
+            <div class="col-sm-12 align-self-end mb-5 text-center">
                 <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
                     Find destination
                 </button>

@@ -8,14 +8,69 @@
     @include('layouts.menu')
   
     <main>
-        <h1 class="mb-3 mt-5">Suggestion Results</h1>
+        <h1 class="mb-3 mt-5">Search Results</h1>
 
-        <div class="alert alert-discord">
-            <p class="text-white mb-0">
-                <i class="fa-brands fa-discord"></i> Contribute with suggestions, bug reports and vote on new features in <a class="text-white" href="https://discord.gg/UkFg9Yy4gP" target="_blank">our Discord <i class="fas fa-up-right-from-square"></i></a>
-            </p>
+        <h2>Departure</h2>
+        <div class="departure-container">
+            <dl>
+                <dt>Airport<dt>
+                <dd>
+                    <img class="flag" src="/img/flags/{{ strtolower($departure->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($departure->iso_country) }}" alt="Flag of {{ getCountryName($departure->iso_country) }}"></img>
+                    {{ $departure->icao }}
+                </dd>
+                <dd>{{ $departure->name }}</dd>
+            </dl>
+
+            <dl>
+                <dt>Runway<dt>
+                <dd class="rwy-feet">{{ $departure->longestRunway() }}</dd>
+                <dd class="rwy-meters text-muted">{{ round($departure->longestRunway()* .3048) }}</dd>
+            </dl>
+
+            <dl>
+                <dt>State<dt>
+                @foreach($departure->scores as $score)
+                    @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
+                        <i 
+                            class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                            data-bs-html="true"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
+                        ></i>
+                    @else
+                        <i 
+                            class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                            data-bs-html="true"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
+                        ></i>
+                    @endif
+                @endforeach
+            </dl>
+
+            <div style="width: 60%">
+                <div class="d-flex mb-3 nav nav-pills" style="font-size: 0.75rem">
+                    <div>
+                        <button class="nav-link active" id="home-tab-{{ $departure->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $departure->id }}" type="button" role="tab">METAR</button>
+                    </div>
+                    <div>
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $departure->id }}" data-taf-button="true" data-airport-icao="{{ $departure->icao }}" type="button" role="tab">TAF</button>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="metar-pane-{{ $departure->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $departure->id }}" tabindex="0">{{ \Carbon\Carbon::parse($departure->metar->last_update)->format('dHm\Z') }} {{ $departure->metar->metar }}</div>
+                    @isset($tafs[$departure->icao])
+                        <div class="tab-pane fade" id="taf-pane-{{ $departure->id }}" role="tabpanel" tabindex="0">{{ $tafs[$departure->icao] }}</div>
+                    @else
+                        <div class="tab-pane fade" id="taf-pane-{{ $departure->id }}" role="tabpanel" tabindex="0">
+                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
 
+        <h2>Arrival Suggestions</h2>
         <div class="scroll-fade">
             <div class="table-responsive">
                 <table class="table table-hover text-start">
@@ -40,8 +95,8 @@
                                 <td>{{ $airport->icao }}</td>
                                 <td>{{ $airport->name }}</td>
                                 <td><img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img></td>
-                                <td>{{ $distances[$airport->icao] }}nm</td>
-                                <td>{{ $airtimes[$airport->icao] }}h</td>
+                                <td>{{ $airport->distance }}nm</td>
+                                <td>{{ $airport->airtime }}h</td>
                                 <td class="fs-5">
                                     @foreach($airport->scores as $score)
                                         @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
@@ -102,6 +157,12 @@
                         @endif
                     </tbody>
                 </table>
+            </div>
+
+            <div class="alert alert-discord">
+                <p class="text-white mb-0">
+                    <i class="fa-brands fa-discord"></i> Contribute with suggestions, bug reports and vote on new features in <a class="text-white" href="https://discord.gg/UkFg9Yy4gP" target="_blank">our Discord <i class="fas fa-up-right-from-square"></i></a>
+                </p>
             </div>
         </div>
 

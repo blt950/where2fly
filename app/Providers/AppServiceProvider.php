@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Mixins\CollectionAirportFilter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Collection;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +25,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Collection::mixin(new CollectionAirportFilter);
     }
 }

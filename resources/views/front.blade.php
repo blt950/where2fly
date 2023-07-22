@@ -7,7 +7,7 @@
 @section('title', 'Search')
 @section('content')
 
-<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+<div class="cover-container text-center d-flex w-100 h-100 p-3 mx-auto flex-column">
 
     @include('layouts.menu')
   
@@ -19,7 +19,7 @@
         <div class="row g-3 justify-content-center">
             <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
                 <label for="departure">Departure</label>
-                <input type="text" class="form-control" id="departure" name="departure" placeholder="ICAO" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('departure') }}">
+                <input type="text" class="form-control" id="departure" name="departure" placeholder="ICAO or blank" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('departure') }}">
                 @error('departure')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
