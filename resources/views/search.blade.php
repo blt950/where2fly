@@ -19,7 +19,13 @@
                     @csrf
 
                     @foreach($_POST as $key => $value)
-                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @if(is_array($value))
+                            @foreach($value as $subvalue)
+                                <input type="hidden" name="{{ $key }}[]" value="{{ $subvalue }}">
+                            @endforeach
+                        @else
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
                     @endforeach
 
                     <button class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;"><i class="fas fa-shuffle"></i> Randomise</button>
