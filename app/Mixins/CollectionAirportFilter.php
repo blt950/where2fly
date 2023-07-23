@@ -42,7 +42,7 @@ class CollectionAirportFilter{
                 ->filter(fn ($a) => AirportFilterHelper::hasCorrectMetcon($requiredMetcon, $a))
                 ->filter(fn ($a) => AirportFilterHelper::hasRequiredScores($requiredScores, $a))
                 ->filter(fn ($a) => AirportFilterHelper::hasRequiredAirtime($departureAirport, $a, $codeletter, $airtimeMin, $airtimeMax))
-                ->filter(fn ($a) => AirportFilterHelper::hasRequiredRunwayLength($runwayLengthMin, $runwayLengthMax, $a))
+                ->filter(fn ($a) => AirportFilterHelper::hasRequiredRunwayLength($runwayLengthMin, $runwayLengthMax, $codeletter, $a))
                 ->filter(fn ($a) => AirportFilterHelper::hasRequiredAirportElevation($airportElevationMin, $airportElevationMax, $a));
 
             return $returnCollection;
