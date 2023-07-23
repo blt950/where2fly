@@ -81,7 +81,7 @@ class SearchController extends Controller
             $suggestedAirports = $suggestedAirports->shuffle();
         }
 
-        $suggestedAirports = $suggestedAirports->slice(0, 10);
+        $suggestedAirports = $suggestedAirports->slice(0, 20);
 
         $wasAdvancedSearch = false;
         return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture', 'wasAdvancedSearch'));
@@ -141,7 +141,7 @@ class SearchController extends Controller
         // Sort the suggested airports based on the intended filters
         $suggestedAirports = $suggestedAirports->shuffle(); 
         $suggestedAirports = $suggestedAirports->sortByFilteredScores($filteredScores);
-        $suggestedAirports = $suggestedAirports->splice(0,10);
+        $suggestedAirports = $suggestedAirports->splice(0,20);
 
         $wasAdvancedSearch = true;
         return view('search', compact('suggestedAirports', 'filteredScores', 'departure', 'suggestedDeparture', 'wasAdvancedSearch'));

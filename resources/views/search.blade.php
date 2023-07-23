@@ -125,7 +125,7 @@
                         @endif
 
                         @foreach($suggestedAirports as $airport)
-                            <tr>
+                            <tr class="{{ ($count > 10) ? 'showmore-hidden' : null }}">
                                 <th scope="row">{{ $count }}</th>
                                 <td>{{ $airport->icao }}</td>
                                 <td>{{ $airport->name }}</td>
@@ -181,8 +181,10 @@
                                     </div>
                                 </td>
                             </tr>
+
                             @php $count++; @endphp
                         @endforeach
+
                         @if($count == 1)
                             <tr>
                                 <th colspan="9" class="text-center text-danger">
@@ -190,8 +192,14 @@
                                 </th>
                             </tr>
                         @endif
+                        <tr id="showMoreRow">
+                            <th colspan="9" class="text-center text-danger">
+                                <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
+                            </th>
+                        </tr>
                     </tbody>
                 </table>
+
             </div>
 
             <div class="alert alert-discord">
@@ -204,6 +212,16 @@
         @include('layouts.legend')
 
     </main>
+
+    <script>
+        // Get the show more button and add on click event where it removes the class that hides the rows
+        document.querySelector('#showMoreBtn').addEventListener('click', function() {
+            document.querySelectorAll('.showmore-hidden').forEach(function(element) {
+                element.classList.remove('showmore-hidden');
+            });
+            document.querySelector('#showMoreRow').remove();
+        });
+    </script>
 
     @include('scripts.measures')
     @include('scripts.tooltip')
