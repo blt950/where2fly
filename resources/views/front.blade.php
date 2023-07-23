@@ -69,7 +69,7 @@
                 </div>
                 
                 <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
-                    <label>Rank by</label>
+                    <label>Order by</label>
                     
                     <div class="form-check mb-0">
                         <input class="form-check-input" type="checkbox" value="1" id="filterWeather" name="filterWeather" checked>

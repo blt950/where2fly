@@ -48,7 +48,13 @@ h1 {
     text-align: center;
 }
 
+.font-family-paragraph
+{
+    font-family: 'Work Sans', sans-serif; 
+}
+
 p {
+    
     &.front{
         font-size: 1.2rem;
         @include media-breakpoint-between(sm, md) {
