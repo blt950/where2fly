@@ -3,13 +3,7 @@
         <a href="{{ route('front') }}" class="float-none float-md-start text-decoration-none text-white">
             <h3 class="mb-0 logo">Where2Fly</h3>
         </a>
-
-        @if(Config::get('app.env') != "production")
-            <span class="badge bg-warning ms-2 mt-2 fs-sm" role="alert">
-                TEST
-            </span>
-        @endif
-        
+    
         <nav class="nav nav-masthead justify-content-center float-md-end">
             <a class="nav-link {{ Route::is('front') || Route::is('front.advanced') || Route::is('search*') ? 'active' : '' }}" href="{{ route('front') }}">Search</a>
             <a class="nav-link {{ Route::is('top*') ? 'active' : '' }}" href="{{ route('top') }}">Top List</a>
@@ -19,3 +13,8 @@
         </nav>
     </div>
 </header>
+@if(Config::get('app.env') != "production")
+    <span class="testbadge badge bg-warning ms-2 mt-2" role="alert">
+        TEST
+    </span>
+@endif
