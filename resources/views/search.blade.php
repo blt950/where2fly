@@ -191,12 +191,14 @@
                                     <i class="fas fa-exclamation-triangle"></i> No results matched your criteria
                                 </th>
                             </tr>
+                        @else
+                            <tr id="showMoreRow">
+                                <th colspan="9" class="text-center text-danger">
+                                    <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
+                                </th>
+                            </tr>
                         @endif
-                        <tr id="showMoreRow">
-                            <th colspan="9" class="text-center text-danger">
-                                <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
-                            </th>
-                        </tr>
+                        
                     </tbody>
                 </table>
 
