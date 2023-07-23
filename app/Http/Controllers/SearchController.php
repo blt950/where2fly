@@ -83,7 +83,8 @@ class SearchController extends Controller
 
         $suggestedAirports = $suggestedAirports->slice(0, 10);
 
-        return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture'));
+        $wasAdvancedSearch = false;
+        return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture', 'wasAdvancedSearch'));
     }
 
     /**
@@ -108,7 +109,6 @@ class SearchController extends Controller
             'metcondition' => 'required|in:IFR,VFR,ANY'
         ]);
 
-        $departure = Airport::where('icao', $data['departure'])->get()->first();
         $continent = $data['continent'];
         $codeletter = $data['codeletter'];
         $rwyLengthMin = (int)$data['rwyLengthMin'];
@@ -126,7 +126,7 @@ class SearchController extends Controller
             $departure = Airport::where('icao', $data['departure'])->get()->first();
         } else {
             // Get a random airport from the toplist
-            $departure = AirportScore::getTopAirports($continent, 5)->random()->airport;
+            $departure = Airport::findWithCriteria($continent)->sortByFilteredScores($filteredScores)->slice(0, 10)->random();
             $suggestedDeparture = true;
         }
 
