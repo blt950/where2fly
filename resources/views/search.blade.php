@@ -131,7 +131,7 @@
                                 <td>{{ $airport->name }}</td>
                                 <td><img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img></td>
                                 <td>{{ $airport->distance }}nm</td>
-                                <td>{{ $airport->airtime }}h</td>
+                                <td>{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
                                 <td class="fs-5">
                                     @foreach($airport->scores as $score)
                                         @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
