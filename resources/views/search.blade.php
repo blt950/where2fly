@@ -17,14 +17,16 @@
                 {{-- Add possiblity to re-post the search query for a new random departure --}}
                 <form method="POST" action="{{ ($wasAdvancedSearch) ? route('search.advanced') : route('search') }}">
                     @csrf
-
+                    
                     @foreach($_POST as $key => $value)
-                        @if(is_array($value))
-                            @foreach($value as $subvalue)
-                                <input type="hidden" name="{{ $key }}[]" value="{{ $subvalue }}">
-                            @endforeach
-                        @else
-                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @if($key != '_token')
+                            @if(is_array($value))
+                                @foreach($value as $subvalue)
+                                    <input type="hidden" name="{{ $key }}[]" value="{{ $subvalue }}">
+                                @endforeach
+                            @else
+                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                            @endif
                         @endif
                     @endforeach
 
