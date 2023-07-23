@@ -25,8 +25,12 @@ class AirportFilterHelper{
         return true;
     }
 
-    public static function hasRequiredRunwayLength($runwayLengthMin, $runwayLengthMax, $airport){
-        if($runwayLengthMin === null || $runwayLengthMax === null) return true;
+    public static function hasRequiredRunwayLength($runwayLengthMin, $runwayLengthMax, $codeletter, $airport){
+
+        // If min/max is not defined it's a simple search and should just match according to codeletter
+        if($runwayLengthMin === null || $runwayLengthMax === null){
+            return $airport->supportsAircraftCode($codeletter);
+        }
 
         $longestAirportRunway = $airport->longestRunway();
         if($longestAirportRunway < $runwayLengthMin || $longestAirportRunway > $runwayLengthMax) {
