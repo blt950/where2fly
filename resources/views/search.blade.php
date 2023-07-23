@@ -17,7 +17,7 @@
                 {{-- Add possiblity to re-post the search query for a new random departure --}}
                 <form method="POST" action="{{ ($wasAdvancedSearch) ? route('search.advanced') : route('search') }}">
                     @csrf
-                    
+
                     @foreach($_POST as $key => $value)
                         @if($key != '_token')
                             @if(is_array($value))
@@ -193,7 +193,7 @@
                                     <i class="fas fa-exclamation-triangle"></i> No results matched your criteria
                                 </th>
                             </tr>
-                        @else
+                        @elseif($count > 10)
                             <tr id="showMoreRow">
                                 <th colspan="9" class="text-center text-danger">
                                     <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
