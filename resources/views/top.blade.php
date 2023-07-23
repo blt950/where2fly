@@ -8,7 +8,9 @@
     @include('layouts.menu')
   
     <main>
-        <h1 class="mb-3 mt-5">Top Airports Right Now</h1>
+        <h1 class="mb-0 mt-5">Top Airports Right Now</h1>
+        <p class="top mb-5 text-center">Destinations with the worst weather right now</p>
+
         <p class="text-center">Filter: 
             <a class="btn btn-sm {{ Route::is('top') ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top') }}">All</a>
             <a class="btn btn-sm {{ $continent == 'AF' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'AF') }}">Africa</a>
