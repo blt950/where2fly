@@ -12,6 +12,20 @@
         
         <div class="text-start">
 
+            <h2>v1.1.0</h2>
+            <ul>
+                <li>Added random departure suggestions if departure is left blank</li>
+                <li>Added a warning if your search ranking criteria are not met</li>
+                <li>Added more search suggestions</li>
+                <li>Fixed Russia to be split into European and Asian part by the Ural Mountains</li>
+                <li>Fixed advanced search only returning large airports</li>
+                <li>Fixed IFR/VFR condition filter not filtering correctly</li>
+                <li>Fixed METAR timestamp showing visually incorrect minute value</li>
+                <li>Fixed search to check if the runway in question is not closed</li>
+                <li>Made airtime show in hh:mm format instead of decimals</li>
+                <li>Tweaked some texts</li>
+            </ul>
+
             <h2>v1.0.2</h2>
             <ul>
                 <li>Revised the Privacy Policy and removed tracking cookies</li>
