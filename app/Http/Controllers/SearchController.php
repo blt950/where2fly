@@ -58,11 +58,13 @@ class SearchController extends Controller
         isset($data['filterATC']) ? $filterByScores = array_merge($filterByScores, ScoreController::getVatsimTypes()) : null;
 
         // Use the supplied departure or select a random from toplist
+        $suggestedDeparture = false;
         if(isset($data['departure'])){
             $departure = Airport::where('icao', $data['departure'])->get()->first();
         } else {
             // Get a random airport from the toplist
             $departure = Airport::findWithCriteria($continent)->sortByFilteredScores($filterByScores)->slice(0, 10)->random();
+            $suggestedDeparture = true;
         }
 
         // Get airports according to filter
@@ -81,7 +83,7 @@ class SearchController extends Controller
 
         $suggestedAirports = $suggestedAirports->slice(0, 10);
 
-        return view('search', compact('suggestedAirports', 'departure'));
+        return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture'));
     }
 
     /**
@@ -119,11 +121,13 @@ class SearchController extends Controller
         $metcon = $data['metcondition'];
 
         // Use the supplied departure or select a random from toplist
+        $suggestedDeparture = false;
         if(isset($data['departure'])){
             $departure = Airport::where('icao', $data['departure'])->get()->first();
         } else {
             // Get a random airport from the toplist
             $departure = AirportScore::getTopAirports($continent, 5)->random()->airport;
+            $suggestedDeparture = true;
         }
 
         // Get airports according to filter
@@ -139,7 +143,8 @@ class SearchController extends Controller
         $suggestedAirports = $suggestedAirports->sortByFilteredScores($filteredScores);
         $suggestedAirports = $suggestedAirports->splice(0,10);
 
-        return view('search', compact('suggestedAirports', 'filteredScores', 'departure'));
+        $wasAdvancedSearch = true;
+        return view('search', compact('suggestedAirports', 'filteredScores', 'departure', 'suggestedDeparture', 'wasAdvancedSearch'));
     }
 
 

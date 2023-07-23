@@ -10,7 +10,25 @@
     <main>
         <h1 class="mb-3 mt-5">Search Results</h1>
 
-        <h2>Departure</h2>
+        @if($suggestedDeparture)
+            <div class="d-flex flex-wrap justify-content-between">
+                <h2>Departure suggestion</h2>
+
+                {{-- Add possiblity to re-post the search query for a new random departure --}}
+                <form method="POST" action="{{ ($wasAdvancedSearch) ? route('search.advanced') : route('search') }}">
+                    @csrf
+
+                    @foreach($_POST as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+
+                    <button class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;"><i class="fas fa-shuffle"></i> Randomise</button>
+                </form>
+
+            </div>
+        @else
+            <h2>Departure</h2>
+        @endif
         <div class="departure-container">
             <dl>
                 <dt>Airport<dt>
@@ -70,7 +88,7 @@
             </div>
         </div>
 
-        <h2>Arrival Suggestions</h2>
+        <h2>Arrival suggestions</h2>
         <div class="scroll-fade">
             <div class="table-responsive">
                 <table class="table table-hover text-start">
@@ -90,7 +108,7 @@
                     <tbody>
                         @php $count = 1; @endphp
 
-                        @if(isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0)
+                        @if( ! $wasAdvancedSearch && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
 
                             <tr>
                                 <th class="text-center text-danger" colspan="9">
