@@ -89,6 +89,17 @@
                     </thead>
                     <tbody>
                         @php $count = 1; @endphp
+
+                        @if(isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0)
+
+                            <tr>
+                                <th class="text-center text-danger" colspan="9">
+                                    <i class="fas fa-exclamation-triangle"></i> No airports matched your criteria
+                                </th>
+                            </tr>
+
+                        @endif
+
                         @foreach($suggestedAirports as $airport)
                             <tr>
                                 <th scope="row">{{ $count }}</th>
