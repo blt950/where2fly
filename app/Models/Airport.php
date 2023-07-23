@@ -119,27 +119,25 @@ class Airport extends Model
         ->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport']);
         
         // If the filter is domestic
-        if(isset($country)){
-            if($continent == "DO"){
-                $returnQuery= $returnQuery->where('iso_country', $country);
+        if(isset($country) && $continent == "DO"){
+            $returnQuery = $returnQuery->where('iso_country', $country);
+        } elseif($continent != "DO") {
+
+            // Include European and Russian-European airports
+            if($continent == "EU"){
+                $returnQuery = $returnQuery->where('airports.continent', $continent)
+                ->whereNotIn('airports.iso_region', getRussianAsianRegions());
+                            
+            // Include Asian and Russian-Asian airports in a nested query for correct logic grouping
+            } elseif($continent == "AS"){
+                $returnQuery = $returnQuery->where(function($query) use ($continent){
+                    $query->where('airports.continent', $continent)
+                    ->orWhereIn('airports.iso_region', getRussianAsianRegions());
+                });
+
+            // Filter only on continent
             } else {
-
-                // Include European and Russian-European airports
-                if($continent == "EU"){
-                    $returnQuery = $returnQuery->where('airports.continent', $continent)
-                    ->whereNotIn('airports.iso_region', getRussianAsianRegions());
-                                
-                // Include Asian and Russian-Asian airports in a nested query for correct logic grouping
-                } elseif($continent == "AS"){
-                    $returnQuery = $returnQuery->where(function($query) use ($continent){
-                        $query->where('airports.continent', $continent)
-                        ->orWhereIn('airports.iso_region', getRussianAsianRegions());
-                    });
-
-                // Filter only on continent
-                } else {
-                    $returnQuery = $returnQuery->where('airports.continent', $continent);
-                }
+                $returnQuery = $returnQuery->where('airports.continent', $continent);
             }
         }
             
