@@ -116,9 +116,9 @@
 
                         @if( ! $wasAdvancedSearch && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
 
-                            <tr>
-                                <th class="text-center text-danger" colspan="9">
-                                    <i class="fas fa-exclamation-triangle"></i> No airports matched your criteria
+                            <tr class="font-family-paragraph">
+                                <th class="text-center text-info fw-normal pt-3 pb-3" colspan="9">
+                                    <i class="fas fa-info-square"></i> None of the airports in your range has interesting weather or ATC
                                 </th>
                             </tr>
 
