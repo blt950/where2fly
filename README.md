@@ -35,18 +35,19 @@ Flags: https://flagicons.lipis.dev/
 
 ## API
 
-- By using this free API it's expected that you've a `Powered by Where2Fly` text in near proximity of the data provided to the users of your service. The text should link to `https://where2fly.today`
+- By using this free API it's required that you've a `Powered by Where2Fly` text in near proximity of the data provided to the users of your service. The text should link to `https://where2fly.today`
+- The authorisation token is a bearer token, used in a header like this `Authorization: Bearer <token>`
 - Remember to add `Accept: application/json` header in all of your calls to get return in json format.
 
 ### Endpoints
-#### GET `/api/airports`
+#### GET `/api/top`
 Returns the top airports as on the website.
 
 | Param | Required | Type | Description |
 | --- | --- | --- | --- |
 | `continent` | No | string | Filter on continent |
 
-#### POST `/api/toplist`
+#### POST `/api/top`
 Returns top airports with your provided whitelist
 | Param | Required | Type | Description |
 | --- | --- | --- | --- |
@@ -86,7 +87,7 @@ Returns airports matching your search query
 - `VATSIM_EVENT`
 - `VATSIM_POPULAR`
 
-### Available codeletters
+#### Available codeletters
 - `A` - e.g. PIPER/CESSNA
 - `B` - e.g. CRJ/DHC
 - `C` - e.g. A320/B737/ERJ
