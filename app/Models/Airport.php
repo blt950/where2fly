@@ -121,7 +121,7 @@ class Airport extends Model
         // If the filter is domestic
         if(isset($country) && $continent == "DO"){
             $returnQuery = $returnQuery->where('iso_country', $country);
-        } elseif(isset($contient) && $continent != "DO") {
+        } elseif(isset($continent) && $continent != "DO") {
 
             // Include European and Russian-European airports
             if($continent == "EU"){
