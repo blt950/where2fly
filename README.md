@@ -55,7 +55,6 @@ Returns top airports with your provided whitelist
 #### POST `/api/search`
 Returns airports matching your search query
 
-Returns top airports with your provided whitelist
 | Param | Required | Type | Description | Default value |
 | --- | --- | --- | --- | --- |
 | `departure` | Yes | string | Departure airport | - |
@@ -67,7 +66,7 @@ Returns top airports with your provided whitelist
 | `elevationMin` | No | string | Minimum airport elevation | 0 |
 | `elevationMax` | No | string | Maximum airport elevation | 18000 |
 | `scores` | No | array | Apply weather or ATC filters | null |
-| `metconditions` | No | array | Apply weather filters `IFR` or `VFR` | null |
+| `metconditions` | No | string | Apply weather filters `IFR` or `VFR` | null |
 | `arrivalWhitelist` | No | array | Only show whitelisted arrival airports | null |
 
 ### Data types
