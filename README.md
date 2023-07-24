@@ -32,3 +32,65 @@ METAR: https://metar.vatsim.net/all
 TAF: https://api.met.no/weatherapi/tafmetar/1.0/taf.txt?icao=ICAO
 
 Flags: https://flagicons.lipis.dev/
+
+## API
+
+- By using this free API it's expected that you've a `Powered by Where2Fly` text in near proximity of the data provided to the users of your service. The text should link to `https://where2fly.today`
+- Remember to add `Accept: application/json` header in all of your calls to get return in json format.
+
+### Endpoints
+#### GET `/api/airports`
+Returns the top airports as on the website.
+
+| Param | Required | Type | Description |
+| --- | --- | --- | --- |
+| `continent` | No | string | Filter on continent |
+
+#### POST `/api/toplist`
+Returns top airports with your provided whitelist
+| Param | Required | Type | Description |
+| --- | --- | --- | --- |
+| `whitelist` | Yes | array | Filter on selected airport ICAO codes |
+
+#### POST `/api/search`
+Returns airports matching your search query
+
+Returns top airports with your provided whitelist
+| Param | Required | Type | Description | Default value |
+| --- | --- | --- | --- | --- |
+| `departure` | Yes | string | Departure airport | - |
+| `codeletter` | Yes | string | Select aircraft type | - |
+| `rwyLengthMin` | No | string | Minimum runway length | 0 |
+| `rwyLengthMax` | No | string | Maximum runway length | 16000 |
+| `airtimeMin` | No | string | Minimum airtime | 0 |
+| `airtimeMax` | No | string | Maximum airtime | 24 |
+| `elevationMin` | No | string | Minimum airport elevation | 0 |
+| `elevationMax` | No | string | Maximum airport elevation | 18000 |
+| `scores` | No | array | Apply weather or ATC filters | null |
+| `metconditions` | No | array | Apply weather filters `IFR` or `VFR` | null |
+| `arrivalWhitelist` | No | array | Only show whitelisted arrival airports | null |
+
+### Data types
+
+#### Available scores
+- `METAR_WINDY`
+- `METAR_GUSTS`
+- `METAR_CROSSWIND`
+- `METAR_SIGHT`
+- `METAR_RVR`
+- `METAR_CEILING`
+- `METAR_FOGGY`
+- `METAR_HEAVY_RAIN`
+- `METAR_HEAVY_SNOW`
+- `METAR_THUNDERSTORM`
+- `VATSIM_ATC`
+- `VATSIM_EVENT`
+- `VATSIM_POPULAR`
+
+### Available codeletters
+- `A` - e.g. PIPER/CESSNA
+- `B` - e.g. CRJ/DHC
+- `C` - e.g. A320/B737/ERJ
+- `D` - e.g. A330/B767/B777
+- `E` - e.g. A340/B747/B787
+- `F` - e.g. A380/B748

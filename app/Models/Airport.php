@@ -113,7 +113,7 @@ class Airport extends Model
 
     }
 
-    public static function findWithCriteria($continent, $country = null, $departureIcao = null){
+    public static function findWithCriteria($continent, $country = null, $departureIcao = null, Array $whitelistedArrivals = null){
         
         $returnQuery = Airport::where('type', '!=', 'closed')
         ->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport']);
@@ -121,7 +121,7 @@ class Airport extends Model
         // If the filter is domestic
         if(isset($country) && $continent == "DO"){
             $returnQuery = $returnQuery->where('iso_country', $country);
-        } elseif($continent != "DO") {
+        } elseif(isset($contient) && $continent != "DO") {
 
             // Include European and Russian-European airports
             if($continent == "EU"){
@@ -144,6 +144,10 @@ class Airport extends Model
         // Filter out departure airport, get airports with metar, fetch relevant data and run the query
         if(isset($departureIcao)){
             $returnQuery = $returnQuery->where('icao', '!=', $departureIcao);
+        }
+
+        if(isset($whitelistedArrivals)){
+            $returnQuery = $returnQuery->whereIn('icao', $whitelistedArrivals);
         }
 
         $result = $returnQuery->has('metar')

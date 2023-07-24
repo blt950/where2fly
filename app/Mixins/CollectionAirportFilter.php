@@ -27,7 +27,7 @@ class CollectionAirportFilter{
 
     public function filterWithCriteria(){
         return function($departureAirport, $codeletter, $airtimeMin, $airtimeMax, $requiredMetcon = null, $requiredScores = null, $runwayLengthMin = null, $runwayLengthMax = null, $airportElevationMin = null, $airportElevationMax = null ){
-            
+
             $returnCollection = $this
                 ->transform(function ($arrivalAirport) use ($departureAirport, $codeletter){
                     // Insert the calculated distance and airtime into the collection
