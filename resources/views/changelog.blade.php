@@ -12,6 +12,11 @@
         
         <div class="text-start">
 
+            <h2>v1.1.1</h2>
+            <ul>
+                <li>Fixed server error if departure is from an airport without METAR available</li>
+            </ul>
+
             <h2>v1.1.0</h2>
             <ul>
                 <li>Added random departure suggestions if departure is left blank</li>
