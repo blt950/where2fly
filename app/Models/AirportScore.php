@@ -23,7 +23,7 @@ class AirportScore extends Model
         return str_starts_with($this->reason, 'VATSIM_');
     }
 
-    public static function getTopAirports($continent = null, $limit = 30){
+    public static function getTopAirports($continent = null, $whitelist = null, $limit = 30){
         
         // Establish the return query
         $returnQuery = AirportScore::select('airport_id', \DB::raw("count(airport_scores.id) as id_count"))
@@ -50,6 +50,10 @@ class AirportScore extends Model
             } else {
                 $returnQuery = $returnQuery->where('airports.continent', $continent);
             }
+        }
+
+        if($whitelist && is_array($whitelist) && count($whitelist) > 0){
+            $returnQuery = $returnQuery->whereIn('airports.icao', $whitelist);
         }
 
         // Filter airport type, relevant data and run the query
