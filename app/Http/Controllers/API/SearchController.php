@@ -67,7 +67,7 @@ class SearchController extends Controller{
 
                 "name" => $airport->name,
                 "icao" => $airport->icao,
-                "iata" => $airport->local_code ? $airport->local_code : null,
+                "iata" => $airport->iata_code ? $airport->iata_code : null,
                 "contient" => $airport->continent,
                 "country" => $airport->iso_country,
                 "region" => $airport->iso_region,
@@ -83,7 +83,7 @@ class SearchController extends Controller{
         $departureData = [
             "name" => $departure->name,
             "icao" => $departure->icao,
-            "iata" => $departure->local_code ? $departure->local_code : null,
+            "iata" => $departure->iata_code ? $departure->iata_code : null,
             "contient" => $departure->continent,
             "country" => $departure->iso_country,
             "region" => $departure->iso_region,

@@ -52,7 +52,7 @@ class TopController extends Controller{
 
                 "name" => $as->airport->name,
                 "icao" => $as->airport->icao,
-                "iata" => $as->airport->local_code ? $as->airport->local_code : null,
+                "iata" => $as->airport->iata_code ? $as->airport->iata_code : null,
                 "contient" => $as->airport->continent,
                 "country" => $as->airport->iso_country,
                 "region" => $as->airport->iso_region,
