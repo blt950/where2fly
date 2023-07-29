@@ -199,9 +199,6 @@ table{
 }
 
 main{
-    padding-right: 1rem!important;
-    padding-left: 1rem!important;
-
     @include media-breakpoint-between(xs, md) {
         padding-right: .25rem!important;
         padding-left: .25rem!important;
