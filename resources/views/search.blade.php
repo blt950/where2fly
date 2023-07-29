@@ -39,7 +39,11 @@
         @endif
         <div class="departure-container">
             <dl>
-                <dt>Airport<dt>
+                <dt>Airport
+                    @if($suggestedDeparture)
+                        <span class="badge rounded-pill text-bg-info fs-7">Based on filter</span>
+                    @endif
+                <dt>
                 <dd>
                     <img class="flag" src="/img/flags/{{ strtolower($departure->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($departure->iso_country) }}" alt="Flag of {{ getCountryName($departure->iso_country) }}"></img>
                     {{ $departure->icao }}
