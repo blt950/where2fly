@@ -131,6 +131,14 @@ table{
         margin-right: 2rem;
     }
 
+    th:first-child,td:first-child{
+        padding-left: 1rem !important;
+    }
+
+    th:last-child,td:last-child{
+        padding-right: 1rem !important;
+    }
+
     tr .hover-show{
         height: 1.5rem;
         display: none;
