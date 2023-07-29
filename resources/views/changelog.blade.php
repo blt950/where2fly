@@ -12,6 +12,16 @@
         
         <div class="text-start">
 
+            <h2>v1.2.0</h2>
+            <ul>
+                <li>Added an API (Beta) to fetch toplist and search</li>
+                <li>Added Windy button in results</li>
+                <li>Added airbase and airline route exclusion filter in advanced search</li>
+                <li>Added notice that departure suggestions are also based on filters</li>
+                <li>Fixed error 405 if you enter a search result directly. It'll now redirect to the search page</li>
+                <li>Tweaked the design a tiny bit and added some padding to tables</li>
+            </ul>
+
             <h2>v1.1.1</h2>
             <ul>
                 <li>Fixed server error if departure is from an airport without METAR available</li>
