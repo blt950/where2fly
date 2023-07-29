@@ -15,7 +15,7 @@ class TopController extends Controller{
             'limit' => 'sometimes|integer|between:1,30',
         ]);
         $continent = $data['continent'] ?? null;
-        isset($data['resultLimit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
+        isset($data['limit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
 
         $airportScores = AirportScore::getTopAirports($continent, null, $resultLimit);
         $airports = $this->prepareResponse($airportScores);
