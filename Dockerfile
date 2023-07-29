@@ -26,7 +26,7 @@ RUN apt-get update && \
     apt-get install -y git unzip vim nano ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    a2enmod rewrite ssl
+    a2enmod rewrite ssl remoteip
 
 
 # Custom Apache2 configuration based on defaults; fairly straightforward
