@@ -12,10 +12,12 @@ class TopController extends Controller{
 
         $data = $request->validate([
             'continent' => 'sometimes|in:["AF","AS","EU","NA","OC","SA"]',
+            'limit' => 'sometimes|integer|between:1,30',
         ]);
         $continent = $data['continent'] ?? null;
+        isset($data['resultLimit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
 
-        $airportScores = AirportScore::getTopAirports($continent);
+        $airportScores = AirportScore::getTopAirports($continent, null, $resultLimit);
         $airports = $this->prepareResponse($airportScores);
 
         return response()->json([
@@ -29,10 +31,14 @@ class TopController extends Controller{
 
         $data = $request->validate([
             'whitelist' => 'required|array',
+            'limit' => 'sometimes|integer|between:1,30',
         ]);
 
-        $airportScores = AirportScore::getTopAirports(null, $data['whitelist']);
+        isset($data['limit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
+
+        $airportScores = AirportScore::getTopAirports(null, $data['whitelist'], $resultLimit);
         $airports = $this->prepareResponse($airportScores);
+        
 
         return response()->json([
             'message' => 'Success',

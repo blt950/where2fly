@@ -23,6 +23,7 @@ class SearchController extends Controller{
             'scores' => 'sometimes|array',
             'metcondition' => 'sometimes|in:IFR,VFR',
             'arrivalWhitelist' => 'sometimes|array',
+            'limit' => 'sometimes|integer|between:1,30',
             //'onlyAirportsWithScore' => 'sometimes|boolean'
         ]);
 
@@ -37,6 +38,7 @@ class SearchController extends Controller{
         isset($data['scores']) ? $filteredScores = $data['scores'] : $filteredScores = null;
         isset($data['metcondition']) ? $metcon = $data['metcondition'] : $metcon = null;
         isset($data['arrivalWhitelist']) ? $arrivalWhitelist = $data['arrivalWhitelist'] : $arrivalWhitelist = null;
+        isset($data['limit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
         //(isset($data['onlyAirportsWithScore']) && (boolean)$data['onlyAirportsWithScore']) ? $onlyAirportsWithScore = true : $onlyAirportsWithScore = false;
 
         $departure = Airport::where('icao', $data['departure'])->get()->first();
@@ -55,7 +57,7 @@ class SearchController extends Controller{
         }*/
         
         $suggestedAirports = $suggestedAirports->sortByFilteredScores($filteredScores);
-        $suggestedAirports = $suggestedAirports->splice(0,20);
+        $suggestedAirports = $suggestedAirports->splice(0,$resultLimit);
 
         // Prepare arrival suggestions
         $arrivalData = collect();
@@ -76,6 +78,8 @@ class SearchController extends Controller{
                 "scores" => $scores,
                 "airtime" => $airport->airtime,
                 "distanceNm" => $airport->distance,
+                "isAirforcebase" => $airport->w2f_airforcebase,
+                "hasAirlineService" => $airport->w2f_scheduled_service,
             ]);
         }
 
