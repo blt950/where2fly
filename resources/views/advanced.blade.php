@@ -120,6 +120,22 @@
                     </div>
                     @endif
                     @endforeach
+
+                    <label class="pt-4">Airport exclusion parameters</label>
+                    
+                    <div class="form-check mb-0">
+                        <input class="form-check-input exclusion" type="checkbox" id="routes" name="airportExclusions[]" value="routes">
+                        <label class="form-check-label" for="routes">
+                            <i class="fa fa-route"></i>&nbsp; Airline service
+                        </label>
+                    </div>
+
+                    <div class="form-check mb-0">
+                        <input class="form-check-input exclusion" type="checkbox" id="airbases" name="airportExclusions[]" value="airbases">
+                        <label class="form-check-label" for="airbases">
+                            <i class="fa fa-jet-fighter"></i>&nbsp; Airbases
+                        </label>
+                    </div>
                 </div>
                 
                 <div class="col-sm-3 col-md-3 col-lg-2 text-start">

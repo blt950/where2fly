@@ -106,7 +106,8 @@ class SearchController extends Controller
             'elevationMin' => 'required|between:-2000,18000',
             'elevationMax' => 'required|between:-2000,18000',
             'scores' => 'sometimes|array',
-            'metcondition' => 'required|in:IFR,VFR,ANY'
+            'metcondition' => 'required|in:IFR,VFR,ANY',
+            'airportExclusions' => 'sometimes|array'
         ]);
 
         $continent = $data['continent'];
@@ -118,21 +119,22 @@ class SearchController extends Controller
         $elevationMin = (int)$data['elevationMin'];
         $elevationMax = (int)$data['elevationMax'];
         isset($data['scores']) ? $filteredScores = $data['scores'] : $filteredScores = null;
+        isset($data['airportExclusions']) ? $airportExclusions = $data['airportExclusions'] : $airportExclusions = null;
         $metcon = $data['metcondition'];
-
+        
         // Use the supplied departure or select a random from toplist
         $suggestedDeparture = false;
         if(isset($data['departure'])){
             $departure = Airport::where('icao', $data['departure'])->get()->first();
         } else {
             // Get a random airport from the toplist
-            $departure = Airport::findWithCriteria($continent)->sortByFilteredScores($filteredScores)->slice(0, 10)->random();
+            $departure = Airport::findWithCriteria($continent, null, null, null, $airportExclusions)->sortByFilteredScores($filteredScores)->slice(0, 10)->random();
             $suggestedDeparture = true;
         }
 
         // Get airports according to filter
         $airports = collect();
-        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao);
+        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, null, $airportExclusions);
 
         // Filter the eligable airports
         $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $filteredScores, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
