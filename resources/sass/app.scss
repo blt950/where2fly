@@ -138,10 +138,22 @@ table{
         @include media-breakpoint-between(sm, lg) {
             display: block;
         }
+
+        &.secondary{
+            @include media-breakpoint-between(sm, lg) {
+                display: none;
+            }
+        }
     }
 
     tr:hover .hover-show{
         display: block;
+
+        &.secondary{
+            @include media-breakpoint-between(sm, lg) {
+                display: none;
+            }
+        }
     }
 
     tr.showmore-hidden{
