@@ -46,12 +46,14 @@ Returns the top airports as on the website.
 | Param | Required | Type | Description |
 | --- | --- | --- | --- |
 | `continent` | No | string | Filter on continent |
+| `limit` | No | integer | Limit the number of results 0-30 |
 
 #### POST `/api/top`
 Returns top airports with your provided whitelist
 | Param | Required | Type | Description |
 | --- | --- | --- | --- |
 | `whitelist` | Yes | array | Filter on selected airport ICAO codes |
+| `limit` | No | integer | Limit the number of results 0-30 |
 
 #### POST `/api/search`
 Returns airports matching your search query
@@ -69,6 +71,7 @@ Returns airports matching your search query
 | `scores` | No | array | Apply weather or ATC filters | null |
 | `metconditions` | No | string | Apply weather filters `IFR` or `VFR` | null |
 | `arrivalWhitelist` | No | array | Only show whitelisted arrival airports | null |
+| `limit` | No | integer | Limit the number of results 0-30 | 10 |
 
 ### Data types
 
