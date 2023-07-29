@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\ApiKey;
+use App\Models\ApiLog;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -18,7 +19,7 @@ class ApiToken
     public function handle(Request $request, Closure $next, $args = '')
     {
         // Authenticate by searching for the key, check if middleware requires edit rights and compare to key access
-        $key = ApiKey::find($request->bearerToken());
+        $key = ApiKey::where('key', $request->bearerToken())->first();
 
         if ($key == null || ($request->getClientIp() != $key->ip_address && $key->ip_address != '*')) {
             return response()->json([
@@ -34,6 +35,10 @@ class ApiToken
 
         // Update last used
         $key->update(['last_used_at' => now()]);
+
+        ApiLog::create([
+            'api_key_id' => $key->id,
+        ]);
 
         return $next($request);
     }
