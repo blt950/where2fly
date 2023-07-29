@@ -113,7 +113,7 @@ class Airport extends Model
 
     }
 
-    public static function findWithCriteria($continent, $country = null, $departureIcao = null, Array $whitelistedArrivals = null){
+    public static function findWithCriteria($continent, $country = null, $departureIcao = null, Array $whitelistedArrivals = null, Array $airportExclusions = null){
         
         $returnQuery = Airport::where('type', '!=', 'closed')
         ->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport']);
@@ -148,6 +148,17 @@ class Airport extends Model
 
         if(isset($whitelistedArrivals)){
             $returnQuery = $returnQuery->whereIn('icao', $whitelistedArrivals);
+        }
+
+        // Exclude airports
+        if(isset($airportExclusions)){
+            foreach($airportExclusions as $key => $exclusion){
+                if($exclusion == "routes"){
+                    $returnQuery = $returnQuery->where('airports.w2f_scheduled_service', false);
+                } elseif($exclusion == "airbases"){
+                    $returnQuery = $returnQuery->where('airports.w2f_airforcebase', false);
+                }
+            }
         }
 
         $result = $returnQuery->has('metar')
