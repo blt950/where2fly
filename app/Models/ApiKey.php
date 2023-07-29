@@ -14,10 +14,14 @@ class ApiKey extends Model
     public $timestamps = false;
 
     public $fillable = [
-        'id', 'name', 'ip_address', 'last_used_at',
+        'key', 'name', 'ip_address', 'last_used_at',
     ];
 
     public $casts = [
         'disabled' => 'boolean',
     ];
+
+    public function logs(){
+        return $this->hasMany(ApiLog::class);
+    }
 }

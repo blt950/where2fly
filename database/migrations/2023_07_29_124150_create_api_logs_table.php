@@ -13,14 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('api_keys', function (Blueprint $table) {
+        Schema::create('api_logs', function (Blueprint $table) {
             $table->id();
-            $table->uuid('key')->unique();
-            $table->string('name');
-            $table->string('ip_address');
-            $table->boolean('disabled')->default(false);
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('created_at')->default(\DB::raw('CURRENT_TIMESTAMP'));
+            $table->unsignedBigInteger('api_key_id');
+            $table->timestamp('time')->useCurrent();
+
+            $table->foreign('api_key_id')->references('id')->on('api_keys')->onDelete('CASCADE');
         });
     }
 
@@ -31,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('api_keys');
+        Schema::dropIfExists('api_logs');
     }
 };

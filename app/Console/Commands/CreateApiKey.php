@@ -35,7 +35,7 @@ class CreateApiKey extends Command
         // Generate key
         $secret = Uuid::uuid4();
         ApiKey::create([
-            'id' => $secret,
+            'key' => $secret,
             'name' => $name,
             'ip_address' => $ip,
         ]);
