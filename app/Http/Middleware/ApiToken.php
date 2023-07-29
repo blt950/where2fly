@@ -20,7 +20,7 @@ class ApiToken
         // Authenticate by searching for the key, check if middleware requires edit rights and compare to key access
         $key = ApiKey::find($request->bearerToken());
 
-        if ($key == null || $request->getClientIp() != $key->ip_address) {
+        if ($key == null || ($request->getClientIp() != $key->ip_address && $key->ip_address != '*')) {
             return response()->json([
                 'message' => 'Unauthorized',
             ], 401);
