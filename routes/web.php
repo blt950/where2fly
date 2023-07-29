@@ -31,3 +31,12 @@ Route::get('/privacy', function (){
 
 Route::post('/search', [SearchController::class, 'search'])->name('search');
 Route::post('/advanced/search', [SearchController::class, 'searchAdvanced'])->name('search.advanced');
+
+// Failsafe if you try to access the search page directly
+Route::get('/search', function () {
+    return redirect(route('front'));
+});
+
+Route::get('/advanced/search', function () {
+    return redirect(route('front.advanced'));
+});
