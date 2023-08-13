@@ -41,12 +41,9 @@ class FetchFlights extends Command
         //$response = Http::get('http://localhost/flights.json');
         $response = Http::get('http://localhost/flights_2.json');
         if($response->successful()){
-
             $flights = collect(json_decode($response->body(), false)->response);
             
-            // Go through the flights and add them to the database if they don't exist
             $upsertData = [];
-            $insertData = [];
             foreach($flights as $flight){
 
                 // Skip flights without data we need
@@ -64,71 +61,50 @@ class FetchFlights extends Command
                     continue;
                 }
 
-                // Check if this flight already exists
-                $storedFlight = Flight::firstWhere([
+                isset($flight->reg_number) ? $regNumber = $flight->reg_number : $regNumber = null;
+                $upsertData[] = [
+                    'airline_icao' => $flight->airline_icao,
+                    'airline_iata' => $flight->airline_iata,
+                    'flight_number' => $flight->flight_number,
                     'flight_icao' => $flight->flight_icao,
                     'dep_icao' => $flight->dep_icao,
                     'arr_icao' => $flight->arr_icao,
-                ]);
-                
-                if($storedFlight != null){
+                    'aircraft_icao' => $flight->aircraft_icao,
+                    'reg_number' => $regNumber,
+                ];
 
-                    // If last update was more than 12 hours ago, update the counter
-                    if(now() > $storedFlight->updated_at->addHours(12)){
+                $this->info('Touched flight ' . $flight->flight_icao . ' (' . $flight->dep_icao . ' - ' . $flight->arr_icao . ')');
+                $touchCount++;
 
-                        $upsertData[] = [
-                            'counter' => $storedFlight->counter + 1,
-                            'aircraft_icao' => $flight->aircraft_icao,
-                            'reg_number' => $flight->reg_number,
-                        ];
-
-                        $this->info('Updated flight ' . $flight->flight_icao . ' (' . $flight->dep_icao . ' - ' . $flight->arr_icao . ')');
-                        $touchCount++;
-                    } else {
-                        $this->info('Skipped flight ' . $flight->flight_icao . ' (' . $flight->dep_icao . ' - ' . $flight->arr_icao . ')');
-                    }
-
-                    
-
-                } else {    
-
-                    $departureAirportId = Airport::firstWhere('icao', $flight->dep_icao);
-                    $arrivalAirportId = Airport::firstWhere('icao', $flight->arr_icao);
-
-                    // Only create a new model if both airports exist
-                    if($departureAirportId && $arrivalAirportId){
-
-                        (isset($flight->reg_number)) ? $regNumber = $flight->reg_number : $regNumber = null;
-                        $airportScoreInsert[] = [
-                            'airline_icao' => $flight->airline_icao,
-                            'airline_iata' => $flight->airline_iata,
-                            'flight_number' => $flight->flight_number,
-                            'flight_icao' => $flight->flight_icao,
-                            'airport_dep_id' => $departureAirportId->id,
-                            'dep_icao' => $flight->dep_icao,
-                            'airport_arr_id' => $arrivalAirportId->id,
-                            'arr_icao' => $flight->arr_icao,
-                            'aircraft_icao' => $flight->aircraft_icao,
-                            'reg_number' => $regNumber,
-                        ];
-
-                        $touchCount++;
-
-                        $this->info('Added flight ' . $flight->flight_icao . ' (' . $flight->dep_icao . ' - ' . $flight->arr_icao . ')');
-                    }   
-                }
             }
 
-            // Upsert the flights
-            Flight::upsert(
-                $upsertData,
-                ['flight_icao', 'dep_icao', 'arr_icao'],
-                ['aircraft_icao', 'reg_number', 'counter']
-            );
-            Flight::insert($insertData);
+            // Split array into chunks of 4000 each and upsert each individually
+            foreach(array_chunk($upsertData, 4000) as $chunk){
+                Flight::upsert(
+                    $chunk,
+                    ['flight_icao', 'dep_icao', 'arr_icao'],
+                    ['aircraft_icao', 'reg_number']
+                );
+            }
+
+            // Loop through all flights without airport_dep_id and link them to Airports model
+            Flight::whereNull('airport_dep_id')
+                ->join('airports as a', 'flights.dep_icao', '=', 'a.icao')
+                ->update(['flights.airport_dep_id' => \DB::raw('a.id')]);
+
+            // Loop through all flights without airport_arr_id and link them to Airports model
+            Flight::whereNull('airport_arr_id')
+                ->join('airports as a', 'flights.arr_icao', '=', 'a.icao')
+                ->update(['flights.airport_arr_id' => \DB::raw('a.id')]);
+
+            // Clean flights with still missing airport_dep_id or airport_arr_id
+            Flight::whereNull('airport_dep_id')->orWhereNull('airport_arr_id')->delete();
+
+            // TODO: Update counter
+            // Use hex to determine the counting instead? Would be easier than dates. We'd just compare to old hex != new hex.
             
         } else {
-            $this->error("Failed to fetch flights");
+            $this->error("Failed to fetch flights. API response not successful.");
         }
 
         $this->info("Touched ".$touchCount." flights finished in ".round(microtime(true) - $processTime)." seconds");
