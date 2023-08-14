@@ -37,9 +37,7 @@ class FetchFlights extends Command
         $touchCount = 0;
         $this->info("Starting fetching of flights");
 
-        //$response = Http::get('https://airlabs.co/api/v9/flights?api_key={$apiKey}');
-        //$response = Http::get('http://localhost/flights.json');
-        $response = Http::get('http://localhost/flights_2.json');
+        $response = Http::get('https://airlabs.co/api/v9/flights?api_key='.$apiKey);
         if($response->successful()){
             $flights = collect(json_decode($response->body(), false)->response);
             
@@ -71,6 +69,8 @@ class FetchFlights extends Command
                     'arr_icao' => $flight->arr_icao,
                     'aircraft_icao' => $flight->aircraft_icao,
                     'reg_number' => $regNumber,
+                    'last_seen_at' => now(),
+                    'lock_counter' => false,
                 ];
 
                 $this->info('Touched flight ' . $flight->flight_icao . ' (' . $flight->dep_icao . ' - ' . $flight->arr_icao . ')');
@@ -83,7 +83,7 @@ class FetchFlights extends Command
                 Flight::upsert(
                     $chunk,
                     ['flight_icao', 'dep_icao', 'arr_icao'],
-                    ['aircraft_icao', 'reg_number']
+                    ['aircraft_icao', 'reg_number', 'lock_counter', 'last_seen_at']
                 );
             }
 
@@ -100,8 +100,8 @@ class FetchFlights extends Command
             // Clean flights with still missing airport_dep_id or airport_arr_id
             Flight::whereNull('airport_dep_id')->orWhereNull('airport_arr_id')->delete();
 
-            // TODO: Update counter
-            // Use hex to determine the counting instead? Would be easier than dates. We'd just compare to old hex != new hex.
+            // If a flight has not been seen for 6 hours, increase the seen_counter by 1 and lock the counter. Counter is reset by the next fetch upsert.
+            Flight::where('last_seen_at', '<', now()->subHours(6))->where('lock_counter', false)->update(['seen_counter' => \DB::raw('seen_counter + 1'), 'lock_counter' => true]);
             
         } else {
             $this->error("Failed to fetch flights. API response not successful.");
