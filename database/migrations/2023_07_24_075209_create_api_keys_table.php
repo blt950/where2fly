@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('ip_address');
             $table->boolean('disabled')->default(false);
             $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('created_at')->default(\DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('created_at')->default(\DB::raw('UTC_TIMESTAMP'));
         });
     }
 
