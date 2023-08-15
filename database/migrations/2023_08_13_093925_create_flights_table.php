@@ -29,8 +29,8 @@ return new class extends Migration
             $table->unsignedInteger('seen_counter')->default(0);
             $table->boolean('lock_counter')->default(false);
             
-            $table->timestamp('last_seen_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('first_seen_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('last_seen_at')->default(DB::raw('UTC_TIMESTAMP'));
+            $table->timestamp('first_seen_at')->default(DB::raw('UTC_TIMESTAMP'));
 
             $table->unique(['dep_icao', 'arr_icao', 'flight_icao']);
             $table->foreign('airport_dep_id')->references('id')->on('airports');
