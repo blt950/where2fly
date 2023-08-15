@@ -12,7 +12,7 @@ class Flight extends Model
 
     protected $casts = [
         'last_seen_at' => 'datetime',
-        'firsT_seen_at' => 'datetime',
+        'first_seen_at' => 'datetime',
     ];
 
 }
