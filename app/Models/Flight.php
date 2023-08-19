@@ -15,4 +15,12 @@ class Flight extends Model
         'first_seen_at' => 'datetime',
     ];
 
+    public function departureAirport(){
+        return $this->belongsTo(Airport::class, 'airport_dep_id');
+    }
+
+    public function arrivalAirport(){
+        return $this->belongsTo(Airport::class, 'airport_arr_id');
+    }
+
 }

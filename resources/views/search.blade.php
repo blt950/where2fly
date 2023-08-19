@@ -120,6 +120,7 @@
                             <th scope="col">Distance</th>
                             <th scope="col" width="10%">Air Time</th>
                             <th scope="col" width="12%">Why</th>
+                            <th scope="col">Airlines</th>
                             <th scope="col">Runway</th>
                             <th scope="col" width="40%">Details</th>
                         </tr>
@@ -165,6 +166,16 @@
                                     @endforeach
                                 </td>
                                 <td>
+                                    @foreach($airport->arrivalFlights->where('dep_icao', $departure->icao) as $flight)
+                                        <i
+                                            class="fas fa-plane"
+                                            data-bs-html="true"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-title="{{ $flight->flight_icao }} last seen {{ $flight->last_seen_at->diffForHumans() }}"
+                                        ></i>
+                                    @endforeach
+                                </td>
+                                <td>
                                     <div class="rwy-feet">{{ $airport->longestRunway() }}</div>
                                     <div class="rwy-meters text-black text-opacity-50">{{ round($airport->longestRunway()* .3048) }}</div>
                                 </td>
@@ -194,7 +205,10 @@
                                     </div>
                                     
                                     <div class="tab-content">
+                                        {{-- METAR tab --}}
                                         <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $airport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHi\Z') }} {{ $airport->metar->metar }}</div>
+                                        
+                                        {{-- TAF tab --}}
                                         @isset($tafs[$airport->icao])
                                             <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$airport->icao] }}</div>
                                         @else
@@ -217,7 +231,7 @@
                             </tr>
                         @elseif($count > 10)
                             <tr id="showMoreRow">
-                                <th colspan="9" class="text-center text-danger">
+                                <th colspan="10" class="text-center text-danger">
                                     <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
                                 </th>
                             </tr>

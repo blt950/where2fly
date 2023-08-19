@@ -32,6 +32,14 @@ class Airport extends Model
         return $this->hasMany(Controller::class);
     }
 
+    public function arrivalFlights(){
+        return $this->hasMany(Flight::class, 'airport_arr_id');
+    }
+
+    public function departureFlights(){
+        return $this->hasMany(Flight::class, 'airport_dep_id');
+    }
+
     public function hasWeatherScore(){
         foreach($this->scores as $s){
             if($s->isWeatherScore()) return true;
@@ -162,7 +170,7 @@ class Airport extends Model
         }
 
         $result = $returnQuery->has('metar')
-        ->with('runways', 'scores', 'metar')
+        ->with('runways', 'scores', 'metar', 'arrivalFlights')
         ->get();
 
         return $result;
