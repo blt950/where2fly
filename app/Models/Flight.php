@@ -23,4 +23,8 @@ class Flight extends Model
         return $this->belongsTo(Airport::class, 'airport_arr_id');
     }
 
+    public function airline(){
+        return $this->belongsTo(Airline::class, 'airline_icao', 'icao_code');
+    }
+
 }
