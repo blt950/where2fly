@@ -114,9 +114,7 @@
                     <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">ICAO</th>
-                            <th scope="col">Airport</th>
-                            <th scope="col">Country</th>
+                            <th scope="col" width="20%">Airport</th>
                             <th scope="col">Distance</th>
                             <th scope="col" width="10%">Air Time</th>
                             <th scope="col" width="12%">Why</th>
@@ -141,9 +139,13 @@
                         @foreach($suggestedAirports as $airport)
                             <tr class="{{ ($count > 10) ? 'showmore-hidden' : null }}">
                                 <th scope="row">{{ $count }}</th>
-                                <td>{{ $airport->icao }}</td>
-                                <td>{{ $airport->name }}</td>
-                                <td><img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img></td>
+                                <td>
+                                    <div>
+                                        <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
+                                        {{ $airport->icao }}
+                                    </div>
+                                    {{ $airport->name }}
+                                </td>
                                 <td>{{ $airport->distance }}nm</td>
                                 <td>{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
                                 <td class="fs-5">
@@ -166,14 +168,24 @@
                                     @endforeach
                                 </td>
                                 <td>
-                                    @foreach($airport->arrivalFlights->where('dep_icao', $departure->icao) as $flight)
-                                        <i
-                                            class="fas fa-plane"
-                                            data-bs-html="true"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-title="{{ $flight->flight_icao }} last seen {{ $flight->last_seen_at->diffForHumans() }}"
-                                        ></i>
-                                    @endforeach
+                                    @if($departure->departureFlightsTo($airport->icao)->count())
+                                        @foreach($departure->departureFlightsTo($airport->icao) as $airlineIcao => $flights)
+                                            <img
+                                                class="airline-logo" 
+                                                src="https://www.gstatic.com/flights/airline_logos/70px/{{ Str::replace('*', '', ($flights->first()->airline->iata_code) ? $flights->first()->airline->iata_code : 'D9') }}.png"
+                                                data-bs-html="true"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="
+                                                    {{ $flights->first()->airline->name }}<br><br>
+                                                    @foreach($flights as $flight)
+                                                        {{ $flight->flight_icao }} ({{ $flight->aircraft_icao }}) {{ $flight->last_seen_at->diffForHumans() }}<br>
+                                                    @endforeach
+                                                "
+                                            >
+                                        @endforeach
+                                    @else
+                                        -
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="rwy-feet">{{ $airport->longestRunway() }}</div>

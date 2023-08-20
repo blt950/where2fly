@@ -40,6 +40,10 @@ class Airport extends Model
         return $this->hasMany(Flight::class, 'airport_dep_id');
     }
 
+    public function departureFlightsTo($toIcao){
+        return $this->departureFlights()->where('arr_icao', $toIcao)->get()->groupBy('airline_icao');
+    }
+
     public function hasWeatherScore(){
         foreach($this->scores as $s){
             if($s->isWeatherScore()) return true;
