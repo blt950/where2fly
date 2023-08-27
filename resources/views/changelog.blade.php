@@ -16,6 +16,14 @@
         
         <div class="text-start">
 
+            <h2>v1.3.0</h2>
+            <ul>
+                <li>Added real world flights to search results (Beta)</li>
+                <li>Added option to only search for real world flights in advanced search (Beta)</li>
+                <li>Fixed SimBrief link missing origin airport</li>
+                <li>Fixed some missing military airport definintions (RAAF and RNAS)</li>
+            </ul>
+
             <h2>v1.2.0</h2>
             <ul>
                 <li>Added an API (Beta) to fetch toplist and search</li>
