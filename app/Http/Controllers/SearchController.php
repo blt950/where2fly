@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\Airport;
+use App\Models\Airline;
+use App\Models\Flight;
 use App\Models\AirportScore;
 use App\Http\Controllers\ScoreController;
 
@@ -107,7 +109,8 @@ class SearchController extends Controller
             'elevationMax' => 'required|between:-2000,18000',
             'scores' => 'sometimes|array',
             'metcondition' => 'required|in:IFR,VFR,ANY',
-            'airportExclusions' => 'sometimes|array'
+            'airportExclusions' => 'sometimes|array',
+            'airportWithRoutesOnly' => 'sometimes|array'
         ]);
 
         $continent = $data['continent'];
@@ -120,6 +123,7 @@ class SearchController extends Controller
         $elevationMax = (int)$data['elevationMax'];
         isset($data['scores']) ? $filteredScores = $data['scores'] : $filteredScores = null;
         isset($data['airportExclusions']) ? $airportExclusions = $data['airportExclusions'] : $airportExclusions = null;
+        isset($data['airportWithRoutesOnly']) ? $airportWithRoutesOnly = true : $airportWithRoutesOnly = false;
         $metcon = $data['metcondition'];
         
         // Use the supplied departure or select a random from toplist
@@ -134,7 +138,7 @@ class SearchController extends Controller
 
         // Get airports according to filter
         $airports = collect();
-        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, null, $airportExclusions);
+        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, null, $airportExclusions, $airportWithRoutesOnly);
 
         // Filter the eligable airports
         $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $filteredScores, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
@@ -145,7 +149,36 @@ class SearchController extends Controller
         $suggestedAirports = $suggestedAirports->sortByFilteredScores($filteredScores);
         $suggestedAirports = $suggestedAirports->splice(0,20);
 
+        // Get flights and airlines for the suggested airports and add it to the collection
+        $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departure->id)->whereIn('airport_arr_id', $suggestedAirports->pluck('id'))->get();
+        $airlines = Airline::whereIn('icao_code', $flights->pluck('airline_icao')->unique())->get();
+
+        foreach($suggestedAirports as $suggestedAirport){
+
+            $airportFlights = $flights->where('airport_arr_id', $suggestedAirport->id);
+            $suggestedAirport->airlines = $airlines->whereIn('icao_code', $airportFlights->pluck('airline_icao')->unique());
+
+            foreach($suggestedAirport->airlines as $airline){
+                $airline->flights = $airportFlights->where('airline_icao', $airline->icao_code)->sortByDesc('last_seen_at');
+            }
+
+            // Replace * with '' in all airline iata codes with map
+            $suggestedAirport->airlines = $suggestedAirport->airlines->map(function($airline){
+                if($airline->iata_code){
+                    $airline->iata_code = str_replace('*', '', $airline->iata_code);
+                }
+                
+                return $airline;
+            });
+
+        }
+
+        //dd($suggestedAirports->first());
+
+        // Set the advanced search flag
         $wasAdvancedSearch = true;
+
+        // Return the view
         return view('search', compact('suggestedAirports', 'filteredScores', 'departure', 'suggestedDeparture', 'wasAdvancedSearch'));
     }
 

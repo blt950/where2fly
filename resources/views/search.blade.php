@@ -168,16 +168,16 @@
                                     @endforeach
                                 </td>
                                 <td>
-                                    @if($departure->departureFlightsTo($airport->icao)->count())
-                                        @foreach($departure->departureFlightsTo($airport->icao) as $airlineIcao => $flights)
+                                    @if($airport->airlines->isNotEmpty())
+                                        @foreach($airport->airlines as $airline)
                                             <img
                                                 class="airline-logo" 
-                                                src="{{ asset('img/airlines/'.Str::replace('*', '', ($flights->first()->airline->iata_code) ? $flights->first()->airline->iata_code : '00').'.png') }}"
+                                                src="{{ asset('img/airlines/'.$airline->iata_code.'.png') }}"
                                                 data-bs-html="true"
                                                 data-bs-toggle="tooltip"
                                                 data-bs-title="
-                                                    {{ $flights->first()->airline->name }}<br><br>
-                                                    @foreach($flights as $flight)
+                                                    {{ $airline->name }}<br><br>
+                                                    @foreach($airline->flights as $flight)
                                                         {{ $flight->flight_icao }} ({{ $flight->aircraft_icao }}) {{ $flight->last_seen_at->diffForHumans() }}<br>
                                                     @endforeach
                                                 "
