@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Always struggling to decide where to fly? Find some suggested destinations with fun weather and coverage!">
+@yield('meta-description')
 <meta name="author" content="Blt950 / Daniel (1352906)">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 

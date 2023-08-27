@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('meta-description')
+<meta name="description" content="Fine tune your search criteria">
+@endsection
+
 @section('resources')
 @vite('resources/js/nouislider.js')
 @endsection

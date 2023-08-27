@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('meta-description')
+<meta name="description" content="Details of your search">
+@endsection
+
 @section('title', 'Results')
 @section('content')
 

@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('meta-description')
+<meta name="description" content="Check out the details of the new updates">
+@endsection
+
 @section('title', 'Changelog')
 @section('content')
 

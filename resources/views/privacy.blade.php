@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('meta-description')
+<meta name="description" content="We're only using strictly neccesarry service cookies to make the page and search work for your visit.">
+@endsection
+
 @section('title', 'Privacy Policy')
 @section('content')
 
