@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('meta-description')
+<meta name="description" content="Details of your search">
+@endsection
+
 @section('title', 'Results')
 @section('content')
 
@@ -114,12 +118,11 @@
                     <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">ICAO</th>
-                            <th scope="col">Airport</th>
-                            <th scope="col">Country</th>
+                            <th scope="col" width="20%">Airport</th>
                             <th scope="col">Distance</th>
                             <th scope="col" width="10%">Air Time</th>
                             <th scope="col" width="12%">Why</th>
+                            <th scope="col">Airlines</th>
                             <th scope="col">Runway</th>
                             <th scope="col" width="40%">Details</th>
                         </tr>
@@ -140,9 +143,13 @@
                         @foreach($suggestedAirports as $airport)
                             <tr class="{{ ($count > 10) ? 'showmore-hidden' : null }}">
                                 <th scope="row">{{ $count }}</th>
-                                <td>{{ $airport->icao }}</td>
-                                <td>{{ $airport->name }}</td>
-                                <td><img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img></td>
+                                <td>
+                                    <div>
+                                        <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
+                                        {{ $airport->icao }}
+                                    </div>
+                                    {{ $airport->name }}
+                                </td>
                                 <td>{{ $airport->distance }}nm</td>
                                 <td>{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
                                 <td class="fs-5">
@@ -165,6 +172,26 @@
                                     @endforeach
                                 </td>
                                 <td>
+                                    @if($airport->airlines->isNotEmpty())
+                                        @foreach($airport->airlines as $airline)
+                                            <img
+                                                class="airline-logo" 
+                                                src="{{ asset('img/airlines/'.$airline->iata_code.'.png') }}"
+                                                data-bs-html="true"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="
+                                                    {{ $airline->name }}<br><br>
+                                                    @foreach($airline->flights as $flight)
+                                                        {{ $flight->flight_icao }} ({{ $flight->aircraft_icao }}) {{ $flight->last_seen_at->diffForHumans() }}<br>
+                                                    @endforeach
+                                                "
+                                            >
+                                        @endforeach
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>
                                     <div class="rwy-feet">{{ $airport->longestRunway() }}</div>
                                     <div class="rwy-meters text-black text-opacity-50">{{ round($airport->longestRunway()* .3048) }}</div>
                                 </td>
@@ -179,14 +206,14 @@
                                             </div>
                                         </div>
 
-                                        <div class="d-flex">
+                                        <div class="d-flex hover-show-group">
                                             <div class="hover-show secondary">
                                                 <a class="btn btn-sm float-end font-work-sans text-muted" href="https://windy.com/{{ $airport->icao }}" target="_blank">
                                                     <span class="d-none d-lg-inline d-xl-inline">Windy</span> <i class="fas fa-up-right-from-square"></i>
                                                 </a>
                                             </div>
                                             <div class="hover-show">
-                                                <a class="btn btn-sm float-end font-work-sans text-muted" href="https://www.simbrief.com/system/dispatch.php?dest={{ $airport->icao }}" target="_blank">
+                                                <a class="btn btn-sm float-end font-work-sans text-muted" href="https://www.simbrief.com/system/dispatch.php?orig={{ $departure->icao }}&dest={{ $airport->icao }}" target="_blank">
                                                     <span class="d-none d-lg-inline d-xl-inline">SimBrief</span> <i class="fas fa-up-right-from-square"></i>
                                                 </a>
                                             </div>
@@ -194,7 +221,10 @@
                                     </div>
                                     
                                     <div class="tab-content">
+                                        {{-- METAR tab --}}
                                         <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $airport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHi\Z') }} {{ $airport->metar->metar }}</div>
+                                        
+                                        {{-- TAF tab --}}
                                         @isset($tafs[$airport->icao])
                                             <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$airport->icao] }}</div>
                                         @else
@@ -217,7 +247,7 @@
                             </tr>
                         @elseif($count > 10)
                             <tr id="showMoreRow">
-                                <th colspan="9" class="text-center text-danger">
+                                <th colspan="10" class="text-center text-danger">
                                     <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
                                 </th>
                             </tr>

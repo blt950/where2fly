@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\Airport;
+use App\Models\Airline;
+use App\Models\Flight;
 use App\Models\AirportScore;
 use App\Http\Controllers\ScoreController;
 
@@ -82,6 +84,7 @@ class SearchController extends Controller
         }
 
         $suggestedAirports = $suggestedAirports->slice(0, 20);
+        $suggestedAirports = $suggestedAirports->addFlights($departure);
 
         $wasAdvancedSearch = false;
         return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture', 'wasAdvancedSearch'));
@@ -107,7 +110,8 @@ class SearchController extends Controller
             'elevationMax' => 'required|between:-2000,18000',
             'scores' => 'sometimes|array',
             'metcondition' => 'required|in:IFR,VFR,ANY',
-            'airportExclusions' => 'sometimes|array'
+            'airportExclusions' => 'sometimes|array',
+            'airportWithRoutesOnly' => 'sometimes|array'
         ]);
 
         $continent = $data['continent'];
@@ -120,6 +124,7 @@ class SearchController extends Controller
         $elevationMax = (int)$data['elevationMax'];
         isset($data['scores']) ? $filteredScores = $data['scores'] : $filteredScores = null;
         isset($data['airportExclusions']) ? $airportExclusions = $data['airportExclusions'] : $airportExclusions = null;
+        isset($data['airportWithRoutesOnly']) ? $airportWithRoutesOnly = true : $airportWithRoutesOnly = false;
         $metcon = $data['metcondition'];
         
         // Use the supplied departure or select a random from toplist
@@ -134,7 +139,7 @@ class SearchController extends Controller
 
         // Get airports according to filter
         $airports = collect();
-        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, null, $airportExclusions);
+        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, null, $airportExclusions, $airportWithRoutesOnly);
 
         // Filter the eligable airports
         $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $filteredScores, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
@@ -144,8 +149,12 @@ class SearchController extends Controller
         $suggestedAirports = $suggestedAirports->shuffle(); 
         $suggestedAirports = $suggestedAirports->sortByFilteredScores($filteredScores);
         $suggestedAirports = $suggestedAirports->splice(0,20);
+        $suggestedAirports = $suggestedAirports->addFlights($departure);
 
+        // Set the advanced search flag
         $wasAdvancedSearch = true;
+
+        // Return the view
         return view('search', compact('suggestedAirports', 'filteredScores', 'departure', 'suggestedDeparture', 'wasAdvancedSearch'));
     }
 

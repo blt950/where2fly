@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('meta-description')
+<meta name="description" content="Always struggling to decide where to fly? Find some suggested destinations with fun weather and coverage!">
+@endsection
+
 @section('resources')
 @vite('resources/js/nouislider.js')
 @endsection
