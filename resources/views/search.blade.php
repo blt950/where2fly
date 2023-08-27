@@ -172,7 +172,7 @@
                                         @foreach($departure->departureFlightsTo($airport->icao) as $airlineIcao => $flights)
                                             <img
                                                 class="airline-logo" 
-                                                src="https://www.gstatic.com/flights/airline_logos/70px/{{ Str::replace('*', '', ($flights->first()->airline->iata_code) ? $flights->first()->airline->iata_code : 'D9') }}.png"
+                                                src="{{ asset('img/airlines/'.Str::replace('*', '', ($flights->first()->airline->iata_code) ? $flights->first()->airline->iata_code : '00').'.png') }}"
                                                 data-bs-html="true"
                                                 data-bs-toggle="tooltip"
                                                 data-bs-title="
