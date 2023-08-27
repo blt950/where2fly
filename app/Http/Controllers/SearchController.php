@@ -84,6 +84,7 @@ class SearchController extends Controller
         }
 
         $suggestedAirports = $suggestedAirports->slice(0, 20);
+        $suggestedAirports = $suggestedAirports->addFlights($departure);
 
         $wasAdvancedSearch = false;
         return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture', 'wasAdvancedSearch'));
@@ -148,32 +149,7 @@ class SearchController extends Controller
         $suggestedAirports = $suggestedAirports->shuffle(); 
         $suggestedAirports = $suggestedAirports->sortByFilteredScores($filteredScores);
         $suggestedAirports = $suggestedAirports->splice(0,20);
-
-        // Get flights and airlines for the suggested airports and add it to the collection
-        $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departure->id)->whereIn('airport_arr_id', $suggestedAirports->pluck('id'))->get();
-        $airlines = Airline::whereIn('icao_code', $flights->pluck('airline_icao')->unique())->get();
-
-        foreach($suggestedAirports as $suggestedAirport){
-
-            $airportFlights = $flights->where('airport_arr_id', $suggestedAirport->id);
-            $suggestedAirport->airlines = $airlines->whereIn('icao_code', $airportFlights->pluck('airline_icao')->unique());
-
-            foreach($suggestedAirport->airlines as $airline){
-                $airline->flights = $airportFlights->where('airline_icao', $airline->icao_code)->sortByDesc('last_seen_at');
-            }
-
-            // Replace * with '' in all airline iata codes with map
-            $suggestedAirport->airlines = $suggestedAirport->airlines->map(function($airline){
-                if($airline->iata_code){
-                    $airline->iata_code = str_replace('*', '', $airline->iata_code);
-                }
-                
-                return $airline;
-            });
-
-        }
-
-        //dd($suggestedAirports->first());
+        $suggestedAirports = $suggestedAirports->addFlights($departure);
 
         // Set the advanced search flag
         $wasAdvancedSearch = true;
