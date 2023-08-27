@@ -32,6 +32,18 @@ class Airport extends Model
         return $this->hasMany(Controller::class);
     }
 
+    public function arrivalFlights(){
+        return $this->hasMany(Flight::class, 'airport_arr_id');
+    }
+
+    public function departureFlights(){
+        return $this->hasMany(Flight::class, 'airport_dep_id');
+    }
+
+    public function departureFlightsTo($toIcao, $seenThreshold = 3){
+        return $this->departureFlights()->where('arr_icao', $toIcao)->where('seen_counter', '>', $seenThreshold)->get()->groupBy('airline_icao');
+    }
+
     public function hasWeatherScore(){
         foreach($this->scores as $s){
             if($s->isWeatherScore()) return true;
@@ -113,7 +125,7 @@ class Airport extends Model
 
     }
 
-    public static function findWithCriteria($continent, $country = null, $departureIcao = null, Array $whitelistedArrivals = null, Array $airportExclusions = null){
+    public static function findWithCriteria($continent, $country = null, $departureIcao = null, Array $whitelistedArrivals = null, Array $airportExclusions = null, bool $onlyWithRoutes = false){
         
         $returnQuery = Airport::where('type', '!=', 'closed')
         ->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport']);
@@ -159,6 +171,13 @@ class Airport extends Model
                     $returnQuery = $returnQuery->where('airports.w2f_airforcebase', false);
                 }
             }
+        }
+
+        if($onlyWithRoutes){
+            // Only airports with routes to the arrival airport
+            $returnQuery = $returnQuery->whereHas('departureFlights', function($query) use ($departureIcao){
+                $query->where('arr_icao', $departureIcao)->where('seen_counter', '>', 3);
+            });
         }
 
         $result = $returnQuery->has('metar')

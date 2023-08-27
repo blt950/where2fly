@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('meta-description')
+<meta name="description" content="Destinations with the worst weather right now">
+@endsection
+
 @section('title', 'Top List')
 @section('content')
 

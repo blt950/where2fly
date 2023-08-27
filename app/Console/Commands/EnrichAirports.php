@@ -46,6 +46,10 @@ class EnrichAirports extends Command
             ->orWhere('name', 'like', '%airforce%')
             ->orWhere('name', 'like', '%air force%')
             ->orWhere('name', 'like', '%Army Airfield%')
+            ->orWhere('name', 'like', '% RNAS %')
+            ->orWhere('name', 'like', 'RNAS%')
+            ->orWhere('name', 'like', '% RAAF %')
+            ->orWhere('name', 'like', 'RAAF%')
             ->update(['w2f_airforcebase' => true]);
 
         // Upsert the data

@@ -139,6 +139,10 @@ table{
         padding-right: 1rem !important;
     }
 
+    .hover-show-group{
+        min-width: 125px;
+    }
+
     tr .hover-show{
         height: 1.5rem;
         display: none;
@@ -166,6 +170,11 @@ table{
 
     tr.showmore-hidden{
         display: none;
+    }
+
+    .airline-logo{
+        width: 18px;
+        height: 18px;
     }
 
 }

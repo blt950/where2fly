@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('meta-description')
+<meta name="description" content="Fine tune your search criteria">
+@endsection
+
 @section('resources')
 @vite('resources/js/nouislider.js')
 @endsection
@@ -120,6 +124,15 @@
                     </div>
                     @endif
                     @endforeach
+
+                    <label class="pt-4">Destination parameters</label>
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="routesonly" name="airportWithRoutesOnly[]" value="yes">
+                        <label class="form-check-label" for="routesonly">
+                            <i class="fa fa-route"></i>&nbsp; With routes only <span class="badge bg-warning">BETA</span>
+                        </label>
+                    </div>
+                    
 
                     <label class="pt-4">Airport exclusion parameters</label>
                     
