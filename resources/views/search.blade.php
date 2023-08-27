@@ -202,7 +202,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="d-flex">
+                                        <div class="d-flex hover-show-group">
                                             <div class="hover-show secondary">
                                                 <a class="btn btn-sm float-end font-work-sans text-muted" href="https://windy.com/{{ $airport->icao }}" target="_blank">
                                                     <span class="d-none d-lg-inline d-xl-inline">Windy</span> <i class="fas fa-up-right-from-square"></i>
