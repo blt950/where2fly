@@ -17,6 +17,7 @@ A web service suggesting where to fly next.
 
 #### Optional
 `APP_DEBUG` - Enable debug mode
+`SENTRY_LARAVEL_DSN` - Sentry DSN URL
 `DEBUGBAR_ENABLED` - Enable the debugbar
 
 
