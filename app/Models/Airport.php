@@ -126,7 +126,7 @@ class Airport extends Model
     }
 
     public static function findWithCriteria($continent, $country = null, $departureIcao = null, Array $whitelistedArrivals = null, Array $airportExclusions = null, bool $onlyWithRoutes = false){
-        
+
         $returnQuery = Airport::where('type', '!=', 'closed')
         ->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport']);
 
@@ -180,8 +180,8 @@ class Airport extends Model
 
         if($onlyWithRoutes){
             // Only airports with routes to the arrival airport
-            $returnQuery = $returnQuery->whereHas('departureFlights', function($query) use ($departureIcao){
-                $query->where('arr_icao', $departureIcao)->where('seen_counter', '>', 3);
+            $returnQuery = $returnQuery->whereHas('arrivalFlights', function($query) use ($departureIcao){
+                $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3);
             });
         }
 
