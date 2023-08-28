@@ -40,7 +40,7 @@
                             <th scope="col">ICAO</th>
                             <th scope="col">Airport</th>
                             <th scope="col">Country</th>
-                            <th scope="col" width="10%">Why</th>
+                            <th scope="col" width="10%">Conditions</th>
                             <th scope="col">Runway</th>
                             <th scope="col" width="50%">Details</th>
                         </tr>

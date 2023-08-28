@@ -121,7 +121,7 @@
                             <th scope="col" width="20%">Airport</th>
                             <th scope="col">Distance</th>
                             <th scope="col" width="10%">Air Time</th>
-                            <th scope="col" width="12%">Why</th>
+                            <th scope="col" width="12%">Conditions</th>
                             <th scope="col">Airlines</th>
                             <th scope="col">Runway</th>
                             <th scope="col" width="40%">Details</th>
