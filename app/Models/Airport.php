@@ -129,6 +129,11 @@ class Airport extends Model
         
         $returnQuery = Airport::where('type', '!=', 'closed')
         ->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport']);
+
+        // Only airports with open runways
+        $returnQuery = $returnQuery->whereHas('runways', function($query){
+            $query->where('closed', false);
+        });
         
         // If the filter is domestic
         if(isset($country) && $continent == "DO"){
