@@ -103,6 +103,58 @@ body {
     font-size: 1rem;
 }
 
+#filters{
+    border-top: 1px solid $primary;
+
+    .btn-group{
+        border-radius: 2px;
+
+        // Set fixed size for filter buttons
+        .btn-filter-width{
+            width: 32px;
+            height: 26px;
+            line-height: 17px;
+        }
+
+        // Remove margin between buttons
+        & > :not(.btn-check:first-child) + .btn{
+            margin-left: 0px;
+        }
+
+        // Add hover effect
+        & .btn:hover{
+            background: rgba($gray-900, 0.2);
+        }
+    
+        // Tweak buttons
+        .btn{
+            color: #929292;
+            border: 0;
+
+            &-check.red:checked + .btn {
+                color: white;
+                background: rgba($danger, 0.5);
+            }
+
+            &-check.light:checked + .btn {
+                color: white;
+                background: var(--bs-btn-active-bg);
+            }
+
+            &-check.green:checked + .btn {
+                color: white;
+                background: rgba($success, 0.5);
+            }
+        }
+
+    }
+    
+}
+
+.hide-filters{
+    //display: none;
+}
+
 .logo{
     padding: .25rem 0;
     border-bottom: .25rem solid $primary;

@@ -24,8 +24,8 @@
             
             <div class="row g-3 justify-content-center">
                 <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
-                    <label for="departure">Departure</label>
-                    <input type="text" class="form-control" id="departure" name="departure" placeholder="ICAO or blank" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('departure') }}">
+                    <label for="departure">Departure (ICAO)</label>
+                    <input type="text" class="form-control" id="departure" name="departure" placeholder="Random" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('departure') }}">
                     @error('departure')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
@@ -95,15 +95,133 @@
                     </div>
                 </div>
             </div>
+
+            <div id="filters" class="hide-filters">
+                <div class="row g-3 mt-1 justify-content-center">
+                    
+                    <div class="col-sm-4 col-md-3 col-lg-2 text-start">
+                        <label>Arrival Elevation</label>
+                        <input type="hidden" id="elevationMin" name="elevationMin" value="0">
+                        <input type="hidden" id="elevationMax" name="elevationMax" value="18000">
+                        <div id="slider-elevation" class="mt-1 mb-1"></div>
+                        <span id="slider-elevation-text">0-18000ft</span>
+                    </div>
+                    
+                    
+                    <div class="col-sm-4 col-md-3 col-lg-3 text-start">
+                        <label>Arrival Runway Length</label>
+                        <input type="hidden" id="rwyLengthMin" name="rwyLengthMin" value="0">
+                        <input type="hidden" id="rwyLengthMax" name="rwyLengthMax" value="17000">
+                        <div id="slider-rwy" class="mt-1 mb-1"></div>
+                        <span id="slider-rwy-text">0-1000'</span>
+                    </div>
+                    
+                </div>
+
+                <div class="row g-3 mt-3 justify-content-center">
+                    
+                    <div class="col-sm-4 col-md-4 col-lg-4 text-start">
+                        <label>Weather parameters</label>
+
+                        @foreach(\App\Http\Controllers\ScoreController::$score_types as $k => $s)
+                        @if(str_starts_with($k, 'METAR'))
+                            <div class="mt-1">
+                                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                    <input type="radio" class="btn-check red" name="{{ $k }}_filter" value="-1" id="{{ $k }}_exclude" autocomplete="off">
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_exclude">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </label>
+                                
+                                    <input type="radio" class="btn-check light" name="{{ $k }}_filter" value="0" id="{{ $k }}_neutral" autocomplete="off" checked>
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_neutral">
+                                        <i class="fa-solid fa-slash-forward"></i>
+                                    </label>
+                                
+                                    <input type="radio" class="btn-check green" name="{{ $k }}_filter" value="1" id="{{ $k }}_include" autocomplete="off">
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_include">
+                                        <i class="fa-solid fa-check"></i>
+                                    </label>
+                                </div>
+                                <i class="ms-2 fa {{ $s['icon'] }}"></i>&nbsp;{{ $s['desc'] }}
+                            </div>
+                        @endif
+                        @endforeach
+                    </div>
+                    
+                    <div class="col-sm-4 col-md-3 col-lg-3 text-start">
+                        <label>Network parameters</label>
+                        
+                        @foreach(\App\Http\Controllers\ScoreController::$score_types as $k => $s)
+                        @if(str_starts_with($k, 'VATSIM'))
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" id="{{ $k }}" name="scores[]" value="{{ $k }}">
+                            <label class="form-check-label" for="{{ $k }}">
+                                <i class="fa {{ $s['icon'] }}"></i>&nbsp;{{ $s['desc'] }}
+                            </label>
+                        </div>
+                        @endif
+                        @endforeach
+
+                        <label class="pt-4">Destination parameters</label>
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" id="routesonly" name="airportWithRoutesOnly[]" value="yes">
+                            <label class="form-check-label" for="routesonly">
+                                <i class="fa fa-route"></i>&nbsp; With routes only <span class="badge bg-warning">BETA</span>
+                            </label>
+                        </div>
+                        
+
+                        <label class="pt-4">Airport exclusion parameters</label>
+                        
+                        <div class="form-check mb-0">
+                            <input class="form-check-input exclusion" type="checkbox" id="routes" name="airportExclusions[]" value="routes">
+                            <label class="form-check-label" for="routes">
+                                <i class="fa fa-route"></i>&nbsp; Airline service
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-0">
+                            <input class="form-check-input exclusion" type="checkbox" id="airbases" name="airportExclusions[]" value="airbases">
+                            <label class="form-check-label" for="airbases">
+                                <i class="fa fa-jet-fighter"></i>&nbsp; Airbases
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-3 col-md-3 col-lg-2 text-start">
+                        <label>Meteo Condition</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="metcondition" value="ANY" id="met-any" checked>
+                            <label class="form-check-label" for="met-any">
+                                Any
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="metcondition" value="IFR" id="met-ifr">
+                            <label class="form-check-label" for="met-ifr">
+                                IFR
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="metcondition" value="VFR" id="met-vfr">
+                            <label class="form-check-label" for="met-vfr">
+                                VFR
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <div class="row g-3 mt-1 justify-content-center">
+                <div class="col-sm-12 align-self-end mb-5">
+                    <button type="button" id="expandFilters" class="btn btn-outline-primary">
+                        Show more filters
+                    </button>
+                </div>
                 <div class="col-sm-12 align-self-end">
                     <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
                         Find destination
                     </button>
-                </div>
-                <div class="col-sm-12 align-self-end mb-5">
-                    <a class="text-primary" href="{{ route('front.advanced') }}">Advanced Search</a>
                 </div>
             </div>
             
@@ -116,15 +234,73 @@
     <script>
         // Run scripts when DOM is loaded
         document.addEventListener('DOMContentLoaded', function () {
+
+            const userLocale = 'de-DE';
+
+            // Filter button
+            document.getElementById('expandFilters').addEventListener('click', function () {
+                var filter = document.getElementById('filters');
+                filter.classList.toggle('hide-filters');
+
+                if (filter.classList.contains('hide-filters')) {
+                    document.getElementById('expandFilters').innerHTML = 'Show more filters';
+                } else {
+                    document.getElementById('expandFilters').innerHTML = 'Hide filters';
+                }
+            });
+
+            // Sliders
+            var elevationSlider = document.getElementById('slider-elevation');
+            noUiSlider.create(elevationSlider, {
+                start: [{{ old('elevationMin') ? old('elevationMin') : -2000 }}, {{ old('elevationMax') ? old('elevationMax') : 18000 }}],
+                step: 1000,
+                connect: true,
+                behaviour: 'drag',
+                range: {
+                    'min': [-2000],
+                    'max': [18000]
+                }
+            });
+            
+            var elevationSliderText = document.getElementById('slider-elevation-text');
+            var elevationMinInput = document.getElementById('elevationMin');
+            var elevationMaxInput = document.getElementById('elevationMax');
+            elevationSlider.noUiSlider.on('update', function (values) {
+                elevationSliderText.innerHTML = Math.round(values[0]).toLocaleString(userLocale) + '-' + Math.round(values[1]).toLocaleString(userLocale) + 'ft';
+                elevationMinInput.value = Math.round(values[0])
+                elevationMaxInput.value = Math.round(values[1])
+            });
+            
+            var rwySlider = document.getElementById('slider-rwy');
+            noUiSlider.create(rwySlider, {
+                start: [{{ old('rwyLengthMin') ? old('rwyLengthMin') : 0 }}, {{ old('rwyLengthMax') ? old('rwyLengthMax') : 17000 }}],
+                step: 500,
+                connect: true,
+                behaviour: 'drag',
+                range: {
+                    'min': [0],
+                    'max': [17000]
+                }
+            });
+            
+            var rwySliderText = document.getElementById('slider-rwy-text');
+            var rwyMinInput = document.getElementById('rwyLengthMin');
+            var rwyMaxInput = document.getElementById('rwyLengthMax');
+            rwySlider.noUiSlider.on('update', function (values) {
+                rwySliderText.innerHTML = Math.round(values[0]).toLocaleString(userLocale) + '-' + Math.round(values[1]).toLocaleString(userLocale) + 'ft <span class="text-white text-opacity-50"> | ' + Math.round(values[0]/3.2808).toLocaleString(userLocale) + '-' + Math.round(values[1]/3.2808).toLocaleString(userLocale) + 'm</span>';
+                rwyMinInput.value = Math.round(values[0])
+                rwyMaxInput.value = Math.round(values[1])
+            });
+            
             var airtimeSlider = document.getElementById('slider-airtime');
             noUiSlider.create(airtimeSlider, {
-                start: [{{ old('airtimeMin') ? old('airtimeMin') : 0 }}, {{ old('airtimeMax') ? old('airtimeMax') : 4 }}],
+                start: [{{ old('airtimeMin') ? old('airtimeMin') : 0 }}, {{ old('airtimeMax') ? old('airtimeMax') : 5 }}],
                 step: 1,
                 connect: true,
                 behaviour: 'drag',
                 range: {
                     'min': [0],
-                    'max': [8]
+                    'max': [24]
                 }
             });
             
@@ -132,12 +308,7 @@
             var airtimeMinInput = document.getElementById('airtimeMin');
             var airtimeMaxInput = document.getElementById('airtimeMax');
             airtimeSlider.noUiSlider.on('update', function (values) {
-                if(values[1] == 8){
-                    airtimeSliderText.innerHTML = Math.round(values[0]) + '-' + Math.round(values[1]) + '+ hours';
-                } else {
-                    airtimeSliderText.innerHTML = Math.round(values[0]) + '-' + Math.round(values[1]) + ' hours';
-                }
-                
+                airtimeSliderText.innerHTML = Math.round(values[0]) + '-' + Math.round(values[1]) + ' hours';
                 airtimeMinInput.value = Math.round(values[0])
                 airtimeMaxInput.value = Math.round(values[1])
             });
