@@ -49,16 +49,16 @@
                     @enderror
                 </div>
                 
-                <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 text-start">
+                <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
                     <label for="codeletter">Arrival Aircraft Code</label>
                     <select class="form-control" id="codeletter" name="codeletter">
                         <option disabled selected>Choose</option>
-                        <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A (PIPER/CESSNA etc.)</option>
-                        <option value="B" {{ old('codeletter') == "B" ? "selected" : "" }}>B (CRJ/DHC etc.)</option>
-                        <option value="C" {{ old('codeletter') == "C" ? "selected" : "" }}>C (737-700/A320/ERJ etc.)</option>
-                        <option value="D" {{ old('codeletter') == "D" ? "selected" : "" }}>D (B767/A310 etc.)</option>
-                        <option value="E" {{ old('codeletter') == "E" ? "selected" : "" }}>E (B777/B787/A330 etc.)</option>
-                        <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F (747-8/A380 etc.)</option>
+                        <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A (PIPER/CESSNA)</option>
+                        <option value="B" {{ old('codeletter') == "B" ? "selected" : "" }}>B (CRJ/DHC)</option>
+                        <option value="C" {{ old('codeletter') == "C" ? "selected" : "" }}>C (737/A320/ERJ)</option>
+                        <option value="D" {{ old('codeletter') == "D" ? "selected" : "" }}>D (B767/A310)</option>
+                        <option value="E" {{ old('codeletter') == "E" ? "selected" : "" }}>E (B777/B787/A330)</option>
+                        <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F (747-8/A380)</option>
                     </select>
                     @error('codeletter')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -95,10 +95,16 @@
                         @enderror
                     </div>
                 </div>
+
+                <div class="col-sm-2 align-self-center">
+                    <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
+                        Search <i class="fas fa-search"></i>
+                    </button>
+                </div>
             </div>
 
             <div id="filters" class="hide-filters">
-                <div class="row g-3 mt-1 justify-content-center bt">
+                <div class="row g-3 mt-4 justify-content-center bt">
                     
                     <div class="col-sm-4 col-md-3 col-lg-2 text-start">
                         <label>Arrival Elevation</label>
@@ -311,11 +317,6 @@
                         <button type="button" id="expandFilters" class="button">Show more filters</button>
                         <div class="divider"></div>
                     </div>
-                </div>
-                <div class="col-sm-12 align-self-end">
-                    <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
-                        Find destination
-                    </button>
                 </div>
             </div>
             
