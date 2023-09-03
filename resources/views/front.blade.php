@@ -98,7 +98,7 @@
             </div>
 
             <div id="filters" class="hide-filters">
-                <div class="row g-3 mt-1 justify-content-center">
+                <div class="row g-3 mt-1 justify-content-center bt">
                     
                     <div class="col-sm-4 col-md-3 col-lg-2 text-start">
                         <label>Arrival Elevation</label>
@@ -156,8 +156,8 @@
                         </div>
                     </div>  
                 </div>
-
-                <div class="row g-3 mt-3 justify-content-center">
+                
+                <div class="row g-3 mt-3 pb-4 justify-content-center">
                     
                     <div class="col-sm-4 col-md-4 col-lg-4 text-start">
                         <label>Weather parameters</label>
@@ -282,19 +282,19 @@
                         <label>Airport Size</label>
                         
                         <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" value="1" id="filterAirportSizeSmall" name="filterAirportSize[]" checked>
+                            <input class="form-check-input" type="checkbox" value="small_airport" id="filterAirportSizeSmall" name="filterAirportSize[]" checked>
                             <label class="form-check-label" for="filterAirportSizeSmall">
                                 Small
                             </label>
                         </div>
                         <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" value="1" id="filterAirportSizeMedium" name="filterAirportSize[]" checked>
+                            <input class="form-check-input" type="checkbox" value="medium_airport" id="filterAirportSizeMedium" name="filterAirportSize[]" checked>
                             <label class="form-check-label" for="filterAirportSizeMedium">
                                 Medium
                             </label>
                         </div>
                         <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" value="1" id="filterAirportSizeLarge" name="filterAirportSize[]" checked>
+                            <input class="form-check-input" type="checkbox" value="large_airport" id="filterAirportSizeLarge" name="filterAirportSize[]" checked>
                             <label class="form-check-label" for="filterAirportSizeLarge">
                                 Large
                             </label>
@@ -304,11 +304,13 @@
                 </div>
             </div>
             
-            <div class="row g-3 mt-1 justify-content-center">
-                <div class="col-sm-12 align-self-end mb-5">
-                    <button type="button" id="expandFilters" class="btn btn-outline-primary">
-                        Show more filters
-                    </button>
+            <div class="row g-3 mt-3 justify-content-center">
+                <div class="col-sm-12 align-self-end mb-3"> 
+                    <div class="expandFilterGroup">
+                        <div class="divider"></div>
+                        <button type="button" id="expandFilters" class="button">Show more filters</button>
+                        <div class="divider"></div>
+                    </div>
                 </div>
                 <div class="col-sm-12 align-self-end">
                     <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
