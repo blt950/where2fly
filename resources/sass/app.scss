@@ -128,8 +128,8 @@ body {
 
         .btn-filter-width-meteo{
             min-width: 50px;
-            height: 42px;
-            line-height: 30px;
+            height: 26px;
+            line-height: 17px;
         }
 
         // Remove margin between buttons
@@ -458,6 +458,12 @@ img.flag{
 /*
 * Overrides
 */
+
+.form-check{
+    &.me-reduced{
+        margin-right: 0.6rem;
+    }
+}
 
 /* Make checkbox dark checkmark */ 
 .form-check-input{

@@ -103,67 +103,8 @@
                 </div>
             </div>
 
-            <div id="filters" class="hide-filters">
-                <div class="row g-3 mt-4 justify-content-center bt">
-                    
-                    <div class="col-sm-4 col-md-3 col-lg-2 text-start">
-                        <label>Arrival Elevation</label>
-                        <input type="hidden" id="elevationMin" name="elevationMin" value="0">
-                        <input type="hidden" id="elevationMax" name="elevationMax" value="18000">
-                        <div id="slider-elevation" class="mt-1 mb-1"></div>
-                        <span id="slider-elevation-text">0-18000ft</span>
-                    </div>   
-                    
-                    <div class="col-sm-4 col-md-3 col-lg-3 text-start">
-                        <label>Arrival Runway Length</label>
-                        <input type="hidden" id="rwyLengthMin" name="rwyLengthMin" value="0">
-                        <input type="hidden" id="rwyLengthMax" name="rwyLengthMax" value="17000">
-                        <div id="slider-rwy" class="mt-1 mb-1"></div>
-                        <span id="slider-rwy-text">0-1000'</span>
-                    </div>
-
-                    <div class="col-sm-4 col-md-3 col-lg-4 text-start">
-                        <label>Airlines</label>
-                        <select multiple 
-                            multiselect-search="true" 
-                            multiselect-select-all="true"
-                            multiselect-max-items="2"
-                            multiselect-hide-x="false"
-                            name="airlines[]"
-                            placeholder="All airlines">
-                            {{ $airlines = \App\Models\Airline::orderBy('name')->has('flights')->get() }}
-                            @foreach($airlines as $airline)
-                                <option value="{{ $airline->id }}">{{ $airline->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
-
-                        <label>Meteo Condition</label>
-
-                        <div>
-                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                <input type="radio" class="btn-check light" name="metcondition" value="ANY" id="metcondition_all" autocomplete="off" checked>
-                                <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_all">
-                                    Any
-                                </label>
-                            
-                                <input type="radio" class="btn-check red" name="metcondition" value="IFR" id="metcondition_ifr" autocomplete="off">
-                                <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_ifr">
-                                    IFR
-                                </label>
-                            
-                                <input type="radio" class="btn-check green" name="metcondition" value="VFR" id="metcondition_vfr" autocomplete="off">
-                                <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_vfr">
-                                    VFR
-                                </label>
-                            </div>
-                        </div>
-                    </div>  
-                </div>
-                
-                <div class="row g-3 mt-3 pb-4 justify-content-center">
+            <div id="filters" class="hide-filters">             
+                <div class="row g-3 mt-3 pb-4 justify-content-center bt">
                     
                     <div class="col-sm-4 col-md-4 col-lg-4 text-start">
                         <label>Weather parameters</label>
@@ -194,7 +135,28 @@
                     </div>
                     
                     <div class="col-sm-4 col-md-3 col-lg-5 text-start">
-                        <label>Network parameters</label>
+
+                        <label>Meteo Condition</label>
+                        <div>
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check light" name="metcondition" value="ANY" id="metcondition_all" autocomplete="off" checked>
+                                <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_all">
+                                    Any
+                                </label>
+                            
+                                <input type="radio" class="btn-check red" name="metcondition" value="IFR" id="metcondition_ifr" autocomplete="off">
+                                <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_ifr">
+                                    IFR
+                                </label>
+                            
+                                <input type="radio" class="btn-check green" name="metcondition" value="VFR" id="metcondition_vfr" autocomplete="off">
+                                <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_vfr">
+                                    VFR
+                                </label>
+                            </div>
+                        </div>
+
+                        <label class="pt-4">Network parameters</label>
 
                         @foreach(\App\Http\Controllers\ScoreController::$score_types as $k => $s)
                         @if(str_starts_with($k, 'VATSIM'))
@@ -280,31 +242,63 @@
                                 </label>
                             </div>
                             <i class="ms-2 fa fa-jet-fighter"></i>&nbsp;Airbases
-                        </div>                        
+                        </div>
+                        
                     </div>
                     
-                    <div class="col-sm-3 col-md-3 col-lg-2 text-start">
-                        
-                        <label>Airport Size</label>
-                        
-                        <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" value="small_airport" id="filterAirportSizeSmall" name="filterAirportSize[]" checked>
-                            <label class="form-check-label" for="filterAirportSizeSmall">
-                                Small
-                            </label>
+                    <div class="col-sm-3 col-md-3 col-lg-3 text-start">
+
+                        <label class="d-block">Airport Size</label>
+                        <div>
+                            <div class="form-check form-check-inline mb-0 me-reduced">
+                                <input class="form-check-input" type="checkbox" value="small_airport" id="filterAirportSizeSmall" name="filterAirportSize[]" checked>
+                                <label class="form-check-label" for="filterAirportSizeSmall">
+                                    Small
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline mb-0 me-reduced">
+                                <input class="form-check-input" type="checkbox" value="medium_airport" id="filterAirportSizeMedium" name="filterAirportSize[]" checked>
+                                <label class="form-check-label" for="filterAirportSizeMedium">
+                                    Medium
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline mb-0 me-reduced">
+                                <input class="form-check-input" type="checkbox" value="large_airport" id="filterAirportSizeLarge" name="filterAirportSize[]" checked>
+                                <label class="form-check-label" for="filterAirportSizeLarge">
+                                    Large
+                                </label>
+                            </div>
                         </div>
-                        <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" value="medium_airport" id="filterAirportSizeMedium" name="filterAirportSize[]" checked>
-                            <label class="form-check-label" for="filterAirportSizeMedium">
-                                Medium
-                            </label>
+
+                        <div>
+                            <label class="pt-4">Arrival Elevation</label>
+                            <input type="hidden" id="elevationMin" name="elevationMin" value="0">
+                            <input type="hidden" id="elevationMax" name="elevationMax" value="18000">
+                            <div id="slider-elevation" class="mt-1 mb-1"></div>
+                            <span id="slider-elevation-text">0-18000ft</span>
                         </div>
-                        <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" value="large_airport" id="filterAirportSizeLarge" name="filterAirportSize[]" checked>
-                            <label class="form-check-label" for="filterAirportSizeLarge">
-                                Large
-                            </label>
+
+                        <div>
+                            <label class="pt-4">Arrival Runway Length</label>
+                            <input type="hidden" id="rwyLengthMin" name="rwyLengthMin" value="0">
+                            <input type="hidden" id="rwyLengthMax" name="rwyLengthMax" value="17000">
+                            <div id="slider-rwy" class="mt-1 mb-1"></div>
+                            <span id="slider-rwy-text">0-1000'</span>
                         </div>
+
+                        <label class="pt-4">Airlines</label>
+                        <select multiple 
+                            multiselect-search="true" 
+                            multiselect-select-all="true"
+                            multiselect-max-items="1"
+                            multiselect-hide-x="false"
+                            name="airlines[]"
+                            placeholder="All airlines">
+                            {{ $airlines = \App\Models\Airline::orderBy('name')->has('flights')->get() }}
+                            @foreach($airlines as $airline)
+                                <option value="{{ $airline->id }}">{{ $airline->name }}</option>
+                            @endforeach
+                        </select>
 
                     </div>
                 </div>
