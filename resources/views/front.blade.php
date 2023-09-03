@@ -6,6 +6,7 @@
 
 @section('resources')
 @vite('resources/js/nouislider.js')
+@vite('resources/js/multiselect.js')
 @endsection
 
 @section('title', 'Search')
@@ -52,12 +53,12 @@
                     <label for="codeletter">Arrival Aircraft Code</label>
                     <select class="form-control" id="codeletter" name="codeletter">
                         <option disabled selected>Choose</option>
-                        <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A (PIPER/CESSNA)</option>
-                        <option value="B" {{ old('codeletter') == "B" ? "selected" : "" }}>B (CRJ/DHC)</option>
-                        <option value="C" {{ old('codeletter') == "C" ? "selected" : "" }}>C (737-700/A320/ERJ)</option>
-                        <option value="D" {{ old('codeletter') == "D" ? "selected" : "" }}>D (B767/A310)</option>
-                        <option value="E" {{ old('codeletter') == "E" ? "selected" : "" }}>E (B777/B787/A330)</option>
-                        <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F (747-8/A380)</option>
+                        <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A (PIPER/CESSNA etc.)</option>
+                        <option value="B" {{ old('codeletter') == "B" ? "selected" : "" }}>B (CRJ/DHC etc.)</option>
+                        <option value="C" {{ old('codeletter') == "C" ? "selected" : "" }}>C (737-700/A320/ERJ etc.)</option>
+                        <option value="D" {{ old('codeletter') == "D" ? "selected" : "" }}>D (B767/A310 etc.)</option>
+                        <option value="E" {{ old('codeletter') == "E" ? "selected" : "" }}>E (B777/B787/A330 etc.)</option>
+                        <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F (747-8/A380 etc.)</option>
                     </select>
                     @error('codeletter')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -67,9 +68,9 @@
                 <div class="col-xs-12 col-sm-12 col-md-4 col-lg-2 text-start">
                     <label>Intended Air Time</label>
                     <input type="hidden" id="airtimeMin" name="airtimeMin" value="0">
-                    <input type="hidden" id="airtimeMax" name="airtimeMax" value="4">
+                    <input type="hidden" id="airtimeMax" name="airtimeMax" value="12">
                     <div id="slider-airtime" class="mt-1 mb-1"></div>
-                    <span id="slider-airtime-text">0-4 hours</span>
+                    <span id="slider-airtime-text">0-12 hours</span>
                 </div>
                 
                 <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
@@ -105,8 +106,7 @@
                         <input type="hidden" id="elevationMax" name="elevationMax" value="18000">
                         <div id="slider-elevation" class="mt-1 mb-1"></div>
                         <span id="slider-elevation-text">0-18000ft</span>
-                    </div>
-                    
+                    </div>   
                     
                     <div class="col-sm-4 col-md-3 col-lg-3 text-start">
                         <label>Arrival Runway Length</label>
@@ -115,7 +115,46 @@
                         <div id="slider-rwy" class="mt-1 mb-1"></div>
                         <span id="slider-rwy-text">0-1000'</span>
                     </div>
-                    
+
+                    <div class="col-sm-4 col-md-3 col-lg-4 text-start">
+                        <label>Airlines</label>
+                        <select multiple 
+                            multiselect-search="true" 
+                            multiselect-select-all="true"
+                            multiselect-max-items="2"
+                            multiselect-hide-x="false"
+                            name="airlines[]"
+                            placeholder="All airlines">
+                            {{ $airlines = \App\Models\Airline::orderBy('name')->has('flights')->get() }}
+                            @foreach($airlines as $airline)
+                                <option value="{{ $airline->id }}">{{ $airline->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
+
+                        <label>Meteo Condition</label>
+
+                        <div>
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check light" name="metcondition" value="ANY" id="metcondition_all" autocomplete="off" checked>
+                                <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_all">
+                                    Any
+                                </label>
+                            
+                                <input type="radio" class="btn-check red" name="metcondition" value="IFR" id="metcondition_ifr" autocomplete="off">
+                                <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_ifr">
+                                    IFR
+                                </label>
+                            
+                                <input type="radio" class="btn-check green" name="metcondition" value="VFR" id="metcondition_vfr" autocomplete="off">
+                                <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_vfr">
+                                    VFR
+                                </label>
+                            </div>
+                        </div>
+                    </div>  
                 </div>
 
                 <div class="row g-3 mt-3 justify-content-center">
@@ -148,66 +187,119 @@
                         @endforeach
                     </div>
                     
-                    <div class="col-sm-4 col-md-3 col-lg-3 text-start">
+                    <div class="col-sm-4 col-md-3 col-lg-5 text-start">
                         <label>Network parameters</label>
-                        
+
                         @foreach(\App\Http\Controllers\ScoreController::$score_types as $k => $s)
                         @if(str_starts_with($k, 'VATSIM'))
-                        <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" id="{{ $k }}" name="scores[]" value="{{ $k }}">
-                            <label class="form-check-label" for="{{ $k }}">
-                                <i class="fa {{ $s['icon'] }}"></i>&nbsp;{{ $s['desc'] }}
-                            </label>
-                        </div>
+                            <div class="mt-1">
+                                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                    <input type="radio" class="btn-check red" name="{{ $k }}_filter" value="-1" id="{{ $k }}_exclude" autocomplete="off">
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_exclude">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </label>
+                                
+                                    <input type="radio" class="btn-check light" name="{{ $k }}_filter" value="0" id="{{ $k }}_neutral" autocomplete="off" checked>
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_neutral">
+                                        <i class="fa-solid fa-slash-forward"></i>
+                                    </label>
+                                
+                                    <input type="radio" class="btn-check green" name="{{ $k }}_filter" value="1" id="{{ $k }}_include" autocomplete="off">
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_include">
+                                        <i class="fa-solid fa-check"></i>
+                                    </label>
+                                </div>
+                                <i class="ms-2 fa {{ $s['icon'] }}"></i>&nbsp;{{ $s['desc'] }}
+                            </div>
                         @endif
                         @endforeach
 
                         <label class="pt-4">Destination parameters</label>
-                        <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" id="routesonly" name="airportWithRoutesOnly[]" value="yes">
-                            <label class="form-check-label" for="routesonly">
-                                <i class="fa fa-route"></i>&nbsp; With routes only <span class="badge bg-warning">BETA</span>
-                            </label>
-                        </div>
-                        
 
-                        <label class="pt-4">Airport exclusion parameters</label>
-                        
-                        <div class="form-check mb-0">
-                            <input class="form-check-input exclusion" type="checkbox" id="routes" name="airportExclusions[]" value="routes">
-                            <label class="form-check-label" for="routes">
-                                <i class="fa fa-route"></i>&nbsp; Airline service
-                            </label>
+                        <div class="mt-1">
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check red" name="airportWithRoutesOnly" value="-1" id="airportWithRoutesOnly_exclude" autocomplete="off">
+                                <label class="btn btn-sm btn-dark btn-filter-width" for="airportWithRoutesOnly_exclude">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </label>
+                            
+                                <input type="radio" class="btn-check light" name="airportWithRoutesOnly" value="0" id="airportWithRoutesOnly_neutral" autocomplete="off" checked>
+                                <label class="btn btn-sm btn-dark btn-filter-width" for="airportWithRoutesOnly_neutral">
+                                    <i class="fa-solid fa-slash-forward"></i>
+                                </label>
+                            
+                                <input type="radio" class="btn-check green" name="airportWithRoutesOnly" value="1" id="airportWithRoutesOnly_include" autocomplete="off">
+                                <label class="btn btn-sm btn-dark btn-filter-width" for="airportWithRoutesOnly_include">
+                                    <i class="fa-solid fa-check"></i>
+                                </label>
+                            </div>
+                            <i class="ms-2 fa fa-route"></i>&nbsp;With routes only
                         </div>
 
-                        <div class="form-check mb-0">
-                            <input class="form-check-input exclusion" type="checkbox" id="airbases" name="airportExclusions[]" value="airbases">
-                            <label class="form-check-label" for="airbases">
-                                <i class="fa fa-jet-fighter"></i>&nbsp; Airbases
-                            </label>
+                        <div class="mt-1">
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check red" name="airportRunwayLights" value="-1" id="airportRunwayLights_exclude" autocomplete="off">
+                                <label class="btn btn-sm btn-dark btn-filter-width" for="airportRunwayLights_exclude">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </label>
+                            
+                                <input type="radio" class="btn-check light" name="airportRunwayLights" value="0" id="airportRunwayLights_neutral" autocomplete="off" checked>
+                                <label class="btn btn-sm btn-dark btn-filter-width" for="airportRunwayLights_neutral">
+                                    <i class="fa-solid fa-slash-forward"></i>
+                                </label>
+                            
+                                <input type="radio" class="btn-check green" name="airportRunwayLights" value="1" id="airportRunwayLights_include" autocomplete="off">
+                                <label class="btn btn-sm btn-dark btn-filter-width" for="airportRunwayLights_include">
+                                    <i class="fa-solid fa-check"></i>
+                                </label>
+                            </div>
+                            <i class="ms-2 fa fa-lightbulb-on"></i>&nbsp;Runway with lights
                         </div>
+
+                        <div class="mt-1">
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check red" name="airportAirbases" value="-1" id="airportAirbases_exclude" autocomplete="off">
+                                <label class="btn btn-sm btn-dark btn-filter-width" for="airportAirbases_exclude">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </label>
+                            
+                                <input type="radio" class="btn-check light" name="airportAirbases" value="0" id="airportAirbases_neutral" autocomplete="off" checked>
+                                <label class="btn btn-sm btn-dark btn-filter-width" for="airportAirbases_neutral">
+                                    <i class="fa-solid fa-slash-forward"></i>
+                                </label>
+                            
+                                <input type="radio" class="btn-check green" name="airportAirbases" value="1" id="airportAirbases_include" autocomplete="off">
+                                <label class="btn btn-sm btn-dark btn-filter-width" for="airportAirbases_include">
+                                    <i class="fa-solid fa-check"></i>
+                                </label>
+                            </div>
+                            <i class="ms-2 fa fa-jet-fighter"></i>&nbsp;Airbases
+                        </div>                        
                     </div>
                     
                     <div class="col-sm-3 col-md-3 col-lg-2 text-start">
-                        <label>Meteo Condition</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="metcondition" value="ANY" id="met-any" checked>
-                            <label class="form-check-label" for="met-any">
-                                Any
+                        
+                        <label>Airport Size</label>
+                        
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" value="1" id="filterAirportSizeSmall" name="filterAirportSize[]" checked>
+                            <label class="form-check-label" for="filterAirportSizeSmall">
+                                Small
                             </label>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="metcondition" value="IFR" id="met-ifr">
-                            <label class="form-check-label" for="met-ifr">
-                                IFR
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" value="1" id="filterAirportSizeMedium" name="filterAirportSize[]" checked>
+                            <label class="form-check-label" for="filterAirportSizeMedium">
+                                Medium
                             </label>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="metcondition" value="VFR" id="met-vfr">
-                            <label class="form-check-label" for="met-vfr">
-                                VFR
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" value="1" id="filterAirportSizeLarge" name="filterAirportSize[]" checked>
+                            <label class="form-check-label" for="filterAirportSizeLarge">
+                                Large
                             </label>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -300,7 +392,7 @@
                 behaviour: 'drag',
                 range: {
                     'min': [0],
-                    'max': [24]
+                    'max': [12]
                 }
             });
             
@@ -308,7 +400,13 @@
             var airtimeMinInput = document.getElementById('airtimeMin');
             var airtimeMaxInput = document.getElementById('airtimeMax');
             airtimeSlider.noUiSlider.on('update', function (values) {
-                airtimeSliderText.innerHTML = Math.round(values[0]) + '-' + Math.round(values[1]) + ' hours';
+
+                if(values[1] == 12){
+                    airtimeSliderText.innerHTML = Math.round(values[0]) + '-' + Math.round(values[1]) + '+ hours';
+                } else {
+                    airtimeSliderText.innerHTML = Math.round(values[0]) + '-' + Math.round(values[1]) + ' hours';
+                }
+
                 airtimeMinInput.value = Math.round(values[0])
                 airtimeMaxInput.value = Math.round(values[1])
             });
