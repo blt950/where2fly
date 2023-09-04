@@ -117,10 +117,8 @@ function MultiselectDropdown(options){
         
         var timeout = null
         search.addEventListener('input',()=>{
-            console.log("type")
             clearTimeout(timeout);
             timeout = setTimeout(() => {
-                console.log("sort")
                 list.querySelectorAll(":scope div:not(.multiselect-dropdown-all-selector)").forEach(d=>{
                     var txt=d.querySelector("label").innerText.toUpperCase();
                     d.style.display=txt.includes(search.value.toUpperCase())?'block':'none';

@@ -173,12 +173,16 @@ body {
 .expandFilterGroup{
 
     .divider{
-        width: 10rem;
+        width: 15vw;
         height: 1px;
         background: rgba($primary, 0.5);
 
         margin-bottom: 0;
         display: inline-block;
+
+        @include media-breakpoint-down(sm) {
+            width: 8vw;
+        }
     }
 
     .button{
@@ -306,7 +310,11 @@ table{
 main{
 
     &.front{
-        min-height: 860px;
+        padding-top: 200px;
+
+        @include media-breakpoint-between(xs, md) {
+            padding-top: 0;
+        }
     }
 
     @include media-breakpoint-between(xs, md) {
