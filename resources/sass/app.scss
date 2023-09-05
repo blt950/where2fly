@@ -111,6 +111,8 @@ body {
 #submitBtn{
     width: 100%;
     height: 42px;
+
+    margin-top: 24px;
 }
 
 
@@ -177,7 +179,7 @@ body {
         height: 1px;
         background: rgba($primary, 0.5);
 
-        margin-bottom: 0;
+        margin-bottom: 3px;
         display: inline-block;
 
         @include media-breakpoint-down(sm) {

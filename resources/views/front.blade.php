@@ -97,7 +97,7 @@
                         </div>
                     </div>
 
-                    <div class="col-sm-12 col-md-9 col-lg-2 align-self-center">
+                    <div class="col-sm-12 col-md-9 col-lg-2 align-self-start">
                         <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
                             Search <i class="fas fa-search"></i>
                         </button>
