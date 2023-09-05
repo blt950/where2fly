@@ -120,7 +120,7 @@ function MultiselectDropdown(options){
             clearTimeout(timeout);
             timeout = setTimeout(() => {
                 list.querySelectorAll(":scope div:not(.multiselect-dropdown-all-selector)").forEach(d=>{
-                    var txt=d.querySelector("label").innerHTML.toUpperCase();
+                    var txt=d.querySelector("label").textContent.toUpperCase();
                     d.style.display=txt.includes(search.value.toUpperCase())?'block':'none';
                 })}
             , 250)
