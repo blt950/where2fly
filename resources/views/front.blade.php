@@ -78,20 +78,20 @@
                         <label>Order by</label>
                         
                         <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" value="1" id="filterWeather" name="filterWeather" checked>
-                            <label class="form-check-label" for="filterWeather">
+                            <input class="form-check-input" type="checkbox" value="1" id="sortWeather" name="sortWeather" checked>
+                            <label class="form-check-label" for="sortWeather">
                                 Worst Weather
                             </label>
-                            @error('filterWeather')
+                            @error('sortWeather')
                             <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                             @enderror
                         </div>
                         <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" value="1" id="filterATC" name="filterATC" checked>
-                            <label class="form-check-label" for="filterATC">
+                            <input class="form-check-input" type="checkbox" value="1" id="sortATC" name="sortATC" checked>
+                            <label class="form-check-label" for="sortATC">
                                 ATC Coverage
                             </label>
-                            @error('filterATC')
+                            @error('sortATC')
                             <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                             @enderror
                         </div>
@@ -114,17 +114,17 @@
                             @if(str_starts_with($k, 'METAR'))
                                 <div class="mt-1">
                                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                        <input type="radio" class="btn-check red" name="{{ $k }}_filter" value="-1" id="{{ $k }}_exclude" autocomplete="off">
+                                        <input type="radio" class="btn-check red" name="scores[{{ $k }}]" value="-1" id="{{ $k }}_exclude" autocomplete="off">
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_exclude">
                                             <i class="fa-solid fa-xmark"></i>
                                         </label>
                                     
-                                        <input type="radio" class="btn-check light" name="{{ $k }}_filter" value="0" id="{{ $k }}_neutral" autocomplete="off" checked>
+                                        <input type="radio" class="btn-check light" name="scores[{{ $k }}]" value="0" id="{{ $k }}_neutral" autocomplete="off" checked>
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_neutral">
                                             <i class="fa-solid fa-slash-forward"></i>
                                         </label>
                                     
-                                        <input type="radio" class="btn-check green" name="{{ $k }}_filter" value="1" id="{{ $k }}_include" autocomplete="off">
+                                        <input type="radio" class="btn-check green" name="scores[{{ $k }}]" value="1" id="{{ $k }}_include" autocomplete="off">
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_include">
                                             <i class="fa-solid fa-check"></i>
                                         </label>
@@ -163,17 +163,17 @@
                             @if(str_starts_with($k, 'VATSIM'))
                                 <div class="mt-1">
                                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                        <input type="radio" class="btn-check red" name="{{ $k }}_filter" value="-1" id="{{ $k }}_exclude" autocomplete="off">
+                                        <input type="radio" class="btn-check red" name="scores[{{ $k }}]" value="-1" id="{{ $k }}_exclude" autocomplete="off">
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_exclude">
                                             <i class="fa-solid fa-xmark"></i>
                                         </label>
                                     
-                                        <input type="radio" class="btn-check light" name="{{ $k }}_filter" value="0" id="{{ $k }}_neutral" autocomplete="off" checked>
+                                        <input type="radio" class="btn-check light" name="scores[{{ $k }}]" value="0" id="{{ $k }}_neutral" autocomplete="off" checked>
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_neutral">
                                             <i class="fa-solid fa-slash-forward"></i>
                                         </label>
                                     
-                                        <input type="radio" class="btn-check green" name="{{ $k }}_filter" value="1" id="{{ $k }}_include" autocomplete="off">
+                                        <input type="radio" class="btn-check green" name="scores[{{ $k }}]" value="1" id="{{ $k }}_include" autocomplete="off">
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_include">
                                             <i class="fa-solid fa-check"></i>
                                         </label>
@@ -187,18 +187,18 @@
 
                             <div class="mt-1">
                                 <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                    <input type="radio" class="btn-check red" name="airportWithRoutesOnly" value="-1" id="airportWithRoutesOnly_exclude" autocomplete="off">
-                                    <label class="btn btn-sm btn-dark btn-filter-width" for="airportWithRoutesOnly_exclude">
+                                    <input type="radio" class="btn-check red" name="destinationWithRoutesOnly" value="-1" id="destinationWithRoutesOnly_exclude" autocomplete="off">
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="destinationWithRoutesOnly_exclude">
                                         <i class="fa-solid fa-xmark"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check light" name="airportWithRoutesOnly" value="0" id="airportWithRoutesOnly_neutral" autocomplete="off" checked>
-                                    <label class="btn btn-sm btn-dark btn-filter-width" for="airportWithRoutesOnly_neutral">
+                                    <input type="radio" class="btn-check light" name="destinationWithRoutesOnly" value="0" id="destinationWithRoutesOnly_neutral" autocomplete="off" checked>
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="destinationWithRoutesOnly_neutral">
                                         <i class="fa-solid fa-slash-forward"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check green" name="airportWithRoutesOnly" value="1" id="airportWithRoutesOnly_include" autocomplete="off">
-                                    <label class="btn btn-sm btn-dark btn-filter-width" for="airportWithRoutesOnly_include">
+                                    <input type="radio" class="btn-check green" name="destinationWithRoutesOnly" value="1" id="destinationWithRoutesOnly_include" autocomplete="off">
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="destinationWithRoutesOnly_include">
                                         <i class="fa-solid fa-check"></i>
                                     </label>
                                 </div>
@@ -207,18 +207,18 @@
 
                             <div class="mt-1">
                                 <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                    <input type="radio" class="btn-check red" name="airportRunwayLights" value="-1" id="airportRunwayLights_exclude" autocomplete="off">
-                                    <label class="btn btn-sm btn-dark btn-filter-width" for="airportRunwayLights_exclude">
+                                    <input type="radio" class="btn-check red" name="destinationRunwayLights" value="-1" id="destinationRunwayLights_exclude" autocomplete="off">
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="destinationRunwayLights_exclude">
                                         <i class="fa-solid fa-xmark"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check light" name="airportRunwayLights" value="0" id="airportRunwayLights_neutral" autocomplete="off" checked>
-                                    <label class="btn btn-sm btn-dark btn-filter-width" for="airportRunwayLights_neutral">
+                                    <input type="radio" class="btn-check light" name="destinationRunwayLights" value="0" id="destinationRunwayLights_neutral" autocomplete="off" checked>
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="destinationRunwayLights_neutral">
                                         <i class="fa-solid fa-slash-forward"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check green" name="airportRunwayLights" value="1" id="airportRunwayLights_include" autocomplete="off">
-                                    <label class="btn btn-sm btn-dark btn-filter-width" for="airportRunwayLights_include">
+                                    <input type="radio" class="btn-check green" name="destinationRunwayLights" value="1" id="destinationRunwayLights_include" autocomplete="off">
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="destinationRunwayLights_include">
                                         <i class="fa-solid fa-check"></i>
                                     </label>
                                 </div>
@@ -227,18 +227,18 @@
 
                             <div class="mt-1">
                                 <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                    <input type="radio" class="btn-check red" name="airportAirbases" value="-1" id="airportAirbases_exclude" autocomplete="off">
-                                    <label class="btn btn-sm btn-dark btn-filter-width" for="airportAirbases_exclude">
+                                    <input type="radio" class="btn-check red" name="destinationAirbases" value="-1" id="destinationAirbases_exclude" autocomplete="off">
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_exclude">
                                         <i class="fa-solid fa-xmark"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check light" name="airportAirbases" value="0" id="airportAirbases_neutral" autocomplete="off" checked>
-                                    <label class="btn btn-sm btn-dark btn-filter-width" for="airportAirbases_neutral">
+                                    <input type="radio" class="btn-check light" name="destinationAirbases" value="0" id="destinationAirbases_neutral" autocomplete="off" checked>
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_neutral">
                                         <i class="fa-solid fa-slash-forward"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check green" name="airportAirbases" value="1" id="airportAirbases_include" autocomplete="off">
-                                    <label class="btn btn-sm btn-dark btn-filter-width" for="airportAirbases_include">
+                                    <input type="radio" class="btn-check green" name="destinationAirbases" value="1" id="destinationAirbases_include" autocomplete="off">
+                                    <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_include">
                                         <i class="fa-solid fa-check"></i>
                                     </label>
                                 </div>
@@ -248,24 +248,23 @@
                         </div>
                         
                         <div class="col-sm-12 col-md-9 col-lg-3 text-start">
-
                             <label class="d-block">Airport Size</label>
                             <div>
                                 <div class="form-check form-check-inline mb-0 me-reduced">
-                                    <input class="form-check-input" type="checkbox" value="small_airport" id="filterAirportSizeSmall" name="filterAirportSize[]" checked>
-                                    <label class="form-check-label" for="filterAirportSizeSmall">
+                                    <input class="form-check-input" type="checkbox" value="small_airport" id="destinationAirportSizeSmall" name="destinationAirportSize[]" checked>
+                                    <label class="form-check-label" for="destinationAirportSizeSmall">
                                         Small
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline mb-0 me-reduced">
-                                    <input class="form-check-input" type="checkbox" value="medium_airport" id="filterAirportSizeMedium" name="filterAirportSize[]" checked>
-                                    <label class="form-check-label" for="filterAirportSizeMedium">
+                                    <input class="form-check-input" type="checkbox" value="medium_airport" id="destinationAirportSizeMedium" name="destinationAirportSize[]" checked>
+                                    <label class="form-check-label" for="destinationAirportSizeMedium">
                                         Medium
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline mb-0 me-reduced">
-                                    <input class="form-check-input" type="checkbox" value="large_airport" id="filterAirportSizeLarge" name="filterAirportSize[]" checked>
-                                    <label class="form-check-label" for="filterAirportSizeLarge">
+                                    <input class="form-check-input" type="checkbox" value="large_airport" id="destinationAirportSizeLarge" name="destinationAirportSize[]" checked>
+                                    <label class="form-check-label" for="destinationAirportSizeLarge">
                                         Large
                                     </label>
                                 </div>
