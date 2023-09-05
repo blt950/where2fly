@@ -78,20 +78,20 @@
                         <label>Order by</label>
                         
                         <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" value="1" id="sortWeather" name="sortWeather" checked>
-                            <label class="form-check-label" for="sortWeather">
+                            <input class="form-check-input" type="checkbox" value="1" id="sortByWeather" name="sortByWeather" checked>
+                            <label class="form-check-label" for="sortByWeather">
                                 Worst Weather
                             </label>
-                            @error('sortWeather')
+                            @error('sortByWeather')
                             <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                             @enderror
                         </div>
                         <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" value="1" id="sortATC" name="sortATC" checked>
-                            <label class="form-check-label" for="sortATC">
+                            <input class="form-check-input" type="checkbox" value="1" id="sortByATC" name="sortByATC" checked>
+                            <label class="form-check-label" for="sortByATC">
                                 ATC Coverage
                             </label>
-                            @error('sortATC')
+                            @error('sortByATC')
                             <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                             @enderror
                         </div>
@@ -104,9 +104,15 @@
                     </div>
                 </div>
 
+                @if($errors->any())
+                    <div class="validation-error mt-4">
+                        {{ implode('', $errors->all(':message')) }}
+                    </div>
+                @endif
+
                 <div id="filters" class="hide-filters">             
                     <div class="row g-3 mt-3 pb-4 justify-content-center bt">
-                        
+
                         <div class="col-sm-6 col-md-4 col-lg-4 text-start">
                             <label>Weather parameters</label>
 
