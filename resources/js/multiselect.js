@@ -120,10 +120,16 @@ function MultiselectDropdown(options){
             clearTimeout(timeout);
             timeout = setTimeout(() => {
                 list.querySelectorAll(":scope div:not(.multiselect-dropdown-all-selector)").forEach(d=>{
-                    var txt=d.querySelector("label").innerText.toUpperCase();
+                    var txt=d.querySelector("label").innerHTML.toUpperCase();
                     d.style.display=txt.includes(search.value.toUpperCase())?'block':'none';
-                })
-            }, 1500)
+                })}
+            , 250)
+        });
+
+        search.addEventListener('keydown',(ev)=>{
+            if(ev.key==='Enter' || ev.keyCode === 13){
+                ev.preventDefault();
+            }
         });
         
         div.addEventListener('click',()=>{
