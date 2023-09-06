@@ -127,29 +127,20 @@ class Airport extends Model
 
     }
 
-    public static function findWithCriteria($continent, 
-                                            $country = null,
-                                            $departureIcao = null, 
-                                            Collection $filterByScores = null, 
-                                            int $destinationWithRoutesOnly = null, 
-                                            int $destinationRunwayLights = null, 
-                                            int $destinationAirbases = null, 
-                                            Array $destinationAirportSize = null,
-                                            Array $whitelistedArrivals = null,
-                                            Array $filterByAirlines = null
+    public static function findWithCriteria(
+            string $continent, 
+            string $country = null,    
+            string $departureIcao = null, 
+            Array $destinationAirportSize = null,
+            Array $whitelistedArrivals = null,
+            Collection $filterByScores = null, 
+            int $destinationWithRoutesOnly = null, 
+            int $destinationRunwayLights = null, 
+            int $destinationAirbases = null, 
+            Array $filterByAirlines = null
         ){
 
         $returnQuery = Airport::where('type', '!=', 'closed');
-
-        // Destination airport size
-        if(isset($destinationAirportSize)){
-            $returnQuery = $returnQuery->whereIn('type', $destinationAirportSize);
-        }
-
-        // Only airports with open runways
-        $returnQuery = $returnQuery->whereHas('runways', function($query){
-            $query->where('closed', false);
-        });
         
         // If the filter is domestic
         if(isset($country) && $continent == "DO"){
@@ -172,6 +163,16 @@ class Airport extends Model
             } else {
                 $returnQuery = $returnQuery->where('airports.continent', $continent);
             }
+        }
+
+        // Only airports with open runways
+        $returnQuery = $returnQuery->whereHas('runways', function($query){
+            $query->where('closed', false);
+        });
+
+        // Destination airport size
+        if(isset($destinationAirportSize)){
+            $returnQuery = $returnQuery->whereIn('type', $destinationAirportSize);
         }
             
         // Filter out departure airport, get airports with metar, fetch relevant data and run the query
@@ -196,21 +197,27 @@ class Airport extends Model
                 }
             }
 
-            if($includeScores->count()){
-                $returnQuery = $returnQuery->whereHas('scores', function($query) use ($includeScores){
-                    $query->whereIn('reason', $includeScores);
-                });
-            }
-            
-            if($excludeScores->count()){
-                $returnQuery = $returnQuery->whereDoesntHave('scores', function($query) use ($excludeScores){
-                    $query->whereIn('reason', $excludeScores);
-                });
-            }
+            $returnQuery = $returnQuery->where(function($returnQuery) use ($includeScores, $excludeScores){
+                if($includeScores->count()){
+                    foreach($includeScores as $score){
+                        $returnQuery = $returnQuery->whereHas('scores', function($query) use ($score){
+                            $query->where('reason', $score);
+                        });
+                    }
+                }
+                
+                if($excludeScores->count()){
+                    foreach($excludeScores as $score){
+                        $returnQuery = $returnQuery->whereDoesntHave('scores', function($query) use ($score){
+                            $query->where('reason', $score);
+                        });
+                    }
+                }
+            });
         }
 
         // Only airports with routes to the arrival airport
-        if($destinationWithRoutesOnly){
+        if(isset($destinationWithRoutesOnly) && $destinationWithRoutesOnly !== 0){
             
             if($destinationWithRoutesOnly == 1){
                 $returnQuery = $returnQuery->whereHas('arrivalFlights', function($query) use ($departureIcao){
@@ -225,7 +232,7 @@ class Airport extends Model
         }
 
         // Only airports with runway lights
-        if($destinationRunwayLights){
+        if(isset($destinationRunwayLights) && $destinationRunwayLights !== 0){
             
             if($destinationRunwayLights == 1){
                 $returnQuery = $returnQuery->whereHas('runways', function($query){
@@ -240,7 +247,7 @@ class Airport extends Model
         }
 
         // Destinations that are airbases
-        if($destinationAirbases){
+        if(isset($destinationAirbases) && $destinationAirbases !== 0){
             
             if($destinationAirbases == 1){
                 $returnQuery = $returnQuery->where('w2f_airforcebase', true);
