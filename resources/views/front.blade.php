@@ -302,7 +302,7 @@
                                 placeholder="All airlines">
                                 {{ $airlines = \App\Models\Airline::orderBy('name')->has('flights')->get() }}
                                 @foreach($airlines as $airline)
-                                    <option value="{{ $airline->id }}">{{ $airline->name }}</option>
+                                    <option value="{{ $airline->icao_code }}">{{ $airline->name }}</option>
                                 @endforeach
                             </select>
 

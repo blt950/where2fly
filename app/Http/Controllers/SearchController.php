@@ -108,7 +108,7 @@ class SearchController extends Controller
 
         // Get airports according to filter
         $airports = collect();
-        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, null, $filterByScores, $destinationWithRoutesOnly, $destinationRunwayLights, $destinationAirbases, $filterByAirlines);
+        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines);
 
         // Filter the eligable airports
         $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
