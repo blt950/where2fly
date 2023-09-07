@@ -173,6 +173,8 @@ class Airport extends Model
         // Destination airport size
         if(isset($destinationAirportSize)){
             $returnQuery = $returnQuery->whereIn('type', $destinationAirportSize);
+        } else {
+            $returnQuery = $returnQuery->where('type', ['small_airport', 'medium_airport', 'large_airport']);
         }
             
         // Filter out departure airport, get airports with metar, fetch relevant data and run the query

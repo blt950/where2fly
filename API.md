@@ -34,9 +34,9 @@ Returns airports matching your search query
 | `airtimeMax` | No | string | Maximum airtime | 24 |
 | `scores` | No | array* | Apply condition weather or ATC filters as described below | null |
 | `metconditions` | No | string | Apply weather filters `IFR` or `VFR` | null |
-| `destinationRunwayLights` | No | int* | Only show airports with runway lights | null |
-| `destinationAirbases` | No | int* | Only show airports with airbases | null |
-| `destinationAirportSize` | No | array | Only show airports with the selected size | null |
+| `destinationRunwayLights` | No | int* | Only show airports with runway lights | 0 |
+| `destinationAirbases` | No | int* | Only show airports with airbases | 0 |
+| `destinationAirportSize` | No | array | Only show airports with the selected size | airport_small, airport_medium, airport_large |
 | `destinationFilter` | No | array | Filter destinations to your liking | null |
 | `elevationMin` | No | string | Minimum airport elevation | 0 |
 | `elevationMax` | No | string | Maximum airport elevation | 18000 |

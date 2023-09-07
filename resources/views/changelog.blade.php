@@ -18,9 +18,9 @@
 
             <h2>v1.4.0</h2>
             <ul>
-                <li>Fixed airline routes in search results displaying incorrect flights</li>
-                <li>Fixed so airports without runways don't show up anymore</li>
-                <li>Tweaked some texts</li>
+                <li>New filtering options in search</li>
+                <li>Added filter for airlines, runway lights, airport sizes</li>
+                <li>API tweaked to new filters</li>
             </ul>
 
             <h2>v1.3.1</h2>

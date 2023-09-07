@@ -44,8 +44,8 @@ class SearchController extends Controller{
         isset($data['airtimeMax']) ? $airtimeMax = $data['airtimeMax'] : $airtimeMax = 24;
         isset($data['scores']) ? $filterByScores = $data['scores'] : $filterByScores = null;
         isset($data['metcondition']) ? $metcon = $data['metcondition'] : $metcon = null;
-        isset($data['destinationRunwayLights']) ? $destinationRunwayLights = (int)$data['destinationRunwayLights'] : $destinationRunwayLights = null;
-        isset($data['destinationAirbases']) ? $destinationAirbases = (int)$data['destinationAirbases'] : $destinationAirbases = null;
+        isset($data['destinationRunwayLights']) ? $destinationRunwayLights = (int)$data['destinationRunwayLights'] : $destinationRunwayLights = 0;
+        isset($data['destinationAirbases']) ? $destinationAirbases = (int)$data['destinationAirbases'] : $destinationAirbases = 0;
         (isset($data['destinationAirportSize']) && !empty($data['destinationAirportSize'])) ? $destinationAirportSize = $data['destinationAirportSize'] : $destinationAirportSize = null;
         isset($data['elevationMin']) ? $elevationMin = $data['elevationMin'] : $elevationMin = -2000;
         isset($data['elevationMax']) ? $elevationMax = $data['elevationMax'] : $elevationMax = 18000;
