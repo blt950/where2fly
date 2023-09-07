@@ -168,6 +168,30 @@ body {
     
 }
 
+#markdown{
+    padding: 2rem;
+    color: black;
+    background: white;
+
+    h1,h2,h3,h4,h5,h6{
+        padding-top: 2rem;
+    }
+
+    p{
+        font-family: "Work Sans", sans-serif;
+    }
+
+    code{
+        color: #9d0000;
+        background: #f5f5f5;
+        padding: 2px 5px;
+    }
+
+    table tr{
+        border: 1px solid $gray-500;
+    }
+}
+
 .hide-filters{
     display: none;
 }

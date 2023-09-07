@@ -31,6 +31,10 @@ Route::get('/privacy', function (){
     return view('privacy');
 })->name('privacy');
 
+Route::get('/api', function (){
+    return view('api');
+})->name('api');
+
 Route::post('/search', [SearchController::class, 'search'])->name('search');
 
 // Failsafe if you try to access the search page directly
