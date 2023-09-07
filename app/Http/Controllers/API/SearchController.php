@@ -19,7 +19,7 @@ class SearchController extends Controller{
 
         $data = request()->validate([
             'departure' => 'required|exists:App\Models\Airport,icao',
-            'continent' => 'sometimes|string',
+            'continent' => 'required|string',
             'codeletter' => 'required|string',
             'airtimeMin' => 'sometimes|numeric|between:0,24',
             'airtimeMax' => 'sometimes|numeric|between:0,24',
@@ -44,7 +44,6 @@ class SearchController extends Controller{
         isset($data['airtimeMax']) ? $airtimeMax = $data['airtimeMax'] : $airtimeMax = 24;
         isset($data['scores']) ? $filterByScores = $data['scores'] : $filterByScores = null;
         isset($data['metcondition']) ? $metcon = $data['metcondition'] : $metcon = null;
-        isset($data['destinationWithRoutesOnly']) ? $destinationWithRoutesOnly = (int)$data['destinationWithRoutesOnly'] : $destinationWithRoutesOnly = null;
         isset($data['destinationRunwayLights']) ? $destinationRunwayLights = (int)$data['destinationRunwayLights'] : $destinationRunwayLights = null;
         isset($data['destinationAirbases']) ? $destinationAirbases = (int)$data['destinationAirbases'] : $destinationAirbases = null;
         (isset($data['destinationAirportSize']) && !empty($data['destinationAirportSize'])) ? $destinationAirportSize = $data['destinationAirportSize'] : $destinationAirportSize = null;
@@ -63,7 +62,6 @@ class SearchController extends Controller{
             });
         }
 
-
         /**
         *
         *  Fetch the requested data
@@ -73,7 +71,7 @@ class SearchController extends Controller{
         $departure = Airport::where('icao', $data['departure'])->get()->first();
 
         $airports = collect();
-        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, $arrivalWhitelist, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly);
+        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, $arrivalWhitelist, $filterByScores, $destinationRunwayLights, $destinationAirbases);
 
         $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
         $suggestedAirports = $suggestedAirports->shuffle(); 
