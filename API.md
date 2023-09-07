@@ -50,9 +50,9 @@ Returns airports matching your search query
 
 #### Regarding array* and int*
 These parameters should be supplied with an int value standalone or within an array:
-- `-1` = Not allowed
+- `-1` = Exclude
 - `0` = Neutral
-- `1` = Allowed
+- `1` = Must be present
 
 Example: `scores[METAR_WINDY] = -1` to exclude all windy airports, or `destinationRunwayLights=1` to only show airports with runway lights.
 
