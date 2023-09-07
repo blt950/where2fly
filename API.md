@@ -4,7 +4,7 @@
 - Remember to add `Accept: application/json` header in all of your calls to get return in json format.
 
 ### Environments
-- `https://qa.where2fly.today/` for **testing data** and quality assurance. Data in this environment is often static and rarely updated, so it's easier to debug your application.
+- `https://qa.where2fly.today/` for **testing data** and quality assurance. Data in this environment is often static and rarely updated, so it's easier to debug your application. Do not share data from here to your users.
 - `https://where2fly.today/` for **live** production data
 
 ### API
