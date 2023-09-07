@@ -3,6 +3,10 @@
 - The authorisation token is a bearer token, used in a header like this `Authorization: Bearer <token>`
 - Remember to add `Accept: application/json` header in all of your calls to get return in json format.
 
+### URL
+`https://qa.where2fly.today/` for **testing data** and quality assurance. Data in this environment is often static and rarely updated, so it's easier to debug your application.
+`https://where2fly.today/` for **live** production data
+
 ### Access
 To get access to the API, please contact Blt950 on Discord.
 
