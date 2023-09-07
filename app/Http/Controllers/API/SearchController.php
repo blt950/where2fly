@@ -97,7 +97,7 @@ class SearchController extends Controller{
                 "contient" => $airport->continent,
                 "country" => $airport->iso_country,
                 "region" => $airport->iso_region,
-                "metar" => $airport->metar->metar,
+                "metar" => (config('app.env') == 'production') ? $airport->metar->metar : 'TEST-DATA '.$airport->metar->metar,
                 "longestRwyFt" => $airport->longestRunway(),
                 "scores" => $scores,
                 "airtime" => $airport->airtime,
@@ -115,7 +115,7 @@ class SearchController extends Controller{
             "contient" => $departure->continent,
             "country" => $departure->iso_country,
             "region" => $departure->iso_region,
-            "metar" => $departure->metar->metar,
+            "metar" => (config('app.env') == 'production') ? $departure->metar->metar : 'TEST-DATA '.$departure->metar->metar,
             "longestRwyFt" => $departure->longestRunway(),
             "scores" => $departure->scores->pluck('reason'),
         ];
