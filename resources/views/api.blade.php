@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @section('meta-description')
-<meta name="description" content="Check out the details of the new updates">
+<meta name="description" content="Documentation of the API">
 @endsection
 
-@section('title', 'Changelog')
+@section('title', 'API Docs')
 @section('content')
 
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
