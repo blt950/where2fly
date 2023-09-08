@@ -42,7 +42,7 @@ class SearchController extends Controller{
         $codeletter = $data['codeletter'];
         isset($data['airtimeMin']) ? $airtimeMin = $data['airtimeMin'] : $airtimeMin = 0;
         isset($data['airtimeMax']) ? $airtimeMax = $data['airtimeMax'] : $airtimeMax = 24;
-        isset($data['scores']) ? $filterByScores = $data['scores'] : $filterByScores = null;
+        isset($data['scores']) ? $filterByScores = array_map('intval', $data['scores']) : $filterByScores = null;
         isset($data['metcondition']) ? $metcon = $data['metcondition'] : $metcon = null;
         isset($data['destinationRunwayLights']) ? $destinationRunwayLights = (int)$data['destinationRunwayLights'] : $destinationRunwayLights = 0;
         isset($data['destinationAirbases']) ? $destinationAirbases = (int)$data['destinationAirbases'] : $destinationAirbases = 0;
@@ -54,13 +54,6 @@ class SearchController extends Controller{
         
         isset($data['arrivalWhitelist']) ? $arrivalWhitelist = $data['arrivalWhitelist'] : $arrivalWhitelist = null;
         isset($data['limit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
-
-        // Fetch the requested score filtering and cast it to numbers
-        if(isset($filterByScores)){
-            $filterByScores = collect($filterByScores)->map(function($item, $key){
-                return (int)$item;
-            });
-        }
 
         /**
         *

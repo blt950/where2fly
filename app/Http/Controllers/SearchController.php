@@ -68,10 +68,7 @@ class SearchController extends Controller
         isset($data['sortByWeather']) ? $sortByScores = array_merge($sortByScores, ScoreController::getWeatherTypes()) : null;
         isset($data['sortByATC']) ? $sortByScores = array_merge($sortByScores, ScoreController::getVatsimTypes()) : null;
 
-        // Fetch the requested score filtering and cast it to numbers
-        $filterByScores = collect($data['scores'])->map(function($item, $key){
-            return (int)$item;
-        });
+        $filterByScores = array_map('intval', $data['scores']);
 
         $metcon = $data['metcondition'];
         $destinationWithRoutesOnly = (int)$data['destinationWithRoutesOnly'];

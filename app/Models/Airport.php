@@ -133,7 +133,7 @@ class Airport extends Model
             string $departureIcao = null, 
             Array $destinationAirportSize = null,
             Array $whitelistedArrivals = null,
-            Collection $filterByScores = null, 
+            Array $filterByScores = null, 
             int $destinationRunwayLights = null, 
             int $destinationAirbases = null, 
             int $destinationWithRoutesOnly = null, 
@@ -186,36 +186,22 @@ class Airport extends Model
             $returnQuery = $returnQuery->whereIn('icao', $whitelistedArrivals);
         }
 
-        if(isset($filterByScores)){
+        if(isset($filterByScores) && !empty($filterByScores)){
             
-            $includeScores = collect();
-            $excludeScores = collect();
-
-            foreach($filterByScores as $score => $value){
-                if($value == 1){
-                    $includeScores->push($score);
-                } else if($value == -1){
-                    $excludeScores->push($score);
-                }
-            }
-
-            $returnQuery = $returnQuery->where(function($returnQuery) use ($includeScores, $excludeScores){
-                if($includeScores->count()){
-                    foreach($includeScores as $score){
+            $returnQuery = $returnQuery->where(function($returnQuery) use ($filterByScores){
+                foreach($filterByScores as $score => $value){
+                    if($value == 1){
                         $returnQuery = $returnQuery->whereHas('scores', function($query) use ($score){
                             $query->where('reason', $score);
                         });
-                    }
-                }
-                
-                if($excludeScores->count()){
-                    foreach($excludeScores as $score){
+                    } else if($value == -1){
                         $returnQuery = $returnQuery->whereDoesntHave('scores', function($query) use ($score){
                             $query->where('reason', $score);
                         });
                     }
                 }
             });
+
         }
 
         // Only airports with runway lights
