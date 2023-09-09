@@ -17,11 +17,12 @@
         <div class="text-start">
 
             <h2 class="mb-0">v1.4.0</h2>
-            <span class="badge ps-0 pb-2">2023-09-XX</span>
+            <span class="badge ps-0 pb-2">2023-09-09</span>
             <ul>
                 <li>Added new filtering and merged normal and advanced search into one</li>
                 <li>Added filter for airlines, runway lights, airport sizes</li>
                 <li>Added dates to changelog</li>
+                <li>API: No longer in beta!</li>
                 <li>API: Tweaked to accommodate new filters</li>
                 <li>API: Published public documentation</li>
             </ul>
