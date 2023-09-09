@@ -10,13 +10,13 @@ use App\Models\Flight;
 
 class CollectionAirportFilter{
 
-    public function sortByFilteredScores(){
-        return function($filteredScores){
+    public function sortByScores(){
+        return function($sortByScores){
 
-            $result = $this->sort(function($a, $b) use ($filteredScores){
+            $result = $this->sort(function($a, $b) use ($sortByScores){
 
-                $aScore = $a->scores->whereIn('reason', $filteredScores)->count();
-                $bScore = $b->scores->whereIn('reason', $filteredScores)->count();
+                $aScore = $a->scores->whereIn('reason', $sortByScores)->count();
+                $bScore = $b->scores->whereIn('reason', $sortByScores)->count();
 
                 if($aScore == $bScore) return 0;
                 return ($aScore > $bScore) ? -1 : 1;
@@ -29,7 +29,7 @@ class CollectionAirportFilter{
 
 
     public function filterWithCriteria(){
-        return function($departureAirport, $codeletter, $airtimeMin, $airtimeMax, $requiredMetcon = null, $requiredScores = null, $runwayLengthMin = null, $runwayLengthMax = null, $airportElevationMin = null, $airportElevationMax = null ){
+        return function($departureAirport, $codeletter, $airtimeMin, $airtimeMax, $requiredMetcon = null, $runwayLengthMin = null, $runwayLengthMax = null, $airportElevationMin = null, $airportElevationMax = null ){
 
             $returnCollection = $this
                 ->transform(function ($arrivalAirport) use ($departureAirport, $codeletter){
@@ -43,7 +43,6 @@ class CollectionAirportFilter{
                     return $arrivalAirport;
                 })
                 ->filter(fn ($a) => AirportFilterHelper::hasCorrectMetcon($requiredMetcon, $a))
-                ->filter(fn ($a) => AirportFilterHelper::hasRequiredScores($requiredScores, $a))
                 ->filter(fn ($a) => AirportFilterHelper::hasRequiredAirtime($departureAirport, $a, $codeletter, $airtimeMin, $airtimeMax))
                 ->filter(fn ($a) => AirportFilterHelper::hasRequiredRunwayLength($runwayLengthMin, $runwayLengthMax, $codeletter, $a))
                 ->filter(fn ($a) => AirportFilterHelper::hasRequiredAirportElevation($airportElevationMin, $airportElevationMax, $a));

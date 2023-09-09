@@ -16,14 +16,29 @@
         
         <div class="text-start">
 
-            <h2>v1.3.1</h2>
+            <h2 class="mb-0">v1.4.0</h2>
+            <span class="badge ps-0 pb-2">2023-09-09</span>
+            <ul>
+                <li>Added new filtering and merged normal and advanced search into one</li>
+                <li>Added filter for airlines, runway lights, airport sizes</li>
+                <li>Added dates to changelog</li>
+                <li>Fixed the top list style to match search results</li>
+                <li>Fixed input fields zooming the screen on Safari mobile</li>
+                <li>API: No longer in beta!</li>
+                <li>API: Tweaked to accommodate new filters</li>
+                <li>API: Published public documentation</li>
+            </ul>
+
+            <h2 class="mb-0 mt-4">v1.3.1</h2>
+            <span class="badge ps-0 pb-2">2023-08-29</span>
             <ul>
                 <li>Fixed airline routes in search results displaying incorrect flights</li>
                 <li>Fixed so airports without runways don't show up anymore</li>
                 <li>Tweaked some texts</li>
             </ul>
 
-            <h2>v1.3.0</h2>
+            <h2 class="mb-0 mt-4">v1.3.0</h2>
+            <span class="badge ps-0 pb-2">2023-08-27</span>
             <ul>
                 <li>Added real world flights to search results (Beta)</li>
                 <li>Added option to only search for real world flights in advanced search (Beta)</li>
@@ -31,7 +46,8 @@
                 <li>Fixed some missing military airport definintions (RAAF and RNAS)</li>
             </ul>
 
-            <h2>v1.2.0</h2>
+            <h2 class="mb-0 mt-4">v1.2.0</h2>
+            <span class="badge ps-0 pb-2">2023-07-29</span>
             <ul>
                 <li>Added an API (Beta) to fetch toplist and search</li>
                 <li>Added Windy button in results</li>
@@ -41,12 +57,14 @@
                 <li>Tweaked the design a tiny bit and added some padding to tables</li>
             </ul>
 
-            <h2>v1.1.1</h2>
+            <h2 class="mb-0 mt-4">v1.1.1</h2>
+            <span class="badge ps-0 pb-2">2023-07-24</span>
             <ul>
                 <li>Fixed server error if departure is from an airport without METAR available</li>
             </ul>
 
-            <h2>v1.1.0</h2>
+            <h2 class="mb-0 mt-4">v1.1.0</h2>
+            <span class="badge ps-0 pb-2">2023-07-23</span>
             <ul>
                 <li>Added random departure suggestions if departure is left blank</li>
                 <li>Added a warning if your search ranking criteria are not met</li>
@@ -60,12 +78,14 @@
                 <li>Tweaked some texts</li>
             </ul>
 
-            <h2>v1.0.2</h2>
+            <h2 class="mb-0 mt-4">v1.0.2</h2>
+            <span class="badge ps-0 pb-2">2023-07-21</span>
             <ul>
                 <li>Revised the Privacy Policy and removed tracking cookies</li>
             </ul>
 
-            <h2>v1.0.1</h2>
+            <h2 class="mb-0 mt-4">v1.0.1</h2>
+            <span class="badge ps-0 pb-2">2023-01-22</span>
             <ul>
                 <li>Changed and increased the default runway length for advanced search, this will give a lot more results</li>
                 <li>Fixed duplicate RVR score coming up per runway rather than active</li>
@@ -73,7 +93,8 @@
                 <li>Fixed missing Kosovo tooltip</li> 
             </ul>
 
-            <h2>v1.0.0</h2>
+            <h2 class="mb-0 mt-4">v1.0.0</h2>
+            <span class="badge ps-0 pb-2">2023-01-03</span>
             <ul>
                 <li>Hurray! Finally out of beta!</li>
                 <li>Added SimBrief dispatch shortcut on search results</li>
@@ -84,7 +105,7 @@
                 <li>Fixed an issue with going back would leave search button disabled in some browsers</li>
             </ul>
 
-            <h2>Beta 5</h2>
+            <h2 class="mb-0 mt-4">Beta 5</h2>
             <ul>
                 <li>New design</li>
                 <li>Added new and better paramter icons</li>
@@ -93,7 +114,7 @@
                 <li>Fixed further optimized search times</li>
             </ul>
 
-            <h2>Beta 4</h2>
+            <h2 class="mb-0 mt-4">Beta 4</h2>
             <ul>
                 <li>Added advanced search</li>
                 <li>Added hot airport parameter for airports with 10+ movements</li>
@@ -101,7 +122,7 @@
                 <li>Added more VATSIM data: Which ATC is online and what event is running until when</li>
             </ul>
 
-            <h2>Beta 3</h2>
+            <h2 class="mb-0 mt-4">Beta 3</h2>
             <ul>
                 <li>Added new search ranking options, no need to search for bad weather only anymore</li>
                 <li>Added possibility to search for 6+ hour flights</li>
@@ -112,7 +133,7 @@
                 <li>Fixed breaking action misintepreted as RVR</li>
             </ul>
 
-            <h2>Beta 2</h2>
+            <h2 class="mb-0 mt-4">Beta 2</h2>
             <ul>
                 <li>Optimized loading times</li>
                 <li>Fixed TAFs</li>
@@ -121,7 +142,7 @@
                 <li>Mobile tweaks</li>
             </ul>
 
-            <h2>Beta 1</h2>
+            <h2 class="mb-0 mt-4">Beta 1</h2>
             <ul>
                 <li>Initial release</li>
             </ul>

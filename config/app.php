@@ -16,7 +16,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Where2Fly'),
-    'version' => 'v1.3.1',
+    'version' => 'v1.4.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -206,6 +206,8 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+
+        GrahamCampbell\Markdown\MarkdownServiceProvider::class,
 
     ],
 
