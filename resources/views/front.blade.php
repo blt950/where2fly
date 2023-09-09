@@ -19,7 +19,7 @@
     
         <main class="front">
             <h1 class="mb-0 mt-5">What kind of flight do you want?</h1>
-            <p class="front mb-5">Find destinations based on your weather or coverage criteria</p>
+            <h2 class="front mb-5">Find destinations based on your weather or coverage criteria</h2>
             
             <form id="form" action="{{ route('search') }}" method="POST">
                 @csrf
