@@ -25,8 +25,8 @@
                     @foreach($_POST as $key => $value)
                         @if($key != '_token')
                             @if(is_array($value))
-                                @foreach($value as $subvalue)
-                                    <input type="hidden" name="{{ $key }}[]" value="{{ $subvalue }}">
+                                @foreach($value as $subkey => $subvalue)
+                                    <input type="hidden" name="{{ $key }}[{{ $subkey }}]" value="{{ $subvalue }}">
                                 @endforeach
                             @else
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
