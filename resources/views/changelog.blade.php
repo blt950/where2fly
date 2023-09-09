@@ -19,7 +19,7 @@
             <h2 class="mb-0">v1.4.0</h2>
             <span class="badge ps-0 pb-2">2023-09-09</span>
             <ul>
-                <li>Added new filtering and merged normal and advanced search into one</li>
+                <li>Added a new filtering experience which also has merged normal and advanced search into one</li>
                 <li>Added filter for airlines, runway lights, airport sizes</li>
                 <li>Added dates to changelog</li>
                 <li>Fixed the top list style to match search results</li>
@@ -27,7 +27,7 @@
                 <li>Fixed random airport suggestions previously favouring certain airports</li>
                 <li>API: No longer in beta!</li>
                 <li>API: Tweaked to accommodate new filters</li>
-                <li>API: Published public documentation</li>
+                <li>API: Published <a href="{{ route('api') }}">public documentation</a></li>
             </ul>
 
             <h2 class="mb-0 mt-4">v1.3.1</h2>

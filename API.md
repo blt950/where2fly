@@ -62,6 +62,8 @@ The airport sizes array should contain one or more of the following values:
 - `airport_medium`
 - `airport_large`
 
+#### What about airlines and routes?
+Due to the terms of service of the data provider, this won't be available for further distribution through the Where2Fly API.
 
 ## Data types
 
