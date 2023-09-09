@@ -172,12 +172,19 @@ body {
     padding: 2rem;
     color: black;
     background: white;
-    overflow-x: scroll;
+    
+    @include media-breakpoint-between(xs, md) {
+        overflow-x: scroll;
+    }
 
     h2{
         padding-top: 1rem;
         padding-bottom: 0.5rem;
-        border-top: 1px solid $gray-200;
+
+        &:not(:first-of-type){
+            border-top: 1px solid $gray-200;
+        }
+
     }
 
     h3, h4, h5, h6 {
