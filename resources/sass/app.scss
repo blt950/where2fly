@@ -106,6 +106,11 @@ body {
 
 .form-control{
     height: 42px;
+
+    // Set font size to 16px on mobile
+    @include media-breakpoint-down(sm) {
+        font-size: 1rem;
+    }
 }
 
 #submitBtn{
