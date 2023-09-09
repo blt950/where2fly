@@ -97,7 +97,12 @@ class SearchController extends Controller
             $departure = Airport::where('icao', $data['departure'])->get()->first();
         } else {
             // Get a random airport from the toplist
-            $departure = Airport::findWithCriteria($continent, null, null, null, null, null, null, null, $destinationWithRoutesOnly, $filterByAirlines, 'departureFlights')->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
+            $departure = Airport::findWithCriteria($continent, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, 'departureFlights');
+            if(!$departure || !$departure->count()){
+                return back()->withErrors(['departureNotFound' => 'No departure airport found with given criteria']);
+            }
+        
+            $departure = $departure->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
             $suggestedDeparture = true;
         }
 

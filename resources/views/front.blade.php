@@ -104,6 +104,10 @@
                     </div>
                 </div>
 
+                @error('departureNotFound')
+                    <div class="validation-error mt-2">{{ $message }}</div>
+                @enderror
+
                 <div id="filters" class="hide-filters">             
                     <div class="row g-3 mt-3 pb-4 justify-content-center bt">
 
