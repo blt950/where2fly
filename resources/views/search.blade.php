@@ -130,7 +130,7 @@
                     <tbody>
                         @php $count = 1; @endphp
 
-                        @if( isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
+                        @if( !empty($sortByScores) && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
 
                             <tr class="font-family-paragraph">
                                 <th class="text-center text-info fw-normal pt-3 pb-3" colspan="9">
