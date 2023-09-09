@@ -104,7 +104,7 @@ function MultiselectDropdown(options){
                     sels.map(x=>{
                         var c=newEl('span',{class:'optext',text:x.text, srcOption: x});
                         if((el.attributes['multiselect-hide-x']?.value !== 'true'))
-                        c.appendChild(newEl('span',{class:'optdel',text:'🗙',title:config.txtRemove, onclick:(ev)=>{c.srcOption.listitemEl.dispatchEvent(new Event('click'));div.refresh();ev.stopPropagation();}}));
+                        c.appendChild(newEl('span',{class:['optdel', 'fas', 'fa-xmark'],title:config.txtRemove, onclick:(ev)=>{c.srcOption.listitemEl.dispatchEvent(new Event('click'));div.refresh();ev.stopPropagation();}}));
                         
                         div.appendChild(c);
                     });
