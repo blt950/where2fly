@@ -37,9 +37,7 @@
                     <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">ICAO</th>
                             <th scope="col">Airport</th>
-                            <th scope="col">Country</th>
                             <th scope="col" width="10%">Conditions</th>
                             <th scope="col">Runway</th>
                             <th scope="col" width="50%">Details</th>
@@ -50,9 +48,13 @@
                         @foreach($airports as $airport)
                             <tr>
                                 <th scope="row">{{ $count }}</th>
-                                <td>{{ $airport->icao }}</td>
-                                <td>{{ $airport->name }}</td>
-                                <td><img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img></td>
+                                <td>
+                                    <div>
+                                        <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
+                                        {{ $airport->icao }}
+                                    </div>
+                                    {{ $airport->name }}
+                                </td>
                                 <td class="fs-5">
                                     @foreach($airport->scores as $score)
                                         <i 
