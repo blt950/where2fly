@@ -47,6 +47,10 @@ h1, h2, h3, h4, h5, h6, button, p, a, footer, .btn, .badge{
 
 h1 {
     text-align: center;
+
+    @include media-breakpoint-down(sm) {
+        font-size: calc(1.15rem + 1.2vw);
+    }
 }
 
 .font-family-paragraph
