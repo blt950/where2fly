@@ -322,8 +322,7 @@
             </form>
         </main>
     </div>
-    
-    
+        
     @include('scripts.search')
     
     <script>
@@ -331,18 +330,6 @@
         document.addEventListener('DOMContentLoaded', function () {
 
             const userLocale = 'de-DE';
-
-            // Filter button
-            document.getElementById('expandFilters').addEventListener('click', function () {
-                var filter = document.getElementById('filters');
-                filter.classList.toggle('hide-filters');
-
-                if (filter.classList.contains('hide-filters')) {
-                    document.getElementById('expandFilters').innerHTML = 'Show more filters';
-                } else {
-                    document.getElementById('expandFilters').innerHTML = 'Hide filters';
-                }
-            });
 
             // Sliders
             var elevationSlider = document.getElementById('slider-elevation');
