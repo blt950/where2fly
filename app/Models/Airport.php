@@ -137,7 +137,8 @@ class Airport extends Model
             int $destinationRunwayLights = null, 
             int $destinationAirbases = null, 
             int $destinationWithRoutesOnly = null, 
-            Array $filterByAirlines = null
+            Array $filterByAirlines = null,
+            Array $filterByAirlinesDeparture = null
         ){
 
         $returnQuery = Airport::where('type', '!=', 'closed');
@@ -253,7 +254,17 @@ class Airport extends Model
 
         } else if(isset($filterByAirlines)) {
             $returnQuery = $returnQuery->whereHas('arrivalFlights', function($query) use ($departureIcao, $filterByAirlines){
-                $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlines);
+                if(isset($departureIcao)){
+                    $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlines);
+                } else {
+                    $query->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlines);
+                }
+            });
+        }
+
+        if(isset($filterByAirlinesDeparture)){
+            $returnQuery = $returnQuery->whereHas('departureFlights', function($query) use ($filterByAirlinesDeparture){
+                $query->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlinesDeparture);
             });
         }
 
