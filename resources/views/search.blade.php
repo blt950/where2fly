@@ -154,7 +154,7 @@
                                 <td>{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
                                 <td class="fs-5">
                                     @foreach($airport->scores as $score)
-                                        @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
+                                        @if(isset($filterByScores) && $filterByScores[$score->reason] === 1)
                                             <i 
                                                 class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
                                                 data-bs-html="true"

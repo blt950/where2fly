@@ -117,6 +117,6 @@ class SearchController extends Controller
         $suggestedAirports = $suggestedAirports->splice(0,20);
         $suggestedAirports = $suggestedAirports->addFlights($departure);
 
-        return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture'));
+        return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture', 'filterByScores'));
     }
 }
