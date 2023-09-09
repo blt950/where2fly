@@ -138,7 +138,7 @@ class Airport extends Model
             int $destinationAirbases = null, 
             int $destinationWithRoutesOnly = null, 
             Array $filterByAirlines = null,
-            Array $filterByAirlinesDeparture = null
+            string $flightDirection = 'arrivalFlights'
         ){
 
         $returnQuery = Airport::where('type', '!=', 'closed');
@@ -235,16 +235,24 @@ class Airport extends Model
         if(isset($destinationWithRoutesOnly) && $destinationWithRoutesOnly !== 0){
             
             if($destinationWithRoutesOnly == 1){
-                $returnQuery = $returnQuery->whereHas('arrivalFlights', function($query) use ($departureIcao, $filterByAirlines){
-                    $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3);
+                $returnQuery = $returnQuery->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection){
+                    if($flightDirection == 'arrivalFlights'){
+                        $query->where('dep_icao', $departureIcao);
+                    }   
+
+                    $query->where('flights.seen_counter', '>', 3);
 
                     if(isset($filterByAirlines)){
                         $query->whereIn('airline_icao', $filterByAirlines);
                     }
                 });
             } else if($destinationWithRoutesOnly == -1){
-                $returnQuery = $returnQuery->whereDoesntHave('arrivalFlights', function($query) use ($departureIcao, $filterByAirlines){
-                    $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3);
+                $returnQuery = $returnQuery->whereDoesntHave($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection){
+                    if($flightDirection == 'arrivalFlights'){
+                        $query->where('dep_icao', $departureIcao);
+                    }
+
+                    $query->where('flights.seen_counter', '>', 3);
 
                     if(isset($filterByAirlines)){
                         $query->whereIn('airline_icao', $filterByAirlines);
@@ -253,18 +261,12 @@ class Airport extends Model
             }
 
         } else if(isset($filterByAirlines)) {
-            $returnQuery = $returnQuery->whereHas('arrivalFlights', function($query) use ($departureIcao, $filterByAirlines){
+            $returnQuery = $returnQuery->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines){
                 if(isset($departureIcao)){
                     $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlines);
                 } else {
                     $query->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlines);
                 }
-            });
-        }
-
-        if(isset($filterByAirlinesDeparture)){
-            $returnQuery = $returnQuery->whereHas('departureFlights', function($query) use ($filterByAirlinesDeparture){
-                $query->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlinesDeparture);
             });
         }
 
