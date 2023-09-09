@@ -19,7 +19,7 @@
                 <h2>Departure suggestion</h2>
 
                 {{-- Add possiblity to re-post the search query for a new random departure --}}
-                <form method="POST" action="{{ ($wasAdvancedSearch) ? route('search.advanced') : route('search') }}">
+                <form method="POST" action="{{ route('search') }}">
                     @csrf
 
                     @foreach($_POST as $key => $value)
@@ -130,7 +130,7 @@
                     <tbody>
                         @php $count = 1; @endphp
 
-                        @if( ! $wasAdvancedSearch && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
+                        @if( !empty($sortByScores) && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
 
                             <tr class="font-family-paragraph">
                                 <th class="text-center text-info fw-normal pt-3 pb-3" colspan="9">
@@ -154,7 +154,7 @@
                                 <td>{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
                                 <td class="fs-5">
                                     @foreach($airport->scores as $score)
-                                        @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
+                                        @if(isset($filterByScores) && $filterByScores[$score->reason] === 1)
                                             <i 
                                                 class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
                                                 data-bs-html="true"

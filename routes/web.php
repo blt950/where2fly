@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [SearchController::class, 'index'])->name('front');
-Route::get('/advanced', [SearchController::class, 'indexAdvanced'])->name('front.advanced');
+Route::get('/advanced', function () {
+    return redirect(route('front'));
+});
 
 Route::get('/top', [TopController::class, 'index'])->name('top');
 Route::get('/top/{continent}', [TopController::class, 'index'])->name('top.filtered');
@@ -29,8 +31,11 @@ Route::get('/privacy', function (){
     return view('privacy');
 })->name('privacy');
 
+Route::get('/api', function (){
+    return view('api');
+})->name('api');
+
 Route::post('/search', [SearchController::class, 'search'])->name('search');
-Route::post('/advanced/search', [SearchController::class, 'searchAdvanced'])->name('search.advanced');
 
 // Failsafe if you try to access the search page directly
 Route::get('/search', function () {

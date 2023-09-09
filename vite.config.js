@@ -7,6 +7,7 @@ export default defineConfig({
             input: [
                 'resources/js/app.js',
                 'resources/js/nouislider.js',
+                'resources/js/multiselect.js',
             ],
             refresh: true,
         }),

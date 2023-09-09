@@ -35,6 +35,7 @@
 @import "fontawesome/fontawesome.scss";
 @import "fontawesome/solid.scss";
 @import "fontawesome/brands.scss";
+@import "multiselect.scss";
 
 /*
 * Base structure
@@ -101,6 +102,158 @@ body {
     left: 0;
     top: 0;
     font-size: 1rem;
+}
+
+.form-control{
+    height: 42px;
+
+    // Set font size to 16px on mobile
+    @include media-breakpoint-down(sm) {
+        font-size: 1rem;
+    }
+}
+
+#submitBtn{
+    width: 100%;
+    height: 42px;
+
+    margin-top: 24px;
+}
+
+
+#filters{
+
+    .btn-group{
+        border-radius: 2px;
+
+        // Set fixed size for filter buttons
+        .btn-filter-width{
+            width: 32px;
+            height: 26px;
+            line-height: 17px;
+        }
+
+        .btn-filter-width-meteo{
+            min-width: 50px;
+            height: 26px;
+            line-height: 17px;
+        }
+
+        // Remove margin between buttons
+        & > :not(.btn-check:first-child) + .btn{
+            margin-left: 0px;
+        }
+
+        // Add hover effect
+        & .btn:hover{
+            background: rgba($gray-900, 0.2);
+        }
+    
+        // Tweak buttons
+        .btn{
+            color: #929292;
+            border: 0;
+
+            &-check.red:checked + .btn {
+                color: white;
+                background: rgba($danger, 0.5);
+            }
+
+            &-check.light:checked + .btn {
+                color: white;
+                background: var(--bs-btn-active-bg);
+            }
+
+            &-check.green:checked + .btn {
+                color: white;
+                background: rgba($success, 0.5);
+            }
+        }
+    }
+    
+}
+
+#markdown{
+    padding: 2rem;
+    color: black;
+    background: white;
+    
+    @include media-breakpoint-between(xs, md) {
+        overflow-x: scroll;
+    }
+
+    h2{
+        padding-top: 1rem;
+        padding-bottom: 0.5rem;
+
+        &:not(:first-of-type){
+            border-top: 1px solid $gray-200;
+        }
+
+    }
+
+    h3, h4, h5, h6 {
+        padding-top: 0.5rem;
+    }
+
+    p{
+        font-family: "Work Sans", sans-serif;
+    }
+
+    code{
+        color: black;
+        background: #efefef;
+        padding: 2px 5px;
+    }
+
+    table{
+        width: 100%;
+
+        tr{
+            border-top: 1px solid $gray-200;
+        }
+
+        th,td{
+            padding-left: 1rem;
+        }
+    }
+}
+
+.hide-filters{
+    display: none;
+}
+
+.expandFilterGroup{
+
+    .divider{
+        width: 15vw;
+        height: 1px;
+        background: rgba($primary, 0.5);
+
+        margin-bottom: 3px;
+        display: inline-block;
+
+        @include media-breakpoint-down(sm) {
+            width: 8vw;
+        }
+    }
+
+    .button{
+        background: none;
+        color: white;
+        font-weight: 300;
+
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba($primary, 0.5);
+
+        &:hover{
+            border: 1px solid rgba($primary, 1);
+        }
+    }
+}
+
+.bt{
+    border-top: 1px solid rgba($gray-500, 0.5);
 }
 
 .logo{
@@ -208,6 +361,17 @@ table{
 }
 
 main{
+
+    padding-bottom: 50px;
+
+    &.front{
+        padding-top: 200px;
+
+        @include media-breakpoint-between(xs, md) {
+            padding-top: 0;
+        }
+    }
+
     @include media-breakpoint-between(xs, md) {
         padding-right: .25rem!important;
         padding-left: .25rem!important;
@@ -357,6 +521,12 @@ img.flag{
 /*
 * Overrides
 */
+
+.form-check{
+    &.me-reduced{
+        margin-right: 0.6rem;
+    }
+}
 
 /* Make checkbox dark checkmark */ 
 .form-check-input{

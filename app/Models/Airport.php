@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use COM;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class Airport extends Model
 {
@@ -125,15 +127,20 @@ class Airport extends Model
 
     }
 
-    public static function findWithCriteria($continent, $country = null, $departureIcao = null, Array $whitelistedArrivals = null, Array $airportExclusions = null, bool $onlyWithRoutes = false){
+    public static function findWithCriteria(
+            string $continent, 
+            string $country = null,    
+            string $departureIcao = null, 
+            Array $destinationAirportSize = null,
+            Array $whitelistedArrivals = null,
+            Array $filterByScores = null, 
+            int $destinationRunwayLights = null, 
+            int $destinationAirbases = null, 
+            int $destinationWithRoutesOnly = null, 
+            Array $filterByAirlines = null
+        ){
 
-        $returnQuery = Airport::where('type', '!=', 'closed')
-        ->whereIn('type', ['large_airport','medium_airport','seaplane_base','small_airport']);
-
-        // Only airports with open runways
-        $returnQuery = $returnQuery->whereHas('runways', function($query){
-            $query->where('closed', false);
-        });
+        $returnQuery = Airport::where('type', '!=', 'closed');
         
         // If the filter is domestic
         if(isset($country) && $continent == "DO"){
@@ -157,6 +164,18 @@ class Airport extends Model
                 $returnQuery = $returnQuery->where('airports.continent', $continent);
             }
         }
+
+        // Only airports with open runways
+        $returnQuery = $returnQuery->whereHas('runways', function($query){
+            $query->where('closed', false);
+        });
+
+        // Destination airport size
+        if(isset($destinationAirportSize)){
+            $returnQuery = $returnQuery->whereIn('type', $destinationAirportSize);
+        } else {
+            $returnQuery = $returnQuery->where('type', ['small_airport', 'medium_airport', 'large_airport']);
+        }
             
         // Filter out departure airport, get airports with metar, fetch relevant data and run the query
         if(isset($departureIcao)){
@@ -167,21 +186,74 @@ class Airport extends Model
             $returnQuery = $returnQuery->whereIn('icao', $whitelistedArrivals);
         }
 
-        // Exclude airports
-        if(isset($airportExclusions)){
-            foreach($airportExclusions as $key => $exclusion){
-                if($exclusion == "routes"){
-                    $returnQuery = $returnQuery->where('airports.w2f_scheduled_service', false);
-                } elseif($exclusion == "airbases"){
-                    $returnQuery = $returnQuery->where('airports.w2f_airforcebase', false);
+        if(isset($filterByScores) && !empty($filterByScores)){
+            
+            $returnQuery = $returnQuery->where(function($returnQuery) use ($filterByScores){
+                foreach($filterByScores as $score => $value){
+                    if($value == 1){
+                        $returnQuery = $returnQuery->whereHas('scores', function($query) use ($score){
+                            $query->where('reason', $score);
+                        });
+                    } else if($value == -1){
+                        $returnQuery = $returnQuery->whereDoesntHave('scores', function($query) use ($score){
+                            $query->where('reason', $score);
+                        });
+                    }
                 }
-            }
+            });
+
         }
 
-        if($onlyWithRoutes){
-            // Only airports with routes to the arrival airport
-            $returnQuery = $returnQuery->whereHas('arrivalFlights', function($query) use ($departureIcao){
-                $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3);
+        // Only airports with runway lights
+        if(isset($destinationRunwayLights) && $destinationRunwayLights !== 0){
+            
+            if($destinationRunwayLights == 1){
+                $returnQuery = $returnQuery->whereHas('runways', function($query){
+                    $query->where('lighted', true);
+                });
+            } else if($destinationRunwayLights == -1){
+                $returnQuery = $returnQuery->whereDoesntHave('runways', function($query){
+                    $query->where('lighted', true);
+                });
+            }
+
+        }
+
+        // Destinations that are airbases
+        if(isset($destinationAirbases) && $destinationAirbases !== 0){
+            
+            if($destinationAirbases == 1){
+                $returnQuery = $returnQuery->where('w2f_airforcebase', true);
+            } else if($destinationAirbases == -1){
+                $returnQuery = $returnQuery->where('w2f_airforcebase', false);
+            }
+
+        }
+
+        // Only airports with routes to the arrival airport
+        if(isset($destinationWithRoutesOnly) && $destinationWithRoutesOnly !== 0){
+            
+            if($destinationWithRoutesOnly == 1){
+                $returnQuery = $returnQuery->whereHas('arrivalFlights', function($query) use ($departureIcao, $filterByAirlines){
+                    $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3);
+
+                    if(isset($filterByAirlines)){
+                        $query->whereIn('airline_icao', $filterByAirlines);
+                    }
+                });
+            } else if($destinationWithRoutesOnly == -1){
+                $returnQuery = $returnQuery->whereDoesntHave('arrivalFlights', function($query) use ($departureIcao, $filterByAirlines){
+                    $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3);
+
+                    if(isset($filterByAirlines)){
+                        $query->whereIn('airline_icao', $filterByAirlines);
+                    }
+                });
+            }
+
+        } else if(isset($filterByAirlines)) {
+            $returnQuery = $returnQuery->whereHas('arrivalFlights', function($query) use ($departureIcao, $filterByAirlines){
+                $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlines);
             });
         }
 
