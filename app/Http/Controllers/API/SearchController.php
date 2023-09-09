@@ -46,7 +46,7 @@ class SearchController extends Controller{
         isset($data['metcondition']) ? $metcon = $data['metcondition'] : $metcon = null;
         isset($data['destinationRunwayLights']) ? $destinationRunwayLights = (int)$data['destinationRunwayLights'] : $destinationRunwayLights = 0;
         isset($data['destinationAirbases']) ? $destinationAirbases = (int)$data['destinationAirbases'] : $destinationAirbases = 0;
-        (isset($data['destinationAirportSize']) && !empty($data['destinationAirportSize'])) ? $destinationAirportSize = $data['destinationAirportSize'] : $destinationAirportSize = null;
+        (isset($data['destinationAirportSize']) && !empty($data['destinationAirportSize'])) ? $destinationAirportSize = $data['destinationAirportSize'] : $destinationAirportSize = ['small_airport', 'medium_airport', 'large_airport'];
         isset($data['elevationMin']) ? $elevationMin = $data['elevationMin'] : $elevationMin = -2000;
         isset($data['elevationMax']) ? $elevationMax = $data['elevationMax'] : $elevationMax = 18000;
         isset($data['rwyLengthMin']) ? $rwyLengthMin = $data['rwyLengthMin'] : $rwyLengthMin = 0;

@@ -76,10 +76,7 @@ class SearchController extends Controller
         $destinationRunwayLights = (int)$data['destinationRunwayLights'];
         $destinationAirbases = (int)$data['destinationAirbases'];
 
-        $destinationAirportSize = $data['destinationAirportSize'];
-        if(!$destinationAirportSize || empty($destinationAirportSize)){
-            $destinationAirportSize = null;
-        }
+        (isset($data['destinationAirportSize']) && !empty($data['destinationAirportSize'])) ? $destinationAirportSize = $data['destinationAirportSize'] : $destinationAirportSize = ['small_airport', 'medium_airport', 'large_airport'];
         
         $elevationMin = (int)$data['elevationMin'];
         $elevationMax = (int)$data['elevationMax'];
