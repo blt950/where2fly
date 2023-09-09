@@ -104,12 +104,6 @@
                     </div>
                 </div>
 
-                @if($errors->any())
-                    <div class="validation-error mt-4">
-                        {{ implode(' ', $errors->all(':message')) }}
-                    </div>
-                @endif
-
                 <div id="filters" class="hide-filters">             
                     <div class="row g-3 mt-3 pb-4 justify-content-center bt">
 
