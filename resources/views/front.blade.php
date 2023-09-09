@@ -106,7 +106,7 @@
 
                 @if($errors->any())
                     <div class="validation-error mt-4">
-                        {{ implode('', $errors->all(':message')) }}
+                        {{ implode(' ', $errors->all(':message')) }}
                     </div>
                 @endif
 
@@ -120,17 +120,17 @@
                             @if(str_starts_with($k, 'METAR'))
                                 <div class="mt-1">
                                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                        <input type="radio" class="btn-check red" name="scores[{{ $k }}]" value="-1" id="{{ $k }}_exclude" autocomplete="off">
+                                        <input type="radio" class="btn-check red" name="scores[{{ $k }}]" value="-1" id="{{ $k }}_exclude" {{ (!empty(old('scores')) && old('scores')[$k] == -1) ? 'checked' : null }}>
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_exclude">
                                             <i class="fa-solid fa-xmark"></i>
                                         </label>
                                     
-                                        <input type="radio" class="btn-check light" name="scores[{{ $k }}]" value="0" id="{{ $k }}_neutral" autocomplete="off" checked>
+                                        <input type="radio" class="btn-check light" name="scores[{{ $k }}]" value="0" id="{{ $k }}_neutral" {{ (empty(old('scores')) || (!empty(old('scores')) && old('scores')[$k] == 0)) ? 'checked' : null }}>
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_neutral">
                                             <i class="fa-solid fa-slash-forward"></i>
                                         </label>
                                     
-                                        <input type="radio" class="btn-check green" name="scores[{{ $k }}]" value="1" id="{{ $k }}_include" autocomplete="off">
+                                        <input type="radio" class="btn-check green" name="scores[{{ $k }}]" value="1" id="{{ $k }}_include" {{ (!empty(old('scores')) && old('scores')[$k] == 1) ? 'checked' : null }}>
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_include">
                                             <i class="fa-solid fa-check"></i>
                                         </label>
@@ -146,17 +146,17 @@
                             <label>Meteo Condition</label>
                             <div>
                                 <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                    <input type="radio" class="btn-check light" name="metcondition" value="ANY" id="metcondition_all" autocomplete="off" checked>
+                                    <input type="radio" class="btn-check light" name="metcondition" value="ANY" id="metcondition_all"  {{ (old('metcondition') == null || old('metcondition') == "ANY") ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_all">
                                         Any
                                     </label>
                                 
-                                    <input type="radio" class="btn-check red" name="metcondition" value="IFR" id="metcondition_ifr" autocomplete="off">
+                                    <input type="radio" class="btn-check red" name="metcondition" value="IFR" id="metcondition_ifr" {{ old('metcondition') == "IFR" ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_ifr">
                                         IFR
                                     </label>
                                 
-                                    <input type="radio" class="btn-check green" name="metcondition" value="VFR" id="metcondition_vfr" autocomplete="off">
+                                    <input type="radio" class="btn-check green" name="metcondition" value="VFR" id="metcondition_vfr" {{ old('metcondition') == "VFR" ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_vfr">
                                         VFR
                                     </label>
@@ -169,17 +169,17 @@
                             @if(str_starts_with($k, 'VATSIM'))
                                 <div class="mt-1">
                                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                        <input type="radio" class="btn-check red" name="scores[{{ $k }}]" value="-1" id="{{ $k }}_exclude" autocomplete="off">
+                                        <input type="radio" class="btn-check red" name="scores[{{ $k }}]" value="-1" id="{{ $k }}_exclude" {{ (!empty(old('scores')) && old('scores')[$k] == -1) ? 'checked' : null }}>
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_exclude">
                                             <i class="fa-solid fa-xmark"></i>
                                         </label>
                                     
-                                        <input type="radio" class="btn-check light" name="scores[{{ $k }}]" value="0" id="{{ $k }}_neutral" autocomplete="off" checked>
+                                        <input type="radio" class="btn-check light" name="scores[{{ $k }}]" value="0" id="{{ $k }}_neutral" {{ (empty(old('scores')) || (!empty(old('scores')) && old('scores')[$k] == 0)) ? 'checked' : null }}>
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_neutral">
                                             <i class="fa-solid fa-slash-forward"></i>
                                         </label>
                                     
-                                        <input type="radio" class="btn-check green" name="scores[{{ $k }}]" value="1" id="{{ $k }}_include" autocomplete="off">
+                                        <input type="radio" class="btn-check green" name="scores[{{ $k }}]" value="1" id="{{ $k }}_include" {{ (!empty(old('scores')) && old('scores')[$k] == 1) ? 'checked' : null }}>
                                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_include">
                                             <i class="fa-solid fa-check"></i>
                                         </label>
@@ -193,17 +193,17 @@
 
                             <div class="mt-1">
                                 <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                    <input type="radio" class="btn-check red" name="destinationWithRoutesOnly" value="-1" id="destinationWithRoutesOnly_exclude" autocomplete="off">
+                                    <input type="radio" class="btn-check red" name="destinationWithRoutesOnly" value="-1" id="destinationWithRoutesOnly_exclude" {{ old('destinationWithRoutesOnly') == -1 ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationWithRoutesOnly_exclude">
                                         <i class="fa-solid fa-xmark"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check light" name="destinationWithRoutesOnly" value="0" id="destinationWithRoutesOnly_neutral" autocomplete="off" checked>
+                                    <input type="radio" class="btn-check light" name="destinationWithRoutesOnly" value="0" id="destinationWithRoutesOnly_neutral" {{ (old('destinationWithRoutesOnly') == null || old('destinationWithRoutesOnly') == 0) ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationWithRoutesOnly_neutral">
                                         <i class="fa-solid fa-slash-forward"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check green" name="destinationWithRoutesOnly" value="1" id="destinationWithRoutesOnly_include" autocomplete="off">
+                                    <input type="radio" class="btn-check green" name="destinationWithRoutesOnly" value="1" id="destinationWithRoutesOnly_include" {{ old('destinationWithRoutesOnly') == 1 ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationWithRoutesOnly_include">
                                         <i class="fa-solid fa-check"></i>
                                     </label>
@@ -213,17 +213,17 @@
 
                             <div class="mt-1">
                                 <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                    <input type="radio" class="btn-check red" name="destinationRunwayLights" value="-1" id="destinationRunwayLights_exclude" autocomplete="off">
+                                    <input type="radio" class="btn-check red" name="destinationRunwayLights" value="-1" id="destinationRunwayLights_exclude" {{ old('destinationRunwayLights') == -1 ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationRunwayLights_exclude">
                                         <i class="fa-solid fa-xmark"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check light" name="destinationRunwayLights" value="0" id="destinationRunwayLights_neutral" autocomplete="off" checked>
+                                    <input type="radio" class="btn-check light" name="destinationRunwayLights" value="0" id="destinationRunwayLights_neutral" {{ (old('destinationRunwayLights') == null || old('destinationRunwayLights') == 0) ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationRunwayLights_neutral">
                                         <i class="fa-solid fa-slash-forward"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check green" name="destinationRunwayLights" value="1" id="destinationRunwayLights_include" autocomplete="off">
+                                    <input type="radio" class="btn-check green" name="destinationRunwayLights" value="1" id="destinationRunwayLights_include" {{ old('destinationRunwayLights') == 1 ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationRunwayLights_include">
                                         <i class="fa-solid fa-check"></i>
                                     </label>
@@ -233,17 +233,17 @@
 
                             <div class="mt-1">
                                 <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                    <input type="radio" class="btn-check red" name="destinationAirbases" value="-1" id="destinationAirbases_exclude" autocomplete="off">
+                                    <input type="radio" class="btn-check red" name="destinationAirbases" value="-1" id="destinationAirbases_exclude" {{ old('destinationAirbases') == -1 ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_exclude">
                                         <i class="fa-solid fa-xmark"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check light" name="destinationAirbases" value="0" id="destinationAirbases_neutral" autocomplete="off" checked>
+                                    <input type="radio" class="btn-check light" name="destinationAirbases" value="0" id="destinationAirbases_neutral" {{ (old('destinationAirbases') == null || old('destinationAirbases') == 0) ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_neutral">
                                         <i class="fa-solid fa-slash-forward"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check green" name="destinationAirbases" value="1" id="destinationAirbases_include" autocomplete="off">
+                                    <input type="radio" class="btn-check green" name="destinationAirbases" value="1" id="destinationAirbases_include" {{ old('destinationAirbases') == 1 ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_include">
                                         <i class="fa-solid fa-check"></i>
                                     </label>
