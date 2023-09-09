@@ -24,6 +24,7 @@
                 <li>Added dates to changelog</li>
                 <li>Fixed the top list style to match search results</li>
                 <li>Fixed input fields zooming the screen on Safari mobile</li>
+                <li>Fixed random airport suggestions previously favouring certain airports</li>
                 <li>API: No longer in beta!</li>
                 <li>API: Tweaked to accommodate new filters</li>
                 <li>API: Published public documentation</li>
