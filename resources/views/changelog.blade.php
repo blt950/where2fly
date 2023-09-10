@@ -16,6 +16,13 @@
         
         <div class="text-start">
 
+            <h2 class="mb-0">v1.4.1</h2>
+            <span class="badge ps-0 pb-2">2023-09-10</span>
+            <ul>
+                <li>Fixed some urls resulting in server error</li>
+                <li>API: Continent paramter no longer required if whitelist is present</li>
+            </ul>
+
             <h2 class="mb-0">v1.4.0</h2>
             <span class="badge ps-0 pb-2">2023-09-09</span>
             <ul>

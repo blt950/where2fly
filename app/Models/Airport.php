@@ -128,7 +128,7 @@ class Airport extends Model
     }
 
     public static function findWithCriteria(
-            string $continent, 
+            string $continent = null, 
             string $country = null,    
             string $departureIcao = null, 
             Array $destinationAirportSize = null,
