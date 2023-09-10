@@ -32,7 +32,7 @@ Returns airports matching your search query
 | Param | Required | Type | Description | Default value |
 | --- | --- | --- | --- | --- |
 | `departure` | Yes | string | Departure airport | - |
-| `continent` | Yes | string | Filter on continent | - |
+| `continent` | Yes | string | Filter on one continent described below | - |
 | `codeletter` | Yes | string | Select aircraft type | - |
 | `airtimeMin` | No | string | Minimum airtime | 0 |
 | `airtimeMax` | No | string | Maximum airtime | 24 |
@@ -82,6 +82,14 @@ Due to the terms of service of the data provider, this won't be available for fu
 - `VATSIM_ATC`
 - `VATSIM_EVENT`
 - `VATSIM_POPULAR`
+
+### Available continents
+- `AF` - Africa
+- `AS` - Asia
+- `EU` - Europe
+- `NA` - North America
+- `OC` - Oceania
+- `SA` - South America
 
 ### Available codeletters
 - `A` - e.g. PIPER/CESSNA
