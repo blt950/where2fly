@@ -19,7 +19,7 @@ class SearchController extends Controller{
 
         $data = request()->validate([
             'departure' => 'required|exists:App\Models\Airport,icao',
-            'continent' => 'required|string',
+            'continent' => 'required_without:arrivalWhitelist|string',
             'codeletter' => 'required|string',
             'airtimeMin' => 'sometimes|numeric|between:0,24',
             'airtimeMax' => 'sometimes|numeric|between:0,24',
