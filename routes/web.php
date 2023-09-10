@@ -16,32 +16,22 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [SearchController::class, 'index'])->name('front');
-Route::get('/advanced', function () {
-    return redirect(route('front'));
-});
 
 Route::get('/top', [TopController::class, 'index'])->name('top');
 Route::get('/top/{continent}', [TopController::class, 'index'])->name('top.filtered');
 
-Route::get('/changelog', function (){
-    return view('changelog');
-})->name('changelog');
+// Pure views
+Route::view('/changelog', 'changelog')->name('changelog');
+Route::view('/privacy', 'privacy')->name('privacy');
+Route::view('/api', 'api')->name('api');
 
-Route::get('/privacy', function (){
-    return view('privacy');
-})->name('privacy');
-
-Route::get('/api', function (){
-    return view('api');
-})->name('api');
-
+// Search
 Route::post('/search', [SearchController::class, 'search'])->name('search');
 
-// Failsafe if you try to access the search page directly
 Route::get('/search', function () {
     return redirect(route('front'));
 });
 
-Route::get('/advanced/search', function () {
-    return redirect(route('front'));
-});
+// Old routes
+Route::permanentRedirect('/advanced', '/');
+Route::permanentRedirect('/advanced/search', '/');
