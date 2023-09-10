@@ -43,5 +43,5 @@ Route::get('/search', function () {
 });
 
 Route::get('/advanced/search', function () {
-    return redirect(route('front.advanced'));
+    return redirect(route('front'));
 });
