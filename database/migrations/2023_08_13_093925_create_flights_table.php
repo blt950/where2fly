@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('airline_icao', 3);
             $table->string('airline_iata', 3);
             $table->string('flight_number', 10);
-            $table->string('flight_icao', 10);
+            $table->string('flight_icao', 20);
             $table->unsignedBigInteger('airport_dep_id')->nullable();
             $table->string('dep_icao', 4);
             $table->unsignedBigInteger('airport_arr_id')->nullable();
