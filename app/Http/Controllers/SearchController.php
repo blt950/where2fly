@@ -91,35 +91,45 @@ class SearchController extends Controller
         *
         */
 
-        // Use the supplied departure or select a random from toplist
-        $suggestedDeparture = false;
-        if(isset($data['departure'])){
-            $departure = Airport::where('icao', $data['departure'])->get()->first();
-        } else {
-            // Get a random airport from the toplist
-            $departure = Airport::findWithCriteria($continent, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, 'departureFlights');
-            if(!$departure || !$departure->count()){
-                return back()->withErrors(['departureNotFound' => 'No departure airport found with given criteria']);
+        // Lets find an result with the given criteria. Give it 5 attempts before we give up.
+        $maxAttempts = 10;
+        for($attempt = 1; $attempt <= $maxAttempts; $attempt++){
+    
+            // Use the supplied departure or select a random from toplist
+            $suggestedDeparture = false;
+            if(isset($data['departure'])){
+                $departure = Airport::where('icao', $data['departure'])->get()->first();
+            } else {
+                // Get a random airport from the toplist
+                $departure = Airport::findWithCriteria($continent, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, 'departureFlights');
+                if(!$departure || !$departure->count()){
+                    return back()->withErrors(['departureNotFound' => 'No departure airport found with given criteria']);
+                }
+            
+                $departure = $departure->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
+                $suggestedDeparture = true;
             }
-        
-            $departure = $departure->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
-            $suggestedDeparture = true;
+
+            // Get airports according to filter
+            $airports = collect();
+            $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines);
+
+            // Filter the eligable airports
+            $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+
+            // Shuffle the results before sort as slim results will quickly show airports from close by location
+            // Sort the suggested airports based on the intended filters
+            $suggestedAirports = $suggestedAirports->shuffle(); 
+            $suggestedAirports = $suggestedAirports->sortByScores($sortByScores);
+            $suggestedAirports = $suggestedAirports->splice(0,20);
+            $suggestedAirports = $suggestedAirports->addFlights($departure);
+
+            if($suggestedAirports->count()){
+                return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture', 'filterByScores', 'sortByScores'));
+            }
+
         }
 
-        // Get airports according to filter
-        $airports = collect();
-        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines);
-
-        // Filter the eligable airports
-        $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
-
-        // Shuffle the results before sort as slim results will quickly show airports from close by location
-        // Sort the suggested airports based on the intended filters
-        $suggestedAirports = $suggestedAirports->shuffle(); 
-        $suggestedAirports = $suggestedAirports->sortByScores($sortByScores);
-        $suggestedAirports = $suggestedAirports->splice(0,20);
-        $suggestedAirports = $suggestedAirports->addFlights($departure);
-
-        return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture', 'filterByScores', 'sortByScores'));
+        return redirect(route('front'))->withErrors(['departureNotFound' => 'No departure airport found with given criteria']);
     }
 }
