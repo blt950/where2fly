@@ -15,6 +15,12 @@
         <h1 class="mb-3 mt-5">Changelog</h1>
         
         <div class="text-start">
+            
+            <h2 class="mb-0">v1.4.2</h2>
+            <span class="badge ps-0 pb-2">2023-10-19</span>
+            <ul>
+                <li>Fixed search returning departure suggestion with no arrival suggestions</li>
+            </ul>
 
             <h2 class="mb-0">v1.4.1</h2>
             <span class="badge ps-0 pb-2">2023-09-11</span>
