@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('update:data')->hourlyAt(40);
 
         // Fetch flights
-        $schedule->command('fetch:flights')->hourly();
+        $schedule->command('fetch:flights')->everyThirtyMinutes();
     }
 
     /**
