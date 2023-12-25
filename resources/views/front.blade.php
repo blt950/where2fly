@@ -231,12 +231,12 @@
 
                             <div class="mt-1">
                                 <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                    <input type="radio" class="btn-check red" name="destinationAirbases" value="-1" id="destinationAirbases_exclude" {{ old('destinationAirbases') == -1 ? 'checked' : null }}>
+                                    <input type="radio" class="btn-check light" name="destinationAirbases" value="-1" id="destinationAirbases_exclude" {{ (old('destinationAirbases') == null || old('destinationAirbases') == -1) ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_exclude">
                                         <i class="fa-solid fa-xmark"></i>
                                     </label>
                                 
-                                    <input type="radio" class="btn-check light" name="destinationAirbases" value="0" id="destinationAirbases_neutral" {{ (old('destinationAirbases') == null || old('destinationAirbases') == 0) ? 'checked' : null }}>
+                                    <input type="radio" class="btn-check light" name="destinationAirbases" value="0" id="destinationAirbases_neutral" {{ (old('destinationAirbases') === 0) ? 'checked' : null }}>
                                     <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_neutral">
                                         <i class="fa-solid fa-slash-forward"></i>
                                     </label>
