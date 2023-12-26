@@ -5,7 +5,11 @@
 <meta name="author" content="Blt950 / Daniel (1352906)">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<title> {{ config('app.name') }} | @yield('title', 'Home')</title>
+@hasSection('title')
+    <title>{{ config('app.name') }} | @yield('title', 'Home')</title>
+@else
+    <title>{{ config('app.name') }}</title>
+@endif
 
 <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">

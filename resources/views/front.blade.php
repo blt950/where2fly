@@ -9,7 +9,6 @@
 @vite('resources/js/multiselect.js')
 @endsection
 
-@section('title', 'Search')
 @section('content')
 
 <div class="cover-container text-center d-flex w-100 h-100 p-3 mx-auto flex-column">
