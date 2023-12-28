@@ -16,6 +16,16 @@
         
         <div class="text-start">
             
+            <h2 class="mb-0">v1.4.3</h2>
+            <span class="badge ps-0 pb-2">2023-12-28</span>
+            <ul>
+                <li>Fixed search results displaying airports with too short runways</li>
+                <li>Fixed airline popover to only show max 30 flights</li>
+                <li>Changed and made airbases default off in search</li>
+                <li>Changed and clarified the code letter search parameter</li>
+                <li>Increased flight sample rate to catch more flights</li>
+            </ul>
+            
             <h2 class="mb-0">v1.4.2</h2>
             <span class="badge ps-0 pb-2">2023-10-19</span>
             <ul>
