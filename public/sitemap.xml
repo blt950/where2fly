@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<url>
+  <loc>https://where2fly.today/</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://where2fly.today/top</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://where2fly.today/changelog</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://where2fly.today/privacy</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://where2fly.today/api</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://where2fly.today/top/AF</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://where2fly.today/top/AS</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://where2fly.today/top/EU</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://where2fly.today/top/NA</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://where2fly.today/top/OC</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://where2fly.today/top/SA</loc>
+  <lastmod>2023-12-28T10:58:22+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+
+</urlset>
