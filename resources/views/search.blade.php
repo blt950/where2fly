@@ -181,7 +181,7 @@
                                                 data-bs-toggle="tooltip"
                                                 data-bs-title="
                                                     {{ $airline->name }}<br><br>
-                                                    @foreach($airport->flights->where('airline_icao', $airline->icao_code) as $flight)
+                                                    @foreach($airport->flights->where('airline_icao', $airline->icao_code)->slice(0,30) as $flight)
                                                         {{ $flight->flight_icao }} ({{ $flight->aircraft_icao }}) {{ $flight->last_seen_at->diffForHumans() }}<br>
                                                     @endforeach
                                                 "
