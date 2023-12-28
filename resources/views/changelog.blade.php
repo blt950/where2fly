@@ -20,7 +20,7 @@
             <span class="badge ps-0 pb-2">2023-12-28</span>
             <ul>
                 <li>Fixed search results displaying airports with too short runways</li>
-                <li>Fixed airline popover to only show max 30 flights</li>
+                <li>Fixed airline popover to only show max 30 flights and sorted them by time</li>
                 <li>Changed and made airbases default off in search</li>
                 <li>Changed and clarified the code letter search parameter</li>
                 <li>Increased flight sample rate to catch more flights</li>
