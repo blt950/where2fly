@@ -16,14 +16,15 @@ class TopController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
     public function index(Request $request, string $continent = null){
+        $exclude = $request->input('exclude');
+        $airportScores = AirportScore::getTopAirports($continent, null, 30, $exclude);
 
-        $airportScores = AirportScore::getTopAirports($continent);
         $airports = collect();
         foreach($airportScores as $as){
             $airports->push($as->airport);
         }
         
-        return view('top', compact('airports', 'continent'));
+        return view('top', compact('airports', 'continent', 'exclude'));
     }
 
 }

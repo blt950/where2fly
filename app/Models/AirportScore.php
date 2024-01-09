@@ -23,13 +23,20 @@ class AirportScore extends Model
         return str_starts_with($this->reason, 'VATSIM_');
     }
 
-    public static function getTopAirports($continent = null, $whitelist = null, $limit = 30){
+    public static function getTopAirports($continent = null, $whitelist = null, $limit = 30, $exclude = null){
         
         // Establish the return query
         $returnQuery = AirportScore::select('airport_id', \DB::raw("count(airport_scores.id) as id_count"))
         ->groupBy('airport_id')
         ->orderByDesc('id_count')
         ->join('airports', 'airport_scores.airport_id', '=', 'airports.id');
+
+        // Filter out VATSIM scores if requested
+        if($exclude){
+            if($exclude = 'vatsim'){
+                $returnQuery = $returnQuery->where('airport_scores.reason', 'NOT LIKE', 'VATSIM_%');
+            }
+        }
 
         // Filter on continent if supplied
         if($continent){

@@ -15,20 +15,21 @@
         <h1 class="mb-0 mt-5">Top Airports Right Now</h1>
         <h2 class="top mb-5 text-center">Destinations with the worst weather right now</h2>
 
-        <p class="text-center">Filter: 
-            <a class="btn btn-sm {{ Route::is('top') ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top') }}">All</a>
-            <a class="btn btn-sm {{ $continent == 'AF' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'AF') }}">Africa</a>
-            <a class="btn btn-sm {{ $continent == 'AS' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'AS') }}">Asia</a>
-            <a class="btn btn-sm {{ $continent == 'EU' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'EU') }}">Europe</a>
-            <a class="btn btn-sm {{ $continent == 'NA' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'NA') }}">North America</a>
-            <a class="btn btn-sm {{ $continent == 'OC' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'OC') }}">Oceania</a>
-            <a class="btn btn-sm {{ $continent == 'SA' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'SA') }}">South America</a>
-        </p>
+        <div class="filterbox">
+            <span class="m-0">Filter: 
+                <a class="btn btn-sm {{ Route::is('top') ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top') }}">All</a>
+                <a class="btn btn-sm {{ $continent == 'AF' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'AF') }}">Africa</a>
+                <a class="btn btn-sm {{ $continent == 'AS' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'AS') }}">Asia</a>
+                <a class="btn btn-sm {{ $continent == 'EU' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'EU') }}">Europe</a>
+                <a class="btn btn-sm {{ $continent == 'NA' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'NA') }}">North America</a>
+                <a class="btn btn-sm {{ $continent == 'OC' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'OC') }}">Oceania</a>
+                <a class="btn btn-sm {{ $continent == 'SA' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route('top.filtered', 'SA') }}">South America</a>
+            </span>
 
-        <div class="alert alert-discord">
-            <p class="text-white mb-0">
-                <i class="fa-brands fa-discord"></i> Contribute with suggestions, bug reports and vote on new features in <a class="text-white" href="https://discord.gg/UkFg9Yy4gP" target="_blank">our Discord <i class="fas fa-up-right-from-square"></i></a>
-            </p>
+            <span>VATSIM: 
+                <a class="btn btn-sm {{ $exclude === null ? 'btn-primary' : 'btn-secondary' }}" href="{{ route(Route::currentRouteName(), $continent) }}">Include</a>
+                <a class="btn btn-sm {{ $exclude == 'vatsim' ? 'btn-primary' : 'btn-secondary' }}" href="{{ route(Route::currentRouteName(), $continent) }}?exclude=vatsim">Exclude</a>
+            </span>
         </div>
             
         <div class="scroll-fade">
