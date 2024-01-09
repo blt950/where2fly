@@ -170,6 +170,17 @@ body {
     
 }
 
+.filterbox{
+    background: rgba(0,0,0,0.2);
+    padding: 1rem 1rem;
+
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    gap: 1rem;
+}
+
 #markdown{
     padding: 2rem;
     color: black;
