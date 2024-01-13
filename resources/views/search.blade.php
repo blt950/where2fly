@@ -7,6 +7,10 @@
 @section('title', 'Results')
 @section('content')
 
+@section('resources')
+@vite('resources/js/sortable.js')
+@endsection
+
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
 
     @include('layouts.menu')
@@ -114,17 +118,17 @@
         <h2>Arrival suggestions</h2>
         <div class="scroll-fade">
             <div class="table-responsive">
-                <table class="table table-hover text-start">
+                <table class="table table-hover text-start sortable">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col" width="20%">Airport</th>
                             <th scope="col">Distance</th>
-                            <th scope="col" width="10%">Air Time</th>
+                            <th scope="col" width="12%">Air Time</th>
                             <th scope="col" width="12%">Conditions</th>
                             <th scope="col">Airlines</th>
                             <th scope="col">Runway</th>
-                            <th scope="col" width="40%">Details</th>
+                            <th scope="col" class="no-sort" width="40%">Details</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -143,16 +147,16 @@
                         @foreach($suggestedAirports as $airport)
                             <tr class="{{ ($count > 10) ? 'showmore-hidden' : null }}">
                                 <th scope="row">{{ $count }}</th>
-                                <td>
+                                <td data-sort="{{ $airport->icao }}">
                                     <div>
                                         <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
                                         {{ $airport->icao }}
                                     </div>
                                     {{ $airport->name }}
                                 </td>
-                                <td>{{ $airport->distance }}nm</td>
-                                <td>{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
-                                <td class="fs-5">
+                                <td data-sort="{{ $airport->distance }}">{{ $airport->distance }}nm</td>
+                                <td data-sort="{{ $airport->airtime }}">{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
+                                <td class="fs-5" data-sort={{ $airport->scores->count() }}>
                                     @foreach($airport->scores as $score)
                                         @if(isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1)
                                             <i 
@@ -171,7 +175,13 @@
                                         @endif
                                     @endforeach
                                 </td>
-                                <td>
+                                <td 
+                                    @if($airport->airlines->isNotEmpty())
+                                        data-sort="{{ $airport->airlines->count() }}"
+                                    @else
+                                        data-sort="0"
+                                    @endif
+                                >
                                     @if($airport->airlines->isNotEmpty())
                                         @foreach($airport->airlines as $airline)
                                             <img
@@ -191,7 +201,7 @@
                                         -
                                     @endif
                                 </td>
-                                <td>
+                                <td data-sort="{{ $airport->longestRunway() }}">
                                     <div class="rwy-feet">{{ $airport->longestRunway() }}</div>
                                     <div class="rwy-meters text-black text-opacity-50">{{ round($airport->longestRunway()* .3048) }}</div>
                                 </td>
@@ -272,11 +282,27 @@
     <script>
         // Get the show more button and add on click event where it removes the class that hides the rows
         document.querySelector('#showMoreBtn').addEventListener('click', function() {
-            document.querySelectorAll('.showmore-hidden').forEach(function(element) {
-                element.classList.remove('showmore-hidden');
-            });
-            document.querySelector('#showMoreRow').remove();
+            expandAllRows();
         });
+
+        // Expand all rows if user has clicked the table thead th's
+        document.querySelectorAll('thead > tr > th').forEach(function(element) {
+            element.addEventListener('click', function() {
+                expandAllRows();
+            });
+        });
+
+        // Function to expand all rows
+        var expanded = false
+        function expandAllRows() {
+            if(!expanded) {
+                document.querySelectorAll('.showmore-hidden').forEach(function(element) {
+                    element.classList.remove('showmore-hidden');
+                });
+                document.querySelector('#showMoreRow').remove();
+                expanded = true;
+            }
+        }
     </script>
 
     @include('scripts.measures')
