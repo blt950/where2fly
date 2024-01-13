@@ -118,7 +118,7 @@
         <h2>Arrival suggestions</h2>
         <div class="scroll-fade">
             <div class="table-responsive">
-                <table class="table table-hover text-start sortable">
+                <table class="table table-hover text-start sortable asc">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
