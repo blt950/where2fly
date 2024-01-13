@@ -7,6 +7,10 @@
 @section('title', 'Top List')
 @section('content')
 
+@section('resources')
+@vite('resources/js/sortable.js')
+@endsection
+
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
 
     @include('layouts.menu')
@@ -34,14 +38,14 @@
             
         <div class="scroll-fade">
             <div class="table-responsive">
-                <table class="table table-hover text-start">
+                <table class="table table-hover text-start sortable">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Airport</th>
                             <th scope="col" width="10%">Conditions</th>
                             <th scope="col">Runway</th>
-                            <th scope="col" width="50%">Details</th>
+                            <th scope="col" class="no-sort" width="50%">Details</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,14 +53,14 @@
                         @foreach($airports as $airport)
                             <tr>
                                 <th scope="row">{{ $count }}</th>
-                                <td>
+                                <td data-sort="{{ $airport->icao }}">
                                     <div>
                                         <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
                                         {{ $airport->icao }}
                                     </div>
                                     {{ $airport->name }}
                                 </td>
-                                <td class="fs-5">
+                                <td class="fs-5" data-sort="{{ $airport->scores->count() }}">
                                     @foreach($airport->scores as $score)
                                         <i 
                                             class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
@@ -66,7 +70,7 @@
                                         ></i>
                                     @endforeach
                                 </td>
-                                <td>
+                                <td data-sort="{{ $airport->longestRunway() }}">
                                     <div class="rwy-feet">{{ $airport->longestRunway() }}</div>
                                     <div class="rwy-meters text-black text-opacity-50">{{ round($airport->longestRunway()* .3048) }}</div>
                                 </td>
