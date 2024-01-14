@@ -57,7 +57,7 @@ class CollectionAirportFilter{
         return function(Airport $departure){
 
             // Get flights and airlines for the suggested airports
-            $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departure->id)->whereIn('airport_arr_id', $this->pluck('id'))->orderBy('last_seen_at')->get();
+            $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departure->id)->whereIn('airport_arr_id', $this->pluck('id'))->with('aircrafts')->orderBy('last_seen_at')->get();
             $airlines = Airline::whereIn('icao_code', $flights->pluck('airline_icao')->unique())->get();
 
             foreach($this as $arrivalAirport){

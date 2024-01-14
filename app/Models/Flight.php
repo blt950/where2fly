@@ -27,4 +27,8 @@ class Flight extends Model
         return $this->belongsTo(Airline::class, 'airline_icao', 'icao_code');
     }
 
+    public function aircrafts(){
+        return $this->hasMany(FlightAircraft::class, 'flight_id');
+    }
+
 }
