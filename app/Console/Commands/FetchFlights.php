@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Airport;
+use Illuminate\Support\Facades\Artisan;
 use App\Models\Flight;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
@@ -67,7 +67,7 @@ class FetchFlights extends Command
                     'flight_icao' => $flight->flight_icao,
                     'dep_icao' => $flight->dep_icao,
                     'arr_icao' => $flight->arr_icao,
-                    'aircraft_icao' => $flight->aircraft_icao,
+                    'last_aircraft_icao' => $flight->aircraft_icao,
                     'reg_number' => $regNumber,
                     'last_seen_at' => now(),
                     'lock_counter' => false,
@@ -83,7 +83,7 @@ class FetchFlights extends Command
                 Flight::upsert(
                     $chunk,
                     ['flight_icao', 'dep_icao', 'arr_icao'],
-                    ['aircraft_icao', 'reg_number', 'lock_counter', 'last_seen_at']
+                    ['last_aircraft_icao', 'reg_number', 'lock_counter', 'last_seen_at']
                 );
             }
 
@@ -102,6 +102,9 @@ class FetchFlights extends Command
 
             // If a flight has not been seen for 6 hours, increase the seen_counter by 1 and lock the counter. Counter is reset by the next fetch upsert.
             Flight::where('last_seen_at', '<', now()->subHours(6))->where('lock_counter', false)->update(['seen_counter' => \DB::raw('seen_counter + 1'), 'lock_counter' => true]);
+
+            // Enrich the flights with aircraft types
+            Artisan::call('enrich:flights');
             
         } else {
             $this->error("Failed to fetch flights. API response not successful.");
