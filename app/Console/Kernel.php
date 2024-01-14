@@ -21,6 +21,9 @@ class Kernel extends ConsoleKernel
 
         // Fetch flights
         $schedule->command('fetch:flights')->everyThirtyMinutes();
+
+        // Update if airlines have flights
+        $schedule->command('calc:flights')->daily();
     }
 
     /**

@@ -19,7 +19,7 @@ class SearchController extends Controller
      * @return \Illuminate\View\View
     */
     public function index(){
-        $airlines = \App\Models\Airline::orderBy('name')->has('flights')->get();
+        $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         return view('front', compact('airlines'));
     }
 
