@@ -16,6 +16,14 @@
         
         <div class="text-start">
             
+            <h2 class="mb-0">v1.5.0</h2>
+            <span class="badge ps-0 pb-2">2024-01-14</span>
+            <ul>
+                <li>Added sorting of results in top list and search results</li>
+                <li>Added VATSIM filter to top list</li>
+                <li>Fixed slow loading times on front page</li>
+            </ul>
+
             <h2 class="mb-0">v1.4.3</h2>
             <span class="badge ps-0 pb-2">2023-12-28</span>
             <ul>
