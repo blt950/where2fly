@@ -192,7 +192,7 @@
                                                 data-bs-title="
                                                     {{ $airline->name }}<br><br>
                                                     @foreach($airport->flights->where('airline_icao', $airline->icao_code)->slice(0,30) as $flight)
-                                                        {{ $flight->flight_icao }} ({{ $flight->aircrafts->sortBy('last_seen_at')->first()->aircraft_icao }}) {{ $flight->last_seen_at->diffForHumans() }}<br>
+                                                        {{ $flight->flight_icao }} ({{ $flight->aircrafts->pluck('icao')->implode(',') }}) {{ $flight->last_seen_at->diffForHumans() }}<br>
                                                     @endforeach
                                                 "
                                             >

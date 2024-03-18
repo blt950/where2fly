@@ -302,6 +302,19 @@
                                 @endforeach
                             </select>
 
+                            <label class="pt-4">Aircraft</label>
+                            <select multiple 
+                                multiselect-search="true" 
+                                multiselect-select-all="true"
+                                multiselect-max-items="1"
+                                multiselect-hide-x="false"
+                                name="aircrafts[]"
+                                placeholder="All aircrafts">
+                                @foreach($aircrafts as $aircraft)
+                                    <option value="{{ $aircraft }}">{{ $aircraft }}</option>
+                                @endforeach
+                            </select>
+
                         </div>
                     </div>
                 </div>
