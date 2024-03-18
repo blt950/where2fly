@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Flight;
 use App\Models\FlightAircraft;
+use App\Models\Aircraft;
 
 class EnrichFlights extends Command
 {
@@ -32,10 +33,36 @@ class EnrichFlights extends Command
         // Get flights that have been seen within the last 6 hours and upsert the aircraft_icao to the flight_aircrafts table
         $flights = Flight::where('last_seen_at', '>=', now()->subHours(6))->get();
         $upsertAircraftData = [];
+        $aircraftTypeConversions = [
+            '0000' => null,
+            '100' => 'F100',
+            '320' => 'A320',
+            '32Q' => 'A32N',
+            '733' => 'B733',
+            '737' => 'B737',
+            '738' => 'B738',
+            '73F' => 'B732',
+            '73K' => 'B738',
+            '76F' => 'B767',
+            '77X' => 'B77L',
+            'ZZZZ' => null,
+        ];
+
         foreach($flights as $flight){
+            // Directly attempt to get the converted aircraft type or fallback to the original ICAO code.
+            if (array_key_exists($flight->last_aircraft_icao, $aircraftTypeConversions) && $aircraftTypeConversions[$flight->last_aircraft_icao] == null) {
+                continue;
+            }
+
+            $aircraftType = $aircraftTypeConversions[$flight->last_aircraft_icao] ?? $flight->last_aircraft_icao;
+
+            // Use firstOrCreate method to either find the existing aircraft or create a new one, thereby reducing the code complexity and potential for duplicated entries.
+            $aircraft = Aircraft::firstOrCreate(['icao' => $aircraftType], ['icao' => $aircraftType]);
+
+            // Prepare the data for bulk insertion/upsert after the loop.
             $upsertAircraftData[] = [
                 'flight_id' => $flight->id,
-                'aircraft_icao' => $flight->last_aircraft_icao,
+                'aircraft_id' => $aircraft->id,
                 'last_seen_at' => $flight->last_seen_at,
             ];
         }
