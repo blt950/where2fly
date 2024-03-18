@@ -16,6 +16,13 @@
         
         <div class="text-start">
             
+            <h2 class="mb-0">v1.6.0</h2>
+            <span class="badge ps-0 pb-2">2024-03-18</span>
+            <ul>
+                <li>Added aircraft type filter</li>
+                <li>Added airline icons for DHL, Aerologic, Fedex, Cargolux, UPS and Sunclass</li>
+            </ul>
+
             <h2 class="mb-0">v1.5.0</h2>
             <span class="badge ps-0 pb-2">2024-01-14</span>
             <ul>
