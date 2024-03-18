@@ -8,6 +8,7 @@ use App\Models\Airport;
 use App\Models\Airline;
 use App\Models\Flight;
 use App\Models\AirportScore;
+use App\Models\Aircraft;
 use App\Http\Controllers\ScoreController;
 
 class SearchController extends Controller
@@ -20,7 +21,8 @@ class SearchController extends Controller
     */
     public function index(){
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
-        return view('front', compact('airlines'));
+        $aircrafts = Aircraft::all()->pluck('icao')->sort();
+        return view('front', compact('airlines', 'aircrafts'));
     }
 
     /**
@@ -56,6 +58,7 @@ class SearchController extends Controller
             'rwyLengthMin' => 'required|numeric|between:0,17000',
             'rwyLengthMax' => 'required|numeric|between:0,17000',
             'airlines' => 'sometimes|array',
+            'aircrafts' => 'sometimes|array',
         ]);
         
         $continent = $data['continent'];
@@ -84,6 +87,7 @@ class SearchController extends Controller
         $rwyLengthMax = (int)$data['rwyLengthMax'];
 
         isset($data['airlines']) ? $filterByAirlines = $data['airlines'] : $filterByAirlines = null;
+        isset($data['aircrafts']) ? $filterByAircrafts = $data['aircrafts'] : $filterByAircrafts = null;
 
         /**
         *
@@ -101,7 +105,7 @@ class SearchController extends Controller
                 $departure = Airport::where('icao', $data['departure'])->get()->first();
             } else {
                 // Get a random airport from the toplist
-                $departure = Airport::findWithCriteria($continent, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, 'departureFlights');
+                $departure = Airport::findWithCriteria($continent, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, 'departureFlights');
                 if(!$departure || !$departure->count()){
                     return back()->withErrors(['departureNotFound' => 'No departure airport found with given criteria']);
                 }
@@ -112,7 +116,7 @@ class SearchController extends Controller
 
             // Get airports according to filter
             $airports = collect();
-            $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines);
+            $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts);
 
             // Filter the eligable airports
             $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);

@@ -18,4 +18,8 @@ class FlightAircraft extends Model
     public function flight(){
         return $this->belongsTo(Flight::class, 'flight_id');
     }
+
+    public function aircraft(){
+        return $this->belongsTo(Aircraft::class, 'aircraft_id');
+    }
 }

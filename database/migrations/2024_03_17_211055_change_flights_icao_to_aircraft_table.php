@@ -16,7 +16,7 @@ return new class extends Migration
         // Create the new column
         Schema::table('flight_aircraft', function (Blueprint $table) {
             $table->unsignedBigInteger('aircraft_id')->nullable()->after('aircraft_icao');
-            $table->foreign('aircraft_id')->references('id')->on('aircraft');
+            $table->foreign('aircraft_id')->references('id')->on('aircraft')->onDelete('CASCADE');
         });
 
         // Match the aircraft_icao to the id in the new table and set aircraft_id to this

@@ -10,6 +10,10 @@ class Aircraft extends Model
     use HasFactory;
     public $timestamps = false;
 
+    protected $fillable = [
+        'icao',
+    ];
+
     public function flightAircrafts()
     {
         return $this->hasMany(FlightAircraft::class);
