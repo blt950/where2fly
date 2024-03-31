@@ -157,6 +157,6 @@ class SearchController extends Controller
 
         }
 
-        return redirect(route('front'))->withErrors(['airportNotFound' => 'No airport found with given criteria']);
+        return back()->withErrors(['airportNotFound' => 'No airport found with given criteria']);
     }
 }
