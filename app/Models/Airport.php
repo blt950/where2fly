@@ -237,9 +237,14 @@ class Airport extends Model
             
             if($destinationWithRoutesOnly == 1){
                 $returnQuery = $returnQuery->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts){
-                    if($flightDirection == 'arrivalFlights'){
-                        $query->where('dep_icao', $departureIcao);
-                    }   
+                    
+                    if(isset($departureIcao)){
+                        if($flightDirection == 'arrivalFlights'){
+                            $query->where('dep_icao', $departureIcao);
+                        } else {
+                            $query->where('arr_icao', $departureIcao);
+                        }
+                    }
 
                     $query->where('flights.seen_counter', '>', 3);
 
@@ -255,8 +260,13 @@ class Airport extends Model
                 });
             } else if($destinationWithRoutesOnly == -1){
                 $returnQuery = $returnQuery->whereDoesntHave($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts){
-                    if($flightDirection == 'arrivalFlights'){
-                        $query->where('dep_icao', $departureIcao);
+                    
+                    if(isset($departureIcao)){
+                        if($flightDirection == 'arrivalFlights'){
+                            $query->where('dep_icao', $departureIcao);
+                        } else {
+                            $query->where('arr_icao', $departureIcao);
+                        }
                     }
 
                     $query->where('flights.seen_counter', '>', 3);

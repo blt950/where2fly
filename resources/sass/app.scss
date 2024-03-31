@@ -487,6 +487,20 @@ img.flag{
     }
 }
 
+.btn-group{
+    &.filter{
+        width: 520px;
+
+        @include media-breakpoint-between(xs, sm) {
+            width: 100%;
+        }
+
+        @include media-breakpoint-between(sm, md) {
+            width: 450px;
+        }
+    }
+}
+
 .nav-pills{
     .nav-link.active, .show>.nav-link{
         font-size: 0.9em;

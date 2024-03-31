@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [SearchController::class, 'index'])->name('front');
+Route::get('/', [SearchController::class, 'indexArrivalSearch'])->name('front');
+Route::get('/departures/', [SearchController::class, 'indexDepartureSearch'])->name('front.departures');
+Route::get('/routes/', [SearchController::class, 'indexRouteSearch'])->name('front.routes');
 
 Route::get('/top', [TopController::class, 'index'])->name('top');
 Route::get('/top/{continent}', [TopController::class, 'index'])->name('top.filtered');
@@ -27,6 +29,7 @@ Route::view('/api', 'api')->name('api');
 
 // Search
 Route::post('/search', [SearchController::class, 'search'])->name('search');
+Route::post('/search/routes', [SearchController::class, 'searchRoutes'])->name('search.routes');
 
 Route::get('/search', function () {
     return redirect(route('front'));

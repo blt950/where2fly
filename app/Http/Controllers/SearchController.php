@@ -21,10 +21,28 @@ class SearchController extends Controller
      *
      * @return \Illuminate\View\View
     */
-    public function index(){
+    public function indexArrivalSearch(){
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
-        return view('front', compact('airlines', 'aircrafts'));
+        return view('front.index', compact('airlines', 'aircrafts'));
+    }
+
+    /**
+     * Display a listing of the resource.
+     * 
+     */
+    public function indexDepartureSearch(){
+        $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
+        $aircrafts = Aircraft::all()->pluck('icao')->sort();
+        return view('front.departures', compact('airlines', 'aircrafts'));
+    }
+
+    /**
+     * Display a listing of the resource.
+     * 
+     */
+    public function indexRouteSearch(){
+        return view('front.routes');
     }
 
     /**
@@ -42,7 +60,8 @@ class SearchController extends Controller
         */
 
         $data = request()->validate([
-            'departure' => ['nullable', new AirportExists],
+            'icao' => ['nullable', new AirportExists],
+            'direction' => 'required',
             'continent' => 'required|string',
             'codeletter' => 'required|string',
             'airtimeMin' => 'required|numeric|between:0,12',
@@ -63,6 +82,7 @@ class SearchController extends Controller
             'aircrafts' => 'sometimes|array',
         ]);
         
+        $direction = $data['direction'];
         $continent = $data['continent'];
         $codeletter = $data['codeletter'];
         $airtimeMin = (int)$data['airtimeMin'];
@@ -97,45 +117,46 @@ class SearchController extends Controller
         *
         */
 
-        // Lets find an result with the given criteria. Give it 5 attempts before we give up.
+        // Lets find an result with the given criteria. Give it a few attempts before we give up.
         $maxAttempts = 10;
         for($attempt = 1; $attempt <= $maxAttempts; $attempt++){
     
             // Use the supplied departure or select a random from toplist
-            $suggestedDeparture = false;
-            if(isset($data['departure'])){
-                $departure = Airport::where('icao', $data['departure'])->orWhere('local_code', $data['departure'])->get()->first();
+            $suggestedAirport = false;
+            if(isset($data['icao'])){
+                $airport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->get()->first();
             } else {
                 // Get a random airport from the toplist
-                $departure = Airport::findWithCriteria($continent, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, 'departureFlights');
-                if(!$departure || !$departure->count()){
-                    return back()->withErrors(['departureNotFound' => 'No departure airport found with given criteria']);
+                $airport = Airport::findWithCriteria($continent, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, $direction.'Flights');   
+            
+                if(!$airport || !$airport->count()){
+                    return back()->withErrors(['airportNotFound' => 'No '.$direction.' airport found with given criteria']);
                 }
             
-                $departure = $departure->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
-                $suggestedDeparture = true;
+                $airport = $airport->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
+                $suggestedAirport = true;
             }
 
             // Get airports according to filter
             $airports = collect();
-            $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts);
+            $airports = Airport::findWithCriteria($continent, $airport->iso_country, $airport->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts);    
 
             // Filter the eligable airports
-            $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+            $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
             // Shuffle the results before sort as slim results will quickly show airports from close by location
             // Sort the suggested airports based on the intended filters
             $suggestedAirports = $suggestedAirports->shuffle(); 
             $suggestedAirports = $suggestedAirports->sortByScores($sortByScores);
             $suggestedAirports = $suggestedAirports->splice(0,20);
-            $suggestedAirports = $suggestedAirports->addFlights($departure);
+            $suggestedAirports = $suggestedAirports->addFlights($airport, $direction);
 
             if($suggestedAirports->count()){
-                return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture', 'filterByScores', 'sortByScores'));
+                return view('search', compact('suggestedAirports', 'airport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores'));
             }
 
         }
 
-        return redirect(route('front'))->withErrors(['departureNotFound' => 'No departure airport found with given criteria']);
+        return redirect(route('front'))->withErrors(['airportNotFound' => 'No airport found with given criteria']);
     }
 }
