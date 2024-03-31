@@ -40,7 +40,7 @@ class FetchVatsim extends Command
         $upsertControllerData = [];
 
         $this->info("Fetching events...");
-        $response = Http::get('https://my.vatsim.net/api/v1/events/all');
+        $response = Http::get('https://my.vatsim.net/api/v2/events/latest');
         if($response->successful()){
             $data = json_decode($response->body(), false)->data;
 
