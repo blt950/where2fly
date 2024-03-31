@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\Airport;
 use App\Models\Airline;
 use App\Models\Flight;
 use App\Models\AirportScore;
 use App\Models\Aircraft;
 use App\Http\Controllers\ScoreController;
+use App\Rules\AirportExists;
 
 class SearchController extends Controller
 {
@@ -40,7 +42,7 @@ class SearchController extends Controller
         */
 
         $data = request()->validate([
-            'departure' => 'nullable|exists:App\Models\Airport,icao',
+            'departure' => ['nullable', new AirportExists],
             'continent' => 'required|string',
             'codeletter' => 'required|string',
             'airtimeMin' => 'required|numeric|between:0,12',
@@ -102,7 +104,7 @@ class SearchController extends Controller
             // Use the supplied departure or select a random from toplist
             $suggestedDeparture = false;
             if(isset($data['departure'])){
-                $departure = Airport::where('icao', $data['departure'])->get()->first();
+                $departure = Airport::where('icao', $data['departure'])->orWhere('local_code', $data['departure'])->get()->first();
             } else {
                 // Get a random airport from the toplist
                 $departure = Airport::findWithCriteria($continent, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, 'departureFlights');
