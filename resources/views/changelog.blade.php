@@ -24,6 +24,7 @@
                 <li>Added Simbrief shortcuts in route results and top list</li>
                 <li>Added arrival or departure search shortcut from top list</li>
                 <li>Added possibility to search for local airport codes (e.g. 1L1 instead of K1L1)</li>
+                <li>Partly fixed so random deparure + arrival suggestions cross continents for long haul</li>
                 <li>Improved German military airfield classification</li>
             </ul>
 
