@@ -66,7 +66,7 @@
             </dl>
 
             <dl>
-                <dt>State<dt>
+                <dt>Conditions<dt>
                 @foreach($airport->scores as $score)
                     @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
                         <i 
