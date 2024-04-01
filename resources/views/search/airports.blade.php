@@ -23,7 +23,7 @@
                 <h2>{{ ucfirst($direction) }} suggestion</h2>
 
                 {{-- Add possiblity to re-post the search query for a new random departure --}}
-                <form method="POST" action="{{ route('search') }}">
+                <form id="form" method="POST" action="{{ route('search') }}">
                     @csrf
 
                     @foreach($_POST as $key => $value)
@@ -38,7 +38,7 @@
                         @endif
                     @endforeach
 
-                    <button class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;"><i class="fas fa-shuffle"></i> Randomise</button>
+                    <button id="randomiseBtn" type="submit" class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;">Randomise <i class="fas fa-shuffle"></i></button>
                 </form>
 
             </div>
@@ -277,28 +277,39 @@
 
     <script>
         // Get the show more button and add on click event where it removes the class that hides the rows
-        document.querySelector('#showMoreBtn').addEventListener('click', function() {
-            expandAllRows();
-        });
-
-        // Expand all rows if user has clicked the table thead th's
-        document.querySelectorAll('thead > tr > th').forEach(function(element) {
-            element.addEventListener('click', function() {
+        var showMoreBtn = document.querySelector('#showMoreBtn')
+        if(showMoreBtn){
+            document.querySelector('#showMoreBtn').addEventListener('click', function() {
                 expandAllRows();
             });
-        });
 
-        // Function to expand all rows
-        var expanded = false
-        function expandAllRows() {
-            if(!expanded) {
-                document.querySelectorAll('.showmore-hidden').forEach(function(element) {
-                    element.classList.remove('showmore-hidden');
+            // Expand all rows if user has clicked the table thead th's
+            document.querySelectorAll('thead > tr > th').forEach(function(element) {
+                element.addEventListener('click', function() {
+                    expandAllRows();
                 });
-                document.querySelector('#showMoreRow').remove();
-                expanded = true;
+            });
+
+            // Function to expand all rows
+            var expanded = false
+            function expandAllRows() {
+                if(!expanded) {
+                    document.querySelectorAll('.showmore-hidden').forEach(function(element) {
+                        element.classList.remove('showmore-hidden');
+                    });
+                    document.querySelector('#showMoreRow').remove();
+                    expanded = true;
+                }
             }
         }
+
+        // Randomise spinner
+        var button = document.getElementById('randomiseBtn');
+            button.addEventListener('click', function() {
+            button.setAttribute('disabled', '')
+            button.innerHTML = 'Randomise&nbsp;&nbsp;<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
+            document.getElementById('form').submit()
+        });
     </script>
 
     @include('scripts.measures')
