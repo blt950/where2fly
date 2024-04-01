@@ -277,7 +277,7 @@
                     name="airlines[]"
                     placeholder="All airlines">
                     @foreach($airlines as $airline)
-                        <option value="{{ $airline->icao_code }}">{{ $airline->name }}</option>
+                        <option value="{{ $airline->icao_code }}">{{ $airline->name }} ({{ $airline->icao_code }})</option>
                     @endforeach
                 </select>
 
