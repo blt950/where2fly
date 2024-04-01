@@ -54,18 +54,21 @@ class CollectionAirportFilter{
     }
 
     public function addFlights(){
-        return function(Airport $departure){
+        return function(Airport $airport, $direction){
+
+            $arrivalAirportColumn = $direction === 'departure' ? 'airport_dep_id' : 'airport_arr_id';
+            $departureAirportColumn = $direction === 'departure' ? 'airport_arr_id' : 'airport_dep_id';
 
             // Get flights and airlines for the suggested airports
-            $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departure->id)->whereIn('airport_arr_id', $this->pluck('id'))->with('aircrafts')->orderBy('last_seen_at')->get();
+            $flights = Flight::where('seen_counter', '>', 3)->where($arrivalAirportColumn, $airport->id)->whereIn($departureAirportColumn, $this->pluck('id'))->with('aircrafts')->orderBy('last_seen_at')->get();
             $airlines = Airline::whereIn('icao_code', $flights->pluck('airline_icao')->unique())->get();
 
-            foreach($this as $arrivalAirport){
-                $arrivalAirport->flights = $flights->where('airport_arr_id', $arrivalAirport->id);
-                $arrivalAirport->airlines = $airlines->whereIn('icao_code', $arrivalAirport->flights->pluck('airline_icao')->unique());
+            foreach($this as $airport){
+                $airport->flights = $flights->where($departureAirportColumn, $airport->id);
+                $airport->airlines = $airlines->whereIn('icao_code', $airport->flights->pluck('airline_icao')->unique());
 
                 // Replace * with '' in all airline iata codes
-                foreach($arrivalAirport->airlines as $airline){
+                foreach($airport->airlines as $airline){
                     $airline->iata_code = str_replace('*', '', $airline->iata_code);
                 }
             }

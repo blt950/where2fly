@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Airport;
+use App\Rules\AirportExists;
 
 class SearchController extends Controller{
     
@@ -18,7 +19,8 @@ class SearchController extends Controller{
         */
 
         $data = request()->validate([
-            'departure' => 'required|exists:App\Models\Airport,icao',
+            'departure' => ['nullable', new AirportExists],
+            'arrival' => ['nullable', new AirportExists],
             'continent' => 'required_without:arrivalWhitelist|string',
             'codeletter' => 'required|string',
             'airtimeMin' => 'sometimes|numeric|between:0,24',
@@ -38,6 +40,8 @@ class SearchController extends Controller{
             'limit' => 'sometimes|integer|between:1,30',
         ]);
 
+        isset($data['departure']) ? $departure = $data['departure'] : $departure = null;
+        isset($data['arrival']) ? $arrival = $data['arrival'] : $arrival = null;
         isset($data['continent']) ? $continent = $data['continent'] : $continent = null;
         $codeletter = $data['codeletter'];
         isset($data['airtimeMin']) ? $airtimeMin = $data['airtimeMin'] : $airtimeMin = 0;
@@ -55,18 +59,29 @@ class SearchController extends Controller{
         isset($data['arrivalWhitelist']) ? $arrivalWhitelist = $data['arrivalWhitelist'] : $arrivalWhitelist = null;
         isset($data['limit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
 
+        if(($arrival && $departure) || (!$arrival && !$departure)){
+            // Dont allow this, return error json
+            return response()->json([
+                'message' => 'You cannot search for both departure and arrival at the same time'
+            ], 400);
+        }
+
         /**
         *
         *  Fetch the requested data
         *
         */
 
-        $departure = Airport::where('icao', $data['departure'])->get()->first();
-
+        if($departure){
+            $airport = Airport::where('icao', $departure)->orWhere('local_code', $departure)->get()->first();
+        } else {
+            $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->get()->first();
+        }
+        
         $airports = collect();
-        $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, $arrivalWhitelist, $filterByScores, $destinationRunwayLights, $destinationAirbases);
+        $airports = Airport::findWithCriteria($continent, $airport->iso_country, $airport->icao, $destinationAirportSize, $arrivalWhitelist, $filterByScores, $destinationRunwayLights, $destinationAirbases);
 
-        $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
         $suggestedAirports = $suggestedAirports->shuffle(); 
 
         $suggestedAirports = $suggestedAirports->sortByScores($filterByScores);
@@ -77,51 +92,59 @@ class SearchController extends Controller{
         *  Prepare the data for the response
         *
         */
-        $arrivalData = collect();
-        foreach($suggestedAirports as $airport){
-
-            $scores = $airport->scores->pluck('reason');
-
-            $arrivalData->push([
-
-                "name" => $airport->name,
-                "icao" => $airport->icao,
-                "iata" => $airport->iata_code ? $airport->iata_code : null,
-                "contient" => $airport->continent,
-                "country" => $airport->iso_country,
-                "region" => $airport->iso_region,
-                "metar" => (config('app.env') == 'production') ? $airport->metar->metar : 'TEST-DATA '.$airport->metar->metar,
-                "longestRwyFt" => $airport->longestRunway(),
-                "scores" => $scores,
-                "airtime" => $airport->airtime,
-                "distanceNm" => $airport->distance,
-                "isAirforcebase" => $airport->w2f_airforcebase,
-                "hasAirlineService" => $airport->w2f_scheduled_service,
-            ]);
+        
+        // Then in your main function
+        if($departure){
+            [$airportData, $arrivalData] = $this->prepareAirportData($airport, $suggestedAirports);
+        } else {
+            [$airportData, $departureData] = $this->prepareAirportData($airport, $suggestedAirports);
         }
-
-        // Prepare departure data
-        $departureData = [
-            "name" => $departure->name,
-            "icao" => $departure->icao,
-            "iata" => $departure->iata_code ? $departure->iata_code : null,
-            "contient" => $departure->continent,
-            "country" => $departure->iso_country,
-            "region" => $departure->iso_region,
-            "metar" => (config('app.env') == 'production') ? $departure->metar->metar : 'TEST-DATA '.$departure->metar->metar,
-            "longestRwyFt" => $departure->longestRunway(),
-            "scores" => $departure->scores->pluck('reason'),
-        ];
-
+        
         // Send the response
         return response()->json([
             'message' => 'Success',
             'data' => [
-                "departure" => $departureData,
-                "arrivals" => $arrivalData
+                "departure" => $departure ? $airportData : $departureData,
+                "arrivals" => $departure ? $arrivalData : $airportData
             ]
         ], 200);
 
+    }
+
+    function prepareAirportData($airport, $suggestedAirports) {
+        $airportData = [
+            "name" => $airport->name,
+            "icao" => $airport->icao,
+            "iata" => $airport->iata_code ? $airport->iata_code : null,
+            "contient" => $airport->continent,
+            "country" => $airport->iso_country,
+            "region" => $airport->iso_region,
+            "metar" => (config('app.env') == 'production') ? $airport->metar->metar : 'TEST-DATA '.$airport->metar->metar,
+            "longestRwyFt" => $airport->longestRunway(),
+            "scores" => $airport->scores->pluck('reason'),
+        ];
+    
+        $suggestedData = collect();
+        foreach($suggestedAirports as $suggestedAirport){
+            $scores = $suggestedAirport->scores->pluck('reason');
+            $suggestedData->push([
+                "name" => $suggestedAirport->name,
+                "icao" => $suggestedAirport->icao,
+                "iata" => $suggestedAirport->iata_code ? $suggestedAirport->iata_code : null,
+                "contient" => $suggestedAirport->continent,
+                "country" => $suggestedAirport->iso_country,
+                "region" => $suggestedAirport->iso_region,
+                "metar" => (config('app.env') == 'production') ? $suggestedAirport->metar->metar : 'TEST-DATA '.$suggestedAirport->metar->metar,
+                "longestRwyFt" => $suggestedAirport->longestRunway(),
+                "scores" => $scores,
+                "airtime" => $suggestedAirport->airtime,
+                "distanceNm" => $suggestedAirport->distance,
+                "isAirforcebase" => $suggestedAirport->w2f_airforcebase,
+                "hasAirlineService" => $suggestedAirport->w2f_scheduled_service,
+            ]);
+        }
+    
+        return [$airportData, $suggestedData];
     }
 
 }
