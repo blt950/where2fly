@@ -57,7 +57,7 @@
                     </div>
                 </div>
             
-                @error('airportNotFound')
+                @error('routeNotFound')
                     <div class="validation-error mt-2">{{ $message }}</div>
                 @enderror
                 

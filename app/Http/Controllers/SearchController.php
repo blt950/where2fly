@@ -180,6 +180,10 @@ class SearchController extends Controller
         $arrival = Airport::where('icao', $data['arrival'])->orWhere('local_code', $data['arrival'])->get()->first();
 
         $routes = Flight::where('airport_dep_id', $departure->id)->where('airport_arr_id', $arrival->id)->whereHas('airline')->with('airline', 'aircrafts')->get();
+
+        if($routes->count() == 0){
+            return back()->withErrors(['routeNotFound' => 'No routes found between '.$departure->icao.' and '.$arrival->icao]);
+        }
         
         // Strip the stars from IATA codes for the logos to display correctly
         $routes = $routes->map(function($route){
