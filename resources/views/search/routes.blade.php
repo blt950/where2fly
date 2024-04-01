@@ -54,6 +54,7 @@
                             <th scope="col">Airline</th>
                             <th scope="col">Aircraft</th>
                             <th scope="col">Last seen</th>
+                            <th scope="col"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,6 +72,11 @@
                                     {{ $route->aircrafts->pluck('icao')->sort()->implode(', ') }}
                                 </td>
                                 <td>{{ $route->last_seen_at->format('Y-m-d') }}</td>
+                                <td>
+                                    <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/system/dispatch.php?orig={{ $departure->icao }}&dest={{ $arrival->icao }}&airline={{ $route->airline->icao_code }}&fltnum={{ $route->flight_number }}" target="_blank">
+                                        <span class="d-none d-lg-inline d-xl-inline">SimBrief</span> <i class="fas fa-up-right-from-square"></i>
+                                    </a>
+                                </td>
                             </tr>
                         @endforeach                        
                     </tbody>
