@@ -21,10 +21,30 @@ class SearchController extends Controller
      *
      * @return \Illuminate\View\View
     */
-    public function index(){
+    public function indexArrivalSearch(){
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
-        return view('front', compact('airlines', 'aircrafts'));
+        $prefilledIcao = request()->input('icao');
+        return view('front.index', compact('airlines', 'aircrafts', 'prefilledIcao'));
+    }
+
+    /**
+     * Display a listing of the resource.
+     * 
+     */
+    public function indexDepartureSearch(){
+        $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
+        $aircrafts = Aircraft::all()->pluck('icao')->sort();
+        $prefilledIcao = request()->input('icao');
+        return view('front.departures', compact('airlines', 'aircrafts', 'prefilledIcao'));
+    }
+
+    /**
+     * Display a listing of the resource.
+     * 
+     */
+    public function indexRouteSearch(){
+        return view('front.routes');
     }
 
     /**
@@ -42,7 +62,8 @@ class SearchController extends Controller
         */
 
         $data = request()->validate([
-            'departure' => ['nullable', new AirportExists],
+            'icao' => ['nullable', new AirportExists],
+            'direction' => 'required',
             'continent' => 'required|string',
             'codeletter' => 'required|string',
             'airtimeMin' => 'required|numeric|between:0,12',
@@ -63,6 +84,7 @@ class SearchController extends Controller
             'aircrafts' => 'sometimes|array',
         ]);
         
+        $direction = $data['direction'];
         $continent = $data['continent'];
         $codeletter = $data['codeletter'];
         $airtimeMin = (int)$data['airtimeMin'];
@@ -97,45 +119,93 @@ class SearchController extends Controller
         *
         */
 
-        // Lets find an result with the given criteria. Give it 5 attempts before we give up.
+        // Lets find an result with the given criteria. Give it a few attempts before we give up.
         $maxAttempts = 10;
         for($attempt = 1; $attempt <= $maxAttempts; $attempt++){
     
             // Use the supplied departure or select a random from toplist
-            $suggestedDeparture = false;
-            if(isset($data['departure'])){
-                $departure = Airport::where('icao', $data['departure'])->orWhere('local_code', $data['departure'])->get()->first();
+            $suggestedAirport = false;
+            if(isset($data['icao'])){
+                $airport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->get()->first();
             } else {
                 // Get a random airport from the toplist
-                $departure = Airport::findWithCriteria($continent, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, 'departureFlights');
-                if(!$departure || !$departure->count()){
-                    return back()->withErrors(['departureNotFound' => 'No departure airport found with given criteria']);
+                $airport = Airport::findWithCriteria($continent, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, $direction.'Flights');   
+            
+                if(!$airport || !$airport->count()){
+                    return back()->withErrors(['airportNotFound' => 'No '.$direction.' airport found with given criteria']);
                 }
             
-                $departure = $departure->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
-                $suggestedDeparture = true;
+                $airport = $airport->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
+                $suggestedAirport = true;
             }
 
             // Get airports according to filter
             $airports = collect();
-            $airports = Airport::findWithCriteria($continent, $departure->iso_country, $departure->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts);
+            $airports = Airport::findWithCriteria($continent, $airport->iso_country, $airport->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts);    
 
             // Filter the eligable airports
-            $suggestedAirports = $airports->filterWithCriteria($departure, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+            $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
             // Shuffle the results before sort as slim results will quickly show airports from close by location
             // Sort the suggested airports based on the intended filters
             $suggestedAirports = $suggestedAirports->shuffle(); 
             $suggestedAirports = $suggestedAirports->sortByScores($sortByScores);
             $suggestedAirports = $suggestedAirports->splice(0,20);
-            $suggestedAirports = $suggestedAirports->addFlights($departure);
+            $suggestedAirports = $suggestedAirports->addFlights($airport, $direction);
 
             if($suggestedAirports->count()){
-                return view('search', compact('suggestedAirports', 'departure', 'suggestedDeparture', 'filterByScores', 'sortByScores'));
+                return view('search.airports', compact('suggestedAirports', 'airport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores'));
             }
 
         }
 
-        return redirect(route('front'))->withErrors(['departureNotFound' => 'No departure airport found with given criteria']);
+        return back()->withErrors(['airportNotFound' => 'No airport found with given criteria']);
+    }
+
+    /**
+     * Search for a route
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function searchRoutes(Request $request){
+
+        $data = request()->validate([
+            'departure' => ['required', new AirportExists],
+            'arrival' => ['required', new AirportExists],
+            'sort' => 'required|in:flight,airline,timestamp',
+        ]);
+
+        $departure = Airport::where('icao', $data['departure'])->orWhere('local_code', $data['departure'])->get()->first();
+        $arrival = Airport::where('icao', $data['arrival'])->orWhere('local_code', $data['arrival'])->get()->first();
+
+        $routes = Flight::where('airport_dep_id', $departure->id)->where('airport_arr_id', $arrival->id)->whereHas('airline')->with('airline', 'aircrafts')->get();
+
+        if($routes->count() == 0){
+            return back()->withErrors(['routeNotFound' => 'No routes found between '.$departure->icao.' and '.$arrival->icao]);
+        }
+        
+        // Strip the stars from IATA codes for the logos to display correctly
+        $routes = $routes->map(function($route){
+            $route->airline->iata_code = str_replace('*', '', $route->airline->iata_code);
+            return $route;
+        });
+
+        // Sort the routes based on the selected criteria
+        switch($data['sort']){
+            case 'flight':
+                $routes = $routes->sortBy('flight_icao');
+                break;
+            case 'timestamp':
+                $routes = $routes->sortByDesc('last_seen_at');
+                break;
+        }
+
+        if($routes->count()){
+            return view('search.routes', compact('routes', 'departure', 'arrival'));
+        } else {
+            return back()->withErrors(['routeNotFound' => 'No routes found between '.$departure->icao.' and '.$arrival->icao]);
+        }
+
     }
 }

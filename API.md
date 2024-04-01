@@ -32,6 +32,7 @@ Returns airports matching your search query
 | Param | Required | Type | Description | Default value |
 | --- | --- | --- | --- | --- |
 | `departure` | Yes | string | Departure airport | - |
+| `arrival` | Yes | string | Arrival airport | - |
 | `continent` | Yes | string | Filter on one continent described below | - |
 | `codeletter` | Yes | string | Select aircraft type | - |
 | `airtimeMin` | No | string | Minimum airtime | 0 |

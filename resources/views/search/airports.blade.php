@@ -18,9 +18,9 @@
     <main>
         <h1 class="mb-3 mt-5">Search Results</h1>
 
-        @if($suggestedDeparture)
+        @if($suggestedAirport)
             <div class="d-flex flex-wrap justify-content-between">
-                <h2>Departure suggestion</h2>
+                <h2>{{ ucfirst($direction) }} suggestion</h2>
 
                 {{-- Add possiblity to re-post the search query for a new random departure --}}
                 <form method="POST" action="{{ route('search') }}">
@@ -43,31 +43,31 @@
 
             </div>
         @else
-            <h2>Departure</h2>
+            <h2>{{ ucfirst($direction) }}</h2>
         @endif
         <div class="departure-container">
             <dl>
                 <dt>Airport
-                    @if($suggestedDeparture)
+                    @if($suggestedAirport)
                         <span class="badge rounded-pill text-bg-info fs-7">Based on filter</span>
                     @endif
                 <dt>
                 <dd>
-                    <img class="flag" src="/img/flags/{{ strtolower($departure->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($departure->iso_country) }}" alt="Flag of {{ getCountryName($departure->iso_country) }}"></img>
-                    {{ $departure->icao }}
+                    <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
+                    {{ $airport->icao }}
                 </dd>
-                <dd>{{ $departure->name }}</dd>
+                <dd>{{ $airport->name }}</dd>
             </dl>
 
             <dl>
                 <dt>Runway<dt>
-                <dd class="rwy-feet">{{ $departure->longestRunway() }}</dd>
-                <dd class="rwy-meters text-muted">{{ round($departure->longestRunway()* .3048) }}</dd>
+                <dd class="rwy-feet">{{ $airport->longestRunway() }}</dd>
+                <dd class="rwy-meters text-muted">{{ round($airport->longestRunway()* .3048) }}</dd>
             </dl>
 
             <dl>
                 <dt>State<dt>
-                @foreach($departure->scores as $score)
+                @foreach($airport->scores as $score)
                     @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
                         <i 
                             class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
@@ -87,21 +87,21 @@
             </dl>
 
             <div style="width: 60%">
-                @if($departure->metar)
+                @if($airport->metar)
                     <div class="d-flex mb-3 nav nav-pills" style="font-size: 0.75rem">
                         <div>
-                            <button class="nav-link active" id="home-tab-{{ $departure->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $departure->id }}" type="button" role="tab">METAR</button>
+                            <button class="nav-link active" id="home-tab-{{ $airport->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $airport->id }}" type="button" role="tab">METAR</button>
                         </div>
                         <div>
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $departure->id }}" data-taf-button="true" data-airport-icao="{{ $departure->icao }}" type="button" role="tab">TAF</button>
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" data-taf-button="true" data-airport-icao="{{ $airport->icao }}" type="button" role="tab">TAF</button>
                         </div>
                     </div>
                     <div class="tab-content">
-                        <div class="tab-pane fade show active" id="metar-pane-{{ $departure->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $departure->id }}" tabindex="0">{{ \Carbon\Carbon::parse($departure->metar->last_update)->format('dHi\Z') }} {{ $departure->metar->metar }}</div>
-                        @isset($tafs[$departure->icao])
-                            <div class="tab-pane fade" id="taf-pane-{{ $departure->id }}" role="tabpanel" tabindex="0">{{ $tafs[$departure->icao] }}</div>
+                        <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $airport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHi\Z') }} {{ $airport->metar->metar }}</div>
+                        @isset($tafs[$airport->icao])
+                            <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$airport->icao] }}</div>
                         @else
-                            <div class="tab-pane fade" id="taf-pane-{{ $departure->id }}" role="tabpanel" tabindex="0">
+                            <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">
                                 <span class="spinner-border spinner-border-sm" role="status"></span>
                             </div>
                         @endif
@@ -115,7 +115,7 @@
             </div>
         </div>
 
-        <h2>Arrival suggestions</h2>
+        <h2>{{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>
         <div class="scroll-fade">
             <div class="table-responsive">
                 <table class="table table-hover text-start sortable asc">
@@ -223,7 +223,7 @@
                                                 </a>
                                             </div>
                                             <div class="hover-show">
-                                                <a class="btn btn-sm float-end font-work-sans text-muted" href="https://www.simbrief.com/system/dispatch.php?orig={{ $departure->icao }}&dest={{ $airport->icao }}" target="_blank">
+                                                <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/options/custom?orig={{ $airport->icao }}&dest={{ $airport->icao }}" target="_blank">
                                                     <span class="d-none d-lg-inline d-xl-inline">SimBrief</span> <i class="fas fa-up-right-from-square"></i>
                                                 </a>
                                             </div>
