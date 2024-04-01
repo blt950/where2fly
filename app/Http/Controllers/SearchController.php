@@ -132,7 +132,7 @@ class SearchController extends Controller
                 $airport = Airport::findWithCriteria(null, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, $direction.'Flights');   
             
                 if(!$airport || !$airport->count()){
-                    return back()->withErrors(['airportNotFound' => 'No '.$direction.' airport found with given criteria']);
+                    return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
                 }
             
                 $airport = $airport->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
@@ -159,7 +159,11 @@ class SearchController extends Controller
 
         }
 
-        return back()->withErrors(['airportNotFound' => 'No airport found with given criteria']);
+        if($direction == 'departure'){
+            return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable arrival airport could be found with given criteria'])->withInput();
+        } else {
+            return redirect(route('front.departures'))->withErrors(['airportNotFound' => 'No suitable arrival airport could be found given criteria'])->withInput();
+        }
     }
 
     /**
