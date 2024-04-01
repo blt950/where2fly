@@ -60,17 +60,17 @@
                         @foreach($routes as $route)
                             <tr>
                                 <td data-sort="{{ $route->flight_icao }}">{{ $route->flight_icao }}</td>
-                                <td data-sort="">
+                                <td data-sort="{{ $route->airline->iata_code }}">
                                     <img
                                         class="airline-logo" 
                                         src="{{ asset('img/airlines/'.$route->airline->iata_code.'.png') }}"
                                     >
                                     {{ $route->airline->name }}
                                 </td>
-                                <td data-sort="">
+                                <td>
                                     {{ $route->aircrafts->pluck('icao')->sort()->implode(', ') }}
                                 </td>
-                                <td data-sort="">{{ $route->last_seen_at->format('Y-m-d') }}</td>
+                                <td>{{ $route->last_seen_at->format('Y-m-d') }}</td>
                             </tr>
                         @endforeach                        
                     </tbody>
