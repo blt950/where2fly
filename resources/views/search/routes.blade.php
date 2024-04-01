@@ -42,7 +42,7 @@
 
         <div class="d-flex flex-wrap justify-content-between align-items-center">
             <h2>Routes</h2>
-            <p class="mb-0">Data since {{ $routes->sort()->first()->first_seen_at->format('Y-d-m') }}</p>
+            <p class="mb-0">Data since {{ $routes->sort()->first()->first_seen_at->format('Y-m-d') }}</p>
         </div>
         
         <div class="scroll-fade">
@@ -70,7 +70,7 @@
                                 <td data-sort="">
                                     {{ $route->aircrafts->pluck('icao')->sort()->implode(', ') }}
                                 </td>
-                                <td data-sort="">{{ $route->last_seen_at->format('Y-d-m') }}</td>
+                                <td data-sort="">{{ $route->last_seen_at->format('Y-m-d') }}</td>
                             </tr>
                         @endforeach                        
                     </tbody>
