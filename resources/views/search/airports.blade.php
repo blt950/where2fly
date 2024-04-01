@@ -223,7 +223,7 @@
                                                 </a>
                                             </div>
                                             <div class="hover-show">
-                                                <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/system/dispatch.php?orig={{ $airport->icao }}&dest={{ $airport->icao }}" target="_blank">
+                                                <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/options/custom?orig={{ $airport->icao }}&dest={{ $airport->icao }}" target="_blank">
                                                     <span class="d-none d-lg-inline d-xl-inline">SimBrief</span> <i class="fas fa-up-right-from-square"></i>
                                                 </a>
                                             </div>
