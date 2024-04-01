@@ -24,7 +24,8 @@ class SearchController extends Controller
     public function indexArrivalSearch(){
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
-        return view('front.index', compact('airlines', 'aircrafts'));
+        $prefilledIcao = request()->input('icao');
+        return view('front.index', compact('airlines', 'aircrafts', 'prefilledIcao'));
     }
 
     /**
@@ -34,7 +35,8 @@ class SearchController extends Controller
     public function indexDepartureSearch(){
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
-        return view('front.departures', compact('airlines', 'aircrafts'));
+        $prefilledIcao = request()->input('icao');
+        return view('front.departures', compact('airlines', 'aircrafts', 'prefilledIcao'));
     }
 
     /**

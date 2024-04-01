@@ -86,6 +86,16 @@
                                         </div>
 
                                         <div class="d-flex">
+                                            <div class="hover-show">
+                                                <a class="btn btn-sm float-end font-work-sans text-muted d-none d-lg-inline d-xl-inline" href="{{ route('front', ['icao' => $airport->icao]) }}">
+                                                    <span>Arrival</span> <i class="fas fa-search"></i>
+                                                </a>
+                                            </div>
+                                            <div class="hover-show">
+                                                <a class="btn btn-sm float-end font-work-sans text-muted d-none d-lg-inline d-xl-inline" href="{{ route('front.departures', ['icao' => $airport->icao]) }}">
+                                                    <span>Departure</span> <i class="fas fa-search"></i>
+                                                </a>
+                                            </div>
                                             <div class="hover-show secondary">
                                                 <a class="btn btn-sm float-end font-work-sans text-muted" href="https://windy.com/{{ $airport->icao }}" target="_blank">
                                                     <span class="d-none d-lg-inline d-xl-inline">Windy</span> <i class="fas fa-up-right-from-square"></i>

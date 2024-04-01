@@ -74,7 +74,7 @@
                                 <td>{{ $route->last_seen_at->format('Y-m-d') }}</td>
                                 <td>
                                     <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/system/dispatch.php?orig={{ $departure->icao }}&dest={{ $arrival->icao }}&airline={{ $route->airline->icao_code }}&fltnum={{ $route->flight_number }}" target="_blank">
-                                        <span class="d-none d-lg-inline d-xl-inline">SimBrief</span> <i class="fas fa-up-right-from-square"></i>
+                                        <span>SimBrief</span> <i class="fas fa-up-right-from-square"></i>
                                     </a>
                                 </td>
                             </tr>

@@ -4,7 +4,7 @@
     <div class="row g-3 justify-content-center">
         <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
             <label for="icao">{{ ucfirst($icao) }} (ICAO)</label>
-            <input type="text" class="form-control" id="icao" name="icao" placeholder="Random" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('icao') }}">
+            <input type="text" class="form-control" id="icao" name="icao" placeholder="Random" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ isset($prefilledIcao) ? $prefilledIcao : old('icao') }}">
             <input type="hidden" name="direction" value="{{ $icao }}">
             @error('icao')
             <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
