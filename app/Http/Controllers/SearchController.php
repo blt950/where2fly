@@ -152,11 +152,54 @@ class SearchController extends Controller
             $suggestedAirports = $suggestedAirports->addFlights($airport, $direction);
 
             if($suggestedAirports->count()){
-                return view('search', compact('suggestedAirports', 'airport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores'));
+                return view('search.airports', compact('suggestedAirports', 'airport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores'));
             }
 
         }
 
         return back()->withErrors(['airportNotFound' => 'No airport found with given criteria']);
+    }
+
+    /**
+     * Search for a route
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function searchRoutes(Request $request){
+
+        $data = request()->validate([
+            'departure' => ['required', new AirportExists],
+            'arrival' => ['required', new AirportExists],
+            'sort' => 'required|in:flight,airline,timestamp',
+        ]);
+
+        $departure = Airport::where('icao', $data['departure'])->orWhere('local_code', $data['departure'])->get()->first();
+        $arrival = Airport::where('icao', $data['arrival'])->orWhere('local_code', $data['arrival'])->get()->first();
+
+        $routes = Flight::where('airport_dep_id', $departure->id)->where('airport_arr_id', $arrival->id)->whereHas('airline')->with('airline', 'aircrafts')->get();
+        
+        // Strip the stars from IATA codes for the logos to display correctly
+        $routes = $routes->map(function($route){
+            $route->airline->iata_code = str_replace('*', '', $route->airline->iata_code);
+            return $route;
+        });
+
+        // Sort the routes based on the selected criteria
+        switch($data['sort']){
+            case 'flight':
+                $routes = $routes->sortBy('flight_icao');
+                break;
+            case 'timestamp':
+                $routes = $routes->sortByDesc('last_seen_at');
+                break;
+        }
+
+        if($routes->count()){
+            return view('search.routes', compact('routes', 'departure', 'arrival'));
+        } else {
+            return back()->withErrors(['routeNotFound' => 'No routes found between '.$departure->icao.' and '.$arrival->icao]);
+        }
+
     }
 }

@@ -38,6 +38,17 @@
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                         @enderror
                     </div>
+
+                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
+                        <label for="sort">Sort by</label>
+                        <select class="form-control" id="sort" name="sort">
+                            <option value="flight" {{ old('sort') == "flights" ? "selected" : "" }}>Callsigns</option>
+                            <option value="timestamp" {{ old('sort') == "timestamp" ? "selected" : "" }}>Last seen</option>
+                        </select>
+                        @error('sort')
+                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                        @enderror
+                    </div>
             
                     <div class="col-sm-12 col-md-9 col-lg-2 align-self-start">
                         <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
