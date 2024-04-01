@@ -54,7 +54,7 @@
                             <th scope="col">Airline</th>
                             <th scope="col">Aircraft</th>
                             <th scope="col">Last seen</th>
-                            <th scope="col"></th>
+                            <th scope="col" class="no-sort"></th>
                         </tr>
                     </thead>
                     <tbody>
