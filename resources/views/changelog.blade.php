@@ -16,6 +16,17 @@
         
         <div class="text-start">
             
+            <h2 class="mb-0">v1.7.0</h2>
+            <span class="badge ps-0 pb-2">2024-04-01</span>
+            <ul>
+                <li>Added new search categories: Departure and route</li>
+                <li>Added ICAO codes to airline list for easier search</li>
+                <li>Added Simbrief shortcuts in route results and top list</li>
+                <li>Added arrival or departure search shortcut from top list</li>
+                <li>Added possibility to search for local airport codes (e.g. 1L1 instead of K1L1)</li>
+                <li>Improved German military airfield classification</li>
+            </ul>
+
             <h2 class="mb-0">v1.6.0</h2>
             <span class="badge ps-0 pb-2">2024-03-18</span>
             <ul>
