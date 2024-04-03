@@ -16,6 +16,12 @@
         
         <div class="text-start">
             
+            <h2 class="mb-0">v1.7.1</h2>
+            <span class="badge ps-0 pb-2">2024-04-03</span>
+            <ul>
+                <li>Fixed incorrect icao code from Simbrief links in search results</li>
+            </ul>
+
             <h2 class="mb-0">v1.7.0</h2>
             <span class="badge ps-0 pb-2">2024-04-01</span>
             <ul>

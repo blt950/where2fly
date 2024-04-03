@@ -126,35 +126,35 @@ class SearchController extends Controller
             // Use the supplied departure or select a random from toplist
             $suggestedAirport = false;
             if(isset($data['icao'])){
-                $airport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->get()->first();
+                $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->get()->first();
             } else {
                 // Get a random airport from the toplist
-                $airport = Airport::findWithCriteria(null, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, $direction.'Flights');   
+                $primaryAirport = Airport::findWithCriteria(null, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, $direction.'Flights');   
             
-                if(!$airport || !$airport->count()){
+                if(!$primaryAirport || !$primaryAirport->count()){
                     return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
                 }
             
-                $airport = $airport->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
+                $primaryAirport = $primaryAirport->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
                 $suggestedAirport = true;
             }
 
             // Get airports according to filter
             $airports = collect();
-            $airports = Airport::findWithCriteria($continent, $airport->iso_country, $airport->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts);    
+            $airports = Airport::findWithCriteria($continent, $primaryAirport->iso_country, $primaryAirport->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts);    
 
             // Filter the eligable airports
-            $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
             // Shuffle the results before sort as slim results will quickly show airports from close by location
             // Sort the suggested airports based on the intended filters
             $suggestedAirports = $suggestedAirports->shuffle(); 
             $suggestedAirports = $suggestedAirports->sortByScores($sortByScores);
             $suggestedAirports = $suggestedAirports->splice(0,20);
-            $suggestedAirports = $suggestedAirports->addFlights($airport, $direction);
+            $suggestedAirports = $suggestedAirports->addFlights($primaryAirport, $direction);
 
             if($suggestedAirports->count()){
-                return view('search.airports', compact('suggestedAirports', 'airport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores'));
+                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores'));
             }
 
         }
