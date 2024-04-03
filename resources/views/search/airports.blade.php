@@ -53,21 +53,21 @@
                     @endif
                 <dt>
                 <dd>
-                    <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
-                    {{ $airport->icao }}
+                    <img class="flag" src="/img/flags/{{ strtolower($primaryAirport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($primaryAirport->iso_country) }}" alt="Flag of {{ getCountryName($primaryAirport->iso_country) }}"></img>
+                    {{ $primaryAirport->icao }}
                 </dd>
-                <dd>{{ $airport->name }}</dd>
+                <dd>{{ $primaryAirport->name }}</dd>
             </dl>
 
             <dl>
                 <dt>Runway<dt>
-                <dd class="rwy-feet">{{ $airport->longestRunway() }}</dd>
-                <dd class="rwy-meters text-muted">{{ round($airport->longestRunway()* .3048) }}</dd>
+                <dd class="rwy-feet">{{ $primaryAirport->longestRunway() }}</dd>
+                <dd class="rwy-meters text-muted">{{ round($primaryAirport->longestRunway()* .3048) }}</dd>
             </dl>
 
             <dl>
                 <dt>Conditions<dt>
-                @foreach($airport->scores as $score)
+                @foreach($primaryAirport->scores as $score)
                     @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
                         <i 
                             class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
@@ -87,21 +87,21 @@
             </dl>
 
             <div style="width: 60%">
-                @if($airport->metar)
+                @if($primaryAirport->metar)
                     <div class="d-flex mb-3 nav nav-pills" style="font-size: 0.75rem">
                         <div>
-                            <button class="nav-link active" id="home-tab-{{ $airport->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $airport->id }}" type="button" role="tab">METAR</button>
+                            <button class="nav-link active" id="home-tab-{{ $primaryAirport->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $primaryAirport->id }}" type="button" role="tab">METAR</button>
                         </div>
                         <div>
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" data-taf-button="true" data-airport-icao="{{ $airport->icao }}" type="button" role="tab">TAF</button>
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $primaryAirport->id }}" data-taf-button="true" data-primaryAirport-icao="{{ $primaryAirport->icao }}" type="button" role="tab">TAF</button>
                         </div>
                     </div>
                     <div class="tab-content">
-                        <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $airport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHi\Z') }} {{ $airport->metar->metar }}</div>
-                        @isset($tafs[$airport->icao])
-                            <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$airport->icao] }}</div>
+                        <div class="tab-pane fade show active" id="metar-pane-{{ $primaryAirport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $primaryAirport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($primaryAirport->metar->last_update)->format('dHi\Z') }} {{ $primaryAirport->metar->metar }}</div>
+                        @isset($tafs[$primaryAirport->icao])
+                            <div class="tab-pane fade" id="taf-pane-{{ $primaryAirport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$primaryAirport->icao] }}</div>
                         @else
-                            <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">
+                            <div class="tab-pane fade" id="taf-pane-{{ $primaryAirport->id }}" role="tabpanel" tabindex="0">
                                 <span class="spinner-border spinner-border-sm" role="status"></span>
                             </div>
                         @endif
@@ -223,7 +223,7 @@
                                                 </a>
                                             </div>
                                             <div class="hover-show">
-                                                <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/options/custom?orig={{ $airport->icao }}&dest={{ $airport->icao }}" target="_blank">
+                                                <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/options/custom?orig={{ $primaryAirport->icao }}&dest={{ $airport->icao }}" target="_blank">
                                                     <span class="d-none d-lg-inline d-xl-inline">SimBrief</span> <i class="fas fa-up-right-from-square"></i>
                                                 </a>
                                             </div>
