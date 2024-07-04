@@ -223,7 +223,10 @@
                                                 </a>
                                             </div>
                                             <div class="hover-show">
-                                                <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/options/custom?orig={{ $primaryAirport->icao }}&dest={{ $airport->icao }}" target="_blank">
+                                                @php
+                                                    $simbriefUrl = 'orig=' . ($direction == 'departure' ? $primaryAirport->icao : $airport->icao ) . '&dest=' . ($direction == 'departure' ? $airport->icao : $primaryAirport->icao);
+                                                @endphp
+                                                <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/options/custom?{{ $simbriefUrl }}" target="_blank">
                                                     <span class="d-none d-lg-inline d-xl-inline">SimBrief</span> <i class="fas fa-up-right-from-square"></i>
                                                 </a>
                                             </div>
