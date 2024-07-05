@@ -16,6 +16,12 @@
         
         <div class="text-start">
             
+            <h2 class="mb-0">v1.7.2</h2>
+            <span class="badge ps-0 pb-2">2024-07-05</span>
+            <ul>
+                <li>Fixed incorrect order of icao code in Simbrief links when seaching for departure airports</li>
+            </ul>
+
             <h2 class="mb-0">v1.7.1</h2>
             <span class="badge ps-0 pb-2">2024-04-03</span>
             <ul>
