@@ -11,8 +11,8 @@ class Controller extends Model
     public $timestamps = false;
     protected $guarded = [];
 
-    protected $dates = [
-        'logon_time',
+    protected $casts = [
+        'logon_time' => 'datetime',
     ];
 
     public function airport(){
