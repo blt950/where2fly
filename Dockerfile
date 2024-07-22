@@ -1,5 +1,5 @@
 # Intermediate build container for front-end resources
-FROM docker.io/library/node:20.3.0-alpine as frontend
+FROM docker.io/library/node:22.5.1-alpine as frontend
 # Easy to prune intermediary containers
 LABEL stage=build
 
@@ -13,7 +13,7 @@ RUN npm ci --omit dev && \
 # Primary container
 
 # Primary container
-FROM docker.io/library/php:8.1.10-apache-bullseye
+FROM docker.io/library/php:8.3.9-apache-bookworm
 
 # Default container port for the apache configuration
 EXPOSE 80 443
@@ -36,7 +36,7 @@ COPY ./container/configs/apache.conf /etc/apache2/apache2.conf
 COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install PHP extension(s)
-COPY --from=mlocati/php-extension-installer:2.1.30 /usr/bin/install-php-extensions /usr/local/bin/
+COPY --from=mlocati/php-extension-installer:2.2.19 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_mysql
 
 # Install composer

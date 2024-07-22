@@ -9,8 +9,8 @@ class Metar extends Model
 {
     use HasFactory;
     public $timestamps = false;
-    protected $dates = [
-        'last_updated',
+    protected $cats = [
+        'last_updated' => 'datetime',
     ];
 
     protected $guarded = [];
