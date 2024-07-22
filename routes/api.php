@@ -14,10 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::group(['middleware' => ['api-token']], function () {
     Route::get('/top', [App\Http\Controllers\API\TopController::class, 'index'])->name('api.top.index');
     Route::post('/top', [App\Http\Controllers\API\TopController::class, 'indexWhitelist'])->name('api.top.index.whitelist');
