@@ -79,7 +79,11 @@ class SearchController extends Controller{
         }
         
         $airports = collect();
-        $airports = Airport::findWithCriteria($continent, $airport->icao, $destinationAirportSize, $arrivalWhitelist, $filterByScores, $destinationRunwayLights, $destinationAirbases);
+        $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
+        ->inContinent($continent)->withinDistance($codeletter, $airtimeMin, $airtimeMax, $airport->icao)
+        ->filterRunwayLights($destinationRunwayLights)->filterAirbases($destinationAirbases)->filterByScores($filterByScores)
+        ->returnOnlyWhitelistedIcao($arrivalWhitelist)
+        ->has('metar')->with('runways', 'scores', 'metar')->get();
 
         $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
         $suggestedAirports = $suggestedAirports->shuffle(); 
