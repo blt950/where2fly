@@ -141,53 +141,6 @@ class Airport extends Model
     ============================================================
     */
 
-    public static function findWithCriteria(
-            string $continent = null, 
-            string $departureIcao = null, 
-            string $codeletter,
-            int $airtimeMin,
-            int $airtimeMax,
-            Array $destinationAirportSize = null,
-            Array $whitelistedArrivals = null,
-            Array $filterByScores = null, 
-            int $destinationRunwayLights = null, 
-            int $destinationAirbases = null, 
-            int $destinationWithRoutesOnly = null, 
-            Array $filterByAirlines = null,
-            Array $filterByAircrafts = null,
-            string $flightDirection = 'arrivalFlights'
-        ){
-
-        $result = Airport::query()
-        ->airportOpen()
-        ->notIcao($departureIcao)
-        ->isAirportSize($destinationAirportSize)
-
-        ->inContinent($continent)
-        ->withinDistance($codeletter, $airtimeMin, $airtimeMax, $departureIcao)
-        
-        ->filterRunwayLights($destinationRunwayLights)
-        ->filterAirbases($destinationAirbases)
-        ->filterByScores($filterByScores)
-        ->filterRoutesAndAirlines($departureIcao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly, $flightDirection)
-        ->returnOnlyWhitelistedIcao($whitelistedArrivals)
-
-        ->has('metar')
-        ->with('runways', 'scores', 'metar')
-        ->get();
-            
-        // Filter out departure airport, get airports with metar, fetch relevant data and run the query
-        // else find airports pairs with the given criteria
-            /*$distanceLimit = 50000;
-        $returnQuery = $returnQuery->select('airports.id as departure_id', 'airports.name as departure_name', 'arr.id as arrival_id', 'arr.name as arrival_name', \DB::raw('ST_Distance_Sphere(airports.coordinates, arr.coordinates) as distance_meters'))
-            ->join('airports as arr', function ($join) use ($distanceLimit) {
-                $join->on('airports.id', '<>', 'arr.id')
-                    ->whereRaw('ST_Distance_Sphere(airports.coordinates, arr.coordinates) < ?', [$distanceLimit]);
-            });*/
-
-        return $result;
-    }
-
     /**
      * Scope a query to only include airports that are considered open and have open runways
      */
@@ -202,7 +155,7 @@ class Airport extends Model
      */
     public function scopeNotIcao(Builder $query, string $icao = null){
         if(isset($icao)){
-            $query = $query->where('icao', '!=', $icao);
+            $query->where('icao', '!=', $icao);
         }
     }
 
@@ -211,31 +164,36 @@ class Airport extends Model
      */
     public function scopeIsAirportSize(Builder $query, Array $destinationAirportSize = null){
         if(isset($destinationAirportSize)){
-            $query = $query->whereIn('type', $destinationAirportSize);
+            $query->whereIn('type', $destinationAirportSize);
         } else {
-            $query = $query->whereIn('type', ['small_airport', 'medium_airport', 'large_airport']);
+            $query->whereIn('type', ['small_airport', 'medium_airport', 'large_airport']);
         }
     }
 
     /**
      * Scope a query to only include airports in the given continent
      */
-    public function scopeInContinent(Builder $query, string $continent){
-        // Include European and Russian-European airports
-        if($continent == "EU"){
-            $query = $query->where('airports.continent', $continent)
-            ->whereNotIn('airports.iso_region', getRussianAsianRegions());
-                        
-        // Include Asian and Russian-Asian airports in a nested query for correct logic grouping
-        } elseif($continent == "AS"){
-            $query = $query->where(function($query) use ($continent){
-                $query->where('airports.continent', $continent)
-                ->orWhereIn('airports.iso_region', getRussianAsianRegions());
-            });
+    public function scopeInContinent(Builder $query, string $continent, string $country = null){
 
-        // Filter only on continent
-        } else {
-            $query = $query->where('airports.continent', $continent);
+        if(isset($country) && $continent == "DO"){
+            $query->where('iso_country', $country);
+        } elseif(isset($continent) && $continent != "DO") {
+            // Include European and Russian-European airports
+            if($continent == "EU"){
+                $query->where('airports.continent', $continent)
+                ->whereNotIn('airports.iso_region', getRussianAsianRegions());
+                            
+            // Include Asian and Russian-Asian airports in a nested query for correct logic grouping
+            } elseif($continent == "AS"){
+                $query->where(function($query) use ($continent){
+                    $query->where('airports.continent', $continent)
+                    ->orWhereIn('airports.iso_region', getRussianAsianRegions());
+                });
+
+            // Filter only on continent
+            } else {
+                $query->where('airports.continent', $continent);
+            }
         }
     }
 
@@ -246,7 +204,7 @@ class Airport extends Model
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
         if(isset($departureIcao)){
             $departureAirport = Airport::select('coordinates')->where('icao', $departureIcao)->orWhere('local_code', $departureIcao)->first();
-            $query = $query->whereDistance('coordinates', $departureAirport->coordinates, '<=', $maxDistance)->whereDistance('coordinates', $departureAirport->coordinates, '>=', $minDistance);
+            $query->whereDistance('coordinates', $departureAirport->coordinates, '<=', $maxDistance)->whereDistance('coordinates', $departureAirport->coordinates, '>=', $minDistance);
         }
     }
 
@@ -257,11 +215,11 @@ class Airport extends Model
         if(isset($destinationRunwayLights) && $destinationRunwayLights !== 0){
             
             if($destinationRunwayLights == 1){
-                $query = $query->whereHas('runways', function($query){
+                $query->whereHas('runways', function($query){
                     $query->where('lighted', true);
                 });
             } else if($destinationRunwayLights == -1){
-                $query = $query->whereDoesntHave('runways', function($query){
+                $query->whereDoesntHave('runways', function($query){
                     $query->where('lighted', true);
                 });
             }
@@ -276,9 +234,9 @@ class Airport extends Model
         if(isset($destinationAirbases) && $destinationAirbases !== 0){
             
             if($destinationAirbases == 1){
-                $query = $query->where('w2f_airforcebase', true);
+                $query->where('w2f_airforcebase', true);
             } else if($destinationAirbases == -1){
-                $query = $query->where('w2f_airforcebase', false);
+                $query->where('w2f_airforcebase', false);
             }
 
         }
@@ -290,14 +248,14 @@ class Airport extends Model
     public function scopeFilterByScores(Builder $query, Array $filterByScores = null){
         if(isset($filterByScores) && !empty($filterByScores)){
             
-            $query = $query->where(function($query) use ($filterByScores){
+            $query->where(function($query) use ($filterByScores){
                 foreach($filterByScores as $score => $value){
                     if($value == 1){
-                        $query = $query->whereHas('scores', function($query) use ($score){
+                        $query->whereHas('scores', function($query) use ($score){
                             $query->where('reason', $score);
                         });
                     } else if($value == -1){
-                        $query = $query->whereDoesntHave('scores', function($query) use ($score){
+                        $query->whereDoesntHave('scores', function($query) use ($score){
                             $query->where('reason', $score);
                         });
                     }
@@ -314,7 +272,7 @@ class Airport extends Model
         if(isset($destinationWithRoutesOnly) && $destinationWithRoutesOnly !== 0){
             
             if($destinationWithRoutesOnly == 1){
-                $query = $query->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts){
+                $query->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts){
                     
                     if(isset($departureIcao)){
                         if($flightDirection == 'arrivalFlights'){
@@ -337,7 +295,7 @@ class Airport extends Model
                     }
                 });
             } else if($destinationWithRoutesOnly == -1){
-                $query = $query->whereDoesntHave($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts){
+                $query->whereDoesntHave($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts){
                     
                     if(isset($departureIcao)){
                         if($flightDirection == 'arrivalFlights'){
@@ -362,7 +320,7 @@ class Airport extends Model
             }
 
         } else if(isset($filterByAirlines) || isset($filterByAircrafts)) {
-            $query = $query->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $filterByAircrafts){
+            $query->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $filterByAircrafts){
                 if(isset($departureIcao)){
 
                     if($filterByAirlines){
@@ -396,7 +354,7 @@ class Airport extends Model
      */
     public function scopeReturnOnlyWhitelistedIcao(Builder $query, Array $whitelistedArrivals = null){
         if(isset($whitelistedArrivals)){
-            $query = $query->whereIn('icao', $whitelistedArrivals);
+            $query->whereIn('icao', $whitelistedArrivals);
         }
     }
 
