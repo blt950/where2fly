@@ -128,9 +128,12 @@ class SearchController extends Controller
             if(isset($data['icao'])){
                 $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->get()->first();
             } else {
-                // Get a random airport from the toplist
-                $primaryAirport = Airport::findWithCriteria(null, null, $codeletter, $airtimeMin, $airtimeMax, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, $direction.'Flights');   
-                dd($primaryAirport);
+
+                // Select primary airport based on the criteria
+                $primaryAirport = Airport::airportOpen()->isAirportSize($destinationAirportSize)->inContinent($continent)
+                ->filterRunwayLights($destinationRunwayLights)->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                ->has('metar')->with('runways', 'scores', 'metar')->get();
+            
                 if(!$primaryAirport || !$primaryAirport->count()){
                     return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
                 }
