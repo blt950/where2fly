@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use COM;
+use MatanYadaev\EloquentSpatial\Objects\Point;
+use MatanYadaev\EloquentSpatial\Traits\HasSpatial;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -10,9 +12,13 @@ use Illuminate\Support\Collection;
 class Airport extends Model
 {
     use HasFactory;
+    use HasSpatial;
 
     public $timestamps = false;
     protected $guarded = [];
+    protected $casts = [
+        'coordinates' => Point::class,
+    ];
 
     public function metar(){
         return $this->hasOne(Metar::class);
