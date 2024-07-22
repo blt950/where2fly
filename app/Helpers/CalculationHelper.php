@@ -75,4 +75,28 @@ class CalculationHelper{
 
     }
 
+    /** 
+     * Calculate the nautical miles the selected aircraft type will fly in an hour
+     * 
+     * @param string $actCode Aircraft code
+     * @param int $minHours Minimum hours
+     * @param int $maxHours Maximum hours
+     * @return int Nautical miles
+     */
+
+    public static function aircraftNmPerHourRange(string $actCode, int $minHours, int $maxHours){
+        $minDistance = self::aircraftNmPerHour($actCode);
+        $maxDistance = self::aircraftNmPerHour($actCode);
+
+        // Convert to nm and multiply by hours
+        $minDistance = ($minDistance * 1852)  * $minHours;
+        $maxDistance = ($maxDistance * 1852) * $maxHours;
+
+        if($minDistance !== 0){
+            $minDistance += self::timeClimbDescend($actCode);
+        }
+
+        return [$minDistance, $maxDistance];
+    }
+
 }

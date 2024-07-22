@@ -19,7 +19,7 @@ return new class extends Migration
     {
         // Add geometry column
         Schema::table('airports', function (Blueprint $table) {
-            $table->geometry('coordinates')->after('name')->nullable();
+            $table->geometry('coordinates', subtype: 'point')->after('name')->nullable();
         });
 
         // Convert double latitude_deg and longitude_deg to geometry
@@ -30,6 +30,12 @@ return new class extends Migration
             $airport->coordinates = new Point($airport->latitude_deg, $airport->longitude_deg, Srid::WGS84->value);
             $airport->save();
         }
+
+        // Add spatial index which also requires not null
+        Schema::table('airports', function (Blueprint $table) {
+            $table->geometry('coordinates', subtype: 'point')->nullable(false)->change();
+            $table->spatialIndex('coordinates');
+        });
 
     }
 

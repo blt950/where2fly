@@ -129,8 +129,8 @@ class SearchController extends Controller
                 $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->get()->first();
             } else {
                 // Get a random airport from the toplist
-                $primaryAirport = Airport::findWithCriteria(null, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, $direction.'Flights');   
-            
+                $primaryAirport = Airport::findWithCriteria(null, null, $codeletter, $airtimeMin, $airtimeMax, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, $direction.'Flights');   
+                dd($primaryAirport);
                 if(!$primaryAirport || !$primaryAirport->count()){
                     return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
                 }
@@ -141,9 +141,9 @@ class SearchController extends Controller
 
             // Get airports according to filter
             $airports = collect();
-            $airports = Airport::findWithCriteria($continent, $primaryAirport->iso_country, $primaryAirport->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts);    
+            $airports = Airport::findWithCriteria($continent, $primaryAirport->icao, $codeletter, $airtimeMin, $airtimeMax, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts);    
 
-            // Filter the eligable airports
+            // Filter the eligible airports
             $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
             // Shuffle the results before sort as slim results will quickly show airports from close by location

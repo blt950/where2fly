@@ -79,7 +79,7 @@ class SearchController extends Controller{
         }
         
         $airports = collect();
-        $airports = Airport::findWithCriteria($continent, $airport->iso_country, $airport->icao, $destinationAirportSize, $arrivalWhitelist, $filterByScores, $destinationRunwayLights, $destinationAirbases);
+        $airports = Airport::findWithCriteria($continent, $airport->icao, $destinationAirportSize, $arrivalWhitelist, $filterByScores, $destinationRunwayLights, $destinationAirbases);
 
         $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
         $suggestedAirports = $suggestedAirports->shuffle(); 
