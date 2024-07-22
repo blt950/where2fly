@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use COM;
+use MatanYadaev\EloquentSpatial\Objects\Polygon;
+use MatanYadaev\EloquentSpatial\Objects\LineString;
 use MatanYadaev\EloquentSpatial\Objects\Point;
 use MatanYadaev\EloquentSpatial\Traits\HasSpatial;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use App\Helpers\CalculationHelper;
+use MatanYadaev\EloquentSpatial\Enums\Srid;
 
 class Airport extends Model
 {
@@ -205,6 +208,154 @@ class Airport extends Model
         if(isset($departureIcao)){
             $departureAirport = Airport::select('coordinates')->where('icao', $departureIcao)->orWhere('local_code', $departureIcao)->first();
             $query->whereDistance('coordinates', $departureAirport->coordinates, '<=', $maxDistance)->whereDistance('coordinates', $departureAirport->coordinates, '>=', $minDistance);
+        }
+    }
+
+    /**
+     * Scope a query to only include airports that are in the given direction
+     */
+    public function scopeWithinBearing(Builder $query, string $direction = null, string $codeletter, int $airtimeMin, int $airtimeMax, string $departureIcao){
+        
+        // Get the departure airport coordinates and distance range
+        $departureAirport = Airport::select('coordinates')->where('icao', $departureIcao)->orWhere('local_code', $departureIcao)->first();
+        [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
+
+        function calculateBoundingBox($lat, $long, $distanceInNm) {
+            // Convert nautical miles to kilometers
+            $distanceInKm = $distanceInNm * 1.852;
+            
+            // Earth's radius in kilometers
+            $earthRadius = 6371;
+        
+            // Directions in degrees
+            $directions = [
+                'N' => 0,
+                'NE' => 45,
+                'E' => 90,
+                'SE' => 135,
+                'S' => 180,
+                'SW' => 225,
+                'W' => 270,
+                'NW' => 315,
+            ];
+        
+            $boundingPoints = [];
+        
+            foreach ($directions as $direction => $degree) {
+                $boundingPoints[$direction] = calculatePoint($lat, $long, $distanceInKm, $degree, $earthRadius);
+            }
+        
+            return $boundingPoints;
+        }
+        
+        function calculatePoint($lat, $long, $distance, $bearing, $earthRadius) {
+            // Convert latitude, longitude, and bearing to radians
+            $latRad = deg2rad($lat);
+            $longRad = deg2rad($long);
+            $bearingRad = deg2rad($bearing);
+        
+            // Calculate the new latitude
+            $newLatRad = asin(sin($latRad) * cos($distance / $earthRadius) + cos($latRad) * sin($distance / $earthRadius) * cos($bearingRad));
+        
+            // Calculate the new longitude
+            $newLongRad = $longRad + atan2(sin($bearingRad) * sin($distance / $earthRadius) * cos($latRad), cos($distance / $earthRadius) - sin($latRad) * sin($newLatRad));
+        
+            // Convert back to degrees
+            $newLat = rad2deg($newLatRad);
+            $newLong = rad2deg($newLongRad);
+        
+            return ['lat' => $newLat, 'long' => $newLong];
+        }
+
+        //dd($departureAirport->coordinates->latitude, $departureAirport->coordinates->longitude, calculateBoundingBox($departureAirport->coordinates->latitude, $departureAirport->coordinates->longitude, 500));
+
+        $polygonEdges = calculateBoundingBox($departureAirport->coordinates->latitude, $departureAirport->coordinates->longitude, $maxDistance);
+
+        $airportLat = $departureAirport->coordinates->latitude;
+        $airportLon = $departureAirport->coordinates->longitude;
+
+        // Direction is N, NE, E, SE, S, SW, W, NW
+        switch($direction){
+            case "N":
+                $query->whereWithin('coordinates', new Polygon([
+                    new LineString([
+                        new Point($airportLat, $airportLon),
+                        new Point($polygonEdges['NW']['lat'], $polygonEdges['NW']['long']),
+                        new Point($polygonEdges['NE']['lat'], $polygonEdges['NE']['long']),
+                        new Point($airportLat, $airportLon),
+                    ])
+                ], Srid::WGS84->value));
+                break;
+            case "NE":
+                $query->whereWithin('coordinates', new Polygon([
+                    new LineString([
+                        new Point($airportLat, $airportLon),
+                        new Point($polygonEdges['N']['lat'], $polygonEdges['N']['long']),
+                        new Point($polygonEdges['E']['lat'], $polygonEdges['E']['long']),
+                        new Point($airportLat, $airportLon),
+                    ])
+                ], Srid::WGS84->value));
+                break;
+            case "E":
+                $query->whereWithin('coordinates', new Polygon([
+                    new LineString([
+                        new Point($airportLat, $airportLon),
+                        new Point($polygonEdges['NE']['lat'], $polygonEdges['NE']['long']),
+                        new Point($polygonEdges['SE']['lat'], $polygonEdges['SE']['long']),
+                        new Point($airportLat, $airportLon),
+                    ])
+                ], Srid::WGS84->value));
+                break;
+            case "SE":
+                $query->whereWithin('coordinates', new Polygon([
+                    new LineString([
+                        new Point($airportLat, $airportLon),
+                        new Point($polygonEdges['E']['lat'], $polygonEdges['E']['long']),
+                        new Point($polygonEdges['S']['lat'], $polygonEdges['S']['long']),
+                        new Point($airportLat, $airportLon),
+                    ])
+                ], Srid::WGS84->value));
+                break;
+            case "S":
+                $query->whereWithin('coordinates', new Polygon([
+                    new LineString([
+                        new Point($airportLat, $airportLon),
+                        new Point($polygonEdges['SE']['lat'], $polygonEdges['SE']['long']),
+                        new Point($polygonEdges['SW']['lat'], $polygonEdges['SW']['long']),
+                        new Point($airportLat, $airportLon),
+                    ])
+                ], Srid::WGS84->value));
+                break;
+            case "SW":
+                $query->whereWithin('coordinates', new Polygon([
+                    new LineString([
+                        new Point($airportLat, $airportLon),
+                        new Point($polygonEdges['S']['lat'], $polygonEdges['S']['long']),
+                        new Point($polygonEdges['W']['lat'], $polygonEdges['W']['long']),
+                        new Point($airportLat, $airportLon),
+                    ])
+                ], Srid::WGS84->value));
+                break;
+            case "W":
+                $query->whereWithin('coordinates', new Polygon([
+                    new LineString([
+                        new Point($airportLat, $airportLon),
+                        new Point($polygonEdges['SW']['lat'], $polygonEdges['SW']['long']),
+                        new Point($polygonEdges['NW']['lat'], $polygonEdges['NW']['long']),
+                        new Point($airportLat, $airportLon),
+                    ])
+                ], Srid::WGS84->value));
+                break;
+            case "NW":
+                $query->whereWithin('coordinates', new Polygon([
+                    new LineString([
+                        new Point($airportLat, $airportLon),
+                        new Point($polygonEdges['W']['lat'], $polygonEdges['W']['long']),
+                        new Point($polygonEdges['N']['lat'], $polygonEdges['N']['long']),
+                        new Point($airportLat, $airportLon),
+                    ])
+                ], Srid::WGS84->value));
+                break;
         }
     }
 
