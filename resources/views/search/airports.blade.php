@@ -18,6 +18,14 @@
     <main>
         <h1 class="mb-3 mt-5">Search Results</h1>
 
+        @if($bearingWarning)
+            <div class="alert alert-warning">
+                <p class="mb-0">
+                    <i class="fas fa-warning"></i> {{ $bearingWarning }}</a>
+                </p>
+            </div>
+        @endif
+
         @if($suggestedAirport)
             <div class="d-flex flex-wrap justify-content-between">
                 <h2>{{ ucfirst($direction) }} suggestion</h2>
@@ -308,11 +316,14 @@
 
         // Randomise spinner
         var button = document.getElementById('randomiseBtn');
+        if(button){
             button.addEventListener('click', function() {
-            button.setAttribute('disabled', '')
-            button.innerHTML = 'Randomise&nbsp;&nbsp;<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
-            document.getElementById('form').submit()
-        });
+                button.setAttribute('disabled', '')
+                button.innerHTML = 'Randomise&nbsp;&nbsp;<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
+                document.getElementById('form').submit()
+            });
+        }
+            
     </script>
 
     @include('scripts.measures')

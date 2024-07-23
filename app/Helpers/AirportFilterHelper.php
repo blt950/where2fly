@@ -9,23 +9,7 @@ class AirportFilterHelper{
         if($metcon == "IFR" && $airport->hasVisualCondition()) return false;
         return true;
     }
-
-    public static function hasRequiredAirtime($departureAirport, $arrivalAirport, $codeletter, $airtimeMin, $airtimeMax){
-        $distance = distance($departureAirport->latitude_deg, $departureAirport->longitude_deg, $arrivalAirport->latitude_deg, $arrivalAirport->longitude_deg, "N");
-        $estimatedAirtime = ($distance / CalculationHelper::aircraftNmPerHour($codeletter)) + CalculationHelper::timeClimbDescend($codeletter);
-
-        if($estimatedAirtime < $airtimeMin || $estimatedAirtime > $airtimeMax) return false;
-        return true;
-    }
-
-    public static function hasRequiredRunwayLength($runwayLengthMin, $runwayLengthMax, $codeletter, $airport){
-        $longestAirportRunway = $airport->longestRunway();
-        if($longestAirportRunway < $runwayLengthMin || $longestAirportRunway > $runwayLengthMax) {
-            return false;
-        }
-        return $airport->supportsAircraftCode($codeletter);
-    }
-
+    
     public static function hasRequiredAirportElevation($airportElevationMin, $airportElevationMax, $airport){
         if($airportElevationMin === null || $airportElevationMax === null) return true;
 
