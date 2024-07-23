@@ -13,6 +13,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use App\Helpers\CalculationHelper;
 use MatanYadaev\EloquentSpatial\Enums\Srid;
+use Location\Bearing\BearingEllipsoidal;
+use Location\Bearing\BearingSpherical;
+use Location\Coordinate;
+use Location\Formatter\Coordinate\DecimalDegrees;
 
 class Airport extends Model
 {
@@ -207,7 +211,7 @@ class Airport extends Model
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
         if(isset($departureIcao)){
             $departureAirport = Airport::select('coordinates')->where('icao', $departureIcao)->orWhere('local_code', $departureIcao)->first();
-            $query->whereDistance('coordinates', $departureAirport->coordinates, '<=', $maxDistance)->whereDistance('coordinates', $departureAirport->coordinates, '>=', $minDistance);
+            $query->whereDistance('coordinates', $departureAirport->coordinates, '<=', $maxDistance*1852)->whereDistance('coordinates', $departureAirport->coordinates, '>=', $minDistance*1852);
         }
     }
 
@@ -220,143 +224,86 @@ class Airport extends Model
         $departureAirport = Airport::select('coordinates')->where('icao', $departureIcao)->orWhere('local_code', $departureIcao)->first();
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
 
-        function calculateBoundingBox($lat, $long, $distanceInNm) {
-            // Convert nautical miles to kilometers
-            $distanceInKm = $distanceInNm * 1.852;
-            
-            // Earth's radius in kilometers
-            $earthRadius = 6371;
-        
-            // Directions in degrees
-            $directions = [
-                'N' => 0,
-                'NE' => 45,
-                'E' => 90,
-                'SE' => 135,
-                'S' => 180,
-                'SW' => 225,
-                'W' => 270,
-                'NW' => 315,
-            ];
-        
-            $boundingPoints = [];
-        
-            foreach ($directions as $direction => $degree) {
-                $boundingPoints[$direction] = calculatePoint($lat, $long, $distanceInKm, $degree, $earthRadius);
-            }
-        
-            return $boundingPoints;
-        }
-        
-        function calculatePoint($lat, $long, $distance, $bearing, $earthRadius) {
-            // Convert latitude, longitude, and bearing to radians
-            $latRad = deg2rad($lat);
-            $longRad = deg2rad($long);
-            $bearingRad = deg2rad($bearing);
-        
-            // Calculate the new latitude
-            $newLatRad = asin(sin($latRad) * cos($distance / $earthRadius) + cos($latRad) * sin($distance / $earthRadius) * cos($bearingRad));
-        
-            // Calculate the new longitude
-            $newLongRad = $longRad + atan2(sin($bearingRad) * sin($distance / $earthRadius) * cos($latRad), cos($distance / $earthRadius) - sin($latRad) * sin($newLatRad));
-        
-            // Convert back to degrees
-            $newLat = rad2deg($newLatRad);
-            $newLong = rad2deg($newLongRad);
-        
-            return ['lat' => $newLat, 'long' => $newLong];
-        }
-
-        //dd($departureAirport->coordinates->latitude, $departureAirport->coordinates->longitude, calculateBoundingBox($departureAirport->coordinates->latitude, $departureAirport->coordinates->longitude, 500));
-
-        $polygonEdges = calculateBoundingBox($departureAirport->coordinates->latitude, $departureAirport->coordinates->longitude, $maxDistance);
-
         $airportLat = $departureAirport->coordinates->latitude;
         $airportLon = $departureAirport->coordinates->longitude;
 
-        // Direction is N, NE, E, SE, S, SW, W, NW
-        switch($direction){
-            case "N":
-                $query->whereWithin('coordinates', new Polygon([
+        // We calculate bearing in two ways, depending on the distance.
+        // First we calculate it within a polygon up to a certain limit
+        // Second we calculate just X/Y coordinates if it's outside the limit
+        // This is because the polygon gets very skewed after a certain distance
+
+        // >>> Step 1: Create a polygon from the origin, then the bearing + 45 degrees in each direction
+        $directions = [
+            'N' => 0,
+            'NE' => 45,
+            'E' => 90,
+            'SE' => 135,
+            'S' => 180,
+            'SW' => 225,
+            'W' => 270,
+            'NW' => 315,
+        ];
+
+        $airportCoordinate = new Coordinate($airportLat, $airportLon);
+
+        // Adjust the max allowed distance in polygon (800nm then converted to meters)
+        $polygonDistance = ($maxDistance > 800 ? 800 : $maxDistance) * 1852;
+        $highEnd = CalculationHelper::calculateSphericalDestination($airportCoordinate, $directions[$direction]+45, $polygonDistance);
+        $lowEnd = CalculationHelper::calculateSphericalDestination($airportCoordinate, $directions[$direction]-45, $polygonDistance);
+
+        // If the distance is less than 800nm, we can use a polygon
+        $query->where(function ($q) use ($airportLat, $airportLon, $highEnd, $lowEnd, $minDistance, $maxDistance, $direction, $airportCoordinate){
+
+            if($minDistance <= 800){
+                $polygon = new Polygon([
                     new LineString([
                         new Point($airportLat, $airportLon),
-                        new Point($polygonEdges['NW']['lat'], $polygonEdges['NW']['long']),
-                        new Point($polygonEdges['NE']['lat'], $polygonEdges['NE']['long']),
+                        new Point($highEnd->getLat(), $highEnd->getLng()),
+                        new Point($lowEnd->getLat(), $lowEnd->getLng()),
                         new Point($airportLat, $airportLon),
-                    ])
-                ], Srid::WGS84->value));
-                break;
-            case "NE":
-                $query->whereWithin('coordinates', new Polygon([
-                    new LineString([
-                        new Point($airportLat, $airportLon),
-                        new Point($polygonEdges['N']['lat'], $polygonEdges['N']['long']),
-                        new Point($polygonEdges['E']['lat'], $polygonEdges['E']['long']),
-                        new Point($airportLat, $airportLon),
-                    ])
-                ], Srid::WGS84->value));
-                break;
-            case "E":
-                $query->whereWithin('coordinates', new Polygon([
-                    new LineString([
-                        new Point($airportLat, $airportLon),
-                        new Point($polygonEdges['NE']['lat'], $polygonEdges['NE']['long']),
-                        new Point($polygonEdges['SE']['lat'], $polygonEdges['SE']['long']),
-                        new Point($airportLat, $airportLon),
-                    ])
-                ], Srid::WGS84->value));
-                break;
-            case "SE":
-                $query->whereWithin('coordinates', new Polygon([
-                    new LineString([
-                        new Point($airportLat, $airportLon),
-                        new Point($polygonEdges['E']['lat'], $polygonEdges['E']['long']),
-                        new Point($polygonEdges['S']['lat'], $polygonEdges['S']['long']),
-                        new Point($airportLat, $airportLon),
-                    ])
-                ], Srid::WGS84->value));
-                break;
-            case "S":
-                $query->whereWithin('coordinates', new Polygon([
-                    new LineString([
-                        new Point($airportLat, $airportLon),
-                        new Point($polygonEdges['SE']['lat'], $polygonEdges['SE']['long']),
-                        new Point($polygonEdges['SW']['lat'], $polygonEdges['SW']['long']),
-                        new Point($airportLat, $airportLon),
-                    ])
-                ], Srid::WGS84->value));
-                break;
-            case "SW":
-                $query->whereWithin('coordinates', new Polygon([
-                    new LineString([
-                        new Point($airportLat, $airportLon),
-                        new Point($polygonEdges['S']['lat'], $polygonEdges['S']['long']),
-                        new Point($polygonEdges['W']['lat'], $polygonEdges['W']['long']),
-                        new Point($airportLat, $airportLon),
-                    ])
-                ], Srid::WGS84->value));
-                break;
-            case "W":
-                $query->whereWithin('coordinates', new Polygon([
-                    new LineString([
-                        new Point($airportLat, $airportLon),
-                        new Point($polygonEdges['SW']['lat'], $polygonEdges['SW']['long']),
-                        new Point($polygonEdges['NW']['lat'], $polygonEdges['NW']['long']),
-                        new Point($airportLat, $airportLon),
-                    ])
-                ], Srid::WGS84->value));
-                break;
-            case "NW":
-                $query->whereWithin('coordinates', new Polygon([
-                    new LineString([
-                        new Point($airportLat, $airportLon),
-                        new Point($polygonEdges['W']['lat'], $polygonEdges['W']['long']),
-                        new Point($polygonEdges['N']['lat'], $polygonEdges['N']['long']),
-                        new Point($airportLat, $airportLon),
-                    ])
-                ], Srid::WGS84->value));
-                break;
-        }
+                    ]),
+                ], Srid::WGS84);
+
+                $q->whereWithin('coordinates', $polygon);
+            }
+
+            // >>> Step 2: Calculate the lat/long's for the max distance
+            // If the distance is more than 800nm, we need to calculate the lat/long's
+            if($maxDistance > 800){
+
+                switch($direction){
+                    case 'N':
+                        $q->orWhereRaw('ST_X(coordinates) > ?', [$highEnd->getLat()]);
+                        break;
+                    case 'NE':
+                        $q->orWhereRaw('(ST_X(coordinates) > ? AND ST_Y(coordinates) > ?)', [$highEnd->getLat(), $lowEnd->getLng()]);
+                        break;
+                    case 'E':
+                        $q->orWhereRaw('ST_Y(coordinates) > ?', [$lowEnd->getLng()]);
+                        break;
+                    case 'SE':
+                        $q->orWhereRaw('(ST_X(coordinates) < ? AND ST_Y(coordinates) > ?)', [$lowEnd->getLat(), $highEnd->getLng()]);
+                        break;
+                    case 'S':
+                        $q->orWhereRaw('ST_X(coordinates) < ?', [$lowEnd->getLat()]);
+                        break;
+                    case 'SW':
+                        $q->orWhereRaw('(ST_X(coordinates) < ? AND ST_Y(coordinates) < ?)', [$highEnd->getLat(), $lowEnd->getLng()]);
+                        break;
+                    case 'W':
+                        $q->orWhereRaw('ST_Y(coordinates) < ?', [$lowEnd->getLng()]);
+                        break;
+                    case 'NW':
+                        $q->orWhereRaw('(ST_X(coordinates) > ? AND ST_Y(coordinates) < ?)', [$lowEnd->getLat(), $highEnd->getLng()]);
+                        break;
+                }
+            }
+
+        });        
+
+        // @TODO here we need and OR statement, first: it's within polygon and distance is X, second: it's outside the distance and then we only calc the lat/long's
+        // IDEA: Could we calcuclate sphertical to get the lat/long maxes, so we can know if it crosses DST? 
+        
     }
 
     /**
