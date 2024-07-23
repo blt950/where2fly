@@ -178,6 +178,9 @@ class Airport extends Model
      */
     public function scopeInContinent(Builder $query, string $continent, string $country = null){
 
+        // If filter is AnYwhere, forget this filter
+        if($continent == 'AY') return;
+
         if(isset($country) && $continent == "DO"){
             $query->where('iso_country', $country);
         } elseif(isset($continent) && $continent != "DO") {

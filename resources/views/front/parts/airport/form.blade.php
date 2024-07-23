@@ -16,6 +16,7 @@
             <select class="form-control" id="continent" name="continent">
                 <option disabled selected>Choose</option>
                 <option value="DO" {{ old('continent') == "DO" ? "selected" : "" }}>Domestic Only</option>
+                <option value="AY" {{ old('continent') == "AY" ? "selected" : "" }}>Anywhere</option>
                 <option value="AF" {{ old('continent') == "AF" ? "selected" : "" }}>Africa</option>
                 <option value="AS" {{ old('continent') == "AS" ? "selected" : "" }}>Asia</option>
                 <option value="EU" {{ old('continent') == "EU" ? "selected" : "" }}>Europe</option>
