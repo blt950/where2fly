@@ -205,7 +205,7 @@ class Airport extends Model
      */
     public function scopeWithinDistance(Builder $query, Airport $departureAirport, int $minDistance, int $maxDistance, string $departureIcao){
         if(isset($departureIcao)){
-            $query->whereDistance('coordinates', $departureAirport->coordinates, '<=', $maxDistance*1852)->whereDistance('coordinates', $departureAirport->coordinates, '>=', $minDistance*1852);
+            $query->whereDistanceSphere('coordinates', $departureAirport->coordinates, '<=', $maxDistance*1852)->whereDistanceSphere('coordinates', $departureAirport->coordinates, '>=', $minDistance*1852);
         }
     }
 
@@ -227,7 +227,7 @@ class Airport extends Model
         // Second we calculate just X/Y coordinates if it's outside the limit
         // This is because the polygon gets very skewed after a certain distance
 
-        // >>> Step 1: Create a polygon from the origin, then the bearing + 45 degrees in each direction
+        $airportCoordinate = new Coordinate($airportLat, $airportLon);
         $directions = [
             'N' => 0,
             'NE' => 45,
@@ -239,8 +239,6 @@ class Airport extends Model
             'NW' => 315,
         ];
 
-        $airportCoordinate = new Coordinate($airportLat, $airportLon);
-
         // Adjust the max allowed distance in polygon (800nm then converted to meters)
         $polygonDistance = ($maxDistance > 800 ? 800 : $maxDistance) * 1852;
         $highEnd = CalculationHelper::calculateSphericalDestination($airportCoordinate, $directions[$direction]+45, $polygonDistance);
@@ -249,6 +247,7 @@ class Airport extends Model
         // If the distance is less than 800nm, we can use a polygon
         $query->where(function ($q) use ($airportLat, $airportLon, $highEnd, $lowEnd, $minDistance, $maxDistance, $direction, $airportCoordinate){
 
+            // >>> Step 1: Create a polygon from the origin, then the bearing + 45 degrees in each direction
             if($minDistance <= 800){
                 $polygon = new Polygon([
                     new LineString([
