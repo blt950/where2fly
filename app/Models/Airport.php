@@ -10,13 +10,9 @@ use MatanYadaev\EloquentSpatial\Traits\HasSpatial;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use App\Helpers\CalculationHelper;
 use MatanYadaev\EloquentSpatial\Enums\Srid;
-use Location\Bearing\BearingEllipsoidal;
-use Location\Bearing\BearingSpherical;
 use Location\Coordinate;
-use Location\Formatter\Coordinate\DecimalDegrees;
 
 class Airport extends Model
 {
@@ -207,10 +203,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports within the given distance
      */
-    public function scopeWithinDistance(Builder $query, string $codeletter, int $airtimeMin, int $airtimeMax, string $departureIcao){
-        [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
+    public function scopeWithinDistance(Builder $query, Airport $departureAirport, int $minDistance, int $maxDistance, string $departureIcao){
         if(isset($departureIcao)){
-            $departureAirport = Airport::select('coordinates')->where('icao', $departureIcao)->orWhere('local_code', $departureIcao)->first();
             $query->whereDistance('coordinates', $departureAirport->coordinates, '<=', $maxDistance*1852)->whereDistance('coordinates', $departureAirport->coordinates, '>=', $minDistance*1852);
         }
     }
@@ -218,11 +212,12 @@ class Airport extends Model
     /**
      * Scope a query to only include airports that are in the given direction
      */
-    public function scopeWithinBearing(Builder $query, string $direction = null, string $codeletter, int $airtimeMin, int $airtimeMax, string $departureIcao){
-        
-        // Get the departure airport coordinates and distance range
-        $departureAirport = Airport::select('coordinates')->where('icao', $departureIcao)->orWhere('local_code', $departureIcao)->first();
-        [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
+    public function scopeWithinBearing(Builder $query, Airport $departureAirport, string $direction = null, int $minDistance, int $maxDistance){
+
+        // Ignore this scope if direction is not set
+        if(!isset($direction)){
+            return;
+        }
 
         $airportLat = $departureAirport->coordinates->latitude;
         $airportLon = $departureAirport->coordinates->longitude;
@@ -268,7 +263,6 @@ class Airport extends Model
             }
 
             // >>> Step 2: Calculate the lat/long's for the max distance
-            // If the distance is more than 800nm, we need to calculate the lat/long's
             if($maxDistance > 800){
 
                 switch($direction){
@@ -300,10 +294,6 @@ class Airport extends Model
             }
 
         });        
-
-        // @TODO here we need and OR statement, first: it's within polygon and distance is X, second: it's outside the distance and then we only calc the lat/long's
-        // IDEA: Could we calcuclate sphertical to get the lat/long maxes, so we can know if it crosses DST? 
-        
     }
 
     /**

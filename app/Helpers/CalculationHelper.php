@@ -132,24 +132,4 @@ class CalculationHelper{
         return new Coordinate($Φ, $Λ);
     }
 
-    /**
-     * Normalize longitude to ensure it falls within the range of -180 to +180 degrees.
-     *
-     * @param float $longitude
-     * @return float
-     */
-    public static function normalizeLongitude(float $longitude): float
-    {
-        // Normalize the longitude to be within the range of -180 to +180
-        while ($longitude < -180) {
-            $longitude += 360;
-        }
-        
-        while ($longitude > 180) {
-            $longitude -= 360;
-        }
-
-        return $longitude;
-    }
-
 }
