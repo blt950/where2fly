@@ -172,7 +172,7 @@ class Airport extends Model
     /**
      * Scope a query to only include airports within the given distance
      */
-    public function scopeWithinDistance(Builder $query, Airport $departureAirport, int $minDistance, int $maxDistance, string $departureIcao){
+    public function scopeWithinDistance(Builder $query, Airport $departureAirport, float $minDistance, float $maxDistance, string $departureIcao){
         if(isset($departureIcao)){
             $query->whereDistanceSphere('coordinates', $departureAirport->coordinates, '<=', $maxDistance*1852)->whereDistanceSphere('coordinates', $departureAirport->coordinates, '>=', $minDistance*1852);
         }
@@ -181,7 +181,7 @@ class Airport extends Model
     /**
      * Scope a query to only include airports that are in the given direction
      */
-    public function scopeWithinBearing(Builder $query, Airport $departureAirport, string $direction = null, int $minDistance, int $maxDistance){
+    public function scopeWithinBearing(Builder $query, Airport $departureAirport, string $direction = null, float $minDistance, float $maxDistance){
 
         // Ignore this scope if direction is not set
         if(!isset($direction)){
