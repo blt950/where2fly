@@ -104,40 +104,6 @@ class Airport extends Model
         return $this->metar->isVisualCondition();
     }
 
-    public function supportsAircraftCode(string $code){
-
-        $reqRwyLength = 0;
-        switch($code){
-            case "A":
-                $reqRwyLength = 800;
-                break;
-            case "B":
-                $reqRwyLength = 2500;
-                break;
-            case "C":
-                $reqRwyLength = 6000;
-                break;
-            case "D":
-                $reqRwyLength = 6500;
-                break;
-            case "E":
-                $reqRwyLength = 7500;
-                break;
-            case "F":
-                $reqRwyLength = 8000;
-                break;
-            default:
-                $reqRwyLength = 0;
-        }
-
-        if($this->runways->where('closed', false)->where('length_ft', '>=', $reqRwyLength)->count()){
-            return true;
-        }
-
-        return false;
-
-    }
-
     /*
     ============================================================
         Search scopes and functions
@@ -296,6 +262,19 @@ class Airport extends Model
             }
 
         });        
+    }
+
+    public function scopeFilterRunwayLengths(Builder $query, int $rwyLengthMin, int $rwyLengthMax, string $codeletter){
+        
+        // Set minimum according to aircraft code unless it's already higher
+        $codeMinimum = CalculationHelper::minimumRequiredRunwayLength($codeletter);
+        if($rwyLengthMin < $codeMinimum) $rwyLengthMin = $codeMinimum;
+
+        // Get longest not closed runway
+        $query->whereHas('runways', function($query) use ($rwyLengthMin, $rwyLengthMax){
+            $query->where('closed', false)->where('length_ft', '>=', $rwyLengthMin)->where('length_ft', '<=', $rwyLengthMax);
+        });
+
     }
 
     /**

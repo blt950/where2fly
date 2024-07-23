@@ -7,6 +7,31 @@ use Location\Coordinate;
 class CalculationHelper{
 
     /**
+     * Calculate the distance between two points
+     * 
+     * $param string $code aircraft type code
+     * @return int Required runway length
+     */
+    public static function minimumRequiredRunwayLength(string $code){
+        switch($code){
+            case "A":
+                return 100;
+            case "B":
+                return 1400;
+            case "C":
+                return 5600;
+            case "D":
+                return 6500;
+            case "E":
+                return 7500;
+            case "F":
+                return 8000;
+            default:
+                return 0;
+        }
+    }
+
+    /**
      *  Calculate aircraft travel nautrical miles per hour
      *
      * @param  string $actCode Aircraft code

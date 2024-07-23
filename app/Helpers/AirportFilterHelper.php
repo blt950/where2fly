@@ -9,15 +9,7 @@ class AirportFilterHelper{
         if($metcon == "IFR" && $airport->hasVisualCondition()) return false;
         return true;
     }
-
-    public static function hasRequiredRunwayLength($runwayLengthMin, $runwayLengthMax, $codeletter, $airport){
-        $longestAirportRunway = $airport->longestRunway();
-        if($longestAirportRunway < $runwayLengthMin || $longestAirportRunway > $runwayLengthMax) {
-            return false;
-        }
-        return $airport->supportsAircraftCode($codeletter);
-    }
-
+    
     public static function hasRequiredAirportElevation($airportElevationMin, $airportElevationMax, $airport){
         if($airportElevationMin === null || $airportElevationMax === null) return true;
 
