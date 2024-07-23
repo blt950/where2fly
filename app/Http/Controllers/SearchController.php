@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Models\Airport;
 use App\Models\Airline;
 use App\Models\Flight;
-use App\Models\AirportScore;
 use App\Models\Aircraft;
 use App\Http\Controllers\ScoreController;
+use App\Helpers\CalculationHelper;
 use App\Rules\AirportExists;
+use App\Rules\FlightDirection;
 
 class SearchController extends Controller
 {
@@ -75,6 +74,7 @@ class SearchController extends Controller
             'destinationWithRoutesOnly' => 'required|numeric|between:-1,1',
             'destinationRunwayLights' => 'required|numeric|between:-1,1',
             'destinationAirbases' => 'required|numeric|between:-1,1',
+            'flightDirection' => ['required', new FlightDirection],
             'destinationAirportSize' => 'sometimes|array',
             'elevationMin' => 'required|numeric|between:-2000,18000',
             'elevationMax' => 'required|numeric|between:-2000,18000',
@@ -102,6 +102,7 @@ class SearchController extends Controller
         $destinationWithRoutesOnly = (int)$data['destinationWithRoutesOnly'];
         $destinationRunwayLights = (int)$data['destinationRunwayLights'];
         $destinationAirbases = (int)$data['destinationAirbases'];
+        ($data['flightDirection'] != 0) ? $flightDirection = $data['flightDirection'] : $flightDirection = null;
 
         (isset($data['destinationAirportSize']) && !empty($data['destinationAirportSize'])) ? $destinationAirportSize = $data['destinationAirportSize'] : $destinationAirportSize = ['small_airport', 'medium_airport', 'large_airport'];
         
@@ -113,6 +114,8 @@ class SearchController extends Controller
         isset($data['airlines']) ? $filterByAirlines = $data['airlines'] : $filterByAirlines = null;
         isset($data['aircrafts']) ? $filterByAircrafts = $data['aircrafts'] : $filterByAircrafts = null;
 
+        [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
+
         /**
         *
         *  Fetch the requested data
@@ -123,13 +126,16 @@ class SearchController extends Controller
         $maxAttempts = 10;
         for($attempt = 1; $attempt <= $maxAttempts; $attempt++){
     
-            // Use the supplied departure or select a random from toplist
+            // Use the supplied departure or select a random airport
             $suggestedAirport = false;
             if(isset($data['icao'])){
                 $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->get()->first();
             } else {
-                // Get a random airport from the toplist
-                $primaryAirport = Airport::findWithCriteria(null, null, null, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts, $direction.'Flights');   
+                // Select primary airport based on the criteria
+                $primaryAirport = Airport::airportOpen()->isAirportSize($destinationAirportSize)->inContinent($continent)
+                ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
+                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                ->has('metar')->with('runways', 'scores', 'metar')->get();
             
                 if(!$primaryAirport || !$primaryAirport->count()){
                     return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
@@ -141,9 +147,14 @@ class SearchController extends Controller
 
             // Get airports according to filter
             $airports = collect();
-            $airports = Airport::findWithCriteria($continent, $primaryAirport->iso_country, $primaryAirport->icao, $destinationAirportSize, null, $filterByScores, $destinationRunwayLights, $destinationAirbases, $destinationWithRoutesOnly, $filterByAirlines, $filterByAircrafts);    
+            $airports = Airport::airportOpen()->notIcao($primaryAirport->icao)->isAirportSize($destinationAirportSize)
+            ->inContinent($continent, $primaryAirport->iso_country)->withinDistance($primaryAirport, $minDistance, $maxDistance, $primaryAirport->icao)->withinBearing($primaryAirport, $flightDirection, $minDistance, $maxDistance)
+            ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
+            ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+            ->has('metar')->with('runways', 'scores', 'metar')->get();
 
-            // Filter the eligable airports
+
+            // Filter the eligible airports
             $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
             // Shuffle the results before sort as slim results will quickly show airports from close by location
@@ -153,16 +164,22 @@ class SearchController extends Controller
             $suggestedAirports = $suggestedAirports->splice(0,20);
             $suggestedAirports = $suggestedAirports->addFlights($primaryAirport, $direction);
 
+            // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy
+            $bearingWarning = false;
+            if($maxDistance > 2300 && isset($flightDirection)){
+                $bearingWarning = "Use the destination region filter instead of flight direction for longer hauls, this avoids false positives, skewed or no results.";
+            }
+
             if($suggestedAirports->count()){
-                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores'));
+                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores', 'bearingWarning'));
             }
 
         }
 
         if($direction == 'departure'){
-            return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable arrival airport could be found with given criteria'])->withInput();
+            return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable arrival airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
         } else {
-            return redirect(route('front.departures'))->withErrors(['airportNotFound' => 'No suitable arrival airport could be found given criteria'])->withInput();
+            return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable arrival airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
         }
     }
 

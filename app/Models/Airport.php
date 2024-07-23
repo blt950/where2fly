@@ -3,16 +3,27 @@
 namespace App\Models;
 
 use COM;
+use MatanYadaev\EloquentSpatial\Objects\Polygon;
+use MatanYadaev\EloquentSpatial\Objects\LineString;
+use MatanYadaev\EloquentSpatial\Objects\Point;
+use MatanYadaev\EloquentSpatial\Traits\HasSpatial;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
+use App\Helpers\CalculationHelper;
+use MatanYadaev\EloquentSpatial\Enums\Srid;
+use Location\Coordinate;
 
 class Airport extends Model
 {
     use HasFactory;
+    use HasSpatial;
 
     public $timestamps = false;
     protected $guarded = [];
+    protected $casts = [
+        'coordinates' => Point::class,
+    ];
 
     public function metar(){
         return $this->hasOne(Metar::class);
@@ -93,111 +104,227 @@ class Airport extends Model
         return $this->metar->isVisualCondition();
     }
 
-    public function supportsAircraftCode(string $code){
+    /*
+    ============================================================
+        Search scopes and functions
+    ============================================================
+    */
 
-        $reqRwyLength = 0;
-        switch($code){
-            case "A":
-                $reqRwyLength = 800;
-                break;
-            case "B":
-                $reqRwyLength = 2500;
-                break;
-            case "C":
-                $reqRwyLength = 6000;
-                break;
-            case "D":
-                $reqRwyLength = 6500;
-                break;
-            case "E":
-                $reqRwyLength = 7500;
-                break;
-            case "F":
-                $reqRwyLength = 8000;
-                break;
-            default:
-                $reqRwyLength = 0;
-        }
-
-        if($this->runways->where('closed', false)->where('length_ft', '>=', $reqRwyLength)->count()){
-            return true;
-        }
-
-        return false;
-
+    /**
+     * Scope a query to only include airports that are considered open and have open runways
+     */
+    public function scopeAirportOpen(Builder $query){
+        $query->where('type', '!=', 'closed')->whereHas('runways', function($query){
+            $query->where('closed', false);
+        });
     }
 
-    public static function findWithCriteria(
-            string $continent = null, 
-            string $country = null,    
-            string $departureIcao = null, 
-            Array $destinationAirportSize = null,
-            Array $whitelistedArrivals = null,
-            Array $filterByScores = null, 
-            int $destinationRunwayLights = null, 
-            int $destinationAirbases = null, 
-            int $destinationWithRoutesOnly = null, 
-            Array $filterByAirlines = null,
-            Array $filterByAircrafts = null,
-            string $flightDirection = 'arrivalFlights'
-        ){
+    /**
+     * Scope a query to only include airports that are not the departure airport
+     */
+    public function scopeNotIcao(Builder $query, string $icao = null){
+        if(isset($icao)){
+            $query->where('icao', '!=', $icao);
+        }
+    }
 
-        $returnQuery = Airport::where('type', '!=', 'closed');
-        
-        // If the filter is domestic
+    /**
+     * Scope a query to only include airports that are of the given size
+     */
+    public function scopeIsAirportSize(Builder $query, Array $destinationAirportSize = null){
+        if(isset($destinationAirportSize)){
+            $query->whereIn('type', $destinationAirportSize);
+        } else {
+            $query->whereIn('type', ['small_airport', 'medium_airport', 'large_airport']);
+        }
+    }
+
+    /**
+     * Scope a query to only include airports in the given continent
+     */
+    public function scopeInContinent(Builder $query, string $continent, string $country = null){
+
+        // If filter is AnYwhere, forget this filter
+        if($continent == 'AY') return;
+
         if(isset($country) && $continent == "DO"){
-            $returnQuery = $returnQuery->where('iso_country', $country);
+            $query->where('iso_country', $country);
         } elseif(isset($continent) && $continent != "DO") {
-
             // Include European and Russian-European airports
             if($continent == "EU"){
-                $returnQuery = $returnQuery->where('airports.continent', $continent)
+                $query->where('airports.continent', $continent)
                 ->whereNotIn('airports.iso_region', getRussianAsianRegions());
                             
             // Include Asian and Russian-Asian airports in a nested query for correct logic grouping
             } elseif($continent == "AS"){
-                $returnQuery = $returnQuery->where(function($query) use ($continent){
+                $query->where(function($query) use ($continent){
                     $query->where('airports.continent', $continent)
                     ->orWhereIn('airports.iso_region', getRussianAsianRegions());
                 });
 
             // Filter only on continent
             } else {
-                $returnQuery = $returnQuery->where('airports.continent', $continent);
+                $query->where('airports.continent', $continent);
             }
         }
+    }
 
-        // Only airports with open runways
-        $returnQuery = $returnQuery->whereHas('runways', function($query){
-            $query->where('closed', false);
+    /**
+     * Scope a query to only include airports within the given distance
+     */
+    public function scopeWithinDistance(Builder $query, Airport $departureAirport, float $minDistance, float $maxDistance, string $departureIcao){
+        if(isset($departureIcao)){
+            $query->whereDistanceSphere('coordinates', $departureAirport->coordinates, '<=', $maxDistance*1852)->whereDistanceSphere('coordinates', $departureAirport->coordinates, '>=', $minDistance*1852);
+        }
+    }
+
+    /**
+     * Scope a query to only include airports that are in the given direction
+     */
+    public function scopeWithinBearing(Builder $query, Airport $departureAirport, string $direction = null, float $minDistance, float $maxDistance){
+
+        // Ignore this scope if direction is not set
+        if(!isset($direction)){
+            return;
+        }
+
+        $airportLat = $departureAirport->coordinates->latitude;
+        $airportLon = $departureAirport->coordinates->longitude;
+
+        // We calculate bearing in two ways, depending on the distance.
+        // First we calculate it within a polygon up to a certain limit
+        // Second we calculate just X/Y coordinates if it's outside the limit
+        // This is because the polygon gets very skewed after a certain distance
+
+        $airportCoordinate = new Coordinate($airportLat, $airportLon);
+        $directions = [
+            'N' => 0,
+            'NE' => 45,
+            'E' => 90,
+            'SE' => 135,
+            'S' => 180,
+            'SW' => 225,
+            'W' => 270,
+            'NW' => 315,
+        ];
+
+        // Adjust the max allowed distance in polygon (800nm then converted to meters)
+        $polygonDistance = ($maxDistance > 800 ? 800 : $maxDistance) * 1852;
+        $highEnd = CalculationHelper::calculateSphericalDestination($airportCoordinate, $directions[$direction]+45, $polygonDistance);
+        $lowEnd = CalculationHelper::calculateSphericalDestination($airportCoordinate, $directions[$direction]-45, $polygonDistance);
+
+        // If the distance is less than 800nm, we can use a polygon
+        $query->where(function ($q) use ($airportLat, $airportLon, $highEnd, $lowEnd, $minDistance, $maxDistance, $direction, $airportCoordinate){
+
+            // >>> Step 1: Create a polygon from the origin, then the bearing + 45 degrees in each direction
+            if($minDistance <= 800){
+                $polygon = new Polygon([
+                    new LineString([
+                        new Point($airportLat, $airportLon),
+                        new Point($highEnd->getLat(), $highEnd->getLng()),
+                        new Point($lowEnd->getLat(), $lowEnd->getLng()),
+                        new Point($airportLat, $airportLon),
+                    ]),
+                ], Srid::WGS84);
+
+                $q->whereWithin('coordinates', $polygon);
+            }
+
+            // >>> Step 2: Calculate the lat/long's for the max distance
+            if($maxDistance > 800){
+
+                switch($direction){
+                    case 'N':
+                        $q->orWhereRaw('ST_X(coordinates) > ?', [$highEnd->getLat()]);
+                        break;
+                    case 'NE':
+                        $q->orWhereRaw('(ST_X(coordinates) > ? AND ST_Y(coordinates) > ?)', [$highEnd->getLat(), $lowEnd->getLng()]);
+                        break;
+                    case 'E':
+                        $q->orWhereRaw('ST_Y(coordinates) > ?', [$lowEnd->getLng()]);
+                        break;
+                    case 'SE':
+                        $q->orWhereRaw('(ST_X(coordinates) < ? AND ST_Y(coordinates) > ?)', [$lowEnd->getLat(), $highEnd->getLng()]);
+                        break;
+                    case 'S':
+                        $q->orWhereRaw('ST_X(coordinates) < ?', [$lowEnd->getLat()]);
+                        break;
+                    case 'SW':
+                        $q->orWhereRaw('(ST_X(coordinates) < ? AND ST_Y(coordinates) < ?)', [$highEnd->getLat(), $lowEnd->getLng()]);
+                        break;
+                    case 'W':
+                        $q->orWhereRaw('ST_Y(coordinates) < ?', [$lowEnd->getLng()]);
+                        break;
+                    case 'NW':
+                        $q->orWhereRaw('(ST_X(coordinates) > ? AND ST_Y(coordinates) < ?)', [$lowEnd->getLat(), $highEnd->getLng()]);
+                        break;
+                }
+            }
+
+        });        
+    }
+
+    public function scopeFilterRunwayLengths(Builder $query, int $rwyLengthMin, int $rwyLengthMax, string $codeletter){
+        
+        // Set minimum according to aircraft code unless it's already higher
+        $codeMinimum = CalculationHelper::minimumRequiredRunwayLength($codeletter);
+        if($rwyLengthMin < $codeMinimum) $rwyLengthMin = $codeMinimum;
+
+        // Get longest not closed runway
+        $query->whereHas('runways', function($query) use ($rwyLengthMin, $rwyLengthMax){
+            $query->where('closed', false)->where('length_ft', '>=', $rwyLengthMin)->where('length_ft', '<=', $rwyLengthMax);
         });
 
-        // Destination airport size
-        if(isset($destinationAirportSize)){
-            $returnQuery = $returnQuery->whereIn('type', $destinationAirportSize);
-        } else {
-            $returnQuery = $returnQuery->whereIn('type', ['small_airport', 'medium_airport', 'large_airport']);
-        }
+    }
+
+    /**
+     * Scope a query to only include airports that have runways with lights
+     */
+    public function scopeFilterRunwayLights(Builder $query, int $destinationRunwayLights = null){
+        if(isset($destinationRunwayLights) && $destinationRunwayLights !== 0){
             
-        // Filter out departure airport, get airports with metar, fetch relevant data and run the query
-        if(isset($departureIcao)){
-            $returnQuery = $returnQuery->where('icao', '!=', $departureIcao);
-        }
+            if($destinationRunwayLights == 1){
+                $query->whereHas('runways', function($query){
+                    $query->where('lighted', true);
+                });
+            } else if($destinationRunwayLights == -1){
+                $query->whereDoesntHave('runways', function($query){
+                    $query->where('lighted', true);
+                });
+            }
 
-        if(isset($whitelistedArrivals)){
-            $returnQuery = $returnQuery->whereIn('icao', $whitelistedArrivals);
         }
+    }
 
+    /**
+     * Scope a query to only include airports that are airbases
+     */
+    public function scopeFilterAirbases(Builder $query, int $destinationAirbases = null){
+        if(isset($destinationAirbases) && $destinationAirbases !== 0){
+            
+            if($destinationAirbases == 1){
+                $query->where('w2f_airforcebase', true);
+            } else if($destinationAirbases == -1){
+                $query->where('w2f_airforcebase', false);
+            }
+
+        }
+    }
+
+    /**
+     * Scope a query to only include airports that have scores
+     */
+    public function scopeFilterByScores(Builder $query, Array $filterByScores = null){
         if(isset($filterByScores) && !empty($filterByScores)){
             
-            $returnQuery = $returnQuery->where(function($returnQuery) use ($filterByScores){
+            $query->where(function($query) use ($filterByScores){
                 foreach($filterByScores as $score => $value){
                     if($value == 1){
-                        $returnQuery = $returnQuery->whereHas('scores', function($query) use ($score){
+                        $query->whereHas('scores', function($query) use ($score){
                             $query->where('reason', $score);
                         });
                     } else if($value == -1){
-                        $returnQuery = $returnQuery->whereDoesntHave('scores', function($query) use ($score){
+                        $query->whereDoesntHave('scores', function($query) use ($score){
                             $query->where('reason', $score);
                         });
                     }
@@ -205,38 +332,16 @@ class Airport extends Model
             });
 
         }
+    }
 
-        // Only airports with runway lights
-        if(isset($destinationRunwayLights) && $destinationRunwayLights !== 0){
-            
-            if($destinationRunwayLights == 1){
-                $returnQuery = $returnQuery->whereHas('runways', function($query){
-                    $query->where('lighted', true);
-                });
-            } else if($destinationRunwayLights == -1){
-                $returnQuery = $returnQuery->whereDoesntHave('runways', function($query){
-                    $query->where('lighted', true);
-                });
-            }
-
-        }
-
-        // Destinations that are airbases
-        if(isset($destinationAirbases) && $destinationAirbases !== 0){
-            
-            if($destinationAirbases == 1){
-                $returnQuery = $returnQuery->where('w2f_airforcebase', true);
-            } else if($destinationAirbases == -1){
-                $returnQuery = $returnQuery->where('w2f_airforcebase', false);
-            }
-
-        }
-
-        // Only airports with routes to the arrival airport
+    /**
+     * Scope a query to only include airports that have routes and airlines
+     */
+    public function scopeFilterRoutesAndAirlines(Builder $query, string $departureIcao = null, Array $filterByAirlines = null, Array $filterByAircrafts = null, int $destinationWithRoutesOnly = null, string $flightDirection = 'arrivalFlights'){
         if(isset($destinationWithRoutesOnly) && $destinationWithRoutesOnly !== 0){
             
             if($destinationWithRoutesOnly == 1){
-                $returnQuery = $returnQuery->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts){
+                $query->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts){
                     
                     if(isset($departureIcao)){
                         if($flightDirection == 'arrivalFlights'){
@@ -259,7 +364,7 @@ class Airport extends Model
                     }
                 });
             } else if($destinationWithRoutesOnly == -1){
-                $returnQuery = $returnQuery->whereDoesntHave($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts){
+                $query->whereDoesntHave($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts){
                     
                     if(isset($departureIcao)){
                         if($flightDirection == 'arrivalFlights'){
@@ -284,7 +389,7 @@ class Airport extends Model
             }
 
         } else if(isset($filterByAirlines) || isset($filterByAircrafts)) {
-            $returnQuery = $returnQuery->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $filterByAircrafts){
+            $query->whereHas($flightDirection, function($query) use ($departureIcao, $filterByAirlines, $filterByAircrafts){
                 if(isset($departureIcao)){
 
                     if($filterByAirlines){
@@ -311,12 +416,15 @@ class Airport extends Model
                 }
             });
         }
+    }
 
-        $result = $returnQuery->has('metar')
-        ->with('runways', 'scores', 'metar')
-        ->get();
-
-        return $result;
+    /**
+     * Scope a query to only include airports that have the given scores
+     */
+    public function scopeReturnOnlyWhitelistedIcao(Builder $query, Array $whitelistedArrivals = null){
+        if(isset($whitelistedArrivals)){
+            $query->whereIn('icao', $whitelistedArrivals);
+        }
     }
 
 }

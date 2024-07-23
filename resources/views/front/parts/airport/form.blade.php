@@ -16,6 +16,7 @@
             <select class="form-control" id="continent" name="continent">
                 <option disabled selected>Choose</option>
                 <option value="DO" {{ old('continent') == "DO" ? "selected" : "" }}>Domestic Only</option>
+                <option value="AY" {{ old('continent') == "AY" ? "selected" : "" }}>Anywhere</option>
                 <option value="AF" {{ old('continent') == "AF" ? "selected" : "" }}>Africa</option>
                 <option value="AS" {{ old('continent') == "AS" ? "selected" : "" }}>Asia</option>
                 <option value="EU" {{ old('continent') == "EU" ? "selected" : "" }}>Europe</option>
@@ -84,6 +85,12 @@
 
     @error('airportNotFound')
         <div class="validation-error mt-2">{{ $message }}</div>
+    @enderror
+
+    @error('bearingWarning')
+        @if(!empty($message))
+            <div class="validation-error mt-2">{{ $message }}</div>
+        @endif
     @enderror
 
     <div id="filters" class="hide-filters">             
@@ -225,6 +232,63 @@
                         </label>
                     </div>
                     <i class="ms-2 fa fa-jet-fighter"></i>&nbsp;Airbases
+                </div>
+
+                <label class="pt-4">Flight direction</label>
+
+                <!-- Get validation errors -->
+                @error('flightDirection')
+                <div class="validation
+                    -error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
+
+                <div class="mt-1">
+                    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                        <input type="radio" class="btn-check light" name="flightDirection" value="0" id="flightDirection_neutral" {{ (old('flightDirection') == null || old('flightDirection') == 0) ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width" for="flightDirection_neutral">
+                            <i class="fa-solid fa-slash-forward"></i>
+                        </label>
+
+                        <input type="radio" class="btn-check green" name="flightDirection" value="N" id="flightDirection_north" {{ old('flightDirection') == 'N' ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width" for="flightDirection_north">
+                            N
+                        </label>
+
+                        <input type="radio" class="btn-check green" name="flightDirection" value="NE" id="flightDirection_northeast" {{ old('flightDirection') == 'NE' ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width" for="flightDirection_northeast">
+                            NE
+                        </label>
+
+                        <input type="radio" class="btn-check green" name="flightDirection" value="E" id="flightDirection_east" {{ old('flightDirection') == 'E' ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width" for="flightDirection_east">
+                            E
+                        </label>
+
+                        <input type="radio" class="btn-check green" name="flightDirection" value="SE" id="flightDirection_southeast" {{ old('flightDirection') == 'SE' ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width" for="flightDirection_southeast">
+                            SE
+                        </label>
+                        
+                        <input type="radio" class="btn-check green" name="flightDirection" value="S" id="flightDirection_south" {{ old('flightDirection') == 'S' ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width" for="flightDirection_south">
+                            S
+                        </label>
+                        
+                        <input type="radio" class="btn-check green" name="flightDirection" value="SW" id="flightDirection_southwest" {{ old('flightDirection') == 'SW' ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width" for="flightDirection_southwest">
+                            SW
+                        </label>
+
+                        <input type="radio" class="btn-check green" name="flightDirection" value="W" id="flightDirection_west" {{ old('flightDirection') == 'W' ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width" for="flightDirection_west">
+                            W
+                        </label>
+
+                        <input type="radio" class="btn-check green" name="flightDirection" value="NW" id="flightDirection_northwest" {{ old('flightDirection') == 'NW' ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width" for="flightDirection_northwest">
+                            NW
+                        </label>
+                    </div>
                 </div>
                 
             </div>

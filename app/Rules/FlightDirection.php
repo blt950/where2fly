@@ -4,9 +4,8 @@ namespace App\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Facades\DB;
 
-class AirportExists implements ValidationRule
+class FlightDirection implements ValidationRule
 {
     /**
      * Run the validation rule.
@@ -16,14 +15,12 @@ class AirportExists implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
 
-        $exists = DB::table('airports')
-            ->where('icao', $value)
-            ->orWhere('local_code', $value)
-            ->exists();
+        $allowedDirection = [
+            0, 'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'
+        ];
 
-        if(!$exists){
-            $fail("Airport not found.");
+        if(!in_array($value, $allowedDirection)){
+            $fail("The $attribute is invalid.");
         }
-        
     }
 }
