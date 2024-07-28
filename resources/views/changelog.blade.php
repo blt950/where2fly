@@ -17,7 +17,7 @@
         <div class="text-start">
             
             <h2 class="mb-0">v1.8.0</h2>
-            <span class="badge ps-0 pb-2">2024-07-XX</span>
+            <span class="badge ps-0 pb-2">2024-07-27</span>
             <ul>
                 <li>Optimized search times with a new database setup</li>
                 <li>Added flight direction filter</li>
