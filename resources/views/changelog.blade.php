@@ -16,6 +16,16 @@
         
         <div class="text-start">
             
+            <h2 class="mb-0">v1.8.0</h2>
+            <span class="badge ps-0 pb-2">2024-07-XX</span>
+            <ul>
+                <li>Optimized search times with a new database setup</li>
+                <li>Added flight direction filter</li>
+                <li>Added "Anywhere" destination area</li>
+                <li>Added new flights detail view replacing the popover</li>
+                <li>Added highlight of filtered aircraft in search result</li>
+            </ul>
+
             <h2 class="mb-0">v1.7.2</h2>
             <span class="badge ps-0 pb-2">2024-07-05</span>
             <ul>
