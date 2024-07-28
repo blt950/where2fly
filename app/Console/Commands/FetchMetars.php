@@ -59,7 +59,7 @@ class FetchMetars extends Command
                     continue;
                 }
 
-                $time = Carbon::now()->setDay($metarDate)->setHour(substr($d, 7, 2))->setMinute(substr($d, 9, 2))->setSeconds(0);
+                $time = Carbon::now()->setDay($metarDate)->setHour((int)substr($d, 7, 2))->setMinute((int)substr($d, 9, 2))->setSeconds(0);
                 $metar = substr($d, 13, null);
 
                 // Fetch the wind direction and speed
