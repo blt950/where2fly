@@ -11,9 +11,11 @@
             </div>
             <div class="modal-body">
                 <ul class="list-unstyled">
-                    @foreach($airport->flights->where('airline_icao', $airline->icao_code) as $flight)
-                        <li>
-                            {{ $flight->flight_icao }} ({{ $flight->aircrafts->pluck('icao')->implode(',') }}) {{ $flight->last_seen_at->diffForHumans() }}
+                    @foreach($airport->flights->where('airline_icao', $airline->icao_code)->sortByDesc('last_seen_at') as $flight)
+                        <li class="{{$flight->aircrafts->whereIn('icao', $filterByAircrafts)->count() > 0 ? 'highlight' : null}}">
+                            {{ $flight->flight_icao }}
+                            ({{ $flight->aircrafts->pluck('icao')->implode(',') }})
+                            {{ $flight->last_seen_at->diffForHumans() }}
                         </li>
                     @endforeach
                 </ul>

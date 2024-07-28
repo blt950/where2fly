@@ -194,9 +194,12 @@
                                         data-sort="0"
                                     @endif
                                 >
+                                    
                                     @if($airport->airlines->isNotEmpty())
                                         @foreach($airport->airlines as $airline)
-                                            <button type="button" class="airline-button" 
+
+                                            @php $highlight = $airport->flights->where('airline_icao', $airline->icao_code)->contains(fn($flight) => $flight->aircrafts->whereIn('icao', $filterByAircrafts)->isNotEmpty()); @endphp
+                                            <button type="button" class="airline-button {{ $highlight ? 'highlight' : null }}" 
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#{{ $primaryAirport->icao . '-' . $airport->icao . '-' . $airline->icao_code }}-Modal">
                                                 <img
@@ -290,7 +293,7 @@
         {{-- Let's draw all airline modals here --}}
         @foreach($modalAirports as $airport)
             @foreach($airport->airlines as $airline)
-                @include('search.parts.flightsModal', ['primaryAirport' => $primaryAirport, 'airport' => $airport, 'airline' => $airline])
+                @include('search.parts.flightsModal', ['primaryAirport' => $primaryAirport, 'airport' => $airport, 'airline' => $airline, 'filterByAircrafts' => $filterByAircrafts])
             @endforeach
         @endforeach
 

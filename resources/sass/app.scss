@@ -460,19 +460,36 @@ main{
 * Modals
 */
 
-.airline-button{
-    background: transparent;
-    border: 0;
-    margin: 0;
-    padding: 0;
+.modal{
+
+    &-title{
+        text-align: left;
+    }
+
+    &-content{
+        color: black;
+    }
+    
+    &-content ul li.highlight{
+        color: $success;
+        text-decoration: dotted underline;
+    }
 }
 
-.modal-content{
-    color: black;
-}
+button {
 
-.modal-title{
-    text-align: left;
+    padding-bottom: 2px;
+
+    &.airline-button{
+        background: transparent;
+        border: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    &.highlight{
+        border-bottom: 2px dotted $success;
+    }
 }
 
 /*

@@ -171,7 +171,7 @@ class SearchController extends Controller
             }
 
             if($suggestedAirports->count()){
-                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores', 'bearingWarning'));
+                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning'));
             }
 
         }
