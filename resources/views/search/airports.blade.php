@@ -11,6 +11,10 @@
 @vite('resources/js/sortable.js')
 @endsection
 
+@php
+    $modalAirports = collect();
+@endphp
+
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
 
     @include('layouts.menu')
@@ -192,18 +196,16 @@
                                 >
                                     @if($airport->airlines->isNotEmpty())
                                         @foreach($airport->airlines as $airline)
-                                            <img
-                                                class="airline-logo" 
-                                                src="{{ asset('img/airlines/'.$airline->iata_code.'.png') }}"
-                                                data-bs-html="true"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-title="
-                                                    {{ $airline->name }}<br><br>
-                                                    @foreach($airport->flights->where('airline_icao', $airline->icao_code)->slice(0,30) as $flight)
-                                                        {{ $flight->flight_icao }} ({{ $flight->aircrafts->pluck('icao')->implode(',') }}) {{ $flight->last_seen_at->diffForHumans() }}<br>
-                                                    @endforeach
-                                                "
-                                            >
+                                            <button type="button" class="airline-button" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#{{ $primaryAirport->icao . '-' . $airport->icao . '-' . $airline->icao_code }}-Modal">
+                                                <img
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="See all {{ $airline->name }} flights"
+                                                    class="airline-logo" 
+                                                    src="{{ asset('img/airlines/'.$airline->iata_code.'.png') }}"
+                                                >
+                                            </button>
                                         @endforeach
                                     @else
                                         -
@@ -257,7 +259,10 @@
                                 </td>
                             </tr>
 
-                            @php $count++; @endphp
+                            @php 
+                                $modalAirports->push($airport);
+                                $count++;
+                            @endphp
                         @endforeach
 
                         @if($count == 1)
@@ -281,6 +286,13 @@
 
             @include('parts.discord')
         </div>
+
+        {{-- Let's draw all airline modals here --}}
+        @foreach($modalAirports as $airport)
+            @foreach($airport->airlines as $airline)
+                @include('search.parts.flightsModal', ['primaryAirport' => $primaryAirport, 'airport' => $airport, 'airline' => $airline])
+            @endforeach
+        @endforeach
 
         @include('layouts.legend')
 
