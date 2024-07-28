@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', 'b3'),
 
     /*
     |--------------------------------------------------------------------------
@@ -36,6 +36,12 @@ return [
             'throw' => false,
         ],
 
+        'backup' => [
+            'driver' => 'local',
+            'root' => storage_path('app/backup'),
+            'throw' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -54,6 +60,17 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
+        ],
+
+        'backblaze' => [
+            'driver' => 's3',
+            'key' => env('B3_KEY'),
+            'secret' => env('B3_SECRET'),
+            'region' => env('B3_REGION'),
+            'bucket' => env('B3_BUCKET'),
+            'endpoint' => env('B3_ENDPOINT'),
+            'url' => env('B3_URL'),
+            'use_path_style_endpoint' => true,
         ],
 
     ],
