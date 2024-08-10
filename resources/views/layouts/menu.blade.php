@@ -1,4 +1,4 @@
-<header class="mb-auto">
+<header class="mb-auto p-3">
     <div>
         <a href="{{ route('front') }}" class="float-none float-md-start text-decoration-none text-white">
             <h3 class="mb-0 logo">Where2Fly</h3>

@@ -16,16 +16,14 @@
 @endphp
 
 
-<div class="d-flex w-100 h-100 p-3 mx-auto flex-column">
+<div class="d-flex w-100 h-100 mx-auto flex-column">
 
     @include('layouts.menu')
   
-  
-    <main class="d-flex flex-row gap-4">
-        
-        <div style="width: 30%;">
 
-            <h1>Search results</h1>
+    <div class="d-flex flex-row">
+        <main class="d-flex flex-column gap-4 p-2">
+            <h1 style="text-align: left;">Search results</h1>
 
             @if($bearingWarning)
                 <div class="alert alert-warning">
@@ -303,26 +301,10 @@
             @endforeach
 
             @include('layouts.legend')
-        </div>
+        </main>
 
-        <!-- Leaflet -->
-        <div style="width: 70%">
-            <div id="map" class="map" style="height: 100vh; width: 100%;"></div>
-                        
-            @vite('resources/js/leaflet.js')
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    var map = L.map('map').setView([51.505, -0.09], 13);
-
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-                        maxZoom: 19,
-                        attribution: '&copy; <a href="https://cartodb.com/attribution">CartoDB</a>'
-                    }).addTo(map);
-                });
-            </script>
-        </div>
-
-    </main>
+        @include('search.parts.map')
+    </div>
 
     <script>
         // Get the show more button and add on click event where it removes the class that hides the rows
