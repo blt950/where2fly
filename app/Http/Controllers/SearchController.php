@@ -171,7 +171,19 @@ class SearchController extends Controller
             }
 
             if($suggestedAirports->count()){
-                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning'));
+
+                // Create an array with all airports coordinates
+                $airportCoordinates = [];
+                $airportCoordinates[$primaryAirport->icao]['lat'] = $primaryAirport->coordinates->latitude;
+                $airportCoordinates[$primaryAirport->icao]['lon'] = $primaryAirport->coordinates->longitude;
+
+                // Lets add the coordinates of the suggested airports
+                foreach($suggestedAirports as $airport){
+                    $airportCoordinates[$airport->icao]['lat'] = $airport->coordinates->latitude;
+                    $airportCoordinates[$airport->icao]['lon'] = $airport->coordinates->longitude;
+                }
+
+                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning'));
             }
 
         }

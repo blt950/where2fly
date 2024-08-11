@@ -227,6 +227,54 @@
 @section('js')    
 
     <script>
+        airportCoordinates = {!! json_encode($airportCoordinates) !!}    
+
+        var path = null;
+        function drawRoute(depAirport, arrAirport){
+            var latlngs = [];
+
+            var latlng1 = [airportCoordinates[depAirport]['lat'], airportCoordinates[depAirport]['lon']],
+                latlng2 = [airportCoordinates[arrAirport]['lat'], airportCoordinates[arrAirport]['lon']];
+
+            var offsetX = latlng2[1] - latlng1[1],
+                offsetY = latlng2[0] - latlng1[0];
+
+            var r = Math.sqrt( Math.pow(offsetX, 2) + Math.pow(offsetY, 2) ),
+                theta = Math.atan2(offsetY, offsetX);
+
+            var thetaOffset = (3.14/10);
+
+            var r2 = (r/2)/(Math.cos(thetaOffset)),
+                theta2 = theta + thetaOffset;
+
+            var midpointX = (r2 * Math.cos(theta2)) + latlng1[1],
+                midpointY = (r2 * Math.sin(theta2)) + latlng1[0];
+
+            var midpointLatLng = [midpointY, midpointX];
+
+            latlngs.push(latlng1, midpointLatLng, latlng2);
+
+            var pathOptions = {
+                color: 'rgba(208, 198, 5, 1)',
+                weight: 2
+            }
+
+            if(path) {
+                path.remove();
+            }
+
+            path = L.curve(
+                [
+                    'M', latlng1,
+                    'Q', midpointLatLng,
+                        latlng2
+                ], pathOptions).addTo(map);
+
+            map.flyToBounds(path.getBounds(), {duration: 0.25, maxZoom: 5});
+        }
+    </script>
+
+    <script>
         // When table row is howered, fetch the data-airport attribute and show the corresponding popup
         document.querySelectorAll('tbody > tr').forEach(function(element) {
             element.addEventListener('mouseover', function() {
@@ -241,43 +289,7 @@
                 document.querySelector('.popup-container').querySelector('[data-airport="' + airport + '"]').classList.add('show')
 
                 // Draw a line between primary airport and the hovered airport in leafmap
-
-                var latlngs = [];
-
-                var latlng1 = [{{ $primaryAirport->coordinates->latitude }}, {{ $primaryAirport->coordinates->longitude }}],
-                    latlng2 = [{{ $airport->coordinates->latitude }}, {{ $airport->coordinates->longitude }}];
-
-                var offsetX = latlng2[1] - latlng1[1],
-                    offsetY = latlng2[0] - latlng1[0];
-
-                var r = Math.sqrt( Math.pow(offsetX, 2) + Math.pow(offsetY, 2) ),
-                    theta = Math.atan2(offsetY, offsetX);
-
-                var thetaOffset = (3.14/10);
-
-                var r2 = (r/2)/(Math.cos(thetaOffset)),
-                    theta2 = theta + thetaOffset;
-
-                var midpointX = (r2 * Math.cos(theta2)) + latlng1[1],
-                    midpointY = (r2 * Math.sin(theta2)) + latlng1[0];
-
-                var midpointLatLng = [midpointY, midpointX];
-
-                latlngs.push(latlng1, midpointLatLng, latlng2);
-
-                var pathOptions = {
-                    color: 'rgba(208, 198, 5, 1)',
-                    weight: 2
-                }
-
-                var curvedPath = L.curve(
-                    [
-                        'M', latlng1,
-                        'Q', midpointLatLng,
-                            latlng2
-                    ], pathOptions).addTo(map);
-
-                map.flyToBounds(curvedPath.getBounds(), {duration: 0.5, maxZoom: 5});
+                drawRoute('{{ $primaryAirport->icao }}', airport)
 
                 console.log("draw")
 
@@ -300,6 +312,10 @@
                 document.querySelector('.popup-container').querySelector('[data-flights="' + airport + '"]').classList.add('show-flights')
             });
         });
+    </script>
+
+    <script>
+        
     </script>
 
     <script>
