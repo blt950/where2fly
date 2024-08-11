@@ -56,26 +56,3 @@ table{
     }
 
 }
-
-.scroll-fade{
-    position: relative;
-}
-
-.table-responsive{
-    background: transparent;
-
-    // Add horizontal scroll fade on smaller devices
-    @include media-breakpoint-between(xs, md) {
-        background: white;
-        &::after{
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 4rem;
-            background: linear-gradient(to right, rgba(255,255,255,0), #f9f9f9);
-            pointer-events: none;
-        }
-    }
-}
