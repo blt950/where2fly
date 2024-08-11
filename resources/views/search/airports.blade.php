@@ -102,7 +102,7 @@
                             <button class="nav-link active" id="home-tab-{{ $primaryAirport->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $primaryAirport->id }}" type="button" role="tab">METAR</button>
                         </div>
                         <div>
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $primaryAirport->id }}" data-taf-button="true" data-primaryAirport-icao="{{ $primaryAirport->icao }}" type="button" role="tab">TAF</button>
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $primaryAirport->id }}" data-taf-button="true" data-airport-icao="{{ $primaryAirport->icao }}" type="button" role="tab">TAF</button>
                         </div>
                     </div>
                     <div class="tab-content">
