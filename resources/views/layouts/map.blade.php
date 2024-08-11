@@ -1,7 +1,7 @@
 <!-- Leaflet -->
 <div id="map" class="map"></div>
-@vite('resources/js/leaflet.js')
 
+@vite('resources/js/leaflet.js')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var map = L.map('map', {
