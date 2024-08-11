@@ -1,0 +1,120 @@
+.results-container{
+    padding: 1rem;
+    margin-bottom: 2rem;
+
+    color: black;
+    background: #fffdf7;
+
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    @include media-breakpoint-between(xs, md) {
+        overflow-x: scroll;
+    }
+    
+    dt{
+        margin-bottom: 1.35rem;
+    }
+
+    dd{
+        margin-bottom: 0;
+    }
+}
+
+#cookie-consent{
+    position: fixed;
+    bottom: .75rem;
+    right: .75rem;
+
+    color: $primary;
+    background-color: black;
+    border: 2px solid $primary;
+    width: 19rem;
+    max-width: 90%;
+    padding: 10px;
+}
+
+/* Add Discord colored alert */
+.alert{
+    &.alert-discord{
+        background-color: #7289DA;
+        border-color: #7289DA;
+        text-align: center;
+    }
+}
+
+/*
+* Snips
+*/
+
+.testbadge{
+    position: absolute;
+    left: 50vw;
+    top: 0;
+    font-size: 1rem;
+}
+
+.badge{
+    font-weight: 400;
+}
+
+img.flag{
+    border: 1px solid #efefef;
+}
+
+.bt{
+    border-top: 1px solid rgba($gray-500, 0.5);
+}
+
+/*
+* Markdown container
+*/
+
+#markdown{
+    padding: 2rem;
+
+    color: black;
+    background: white;
+
+    overflow-x: scroll;
+
+    h2{
+        padding-top: 1rem;
+        padding-bottom: 0.5rem;
+
+        &:not(:first-of-type){
+            border-top: 1px solid $gray-200;
+        }
+
+    }
+
+    h3, h4, h5, h6 {
+        padding-top: 0.5rem;
+    }
+
+    p{
+        font-family: "Work Sans", sans-serif;
+    }
+
+    code{
+        color: black;
+        background: #efefef;
+        padding: 2px 5px;
+    }
+
+    table{
+        width: 100%;
+
+        tr{
+            border-top: 1px solid $gray-200;
+        }
+
+        th,td{
+            padding-left: 1rem;
+        }
+    }
+}
+

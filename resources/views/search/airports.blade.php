@@ -54,7 +54,7 @@
         @else
             <h2>{{ ucfirst($direction) }}</h2>
         @endif
-        <div class="departure-container">
+        <div class="results-container">
             <dl>
                 <dt>Airport
                     @if($suggestedAirport)
@@ -145,7 +145,7 @@
 
                         @if( !empty($sortByScores) && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
 
-                            <tr class="font-family-paragraph">
+                            <tr class="font-work-sans">
                                 <th class="text-center text-info fw-normal pt-3 pb-3" colspan="9">
                                     <i class="fas fa-info-square"></i> None of the airports in your range has interesting weather or ATC
                                 </th>

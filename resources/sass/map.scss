@@ -1,0 +1,8 @@
+.map{
+    height: calc(100vh - $header-height);
+    width: calc(100vw - $sidebar-width);
+}
+
+.leaflet-container {
+    background: #000;
+}

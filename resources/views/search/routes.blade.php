@@ -14,7 +14,7 @@
     @include('layouts.title', ['title' => 'Search results'])
 
     <div class="container">
-        <div class="departure-container d-flex align-items-center">
+        <div class="results-container d-flex align-items-center">
             <dl>
                 <dt>Departure<dt>
                 <dd>
