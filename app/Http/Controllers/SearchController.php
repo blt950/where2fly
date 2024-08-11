@@ -24,7 +24,7 @@ class SearchController extends Controller
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
-        return view('front.index', compact('airlines', 'aircrafts', 'prefilledIcao'));
+        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao'));
     }
 
     /**
