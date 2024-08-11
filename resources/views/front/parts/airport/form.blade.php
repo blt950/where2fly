@@ -2,7 +2,7 @@
     @csrf
     
     <div class="row g-3 justify-content-center">
-        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
+        <div class="col-xs-12 text-start">
             <label for="icao">{{ ucfirst($icao) }} (ICAO)</label>
             <input type="text" class="form-control" id="icao" name="icao" placeholder="Random" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ isset($prefilledIcao) ? $prefilledIcao : old('icao') }}">
             <input type="hidden" name="direction" value="{{ $icao }}">
@@ -11,7 +11,7 @@
             @enderror
         </div>
         
-        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
+        <div class="col-xs-12 text-start">
             <label for="continent">{{ ucfirst($area) }} Area</label>
             <select class="form-control" id="continent" name="continent">
                 <option disabled selected>Choose</option>
@@ -29,7 +29,7 @@
             @enderror
         </div>
         
-        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
+        <div class="col-xs-12 text-start">
             <label for="codeletter">Aircraft Code Letter</label>
             <select class="form-control" id="codeletter" name="codeletter">
                 <option disabled selected>Choose</option>
@@ -45,7 +45,7 @@
             @enderror
         </div>
         
-        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-2 text-start">
+        <div class="col-xs-12 text-start">
             <label>Intended Air Time</label>
             <input type="hidden" id="airtimeMin" name="airtimeMin" value="0">
             <input type="hidden" id="airtimeMax" name="airtimeMax" value="12">
@@ -53,7 +53,7 @@
             <span id="slider-airtime-text">0-12 hours</span>
         </div>
         
-        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 text-start">
+        <div class="col-xs-12 text-start">
             <label>Order by</label>
             
             <div class="form-check mb-0">
@@ -76,7 +76,7 @@
             </div>
         </div>
 
-        <div class="col-sm-12 col-md-9 col-lg-2 align-self-start">
+        <div class="col-sm-12 align-self-start">
             <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
                 Search <i class="fas fa-search"></i>
             </button>
@@ -96,7 +96,7 @@
     <div id="filters" class="hide-filters">             
         <div class="row g-3 mt-3 pb-4 justify-content-center bt">
 
-            <div class="col-sm-6 col-md-4 col-lg-4 text-start">
+            <div class="col-sm-12 text-start">
                 <label>Weather parameters</label>
 
                 @foreach(\App\Http\Controllers\ScoreController::$score_types as $k => $s)
@@ -124,7 +124,7 @@
                 @endforeach
             </div>
             
-            <div class="col-sm-6 col-md-5 col-lg-5 text-start">
+            <div class="col-sm-12 text-start">
 
                 <label>Meteo Condition</label>
                 <div>
@@ -293,7 +293,7 @@
                 
             </div>
             
-            <div class="col-sm-12 col-md-9 col-lg-3 text-start">
+            <div class="col-sm-12 text-start">
                 <label class="d-block">Airport Size</label>
                 <div>
                     <div class="form-check form-check-inline mb-0 me-reduced">

@@ -48,39 +48,18 @@ h1, h2, h3, h4, h5, h6, button, p, a, footer, .btn, .badge{
 }
 
 h1 {
-    text-align: center;
-
     @include media-breakpoint-down(sm) {
         font-size: calc(1.15rem + 1.2vw);
     }
 }
 
+h2 {
+    font-weight: normal;
+}
+
 .font-family-paragraph
 {
     font-family: 'Work Sans', sans-serif; 
-}
-
-h2 {
-
-    &.front{
-        font-size: 1.2rem;
-        font-weight: normal;
-        @include media-breakpoint-between(sm, md) {
-            font-size: 1rem;
-        }
-        @include media-breakpoint-between(xs, sm) {
-            font-size: inherit;
-        }
-    }
-
-    &.top {
-        font-size: 1.1rem;
-        font-weight: normal;
-        @include media-breakpoint-between(xs, sm) {
-            font-size: inherit;
-        }
-    }
-
 }
 
 header {
@@ -99,27 +78,31 @@ main{
     
     background: #474037;
 
-    .content{
-        padding: 1rem 1rem 1rem 1rem;
+    h2{
+        font-size: 1.5rem;
     }
 
-    &.front{
-        padding-top: 200px;
+    .title{
+        padding: 1.5rem 1rem;
+        background: #61553f;
 
-        @include media-breakpoint-between(xs, md) {
-            padding-top: 0;
+        h1{
+            margin: 0;
         }
+
+        h2{
+            font-size: 1rem;
+        }
+    }
+
+    .container{
+        padding: 2rem 1rem 1rem 1rem;
     }
 
     @include media-breakpoint-between(xs, md) {
         padding-right: .25rem!important;
         padding-left: .25rem!important;
     }
-}
-
-.sidebar-title{
-    padding: 1.5rem 1rem;
-    background: #61553f;
 }
 
 .map{
@@ -285,17 +268,17 @@ footer{
 
 .expandFilterGroup{
 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
     .divider{
-        width: 15vw;
+        width: 30%;
         height: 1px;
         background: rgba($primary, 0.5);
 
         margin-bottom: 3px;
         display: inline-block;
-
-        @include media-breakpoint-down(sm) {
-            width: 8vw;
-        }
     }
 
     .button{
@@ -335,6 +318,8 @@ footer{
 }
 
 table{
+
+    margin-bottom: 2rem !important;
 
     // Add a bit margin to hide horizontal scroll fade
     @include media-breakpoint-between(xs, md) {
@@ -420,7 +405,7 @@ table{
 
 .departure-container{
     padding: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
 
     color: black;
     background: #fffdf7;
@@ -557,15 +542,7 @@ img.flag{
 
 .btn-group{
     &.filter{
-        width: 520px;
-
-        @include media-breakpoint-between(xs, sm) {
-            width: 100%;
-        }
-
-        @include media-breakpoint-between(sm, md) {
-            width: 450px;
-        }
+        width: 100%;
     }
 }
 
@@ -617,15 +594,15 @@ img.flag{
     width: 5px;
 }
 *::-webkit-scrollbar-track {
-    background-color: $gray-700;
+    background-color: $secondary;
 }
 
 *::-webkit-scrollbar-track:hover {
-    background-color: $gray-700;
+    background-color: lighten($secondary, 10%);
 }
 
 *::-webkit-scrollbar-track:active {
-    background-color: $gray-700;
+    background-color: lighten($secondary, 10%);
 }
 
 *::-webkit-scrollbar-thumb {
@@ -633,11 +610,11 @@ img.flag{
 }
 
 *::-webkit-scrollbar-thumb:hover {
-    background-color: lighten($primary, 5%);
+    background-color: darken($primary, 10%);
 }
 
 *::-webkit-scrollbar-thumb:active {
-    background-color: lighten($primary, 5%);
+    background-color: darken($primary, 10%);
 }
 
 /*

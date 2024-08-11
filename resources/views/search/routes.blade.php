@@ -11,13 +11,9 @@
 @vite('resources/js/sortable.js')
 @endsection
 
-<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    @include('layouts.title', ['title' => 'Search results'])
 
-    @include('layouts.menu')
-
-    <main>
-        <h1 class="mb-3 mt-5">Search Results</h1>
-
+    <div class="container">
         <div class="departure-container d-flex align-items-center">
             <dl>
                 <dt>Departure<dt>
@@ -83,17 +79,12 @@
                 </table>
 
             </div>
-
             @include('parts.discord')
         </div>
-
         @include('layouts.legend')
+    </div>
+@endsection
 
-    </main>
-
+@section('js')
     @include('scripts.tooltip')
-  
-    @include('layouts.footer')
-</div>
-
 @endsection

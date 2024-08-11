@@ -7,16 +7,11 @@
         var map = L.map('map', {
             attributionControl: false,
             zoomControl: false
-        }).setView([51.505, -0.09], 5);
+        }).setView([52.51843039016386, 13.395199187248908], 5);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
             minZoom: 2,
             maxZoom: 17,
-            attribution: '&copy; <a href="https://cartodb.com/attribution">CartoDB</a>'
         }).addTo(map);
-
-        // L.control.zoom({
-        //     position: 'bottomleft'
-        // }).addTo(map);
     });
 </script>

@@ -7,13 +7,9 @@
 @section('title', 'Changelog')
 @section('content')
 
-<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    @include('layouts.title', ['title' => 'Changelog'])
 
-    @include('layouts.menu')
-  
-    <main>
-        <h1 class="mb-3 mt-5">Changelog</h1>
-        
+    <div class="container">
         <div class="text-start">
             
             <h2 class="mb-0">v1.8.0</h2>
@@ -220,10 +216,6 @@
                 <li>Initial release</li>
             </ul>
         </div>
-
-    </main>
-  
-    @include('layouts.footer')
-</div>
+    </div>
 
 @endsection

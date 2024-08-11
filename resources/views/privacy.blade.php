@@ -7,12 +7,9 @@
 @section('title', 'Privacy Policy')
 @section('content')
 
-<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    @include('layouts.title', ['title' => 'Privacy Policy'])
 
-    @include('layouts.menu')
-  
-    <main>
-        <h1 class="mb-3 mt-5 text-start">Privacy Policy</h1>
+    <div class="container">
         
         <div class="text-start">
             <p class="font-work-sans">Thank you for using Where2Fly. This is a hobby project, but I'm still striving my best to cover the requirements of GDPR and ePrivacy regulations. In short words, I'm only using strictly neccesarry service cookies to make the page and search work for your visit.</p>
@@ -24,10 +21,6 @@
             </p>
             
         </div>
-
-    </main>
-  
-    @include('layouts.footer')
-</div>
+    </div>
 
 @endsection
