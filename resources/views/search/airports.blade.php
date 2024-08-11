@@ -125,7 +125,7 @@
         </div>
 
         <h2>{{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>
-        <table class="table table-hover text-start sortable asc">
+        <table class="table table-hover text-start sortable asc mb-0">
             <thead>
                 <tr>
                     <th scope="col">#</th>
@@ -204,7 +204,6 @@
             </tbody>
         </table>
 
-        @include('parts.discord')
         @include('layouts.legend')
     </div>
 
@@ -232,9 +231,16 @@
         var routePath = null;
         function drawRoute(primaryAirport, destinationAirport){
             var latlngs = [];
+            var latlng1 = [];
+            var latlng2 = [];
 
-            var latlng1 = [airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']],
+            if('{{ $direction }}' == 'arrival'){
+                latlng1 = [airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon']];
+                latlng2 = [airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']];
+            } else {
+                latlng1 = [airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']];
                 latlng2 = [airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon']];
+            }
 
             var offsetX = latlng2[1] - latlng1[1],
                 offsetY = latlng2[0] - latlng1[0];
@@ -261,9 +267,7 @@
 
             var durationBase = 200;
             var duration = Math.sqrt(Math.log(r)) * durationBase;
-            // Scales the animation duration so that it's related to the line length
-            // (but such that the longest and shortest lines' durations are not too different).
-            // You may want to use a different scaling factor.
+
             pathOptions.animate = {
                 duration: duration,
                 iterations: 1,
@@ -357,10 +361,6 @@
                 document.querySelector('.popup-container').querySelector('[data-flights="' + airport + '"]').classList.add('show-flights')
             });
         });
-    </script>
-
-    <script>
-        
     </script>
 
     <script>
