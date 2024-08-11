@@ -31,7 +31,7 @@
             <div class="d-flex flex-wrap justify-content-between">
                 <h2>{{ ucfirst($direction) }} suggestion</h2>
 
-                {{-- Add possiblity to re-post the search query for a new random departure --}}
+                {{-- Add possibility to re-post the search query for a new random departure --}}
                 <form id="form" method="POST" action="{{ route('search') }}">
                     @csrf
 
@@ -97,7 +97,7 @@
 
             <div class="w-100">
                 @if($primaryAirport->metar)
-                    <div class="d-flex mb-3 nav nav-pills" style="font-size: 0.75rem">
+                    <div class="d-flex nav nav-pills" style="font-size: 0.75rem">
                         <div>
                             <button class="nav-link active" id="home-tab-{{ $primaryAirport->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $primaryAirport->id }}" type="button" role="tab">METAR</button>
                         </div>
@@ -133,9 +133,6 @@
                     <th scope="col">Distance</th>
                     <th scope="col">Time</th>
                     <th scope="col">Conditions</th>
-                    {{-- <th scope="col">Airlines</th>
-                    <th scope="col">Runway</th>
-                    <th scope="col" class="no-sort" width="40%">Details</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -152,7 +149,7 @@
                 @endif
 
                 @foreach($suggestedAirports as $airport)
-                    <tr class="{{ ($count > 10) ? 'showmore-hidden' : null }}">
+                    <tr class="{{ ($count > 10) ? 'showmore-hidden' : null }}" data-airport="{{ $airport->icao }}">
                         <th scope="row">{{ $count }}</th>
                         <td data-sort="{{ $airport->icao }}">
                             <div>
@@ -181,79 +178,6 @@
                                     ></i>
                                 @endif
                             @endforeach
-                        </td>
-                        {{-- <td 
-                            @if($airport->airlines->isNotEmpty())
-                                data-sort="{{ $airport->airlines->count() }}"
-                            @else
-                                data-sort="0"
-                            @endif
-                        >
-                            
-                            @if($airport->airlines->isNotEmpty())
-                                @foreach($airport->airlines as $airline)
-
-                                    @php $highlight = $airport->flights->where('airline_icao', $airline->icao_code)->contains(fn($flight) => $flight->aircrafts->whereIn('icao', $filterByAircrafts)->isNotEmpty()); @endphp
-                                    <button type="button" class="airline-button {{ $highlight ? 'highlight' : null }}" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#{{ $primaryAirport->icao . '-' . $airport->icao . '-' . $airline->icao_code }}-Modal">
-                                        <img
-                                            data-bs-toggle="tooltip"
-                                            data-bs-title="See all {{ $airline->name }} flights"
-                                            class="airline-logo" 
-                                            src="{{ asset('img/airlines/'.$airline->iata_code.'.png') }}"
-                                        >
-                                    </button>
-                                @endforeach
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td data-sort="{{ $airport->longestRunway() }}">
-                            <div class="rwy-feet">{{ $airport->longestRunway() }}</div>
-                            <div class="rwy-meters text-black text-opacity-50">{{ round($airport->longestRunway()* .3048) }}</div>
-                        </td>
-                        <td>
-                            <div class="d-flex justify-content-between mb-3 nav nav-pills" style="font-size: 0.75rem">
-                                <div class="d-flex">
-                                    <div>
-                                        <button class="nav-link active" id="home-tab-{{ $airport->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $airport->id }}" type="button" role="tab">METAR</button>
-                                    </div>
-                                    <div>
-                                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" data-taf-button="true" data-airport-icao="{{ $airport->icao }}" type="button" role="tab">TAF</button>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex hover-show-group">
-                                    <div class="hover-show secondary">
-                                        <a class="btn btn-sm float-end font-work-sans text-muted" href="https://windy.com/{{ $airport->icao }}" target="_blank">
-                                            <span class="d-none d-lg-inline d-xl-inline">Windy</span> <i class="fas fa-up-right-from-square"></i>
-                                        </a>
-                                    </div>
-                                    <div class="hover-show">
-                                        @php
-                                            $simbriefUrl = 'orig=' . ($direction == 'departure' ? $primaryAirport->icao : $airport->icao ) . '&dest=' . ($direction == 'departure' ? $airport->icao : $primaryAirport->icao);
-                                        @endphp
-                                        <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/options/custom?{{ $simbriefUrl }}" target="_blank">
-                                            <span class="d-none d-lg-inline d-xl-inline">SimBrief</span> <i class="fas fa-up-right-from-square"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div> --}}
-                            
-                            {{-- <div class="tab-content">
-                                {{-- METAR tab 
-                                <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $airport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHi\Z') }} {{ $airport->metar->metar }}</div>
-                                
-                                {{-- TAF tab 
-                                @isset($tafs[$airport->icao])
-                                    <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$airport->icao] }}</div>
-                                @else
-                                    <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">
-                                        <span class="spinner-border spinner-border-sm" role="status"></span>
-                                    </div>
-                                @endif
-                            </div> --}}
                         </td>
                     </tr>
 
@@ -291,9 +215,33 @@
 
         @include('layouts.legend')
     </div>
+
+    <div class="popup-container">
+        @foreach($suggestedAirports as $airport)
+            @include('search.parts.mapCard', ['airport' => $airport])
+        @endforeach
+    </div>
+
 @endsection
 
 @section('js')    
+
+    <script>
+        // When table row is howered, fetch the data-airport attribute and show the corresponding popup
+        document.querySelectorAll('tbody > tr').forEach(function(element) {
+            element.addEventListener('mouseover', function() {
+                var airport = this.dataset.airport
+
+                // Remove show class from all popups
+                document.querySelectorAll('.popup-container > div').forEach(function(element) {
+                    element.classList.remove('show')
+                });
+
+                document.querySelector('.popup-container').querySelector('[data-airport="' + airport + '"]').classList.add('show')
+            });
+        });
+    </script>
+
     <script>
         // Get the show more button and add on click event where it removes the class that hides the rows
         var showMoreBtn = document.querySelector('#showMoreBtn')
@@ -334,7 +282,6 @@
             
     </script>
 
-    @include('scripts.measures')
     @include('scripts.tooltip')
     @include('scripts.taf')
 @endsection

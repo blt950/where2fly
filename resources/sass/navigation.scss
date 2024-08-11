@@ -39,12 +39,18 @@
     }
 }
 
+/* Tabs */
 .nav-pills{
     .nav-link.active, .show>.nav-link{
         font-size: 0.9em;
         padding: 0.5em 1em;
         color: white;
         background: $secondary;
+
+        &.light {
+            color: black;
+            background: $gray-300;
+        }
     }
 
     .nav-link, .show>.nav-link{
@@ -52,5 +58,10 @@
         padding: 0.5em 1em;
         color: black;
         background: #f5f5f5;
+
+        &.light {
+            color: white;
+            background: #474037;
+        }
     }
 }

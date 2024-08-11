@@ -37,7 +37,7 @@ COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install PHP extension(s)
 COPY --from=mlocati/php-extension-installer:2.2.19 /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions pdo_mysql zip
+RUN install-php-extensions pdo_mysql zip intl
 
 # Install composer
 COPY --from=docker.io/library/composer:latest /usr/bin/composer /usr/bin/composer

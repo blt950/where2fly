@@ -133,7 +133,6 @@
 @endsection
 
 @section('js')
-    @include('scripts.measures')
     @include('scripts.tooltip')
     @include('scripts.taf')
 @endsection
