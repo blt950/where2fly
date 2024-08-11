@@ -7,25 +7,6 @@
     <h2>{{ $airport->name }}</h2>
 
     <dl class="font-kanit">
-        <dt>Airlines</dt>
-        <dd>
-            @if($airport->airlines->isNotEmpty())
-                @foreach($airport->airlines as $airline)
-
-                    @php $highlight = $airport->flights->where('airline_icao', $airline->icao_code)->contains(fn($flight) => $flight->aircrafts->whereIn('icao', $filterByAircrafts)->isNotEmpty()); @endphp
-                    <button type="button" class="airline-button {{ $highlight ? 'highlight' : null }}" data-toggle-flights="{{ $primaryAirport->icao . '-' . $airport->icao . '-' . $airline->icao_code }}">
-                        <img
-                            data-bs-toggle="tooltip"
-                            data-bs-title="See all {{ $airline->name }} flights"
-                            class="airline-logo" 
-                            src="{{ asset('img/airlines/'.$airline->iata_code.'.png') }}"
-                        >
-                    </button>
-                @endforeach
-            @else
-                N/A
-            @endif
-        </dd>
 
         <dt>Runways</dt>
         @foreach($airport->runways->where('closed', false) as $runway)
@@ -35,6 +16,10 @@
                 <span class="text-white-50">({{ Illuminate\Support\Number::format(round($runway->length_ft * .3048), locale: 'de') }}m)</span>
             </dd>
         @endforeach
+
+        
+
+        
 
         <dt>Weather</dt>
         <dd>
@@ -63,6 +48,24 @@
                 @endif
             </div>
         </dd>
+
+        @if($airport->airlines->isNotEmpty())
+            <dt>Airlines</dt>
+            <dd>
+                @foreach($airport->airlines as $airline)
+
+                    @php $highlight = $airport->flights->where('airline_icao', $airline->icao_code)->contains(fn($flight) => $flight->aircrafts->whereIn('icao', $filterByAircrafts)->isNotEmpty()); @endphp
+                    <button type="button" class="airline-button {{ $highlight ? 'highlight' : null }}" data-toggle-flights="{{ $primaryAirport->icao . '-' . $airport->icao . '-' . $airline->icao_code }}">
+                        <img
+                            data-bs-toggle="tooltip"
+                            data-bs-title="See all {{ $airline->name }} flights"
+                            class="airline-logo" 
+                            src="{{ asset('img/airlines/'.$airline->iata_code.'.png') }}"
+                        >
+                    </button>
+                @endforeach
+            </dd>
+        @endif
     </dl>
 
     <a class="btn btn-outline-primary btn-sm font-work-sans" href="https://windy.com/{{ $airport->icao }}" target="_blank">
