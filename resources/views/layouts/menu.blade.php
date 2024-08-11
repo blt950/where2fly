@@ -1,8 +1,10 @@
-<header class="mb-auto p-3">
+<header class="mb-auto">
     <div>
         <a href="{{ route('front') }}" class="float-none float-md-start text-decoration-none text-white">
             <h3 class="mb-0 logo">Where2Fly</h3>
         </a>
+
+        {{-- <img src="{{ asset('img/w2f.svg') }}" width="125"> --}}
     
         <nav class="nav nav-masthead justify-content-center float-md-end">
             <a class="nav-link {{ Route::is('front*') || Route::is('search*') ? 'active' : '' }}" href="{{ route('front') }}">Search</a>
@@ -13,8 +15,8 @@
         </nav>
     </div>
 </header>
-@if(Config::get('app.env') != "production")
+{{-- @if(Config::get('app.env') != "production")
     <span class="testbadge badge bg-warning ms-2 mt-2" role="alert">
         TEST
     </span>
-@endif
+@endif --}}
