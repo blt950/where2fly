@@ -149,7 +149,7 @@
                 @endif
 
                 @foreach($suggestedAirports as $airport)
-                    <tr class="{{ ($count > 10) ? 'showmore-hidden' : null }}" data-airport="{{ $airport->icao }}">
+                    <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-airport="{{ $airport->icao }}">
                         <th scope="row">{{ $count }}</th>
                         <td data-sort="{{ $airport->icao }}">
                             <div>

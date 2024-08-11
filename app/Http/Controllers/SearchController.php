@@ -235,7 +235,15 @@ class SearchController extends Controller
         }
 
         if($routes->count()){
-            return view('search.routes', compact('routes', 'departure', 'arrival'));
+
+            // Create an array with all airports coordinates
+            $airportCoordinates = [];
+            $airportCoordinates[$departure->icao]['lat'] = $departure->coordinates->latitude;
+            $airportCoordinates[$departure->icao]['lon'] = $departure->coordinates->longitude;
+            $airportCoordinates[$arrival->icao]['lat'] = $arrival->coordinates->latitude;
+            $airportCoordinates[$arrival->icao]['lon'] = $arrival->coordinates->longitude;
+
+            return view('search.routes', compact('routes', 'departure', 'arrival', 'airportCoordinates'));
         } else {
             return back()->withErrors(['routeNotFound' => 'No routes found between '.$departure->icao.' and '.$arrival->icao]);
         }

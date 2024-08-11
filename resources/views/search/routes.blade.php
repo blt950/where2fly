@@ -46,20 +46,24 @@
                 <table class="table table-hover text-start sortable asc">
                     <thead>
                         <tr>
-                            <th scope="col"">Flight</th>
+                            <th scope="col">Flight</th>
                             <th scope="col">Airline</th>
-                            <th scope="col">Aircraft</th>
-                            <th scope="col">Last seen</th>
-                            <th scope="col" class="no-sort"></th>
+                            <th scope="col" width="10%">Aircraft</th>
+                            <th scope="col" width="25%">Last seen</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($routes as $route)
                             <tr>
-                                <td data-sort="{{ $route->flight_icao }}">{{ $route->flight_icao }}</td>
+                                <td data-sort="{{ $route->flight_icao }}">
+                                    <strong>{{ $route->flight_icao }}</strong>
+                                    <a class="fs-6 text-info link-underline-info link-underline-opacity-25-hover font-work-sans ps-0" href="https://dispatch.simbrief.com/options/custom?orig={{ $departure->icao }}&dest={{ $arrival->icao }}&airline={{ $route->airline->icao_code }}&fltnum={{ $route->flight_number }}" target="_blank">
+                                        <span>SimBrief</span> <i class="fas fa-up-right-from-square"></i>
+                                    </a>
+                                </td>
                                 <td data-sort="{{ $route->airline->iata_code }}">
                                     <img
-                                        class="airline-logo" 
+                                        class="airline-logo small nopadding" 
                                         src="{{ asset('img/airlines/'.$route->airline->iata_code.'.png') }}"
                                     >
                                     {{ $route->airline->name }}
@@ -68,11 +72,6 @@
                                     {{ $route->aircrafts->pluck('icao')->sort()->implode(', ') }}
                                 </td>
                                 <td>{{ $route->last_seen_at->format('Y-m-d') }}</td>
-                                <td>
-                                    <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/options/custom?orig={{ $departure->icao }}&dest={{ $arrival->icao }}&airline={{ $route->airline->icao_code }}&fltnum={{ $route->flight_number }}" target="_blank">
-                                        <span>SimBrief</span> <i class="fas fa-up-right-from-square"></i>
-                                    </a>
-                                </td>
                             </tr>
                         @endforeach                        
                     </tbody>
@@ -87,4 +86,10 @@
 
 @section('js')
     @include('scripts.tooltip')
+    @include('scripts.map')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            drawRoute('{{ $departure->icao }}', '{{ $arrival->icao }}');
+        });
+    </script>
 @endsection

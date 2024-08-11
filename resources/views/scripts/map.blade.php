@@ -7,7 +7,7 @@
         var latlng1 = [];
         var latlng2 = [];
 
-        if('{{ $direction }}' == 'arrival'){
+        if('{{ isset($direction) ? $direction : 'null' }}' == 'arrival'){
             latlng1 = [airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon']];
             latlng2 = [airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']];
         } else {
@@ -78,7 +78,7 @@
         if(suggestion) { suggestion.remove() }
 
         var stepIcon = L.icon({
-            iconUrl: 'img/circle.svg',
+            iconUrl: '{{ asset('img/circle.svg') }}',
             iconSize: [12, 12],
         });
 

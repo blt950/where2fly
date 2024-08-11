@@ -24,6 +24,23 @@
     }
 }
 
+.airline-logo{
+    width: 34px;
+    height: 34px;
+
+    background: white;
+    padding: 2px;
+
+    &.small{
+        width: 24px;
+        height: 24px;
+    }
+
+    &.nopadding{
+        padding: 0;
+    }
+}
+
 #cookie-consent{
     position: fixed;
     bottom: .75rem;

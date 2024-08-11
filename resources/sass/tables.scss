@@ -21,7 +21,7 @@ table{
         min-width: 125px;
     }
 
-    tr {
+    tr.pointer {
         cursor: pointer;
 
         // Set th's under to color if .active is present
