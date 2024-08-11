@@ -21,6 +21,16 @@ table{
         min-width: 125px;
     }
 
+    tr {
+        cursor: pointer;
+
+        // Set th's under to color if .active is present
+
+        &.active th, &.active td{
+            background-color: #ffd8a8;
+        }
+    }
+
     tr .hover-show{
         height: 1.5rem;
         display: none;

@@ -7,6 +7,22 @@
     background: #000;
 }
 
+.leaflet-tooltip.airport {
+
+    font-family: 'Work Sans', sans-serif;
+    background-color: transparent;
+    border: transparent;
+    box-shadow: none;
+
+    color: $primary;
+    font-weight: normal;
+    font-size: 1rem;
+
+    &:before{
+        display: none;
+    }
+}
+
 .popup{
     &-container{
         height: calc(100vh - $header-height - $footer-height - 2rem);

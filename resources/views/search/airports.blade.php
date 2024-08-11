@@ -229,12 +229,12 @@
     <script>
         airportCoordinates = {!! json_encode($airportCoordinates) !!}    
 
-        var path = null;
-        function drawRoute(depAirport, arrAirport){
+        var routePath = null;
+        function drawRoute(primaryAirport, destinationAirport){
             var latlngs = [];
 
-            var latlng1 = [airportCoordinates[depAirport]['lat'], airportCoordinates[depAirport]['lon']],
-                latlng2 = [airportCoordinates[arrAirport]['lat'], airportCoordinates[arrAirport]['lon']];
+            var latlng1 = [airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']],
+                latlng2 = [airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon']];
 
             var offsetX = latlng2[1] - latlng1[1],
                 offsetY = latlng2[0] - latlng1[0];
@@ -259,43 +259,88 @@
                 weight: 2
             }
 
-            if(path) {
-                path.remove();
+            var durationBase = 200;
+            var duration = Math.sqrt(Math.log(r)) * durationBase;
+            // Scales the animation duration so that it's related to the line length
+            // (but such that the longest and shortest lines' durations are not too different).
+            // You may want to use a different scaling factor.
+            pathOptions.animate = {
+                duration: duration,
+                iterations: 1,
+                easing: 'ease-in-out',
+                direction: 'alternate'
             }
 
-            path = L.curve(
+            if(routePath) {
+                routePath.remove();
+            }
+
+            routePath = L.curve(
                 [
                     'M', latlng1,
                     'Q', midpointLatLng,
                         latlng2
-                ], pathOptions).addTo(map);
+                ], pathOptions)
 
-            map.flyToBounds(path.getBounds(), {duration: 0.25, maxZoom: 5});
+            map.flyToBounds(routePath.getBounds(), {duration: 0.2, maxZoom: 5});
+
+            drawLabel(primaryAirport, true);
+            drawLabel(destinationAirport);
+
+            setTimeout(() => {
+                routePath.addTo(map);
+            }, 200);
+            
+        }
+
+        var primary = null;
+        var suggestion = null;
+        function drawLabel(airport, isPrimary = false){
+
+            if(primary && isPrimary) { return }
+            if(suggestion) { suggestion.remove() }
+
+            var stepIcon = L.icon({
+                iconUrl: 'img/circle.svg',
+                iconSize: [12, 12],
+            });
+
+            var marker = new L.marker([airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon']], { icon:stepIcon});
+            marker.bindTooltip(airport, {permanent: true, direction: 'left', className: "airport"});
+            marker.addTo(map);
+
+            if(isPrimary){
+                primary = marker;
+            } else {
+                suggestion = marker;
+            }
         }
     </script>
 
     <script>
         // When table row is howered, fetch the data-airport attribute and show the corresponding popup
         document.querySelectorAll('tbody > tr').forEach(function(element) {
-            element.addEventListener('mouseover', function() {
-                var airport = this.dataset.airport
+            element.addEventListener('click', function() {
+                if(this.dataset && this.dataset.airport){
+                    var airport = this.dataset.airport
 
-                // Remove show class from all popups
-                document.querySelectorAll('.popup-container > div').forEach(function(element) {
-                    element.classList.remove('show')
-                    element.classList.remove('show-flights')
-                });
+                    // Add "active" to the clicked row
+                    document.querySelectorAll('tbody > tr').forEach(function(element) {
+                        element.classList.remove('active')
+                    });
+                    this.classList.add('active')
 
-                document.querySelector('.popup-container').querySelector('[data-airport="' + airport + '"]').classList.add('show')
 
-                // Draw a line between primary airport and the hovered airport in leafmap
-                drawRoute('{{ $primaryAirport->icao }}', airport)
+                    // Remove show class from all popups
+                    document.querySelectorAll('.popup-container > div').forEach(function(element) {
+                        element.classList.remove('show')
+                        element.classList.remove('show-flights')
+                    });
 
-                console.log("draw")
+                    document.querySelector('.popup-container').querySelector('[data-airport="' + airport + '"]').classList.add('show')
 
-                /*var polygon = L.polygon(latlngs, {color: '#d0c605'});
-                polygon.addTo(map);*/
-                
+                    drawRoute('{{ $primaryAirport->icao }}', airport)
+                }
             });
         });
 
