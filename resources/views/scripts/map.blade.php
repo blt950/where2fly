@@ -59,7 +59,7 @@
                     latlng2
             ], pathOptions)
 
-        map.flyToBounds(routePath.getBounds(), {duration: 0.2, maxZoom: 5});
+        map.flyToBounds(routePath.getBounds(), {duration: 0.2, maxZoom: 6});
 
         drawLabel(primaryAirport, true);
         drawLabel(destinationAirport);

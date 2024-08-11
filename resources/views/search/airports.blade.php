@@ -70,30 +70,32 @@
 
             <dl>
                 <dt>Runway<dt>
-                <dd class="rwy-feet">{{ $primaryAirport->longestRunway() }}</dd>
-                <dd class="rwy-meters text-muted">{{ round($primaryAirport->longestRunway()* .3048) }}</dd>
+                <dd class="rwy-feet">{{ Illuminate\Support\Number::format((int)$primaryAirport->longestRunway(), locale: 'de') }}ft</dd>
+                <dd class="rwy-meters text-muted">{{ Illuminate\Support\Number::format(round((int)$primaryAirport->longestRunway()* .3048), locale: 'de') }}m</dd>
             </dl>
 
-            <dl>
-                <dt>Conditions<dt>
-                @foreach($primaryAirport->scores as $score)
-                    @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
-                        <i 
-                            class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                            data-bs-html="true"
-                            data-bs-toggle="tooltip"
-                            data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                        ></i>
-                    @else
-                        <i 
-                            class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                            data-bs-html="true"
-                            data-bs-toggle="tooltip"
-                            data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                        ></i>
-                    @endif
-                @endforeach
-            </dl>
+            @if($primaryAirport->scores->count() > 0)
+                <dl>
+                    <dt>Conditions<dt>
+                    @foreach($primaryAirport->scores as $score)
+                        @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
+                            <i 
+                                class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                data-bs-html="true"
+                                data-bs-toggle="tooltip"
+                                data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
+                            ></i>
+                        @else
+                            <i 
+                                class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                data-bs-html="true"
+                                data-bs-toggle="tooltip"
+                                data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
+                            ></i>
+                        @endif
+                    @endforeach
+                </dl>
+            @endif
 
             <div class="w-100">
                 @if($primaryAirport->metar)
