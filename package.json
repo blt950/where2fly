@@ -5,6 +5,7 @@
         "build": "vite build"
     },
     "dependencies": {
+        "@elfalem/leaflet-curve": "^0.9.2",
         "@popperjs/core": "^2.11.6",
         "axios": "^0.27",
         "bootstrap": "^5.2.0",

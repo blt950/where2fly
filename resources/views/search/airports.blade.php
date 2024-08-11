@@ -239,6 +239,51 @@
                 });
 
                 document.querySelector('.popup-container').querySelector('[data-airport="' + airport + '"]').classList.add('show')
+
+                // Draw a line between primary airport and the hovered airport in leafmap
+
+                var latlngs = [];
+
+                var latlng1 = [{{ $primaryAirport->coordinates->latitude }}, {{ $primaryAirport->coordinates->longitude }}],
+                    latlng2 = [{{ $airport->coordinates->latitude }}, {{ $airport->coordinates->longitude }}];
+
+                var offsetX = latlng2[1] - latlng1[1],
+                    offsetY = latlng2[0] - latlng1[0];
+
+                var r = Math.sqrt( Math.pow(offsetX, 2) + Math.pow(offsetY, 2) ),
+                    theta = Math.atan2(offsetY, offsetX);
+
+                var thetaOffset = (3.14/10);
+
+                var r2 = (r/2)/(Math.cos(thetaOffset)),
+                    theta2 = theta + thetaOffset;
+
+                var midpointX = (r2 * Math.cos(theta2)) + latlng1[1],
+                    midpointY = (r2 * Math.sin(theta2)) + latlng1[0];
+
+                var midpointLatLng = [midpointY, midpointX];
+
+                latlngs.push(latlng1, midpointLatLng, latlng2);
+
+                var pathOptions = {
+                    color: 'rgba(208, 198, 5, 1)',
+                    weight: 2
+                }
+
+                var curvedPath = L.curve(
+                    [
+                        'M', latlng1,
+                        'Q', midpointLatLng,
+                            latlng2
+                    ], pathOptions).addTo(map);
+
+                map.flyToBounds(curvedPath.getBounds(), {duration: 0.5, maxZoom: 5});
+
+                console.log("draw")
+
+                /*var polygon = L.polygon(latlngs, {color: '#d0c605'});
+                polygon.addTo(map);*/
+                
             });
         });
 
