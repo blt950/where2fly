@@ -14,7 +14,11 @@
             range: {
                 'min': [-2000],
                 'max': [18000]
-            }
+            },
+            handleAttributes: [
+                { 'aria-label': 'lower' },
+                { 'aria-label': 'upper' },
+            ],
         });
         
         var elevationSliderText = document.getElementById('slider-elevation-text');
@@ -35,14 +39,18 @@
             range: {
                 'min': [0],
                 'max': [17000]
-            }
+            },
+            handleAttributes: [
+                { 'aria-label': 'lower' },
+                { 'aria-label': 'upper' },
+            ],
         });
         
         var rwySliderText = document.getElementById('slider-rwy-text');
         var rwyMinInput = document.getElementById('rwyLengthMin');
         var rwyMaxInput = document.getElementById('rwyLengthMax');
         rwySlider.noUiSlider.on('update', function (values) {
-            rwySliderText.innerHTML = Math.round(values[0]).toLocaleString(userLocale) + '-' + Math.round(values[1]).toLocaleString(userLocale) + 'ft <span class="text-white text-opacity-50"> | ' + Math.round(values[0]/3.2808).toLocaleString(userLocale) + '-' + Math.round(values[1]/3.2808).toLocaleString(userLocale) + 'm</span>';
+            rwySliderText.innerHTML = Math.round(values[0]).toLocaleString(userLocale) + '-' + Math.round(values[1]).toLocaleString(userLocale) + 'ft <span class="text-white text-opacity-75"> (' + Math.round(values[0]/3.2808).toLocaleString(userLocale) + '-' + Math.round(values[1]/3.2808).toLocaleString(userLocale) + 'm)</span>';
             rwyMinInput.value = Math.round(values[0])
             rwyMaxInput.value = Math.round(values[1])
         });
@@ -56,7 +64,11 @@
             range: {
                 'min': [0],
                 'max': [12]
-            }
+            },
+            handleAttributes: [
+                { 'aria-label': 'lower' },
+                { 'aria-label': 'upper' },
+            ],
         });
         
         var airtimeSliderText = document.getElementById('slider-airtime-text');

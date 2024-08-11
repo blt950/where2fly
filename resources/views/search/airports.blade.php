@@ -77,6 +77,7 @@
             @if($primaryAirport->scores->count() > 0)
                 <dl>
                     <dt>Conditions<dt>
+                    <dd>
                     @foreach($primaryAirport->scores as $score)
                         @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
                             <i 
@@ -94,6 +95,7 @@
                             ></i>
                         @endif
                     @endforeach
+                    </dd>
                 </dl>
             @endif
 

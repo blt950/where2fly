@@ -21,7 +21,6 @@
             .then(text => {
                 if(text == ""){
                     paneElement.innerHTML = 'Not Available'
-                    console.log("Emty")
                 } else {
                     var lines = text.match(/[^\r\n]+/g)
                     paneElement.innerHTML = lines[lines.length -1]
