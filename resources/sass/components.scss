@@ -24,6 +24,44 @@
     }
 }
 
+.popup{
+    &-container{
+        height: calc(100vh - $header-height - $footer-height - 2rem);
+        width: 400px;
+        
+        position: absolute;
+        left: calc($sidebar-width + 1rem);
+        top: calc($header-height + 1rem);
+        
+        display: flex;
+        z-index: 2000;
+
+        pointer-events: none;
+    }
+
+    &-card{
+        width: 100%;
+        height: fit-content;
+
+        padding: 1rem;
+        background: rgba($secondary, 0.5);
+
+        pointer-events: all;
+
+        dl{
+            font-size: 0.875rem;
+
+            dt{
+                margin-top: 1rem;
+            }
+
+            dd{
+                margin: 0;
+            }
+        }
+    }
+}
+
 #cookie-consent{
     position: fixed;
     bottom: .75rem;
