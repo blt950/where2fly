@@ -205,20 +205,20 @@
         </table>
 
         @include('parts.discord')
-
-        {{-- Let's draw all airline modals here --}}
-        @foreach($modalAirports as $airport)
-            @foreach($airport->airlines as $airline)
-                @include('search.parts.flightsModal', ['primaryAirport' => $primaryAirport, 'airport' => $airport, 'airline' => $airline, 'filterByAircrafts' => $filterByAircrafts])
-            @endforeach
-        @endforeach
-
         @include('layouts.legend')
     </div>
 
     <div class="popup-container">
+        {{-- Let's draw all airport cards here --}}
         @foreach($suggestedAirports as $airport)
             @include('search.parts.mapCard', ['airport' => $airport])
+        @endforeach
+
+        {{-- Let's draw all airline cards here --}}
+        @foreach($modalAirports as $airport)
+            @foreach($airport->airlines as $airline)
+                @include('search.parts.flightsCard', ['primaryAirport' => $primaryAirport, 'airport' => $airport, 'airline' => $airline, 'filterByAircrafts' => $filterByAircrafts])
+            @endforeach
         @endforeach
     </div>
 
@@ -235,9 +235,24 @@
                 // Remove show class from all popups
                 document.querySelectorAll('.popup-container > div').forEach(function(element) {
                     element.classList.remove('show')
+                    element.classList.remove('show-flights')
                 });
 
                 document.querySelector('.popup-container').querySelector('[data-airport="' + airport + '"]').classList.add('show')
+            });
+        });
+
+        // When airline button is called get data-toggle-flights and show the corresponding popup
+        document.querySelectorAll('[data-toggle-flights]').forEach(function(element) {
+            element.addEventListener('click', function() {
+                var airport = this.dataset.toggleFlights
+
+                // Remove show class from all popups
+                document.querySelectorAll('.popup-container > div').forEach(function(element) {
+                    element.classList.remove('show-flights')
+                });
+
+                document.querySelector('.popup-container').querySelector('[data-flights="' + airport + '"]').classList.add('show-flights')
             });
         });
     </script>
