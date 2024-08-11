@@ -1,4 +1,4 @@
-<footer class="mt-auto text-white-50 d-flex flex-row justify-content-between">
+<footer class="mt-auto text-white-50">
     <div>
         {{ Config('app.version') }}
         | Created by <a href="https://blt950.com" target="_blank" class="text-white-50 text-decoration-underline">Blt950</a>

@@ -69,9 +69,10 @@
 
 .testbadge{
     position: absolute;
-    left: 50vw;
-    top: 5px;
+    left: 1rem;
+    bottom: 1rem;
     font-size: 1rem;
+    z-index: 2000;
 }
 
 .badge{
