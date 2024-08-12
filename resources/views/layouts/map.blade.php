@@ -12,7 +12,7 @@
         var lat = 52.51843039016386;
         var lon = 13.395199187248908;
 
-        if(airportCoordinates !== undefined && Object.keys(airportCoordinates).length > 0){
+        if(primaryAirport !== null && airportCoordinates !== undefined && Object.keys(airportCoordinates).length > 0){
             lat = airportCoordinates[primaryAirport]['lat'];
             lon = airportCoordinates[primaryAirport]['lon'];
         }
