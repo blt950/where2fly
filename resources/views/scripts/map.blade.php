@@ -33,7 +33,8 @@
 
         var pathOptions = {
             color: 'rgba(208, 198, 5, 1)',
-            weight: 2
+            weight: 2,
+            renderer: L.svg()
         }
 
         var durationBase = 200;
@@ -65,6 +66,22 @@
         setTimeout(() => {
             routePath.addTo(map);
         }, 350);
+
+        // Redraw as canvas renderer to fish the line becoming dashes
+        setTimeout(() => {
+
+            routePath.remove();
+
+            pathOptions.renderer = L.canvas();
+            pathOptions.animate = [];
+
+            routePath = L.curve(
+                [
+                    'M', latlng1,
+                    'Q', midpointLatLng,
+                        latlng2
+                ], pathOptions).addTo(map);
+        }, 350 + duration);
         
     }
 
