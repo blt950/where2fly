@@ -229,6 +229,12 @@
 
 @section('js')    
     <script>
+
+        // When DOM is ready, draw the primary airport
+        document.addEventListener('DOMContentLoaded', function() {
+            drawLabel('{{ $primaryAirport->icao }}', true);
+        });
+
         // When table row is howered, fetch the data-airport attribute and show the corresponding popup
         document.querySelectorAll('tbody > tr').forEach(function(element) {
             element.addEventListener('click', function() {

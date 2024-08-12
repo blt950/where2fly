@@ -1,6 +1,4 @@
 <script>
-    airportCoordinates = {!! json_encode($airportCoordinates) !!}    
-
     var routePath = null;
     function drawRoute(primaryAirport, destinationAirport){
         var latlngs = [];
@@ -59,14 +57,14 @@
                     latlng2
             ], pathOptions)
 
-        map.flyToBounds(routePath.getBounds(), {duration: 0.2, maxZoom: 6});
+        map.flyToBounds(routePath.getBounds(), {duration: 0.35, maxZoom: 6});
 
         drawLabel(primaryAirport, true);
         drawLabel(destinationAirport);
 
         setTimeout(() => {
             routePath.addTo(map);
-        }, 200);
+        }, 350);
         
     }
 
