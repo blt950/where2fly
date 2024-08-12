@@ -22,8 +22,13 @@
             zoomControl: false,
         }).setView([lat, lon], 5);
 
+        map.setMaxBounds([
+            [-85, -250], // Southwest corner of the bounds
+            [85, 250]    // Northeast corner of the bounds
+        ]);
+
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-            minZoom: 2,
+            minZoom: 3,
             maxZoom: 17,
         }).addTo(map);
     });
