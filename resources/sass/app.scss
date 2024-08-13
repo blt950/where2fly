@@ -88,7 +88,7 @@ main{
     height: calc(100vh - $header-height);
     overflow-y: scroll;
 
-    background: #474037;
+    background: $secondary;
 
     @include media-breakpoint-down(md) { 
         width: 100%;
@@ -101,7 +101,7 @@ main{
 
     .title{
         padding: 1.5rem 1rem;
-        background: #61553f;
+        background: #202538;
 
         h1{
             margin: 0;
