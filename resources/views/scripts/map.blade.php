@@ -32,7 +32,7 @@
         latlngs.push(latlng1, midpointLatLng, latlng2);
 
         var pathOptions = {
-            color: 'rgba(208, 198, 5, 1)',
+            color: '#ddb81c',
             weight: 2,
             renderer: L.svg()
         }
