@@ -59,13 +59,13 @@
             ], pathOptions)
 
         map.flyToBounds(routePath.getBounds(), {duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [400, 350], paddingBottomRight: [75, 50]});
-
+        
         drawLabel(primaryAirport, true);
         drawLabel(destinationAirport);
 
-        setTimeout(() => {
+        map.once('moveend', function() {
             routePath.addTo(map);
-        }, 350);
+        });
 
         // Redraw as canvas renderer to fish the line becoming dashes
         setTimeout(() => {
