@@ -99,33 +99,17 @@
                 </dl>
             @endif
 
-            <div class="w-100">
-                @if($primaryAirport->metar)
-                    <div class="d-flex nav nav-pills" style="font-size: 0.75rem">
-                        <div>
-                            <button class="nav-link active" id="home-tab-{{ $primaryAirport->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $primaryAirport->id }}" type="button" role="tab">METAR</button>
-                        </div>
-                        <div>
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $primaryAirport->id }}" data-taf-button="true" data-airport-icao="{{ $primaryAirport->icao }}" type="button" role="tab">TAF</button>
-                        </div>
-                    </div>
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="metar-pane-{{ $primaryAirport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $primaryAirport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($primaryAirport->metar->last_update)->format('dHi\Z') }} {{ $primaryAirport->metar->metar }}</div>
-                        @isset($tafs[$primaryAirport->icao])
-                            <div class="tab-pane fade" id="taf-pane-{{ $primaryAirport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$primaryAirport->icao] }}</div>
-                        @else
-                            <div class="tab-pane fade" id="taf-pane-{{ $primaryAirport->id }}" role="tabpanel" tabindex="0">
-                                <span class="spinner-border spinner-border-sm" role="status"></span>
-                            </div>
-                        @endif
-                    </div>
-                @else
-                    <dl>
-                        <dt>METAR<dt>
-                        <dd class="text-info"><i class="fas fa-info-square"></i> No METAR available</dd>
-                    </dl>
-                @endif
-            </div>
+            <dl>
+                <dt>Weather<dt>
+                <dd>
+                    @if($primaryAirport->metar)
+                        {{ \Carbon\Carbon::parse($primaryAirport->metar->last_update)->format('dHi\Z') }} {{ $primaryAirport->metar->metar }}
+                        <span class="d-block mt-2"><button class="d-block btn btn-outline-secondary btn-sm" data-airport-icao="{{ $primaryAirport->icao }}" data-taf-button="true">Fetch TAF</button></span>
+                    @else
+                        <i class="fas fa-info-square"></i> No METAR available
+                    @endif
+                </dd>
+            </dl>
         </div>
 
         <h2>{{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>

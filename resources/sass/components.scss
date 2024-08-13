@@ -9,14 +9,14 @@
     justify-content: space-between;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: .5rem;
 
     @include media-breakpoint-between(xs, md) {
         overflow-x: scroll;
     }
     
     dt{
-        margin-bottom: 1.35rem;
+        margin-bottom: 0.25rem;
     }
 
     dd{

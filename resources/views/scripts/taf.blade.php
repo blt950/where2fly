@@ -3,13 +3,11 @@
     var tafButtons = document.querySelectorAll('[data-taf-button="true"]');
     tafButtons.forEach(element => {
         element.addEventListener('click', function() {
-            fetchTAF(element.getAttribute('data-airport-icao'), element.getAttribute('data-bs-target'))
+            fetchTAF(element.getAttribute('data-airport-icao'), element)
         });
     })
     
-    function fetchTAF(icao, pane){
-
-        paneElement = document.querySelector(pane)
+    function fetchTAF(icao, element){
 
         fetch('https://api.met.no/weatherapi/tafmetar/1.0/taf.txt?icao='+icao)
             .then(response => {
@@ -20,14 +18,14 @@
             })
             .then(text => {
                 if(text == ""){
-                    paneElement.innerHTML = 'Not Available'
+                    element.outerHTML = 'Not Available'
                 } else {
                     var lines = text.match(/[^\r\n]+/g)
-                    paneElement.innerHTML = lines[lines.length -1]
+                    element.outerHTML = lines[lines.length -1]
                 }
             })
             .catch(error => {
-                paneElement.innerHTML = 'TAF Fetch failed'
+                element.outerHTML = 'TAF Fetch failed'
             });
 
     }

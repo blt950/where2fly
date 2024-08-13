@@ -17,36 +17,14 @@
             </dd>
         @endforeach
 
-        
-
-        
-
-        <dt>Weather</dt>
+        <dt>METAR</dt>
         <dd>
-            <div class="d-flex justify-content-between nav nav-pills" style="font-size: 0.75rem">
-                <div class="d-flex">
-                    <div>
-                        <button class="nav-link light active" id="home-tab-{{ $airport->id }}" data-bs-toggle="tab" data-bs-target="#metar-pane-{{ $airport->id }}" type="button" role="tab">METAR</button>
-                    </div>
-                    <div>
-                        <button class="nav-link light" data-bs-toggle="tab" data-bs-target="#taf-pane-{{ $airport->id }}" data-taf-button="true" data-airport-icao="{{ $airport->icao }}" type="button" role="tab">TAF</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="tab-content">
-                {{-- METAR tab --}}
-                <div class="tab-pane fade show active" id="metar-pane-{{ $airport->id }}" role="tabpanel" aria-labelledby="home-tab-{{ $airport->id }}" tabindex="0">{{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHi\Z') }} {{ $airport->metar->metar }}</div>
-                
-                {{-- TAF tab --}}
-                @isset($tafs[$airport->icao])
-                    <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">{{ $tafs[$airport->icao] }}</div>
-                @else
-                    <div class="tab-pane fade" id="taf-pane-{{ $airport->id }}" role="tabpanel" tabindex="0">
-                        <span class="spinner-border spinner-border-sm" role="status"></span>
-                    </div>
-                @endif
-            </div>
+            {{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHi\Z') }} {{ $airport->metar->metar }}
+        </dd>
+
+        <dt>TAF</dt>
+        <dd>
+            <button class="btn btn-outline-light btn-sm" data-airport-icao="{{ $airport->icao }}" data-taf-button="true">Fetch</button>
         </dd>
 
         @if($airport->airlines && $airport->airlines->isNotEmpty())
