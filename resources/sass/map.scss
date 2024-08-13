@@ -31,6 +31,17 @@
     }
 }
 
+.leaflet-marker-icon.marker-cluster{
+    color: black;
+    background: $primary;
+    border-radius: 50%;
+
+    font-family: 'Work Sans', sans-serif;
+    font-size: 1rem;
+    text-align: center;
+    align-content: center;
+}
+
 .popup{
 
     &-container{

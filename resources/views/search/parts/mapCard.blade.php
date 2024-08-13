@@ -49,7 +49,7 @@
             </div>
         </dd>
 
-        @if($airport->airlines->isNotEmpty())
+        @if($airport->airlines && $airport->airlines->isNotEmpty())
             <dt>Airlines</dt>
             <dd>
                 @foreach($airport->airlines as $airline)
@@ -72,11 +72,26 @@
         Windy <i class="fas fa-up-right-from-square"></i>
     </a>
 
-    @php
-        $simbriefUrl = 'orig=' . ($direction == 'departure' ? $primaryAirport->icao : $airport->icao ) . '&dest=' . ($direction == 'departure' ? $airport->icao : $primaryAirport->icao);
-    @endphp
-    <a class="btn btn-outline-primary btn-sm font-work-sans" href="https://dispatch.simbrief.com/options/custom?{{ $simbriefUrl }}" target="_blank">
-        SimBrief <i class="fas fa-up-right-from-square"></i>
-    </a>
+    @isset($direction)
+        @php
+            $simbriefUrl = 'orig=' . ($direction == 'departure' ? $primaryAirport->icao : $airport->icao ) . '&dest=' . ($direction == 'departure' ? $airport->icao : $primaryAirport->icao);
+        @endphp
+        <a class="btn btn-outline-primary btn-sm font-work-sans" href="https://dispatch.simbrief.com/options/custom?{{ $simbriefUrl }}" target="_blank">
+            SimBrief <i class="fas fa-up-right-from-square"></i>
+        </a>
+    @else
+        <a class="btn btn-outline-primary btn-sm font-work-sans" href="{{ route('front', ['icao' => $airport->icao]) }}">
+            <span>Arrival</span> <i class="fas fa-search"></i>
+        </a>
+    
+        <a class="btn btn-outline-primary btn-sm font-work-sans" href="{{ route('front.departures', ['icao' => $airport->icao]) }}">
+            <span>Departure</span> <i class="fas fa-search"></i>
+        </a>
+
+        <a class="btn btn-outline-primary btn-sm font-work-sans" href="https://dispatch.simbrief.com/options/custom?dest={{ $airport->icao }}" target="_blank">
+            <span>SimBrief</span> <i class="fas fa-up-right-from-square"></i>
+        </a>
+
+    @endif
 
 </div>
