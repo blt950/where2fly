@@ -86,13 +86,12 @@ header {
 main{
     width: $sidebar-width;
     height: calc(100vh - $header-height);
-    overflow-y: scroll;
+    overflow-y: auto;
 
     background: $secondary;
 
     @include media-breakpoint-down(md) { 
         width: 100%;
-        overflow-y: auto;
     }
 
     h2{
