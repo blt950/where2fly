@@ -39,6 +39,7 @@
                             data-bs-title="See all {{ $airline->name }} flights"
                             class="airline-logo" 
                             src="{{ asset('img/airlines/'.$airline->iata_code.'.png') }}"
+                            alt="See all {{ $airline->name }} flights"
                         >
                     </button>
                 @endforeach

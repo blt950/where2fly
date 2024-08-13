@@ -1,5 +1,8 @@
 <!-- Leaflet -->
-<div id="map" class="map"></div>
+
+<aside>
+    <div id="map" class="map"></div>
+</aside>
 
 @vite('resources/js/leaflet.js')
 <script>
