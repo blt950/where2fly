@@ -32,48 +32,50 @@
             </span>
         </div>
             
-        <table class="table table-hover text-start sortable asc">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Airport</th>
-                    <th scope="col" width="10%">Conditions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $count = 1; @endphp
-                @foreach($airports as $airport)
-                    <tr class="pointer" data-airport="{{ $airport->icao }}">
-                        <th scope="row">{{ $count }}</th>
-                        <td data-sort="{{ $airport->icao }}">
-                            <div>
-                                <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
-                                {{ $airport->icao }}
-                            </div>
-                            {{ $airport->name }}
-                        </td>
-                        <td class="fs-5" data-sort="{{ $airport->scores->count() }}">
-                            @foreach($airport->scores as $score)
-                                <i 
-                                    class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                    data-bs-html="true"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                                ></i>
-                            @endforeach
-                        </td>
-                    </tr>
-                    @php $count++; @endphp
-                @endforeach
-                @if($count == 1)
+        <div class="table-responsive">
+            <table class="table table-hover text-start sortable asc">
+                <thead>
                     <tr>
-                        <th colspan="9" class="text-center text-danger">
-                            <i class="fas fa-exclamation-triangle"></i> No top airports available in this area, the weather is too nice
-                        </th>
+                        <th scope="col">#</th>
+                        <th scope="col">Airport</th>
+                        <th scope="col" width="10%">Conditions</th>
                     </tr>
-                @endif
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @php $count = 1; @endphp
+                    @foreach($airports as $airport)
+                        <tr class="pointer" data-airport="{{ $airport->icao }}">
+                            <th scope="row">{{ $count }}</th>
+                            <td data-sort="{{ $airport->icao }}">
+                                <div>
+                                    <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
+                                    {{ $airport->icao }}
+                                </div>
+                                {{ $airport->name }}
+                            </td>
+                            <td class="fs-5" data-sort="{{ $airport->scores->count() }}">
+                                @foreach($airport->scores as $score)
+                                    <i 
+                                        class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                        data-bs-html="true"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
+                                    ></i>
+                                @endforeach
+                            </td>
+                        </tr>
+                        @php $count++; @endphp
+                    @endforeach
+                    @if($count == 1)
+                        <tr>
+                            <th colspan="9" class="text-center text-danger">
+                                <i class="fas fa-exclamation-triangle"></i> No top airports available in this area, the weather is too nice
+                            </th>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="popup-container">

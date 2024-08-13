@@ -113,84 +113,86 @@
         </div>
 
         <h2>{{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>
-        <table class="table table-hover text-start sortable asc mb-0">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Airport</th>
-                    <th scope="col">Distance</th>
-                    <th scope="col">Time</th>
-                    <th scope="col">Conditions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $count = 1; @endphp
-
-                @if( !empty($sortByScores) && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
-
-                    <tr class="font-work-sans">
-                        <th class="text-center text-info fw-normal pt-3 pb-3" colspan="9">
-                            <i class="fas fa-info-square"></i> None of the airports in your range has interesting weather or ATC
-                        </th>
-                    </tr>
-
-                @endif
-
-                @foreach($suggestedAirports as $airport)
-                    <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-airport="{{ $airport->icao }}">
-                        <th scope="row">{{ $count }}</th>
-                        <td data-sort="{{ $airport->icao }}">
-                            <div>
-                                <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
-                                {{ $airport->icao }}
-                            </div>
-                            {{ $airport->name }}
-                        </td>
-                        <td data-sort="{{ $airport->distance }}">{{ $airport->distance }}nm</td>
-                        <td data-sort="{{ $airport->airtime }}">{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
-                        <td class="fs-5" data-sort={{ $airport->scores->count() }}>
-                            @foreach($airport->scores as $score)
-                                @if(isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1)
-                                    <i 
-                                        class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                        data-bs-html="true"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                                    ></i>
-                                @else
-                                    <i 
-                                        class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                        data-bs-html="true"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                                    ></i>
-                                @endif
-                            @endforeach
-                        </td>
-                    </tr>
-
-                    @php 
-                        $modalAirports->push($airport);
-                        $count++;
-                    @endphp
-                @endforeach
-
-                @if($count == 1)
+        <div class="table-responsive">
+            <table class="table table-hover text-start sortable asc mb-0">
+                <thead>
                     <tr>
-                        <th colspan="9" class="text-center text-danger">
-                            <i class="fas fa-exclamation-triangle"></i> No results matched your criteria
-                        </th>
+                        <th scope="col">#</th>
+                        <th scope="col">Airport</th>
+                        <th scope="col">Distance</th>
+                        <th scope="col">Time</th>
+                        <th scope="col">Conditions</th>
                     </tr>
-                @elseif($count > 10)
-                    <tr id="showMoreRow">
-                        <th colspan="10" class="text-center text-danger">
-                            <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
-                        </th>
-                    </tr>
-                @endif
-                
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @php $count = 1; @endphp
+
+                    @if( !empty($sortByScores) && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
+
+                        <tr class="font-work-sans">
+                            <th class="text-center text-info fw-normal pt-3 pb-3" colspan="9">
+                                <i class="fas fa-info-square"></i> None of the airports in your range has interesting weather or ATC
+                            </th>
+                        </tr>
+
+                    @endif
+
+                    @foreach($suggestedAirports as $airport)
+                        <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-airport="{{ $airport->icao }}">
+                            <th scope="row">{{ $count }}</th>
+                            <td data-sort="{{ $airport->icao }}">
+                                <div>
+                                    <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
+                                    {{ $airport->icao }}
+                                </div>
+                                {{ $airport->name }}
+                            </td>
+                            <td data-sort="{{ $airport->distance }}">{{ $airport->distance }}nm</td>
+                            <td data-sort="{{ $airport->airtime }}">{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
+                            <td class="fs-5" data-sort={{ $airport->scores->count() }}>
+                                @foreach($airport->scores as $score)
+                                    @if(isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1)
+                                        <i 
+                                            class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                            data-bs-html="true"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
+                                        ></i>
+                                    @else
+                                        <i 
+                                            class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                            data-bs-html="true"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
+                                        ></i>
+                                    @endif
+                                @endforeach
+                            </td>
+                        </tr>
+
+                        @php 
+                            $modalAirports->push($airport);
+                            $count++;
+                        @endphp
+                    @endforeach
+
+                    @if($count == 1)
+                        <tr>
+                            <th colspan="9" class="text-center text-danger">
+                                <i class="fas fa-exclamation-triangle"></i> No results matched your criteria
+                            </th>
+                        </tr>
+                    @elseif($count > 10)
+                        <tr id="showMoreRow">
+                            <th colspan="10" class="text-center text-danger">
+                                <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
+                            </th>
+                        </tr>
+                    @endif
+                    
+                </tbody>
+            </table>
+        </div>
 
         @include('layouts.legend')
     </div>
