@@ -89,7 +89,7 @@
     var suggestion = null;
     function drawLabel(airport, isPrimary = false){
 
-        if(primary) { primary.remove() }
+        if(primary && isPrimary) { return }
         if(suggestion) { suggestion.remove() }
 
         var stepIcon = L.icon({
