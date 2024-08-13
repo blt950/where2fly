@@ -9,7 +9,7 @@
     <dl class="font-kanit">
 
         <dt>Runways</dt>
-        @foreach($airport->runways->where('closed', false) as $runway)
+        @foreach($airport->runways->where('closed', false)->whereNotNull('length_ft') as $runway)
             <dd>
                 <strong>{{ $runway->le_ident }}/{{ $runway->he_ident }}:</strong>
                 {{ Illuminate\Support\Number::format($runway->length_ft, locale: 'de') }}ft
