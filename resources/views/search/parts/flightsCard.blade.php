@@ -1,7 +1,7 @@
 <div class="popup-card" data-flights="{{ $primaryAirport->icao . '-' . $airport->icao . '-' . $airline->icao_code }}">
 
     <h2>
-        <img class="airline-logo small" src="{{asset('img/airlines/'.$airline->iata_code.'.png')}}"> {{ $airline->name }} flights
+        <img class="airline-logo small" alt="{{ $airline->name }} logo" src="{{asset('img/airlines/'.$airline->iata_code.'.png')}}"> {{ $airline->name }} flights
     </h2>
     <ul class="list-unstyled">
         @foreach($airport->flights->where('airline_icao', $airline->icao_code)->sortByDesc('last_seen_at') as $flight)
