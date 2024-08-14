@@ -11,6 +11,8 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/nouislider.js',
                 'resources/js/multiselect.js',
+                'resources/js/map.js',
+                'resources/js/cards.js',
                 'resources/js/leaflet.js',
                 'resources/js/sortable.js',
             ],

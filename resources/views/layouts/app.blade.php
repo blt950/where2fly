@@ -16,7 +16,7 @@
                 </main>
 
                 <div>
-                    @include('layouts.map')
+                    @include('parts.map')
                     @include('layouts.footer')
                 </div>
             </div>

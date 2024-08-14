@@ -76,9 +76,7 @@
                         @endforeach                        
                     </tbody>
                 </table>
-
             </div>
-            @include('parts.discord')
         </div>
         @include('layouts.legend')
     </div>

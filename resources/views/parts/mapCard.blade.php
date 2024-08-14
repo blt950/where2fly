@@ -1,4 +1,4 @@
-<div class="popup-card" data-airport="{{ $airport->icao }}">
+<div class="popup-card" data-card-id="{{ $airport->icao }}">
 
     <div>
         <img class="flag border-0" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>

@@ -200,13 +200,13 @@
     <div class="popup-container">
         {{-- Let's draw all airport cards here --}}
         @foreach($suggestedAirports as $airport)
-            @include('search.parts.mapCard', ['airport' => $airport])
+            @include('parts.mapCard', ['airport' => $airport])
         @endforeach
 
         {{-- Let's draw all airline cards here --}}
         @foreach($modalAirports as $airport)
             @foreach($airport->airlines as $airline)
-                @include('search.parts.flightsCard', ['primaryAirport' => $primaryAirport, 'airport' => $airport, 'airline' => $airline, 'filterByAircrafts' => $filterByAircrafts])
+                @include('parts.flightsCard', ['primaryAirport' => $primaryAirport, 'airport' => $airport, 'airline' => $airline, 'filterByAircrafts' => $filterByAircrafts])
             @endforeach
         @endforeach
     </div>

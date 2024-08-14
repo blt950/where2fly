@@ -44,7 +44,7 @@
                 <tbody>
                     @php $count = 1; @endphp
                     @foreach($airports as $airport)
-                        <tr class="pointer" data-airport="{{ $airport->icao }}">
+                        <tr class="pointer" data-card-event="open" data-card-type="airport" data-card-for="{{ $airport->icao }}">
                             <th scope="row">{{ $count }}</th>
                             <td data-sort="{{ $airport->icao }}">
                                 <div>
@@ -82,73 +82,50 @@
     <div class="popup-container">
         {{-- Let's draw all airport cards here --}}
         @foreach($airports as $airport)
-            @include('search.parts.mapCard', ['airport' => $airport])
+            @include('parts.mapCard', ['airport' => $airport])
         @endforeach
     </div>
 
 @endsection
 
 @section('js')
+    @vite('resources/js/cards.js')
     <script>
-        // When DOM is ready, draw the primary airport
-        airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply click events on card related triggers
+            initCardEvents()
+        })
+    </script>
+
+    @vite('resources/js/map.js')
+    <script>
+        var airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
+        var focusContinent = {!! isset($continent) ? '\''.$continent.'\'' : 'null' !!};
+        var iconUrl = '{{ asset('img/circle.svg') }}';
 
         document.addEventListener('DOMContentLoaded', function() {
-            if(airportCoordinates !== undefined){
+            initMap(airportCoordinates, null, focusContinent);
 
-                var stepIcon = L.icon({
-                    iconUrl: '{{ asset('img/circle.svg') }}',
-                    iconSize: [12, 12],
-                });
-
-                var markers = L.markerClusterGroup({
-                    showCoverageOnHover: false,
-                });
-
-                Object.keys(airportCoordinates).forEach(airport => {
-                    var marker = new L.marker([airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon']], { icon:stepIcon }).on('click', function(){
-                        document.querySelectorAll('.popup-container > div').forEach(function(element) {
-                            element.classList.remove('show')
-                        });
-                        document.querySelector('.popup-container').querySelector('[data-airport="' + airport + '"]').classList.add('show')
-                    });
-                    marker.bindTooltip(airport, {permanent: true, direction: 'left', className: "airport"});
-                    markers.addLayer(marker);
-                });
-
-                map.addLayer(markers);
-            }
-        });
-    </script>
-
-    <script>
-
-        // When table row is howered, fetch the data-airport attribute and show the corresponding popup
-        document.querySelectorAll('tbody > tr').forEach(function(element) {
-            element.addEventListener('click', function() {
-                if(this.dataset && this.dataset.airport){
-                    var airport = this.dataset.airport
-
-                    // Add "active" to the clicked row
-                    document.querySelectorAll('tbody > tr').forEach(function(element) {
-                        element.classList.remove('active')
-                    });
-                    this.classList.add('active')
-
-
-                    // Remove show class from all popups
-                    document.querySelectorAll('.popup-container > div').forEach(function(element) {
-                        element.classList.remove('show')
-                    });
-
-                    map.panTo([airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon']], {animate: true, duration: 0.5, easeLinearity: 0.25});
-
-                    document.querySelector('.popup-container').querySelector('[data-airport="' + airport + '"]').classList.add('show')
+            // Draw the top airports
+            var cluster = createCluster();
+            Object.keys(airportCoordinates).forEach(airport => {
+                // Prepare the on click function
+                onClickFunc = () => {
+                    var card = document.querySelector('[data-card-id="' + airport + '"]')
+                    if(card){
+                        openCard(card, 'airport')
+                    }
                 }
-            });
-        });
 
+                // Draw the marker
+                drawMarker(airport, airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon'], iconUrl, onClickFunc, cluster);
+            })
+
+            // Add the cluster to the map
+            map.addLayer(cluster);
+        })
     </script>
+
     @include('scripts.tooltip')
     @include('scripts.taf')
     @include('scripts.map')
