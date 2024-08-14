@@ -9,6 +9,7 @@
 
     airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
     primaryAirport = {!! isset($primaryAirport) ? '\''.$primaryAirport->icao.'\'' : 'null' !!};
+    var continentFilter = {!! isset($continent) ? '\''.$continent.'\'' : 'null' !!}
 
     document.addEventListener('DOMContentLoaded', function () {
 
@@ -20,10 +21,32 @@
             lon = airportCoordinates[primaryAirport]['lon'];
         }
 
+        if(continentFilter !== undefined && continentFilter !== null){
+            if(continentFilter == 'AF'){
+                lat = 7.1881;
+                lon = 21.0936;
+            } else if(continentFilter == 'AS'){
+                lat = 34.0479;
+                lon = 100.6197;
+            } else if(continentFilter == 'EU'){
+                lat = 54.5260;
+                lon = 15.2551;
+            } else if(continentFilter == 'NA'){
+                lat = 37.0902;
+                lon = -95.7129;
+            } else if(continentFilter == 'OC'){
+                lat = -25.2744;
+                lon = 133.7751;
+            } else if(continentFilter == 'SA'){
+                lat = -8.7832;
+                lon = -55.4915;
+            }
+        }
+
         map = L.map('map', {
             attributionControl: false,
             zoomControl: false,
-        }).setView([lat, lon], 5);
+        }).setView([lat, lon], 4);
 
         map.setMaxBounds([
             [-85, -250], // Southwest corner of the bounds
