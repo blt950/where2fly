@@ -76,6 +76,7 @@
                 </tbody>
             </table>
         </div>
+        @include('layouts.legend')
     </div>
 
     <div class="popup-container">
@@ -85,7 +86,6 @@
         @endforeach
     </div>
 
-    @include('layouts.legend')
 @endsection
 
 @section('js')
