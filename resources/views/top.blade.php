@@ -106,7 +106,12 @@
                 });
 
                 Object.keys(airportCoordinates).forEach(airport => {
-                    var marker = new L.marker([airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon']], { icon:stepIcon });
+                    var marker = new L.marker([airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon']], { icon:stepIcon }).on('click', function(){
+                        document.querySelectorAll('.popup-container > div').forEach(function(element) {
+                            element.classList.remove('show')
+                        });
+                        document.querySelector('.popup-container').querySelector('[data-airport="' + airport + '"]').classList.add('show')
+                    });
                     marker.bindTooltip(airport, {permanent: true, direction: 'left', className: "airport"});
                     markers.addLayer(marker);
                 });
