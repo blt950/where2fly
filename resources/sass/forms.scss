@@ -1,6 +1,8 @@
 .form-control{
     height: 42px;
 
+    color: black;
+
     // Set font size to 16px on mobile
     @include media-breakpoint-down(sm) {
         font-size: 1rem;
