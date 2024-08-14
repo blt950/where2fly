@@ -58,7 +58,12 @@
                     latlng2
             ], pathOptions)
 
-        map.flyToBounds(routePath.getBounds(), {duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [400, 350], paddingBottomRight: [75, 50]});
+        // Adjust padding for desktop view
+        if(window.innerWidth >= 1024){
+            map.flyToBounds(routePath.getBounds(), {duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [400, 350], paddingBottomRight: [75, 50]});
+        } else {
+            map.flyToBounds(routePath.getBounds(), {duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [0, 350]});
+        }
         
         drawLabel(primaryAirport, true);
         drawLabel(destinationAirport);
