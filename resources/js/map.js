@@ -60,8 +60,8 @@ function initMap(airportCoordinates = null, focusAirport = null, focusContinent 
 
     // Set max bounds for map
     map.setMaxBounds([
-        [-85, -250], // Southwest corner of the bounds
-        [85, 250]    // Northeast corner of the bounds
+        [-85, -360], // Southwest corner of the bounds
+        [85, 360]    // Northeast corner of the bounds
     ]);
 
     // Set title provider and zoom restrictions
@@ -119,6 +119,23 @@ function drawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirection
     } else {
         latlng1 = [airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']]
         latlng2 = [airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon']]
+    }
+
+    // Adjust for shortest path across the International Date Line
+    if (Math.abs(latlng2[1] - latlng1[1]) > 180) {
+        if (latlng1[1] > 0) {
+            latlng1[1] -= 360;
+            if(primaryMarker) {
+                primaryMarker.remove()
+                primaryMarker = drawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']-360, iconUrl)
+            }
+        } else {
+            latlng1[1] += 360;
+            if(primaryMarker) {
+                primaryMarker.remove()
+                primaryMarker = drawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']+360, iconUrl)
+            }
+        }
     }
 
     // Path color and weight

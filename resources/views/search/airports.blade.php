@@ -232,7 +232,7 @@
 
             // Apply initial map
             initMap(airportCoordinates, focusAirport);
-            drawMarker(focusAirport, airportCoordinates[focusAirport]['lat'], airportCoordinates[focusAirport]['lon'], iconUrl);
+            primaryMarker = drawMarker(focusAirport, airportCoordinates[focusAirport]['lat'], airportCoordinates[focusAirport]['lon'], iconUrl);
         })
 
         document.addEventListener('cardOpened', function(event) {
