@@ -77,6 +77,7 @@ function initMap(airportCoordinates = null, focusAirport = null, focusContinent 
 function createCluster(){
     return L.markerClusterGroup({
         showCoverageOnHover: false,
+        maxClusterRadius: 40
     });
 }
 
