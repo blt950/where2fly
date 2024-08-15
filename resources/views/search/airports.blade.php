@@ -231,7 +231,7 @@
             initCardEvents()
 
             // Apply initial map
-            initMap(airportCoordinates);
+            initMap(airportCoordinates, focusAirport);
             drawMarker(focusAirport, airportCoordinates[focusAirport]['lat'], airportCoordinates[focusAirport]['lon'], iconUrl);
         })
 
