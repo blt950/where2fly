@@ -15,17 +15,22 @@ window.closeAllCards = closeAllCards;
 function initCardEvents(){
 
     // Fetch all elements with data-card-event="open" attribute and add click event
-
     document.querySelectorAll('[data-card-event="open"]').forEach(function(element){
         var cardId = element.getAttribute('data-card-for')
         var type = element.getAttribute('data-card-type')
         var card = document.querySelector('[data-card-id="'+cardId+'"]')
         element.addEventListener('click', function(){
-            if(type == 'airport'){
-                openCard(card, type, true);
-            } else {
-                openCard(card, type);
-            }
+            openCard(card, type);
+        });
+    });
+
+    // Fetch all elements with data-card-event="close" attribute and add click event
+    document.querySelectorAll('[data-card-event="close"]').forEach(function(element){
+        var cardId = element.getAttribute('data-card-for')
+        var type = element.getAttribute('data-card-type')
+        var card = document.querySelector('[data-card-id="'+cardId+'"]')
+        element.addEventListener('click', function(){
+            closeCard(card, type);
         });
     });
 
