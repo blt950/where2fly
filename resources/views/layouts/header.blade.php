@@ -24,7 +24,7 @@
 <meta property="og:title" content="Where2Fly">
 <meta property="og:description" content="Always struggling to decide where to fly? Find some suggested destinations with fun weather and coverage!">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://where2fly.today/img/bg.jpg">
+<meta property="og:image" content="https://where2fly.today/img/thumb.jpg">
 <meta property="og:image:type" content="image/jpg">
 
 {!! (config('app.env') != 'production') ? '<meta name="robots" content="noindex">' : null !!}
