@@ -192,12 +192,27 @@ function calcMidpointLatLng(latlng1, latlng2){
     var offsetX = latlng2[1] - latlng1[1],
         offsetY = latlng2[0] - latlng1[0];
 
-    var r = Math.sqrt( Math.pow(offsetX, 2) + Math.pow(offsetY, 2) ),
+    var r = Math.sqrt(Math.pow(offsetX, 2) + Math.pow(offsetY, 2)),
         theta = Math.atan2(offsetY, offsetX);
 
-    var thetaOffset = (3.14/10);
+    // Determine the thetaOffset based on the position relative to the equator and the east-west direction
+    var thetaOffset;
 
-    var r2 = (r/2)/(Math.cos(thetaOffset)),
+    if (latlng1[0] >= 0) { // Origin north of the equator
+        if (offsetX >= 0) { // Destination is eastbound
+            thetaOffset = (3.14 / 10); // Curve slightly to the right (default)
+        } else { // Destination is westbound
+            thetaOffset = -(3.14 / 10); // Curve slightly to the left
+        }
+    } else { // Origin south of the equator
+        if (offsetX >= 0) { // Destination is eastbound
+            thetaOffset = -(3.14 / 10); // Curve slightly to the left
+        } else { // Destination is westbound
+            thetaOffset = (3.14 / 10); // Curve slightly to the right
+        }
+    }
+
+    var r2 = (r / 2) / (Math.cos(thetaOffset)),
         theta2 = theta + thetaOffset;
 
     var midpointX = (r2 * Math.cos(theta2)) + latlng1[1],
