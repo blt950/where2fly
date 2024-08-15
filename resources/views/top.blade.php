@@ -124,6 +124,14 @@
             // Add the cluster to the map
             map.addLayer(cluster);
         })
+
+        document.addEventListener('cardOpened', function(event) {
+            var airport = event.detail.cardId;
+
+            // Focus on the airport
+            map.panTo([airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon']],
+                {animate: true, duration: 0.5, easeLinearity: 0.25});
+        })
     </script>
 
     @include('scripts.tooltip')

@@ -33,6 +33,15 @@ function openCard(element, type){
     // Add to openCards array
     if(openCards[type] === undefined){ openCards[type] = [] }
     openCards[type].push(element)
+
+    // Trigger an event
+    document.dispatchEvent(new CustomEvent('cardOpened', {
+        detail: {
+            type: type,
+            card: element,
+            cardId: element.getAttribute('data-card-id')
+        }
+    }))
 }
 
 /*
