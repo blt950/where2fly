@@ -15,9 +15,9 @@
             <h2 class="mb-0">v2.0.0</h2>
             <span class="badge ps-0 pb-2">2024-xx-xx</span>
             <ul>
-                <li>Created a whole new map view</li>
+                <li>New design with map view</li>
                 <li>Improved accessibility</li>
-                <li>Fixed TAF never working for departure airport</li>
+                <li>Fixed TAF not working for departure airport</li>
             </ul>
 
             <h2 class="mb-0">v1.8.0</h2>
