@@ -17,9 +17,15 @@
 <link rel="manifest" href="/img/favicon/site.webmanifest">
 <link rel="mask-icon" href="/img/favicon/safari-pinned-tab.svg" color="#5bbad5">
 <link rel="shortcut icon" href="/img/favicon/favicon.ico">
-<meta name="msapplication-TileColor" content="#da532c">
+<meta name="msapplication-TileColor" content="#ddb81c">
 <meta name="msapplication-config" content="/img/favicon/browserconfig.xml">
-<meta name="theme-color" content="#d0c605">
+<meta name="theme-color" content="#ddb81c">
+
+<meta property="og:title" content="Where2Fly">
+<meta property="og:description" content="Always struggling to decide where to fly? Find some suggested destinations with fun weather and coverage!">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://where2fly.today/img/bg.jpg">
+<meta property="og:image:type" content="image/jpg">
 
 {!! (config('app.env') != 'production') ? '<meta name="robots" content="noindex">' : null !!}
 
