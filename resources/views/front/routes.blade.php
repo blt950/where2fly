@@ -63,5 +63,5 @@
 @endsection
 
 @section('js')
-    @include('scripts.search')
+    @vite('resources/js/functions/searchForm.js')
 @endsection

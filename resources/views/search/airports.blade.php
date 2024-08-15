@@ -138,7 +138,7 @@
                     @endif
 
                     @foreach($suggestedAirports as $airport)
-                        <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-airport="{{ $airport->icao }}">
+                        <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-card-event="open" data-card-type="airport" data-card-for="{{ $airport->icao }}">
                             <th scope="row">{{ $count }}</th>
                             <td data-sort="{{ $airport->icao }}">
                                 <div>
@@ -213,96 +213,35 @@
 
 @endsection
 
-@section('js')    
-    <script>
+@section('js')
+    @vite('resources/js/functions/searchResults.js')
+    @vite('resources/js/functions/taf.js')
+    @vite('resources/js/functions/tooltip.js')
 
-        // When DOM is ready, draw the primary airport
+    @vite('resources/js/cards.js')
+    @vite('resources/js/map.js')
+    <script>
+        var airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
+        var focusAirport = '{{ $primaryAirport->icao }}';
+        var iconUrl = '{{ asset('img/circle.svg') }}';
+        var direction = '{{ $direction }}';
+
         document.addEventListener('DOMContentLoaded', function() {
-            drawLabel('{{ $primaryAirport->icao }}', true);
-        });
+            // Apply click events on card related triggers
+            initCardEvents()
 
-        // When table row is howered, fetch the data-airport attribute and show the corresponding popup
-        document.querySelectorAll('tbody > tr').forEach(function(element) {
-            element.addEventListener('click', function() {
-                if(this.dataset && this.dataset.airport){
-                    var airport = this.dataset.airport
+            // Apply initial map
+            initMap(airportCoordinates);
+            drawMarker(focusAirport, airportCoordinates[focusAirport]['lat'], airportCoordinates[focusAirport]['lon'], iconUrl);
+        })
 
-                    // Add "active" to the clicked row
-                    document.querySelectorAll('tbody > tr').forEach(function(element) {
-                        element.classList.remove('active')
-                    });
-                    this.classList.add('active')
+        document.addEventListener('cardOpened', function(event) {
+            if(event.detail.type == 'airport'){
+                var airport = event.detail.cardId;
+                drawRoute(focusAirport, airport, iconUrl, (direction == 'departure' ? false : true))
 
-
-                    // Remove show class from all popups
-                    document.querySelectorAll('.popup-container > div').forEach(function(element) {
-                        element.classList.remove('show')
-                        element.classList.remove('show-flights')
-                    });
-
-                    document.querySelector('.popup-container').querySelector('[data-airport="' + airport + '"]').classList.add('show')
-
-                    drawRoute('{{ $primaryAirport->icao }}', airport)
-                }
-            });
-        });
-
-        // When airline button is called get data-toggle-flights and show the corresponding popup
-        document.querySelectorAll('[data-toggle-flights]').forEach(function(element) {
-            element.addEventListener('click', function() {
-                var airport = this.dataset.toggleFlights
-
-                // Remove show class from all popups
-                document.querySelectorAll('.popup-container > div').forEach(function(element) {
-                    element.classList.remove('show-flights')
-                });
-
-                document.querySelector('.popup-container').querySelector('[data-flights="' + airport + '"]').classList.add('show-flights')
-            });
-        });
-    </script>
-
-    <script>
-        // Get the show more button and add on click event where it removes the class that hides the rows
-        var showMoreBtn = document.querySelector('#showMoreBtn')
-        if(showMoreBtn){
-            document.querySelector('#showMoreBtn').addEventListener('click', function() {
-                expandAllRows();
-            });
-
-            // Expand all rows if user has clicked the table thead th's
-            document.querySelectorAll('thead > tr > th').forEach(function(element) {
-                element.addEventListener('click', function() {
-                    expandAllRows();
-                });
-            });
-
-            // Function to expand all rows
-            var expanded = false
-            function expandAllRows() {
-                if(!expanded) {
-                    document.querySelectorAll('.showmore-hidden').forEach(function(element) {
-                        element.classList.remove('showmore-hidden');
-                    });
-                    document.querySelector('#showMoreRow').remove();
-                    expanded = true;
-                }
+                closeAllCards('flights')
             }
-        }
-
-        // Randomise spinner
-        var button = document.getElementById('randomiseBtn');
-        if(button){
-            button.addEventListener('click', function() {
-                button.setAttribute('disabled', '')
-                button.innerHTML = 'Randomise&nbsp;&nbsp;<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
-                document.getElementById('form').submit()
-            });
-        }
-            
+        })
     </script>
-
-    @include('scripts.map')
-    @include('scripts.tooltip')
-    @include('scripts.taf')
 @endsection

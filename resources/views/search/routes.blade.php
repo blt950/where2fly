@@ -83,11 +83,21 @@
 @endsection
 
 @section('js')
-    @include('scripts.tooltip')
-    @include('scripts.map')
+    @vite('resources/js/functions/tooltip.js')
+    @vite('resources/js/map.js')
     <script>
+        var airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
+        var departure = '{{ $departure->icao }}';
+        var arrival = '{{ $arrival->icao }}';
+        var iconUrl = '{{ asset('img/circle.svg') }}';
+
         document.addEventListener('DOMContentLoaded', function () {
-            drawRoute('{{ $departure->icao }}', '{{ $arrival->icao }}');
+            // Initialize the map
+            initMap(airportCoordinates);
+
+            // Draw the from airport
+            drawMarker(departure, airportCoordinates[departure]['lat'], airportCoordinates[departure]['lon'], iconUrl);
+            drawRoute(departure, arrival, iconUrl);
         });
     </script>
 @endsection

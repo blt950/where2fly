@@ -89,14 +89,11 @@
 @endsection
 
 @section('js')
-    @vite('resources/js/cards.js')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Apply click events on card related triggers
-            initCardEvents()
-        })
-    </script>
 
+    @vite('resources/js/functions/tooltip.js')
+    @vite('resources/js/functions/taf.js')
+
+    @vite('resources/js/cards.js')
     @vite('resources/js/map.js')
     <script>
         var airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
@@ -104,6 +101,10 @@
         var iconUrl = '{{ asset('img/circle.svg') }}';
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Apply click events on card related triggers
+            initCardEvents()
+
+            // Initialize the map
             initMap(airportCoordinates, null, focusContinent);
 
             // Draw the top airports
@@ -133,8 +134,4 @@
                 {animate: true, duration: 0.5, easeLinearity: 0.25});
         })
     </script>
-
-    @include('scripts.tooltip')
-    @include('scripts.taf')
-    @include('scripts.map')
 @endsection

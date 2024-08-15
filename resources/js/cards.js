@@ -1,5 +1,13 @@
+/*
+    ***
+    Card functions for Where2Fly
+    ***
+*/
+
 window.initCardEvents = initCardEvents;
 window.openCard = openCard;
+window.closeCard = closeCard;
+window.closeAllCards = closeAllCards;
 
 /*
 * Function to open a card
@@ -13,7 +21,11 @@ function initCardEvents(){
         var type = element.getAttribute('data-card-type')
         var card = document.querySelector('[data-card-id="'+cardId+'"]')
         element.addEventListener('click', function(){
-            openCard(card, type);
+            if(type == 'airport'){
+                openCard(card, type, true);
+            } else {
+                openCard(card, type);
+            }
         });
     });
 
@@ -24,7 +36,6 @@ function initCardEvents(){
 */
 var openCards = []
 function openCard(element, type){
-    // Close all cards of this type
     closeAllCards(type)
     
     // Show the new card
@@ -66,5 +77,5 @@ function closeAllCards(type){
         closeCard(card, type);
     });
 
-    openCards = [];
+    openCards[type] = [];
 }

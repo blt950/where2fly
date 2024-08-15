@@ -4,19 +4,20 @@
     ***
 */
 
-import L from 'leaflet';
+import L, { icon } from 'leaflet';
 import '@elfalem/leaflet-curve';
 import 'leaflet.markercluster';
 
 window.initMap = initMap;
 window.createCluster = createCluster;
 window.drawMarker = drawMarker;
+window.drawRoute = drawRoute;
 window.map = map;
 
 /*
 * Function to initialize the map
 */
-function initMap(airportCoordinates, focusAirport = null, focusContinent = null){
+function initMap(airportCoordinates = null, focusAirport = null, focusContinent = null){
 
     // Default lat and lon (Berlin, Europe)
     var lat = 52.51843039016386;
@@ -82,7 +83,7 @@ function createCluster(){
 /*
 * Function to draw a marker
 */
-function drawMarker(text, lat, lon, iconUrl, clickFunction = null, cluster = false){
+function drawMarker(text, lat, lon, iconUrl, clickFunction = ()=>{}, cluster = false){
 
     var icon = L.icon({
         iconUrl: iconUrl,
@@ -98,4 +99,108 @@ function drawMarker(text, lat, lon, iconUrl, clickFunction = null, cluster = fal
         marker.addTo(map);
     }
 
+    return marker
+
+}
+
+/*
+* Function to draw a route
+*/
+var routePath = null;
+var secondaryMarker = null;
+function drawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirection = false){
+    var latlng1 = [];
+    var latlng2 = [];
+
+    if(reverseDirection === true){
+        latlng1 = [airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon']]
+        latlng2 = [airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']]
+    } else {
+        latlng1 = [airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']]
+        latlng2 = [airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon']]
+    }
+
+    // Path color and weight
+    var pathOptions = {
+        color: '#ddb81c',
+        weight: 2,
+        renderer: L.svg()
+    }
+
+    // Calculations of midpoint and animation
+    var calcMidLatLng = calcMidpointLatLng(latlng1, latlng2)
+    var midpointLatLng = calcMidLatLng[0]
+    var r = calcMidLatLng[1]
+    var duration = Math.sqrt(Math.log(r)) * 200;
+
+    pathOptions.animate = {
+        duration: duration,
+        iterations: 1,
+        easing: 'ease-in-out',
+        direction: 'alternate',
+    }
+
+    // Delete old path and secondary marker if applicable
+    if(routePath) { routePath.remove() }
+    if(secondaryMarker) { secondaryMarker.remove() }
+
+    // Draw the destination airport marker
+    secondaryMarker = drawMarker(destinationAirport, airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon'], iconUrl)
+
+    // Draw the path
+    routePath = L.curve(
+        [
+            'M', latlng1,
+            'Q', midpointLatLng,
+                latlng2
+        ], pathOptions)
+
+    // Fly to bounds but with adjusted padding according to screen size
+    if(window.innerWidth >= 1024){
+        map.flyToBounds(routePath.getBounds(), {duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [400, 350], paddingBottomRight: [75, 50]});
+    } else {
+        map.flyToBounds(routePath.getBounds(), {duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [0, 350]});
+    }
+    
+    // Start drawing the path once map is done moving
+    map.once('moveend', function() {
+        routePath.addTo(map);
+    });
+
+    // Redraw route path with canvas renderer to fix the line becoming dashes
+    setTimeout(() => {
+
+        routePath.remove();
+
+        pathOptions.renderer = L.canvas();
+        pathOptions.animate = [];
+
+        routePath = L.curve(
+            [
+                'M', latlng1,
+                'Q', midpointLatLng,
+                    latlng2
+            ], pathOptions).addTo(map);
+    }, 350 + duration);
+}
+
+/*
+* Function to calculate the midpoint between two latlngs
+*/
+function calcMidpointLatLng(latlng1, latlng2){
+    var offsetX = latlng2[1] - latlng1[1],
+        offsetY = latlng2[0] - latlng1[0];
+
+    var r = Math.sqrt( Math.pow(offsetX, 2) + Math.pow(offsetY, 2) ),
+        theta = Math.atan2(offsetY, offsetX);
+
+    var thetaOffset = (3.14/10);
+
+    var r2 = (r/2)/(Math.cos(thetaOffset)),
+        theta2 = theta + thetaOffset;
+
+    var midpointX = (r2 * Math.cos(theta2)) + latlng1[1],
+        midpointY = (r2 * Math.sin(theta2)) + latlng1[0];
+
+    return [[midpointY, midpointX], r];
 }

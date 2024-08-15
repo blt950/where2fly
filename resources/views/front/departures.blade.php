@@ -14,11 +14,17 @@
 
     <div class="container">
         @include('front.parts.tabs')
-        @include('front.parts.airport.form', ['icao' => 'arrival', 'area' => 'origin'])
+        @include('front.parts.form', ['icao' => 'arrival', 'area' => 'origin'])
     </div>
 @endsection
 
 @section('js')
-    @include('scripts.search')
-    @include('front.parts.airport.script')
+    @vite('resources/js/functions/searchForm.js')
+    @vite('resources/js/map.js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        })
+    </script>
+    @include('front.parts.sliders')
 @endsection

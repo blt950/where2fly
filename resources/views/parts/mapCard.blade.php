@@ -33,7 +33,7 @@
                 @foreach($airport->airlines as $airline)
 
                     @php $highlight = $airport->flights->where('airline_icao', $airline->icao_code)->contains(fn($flight) => $flight->aircrafts->whereIn('icao', $filterByAircrafts)->isNotEmpty()); @endphp
-                    <button type="button" class="airline-button {{ $highlight ? 'highlight' : null }}" data-toggle-flights="{{ $primaryAirport->icao . '-' . $airport->icao . '-' . $airline->icao_code }}">
+                    <button type="button" class="airline-button {{ $highlight ? 'highlight' : null }}" data-card-event="open" data-card-type="flights" data-card-for="{{ $primaryAirport->icao . '-' . $airport->icao . '-' . $airline->icao_code }}">
                         <img
                             data-bs-toggle="tooltip"
                             data-bs-title="See all {{ $airline->name }} flights"
