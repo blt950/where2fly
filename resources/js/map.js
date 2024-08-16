@@ -174,10 +174,10 @@ function drawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirection
         ], pathOptions)
 
     // Fly to bounds but with adjusted padding according to screen size
-    if(window.innerWidth >= 1024){
+    if(window.innerWidth > 1920){
         map.flyToBounds(routePath.getBounds(), {duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [400, 350], paddingBottomRight: [75, 50]});
     } else {
-        map.flyToBounds(routePath.getBounds(), {duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [0, 350]});
+        map.flyToBounds(routePath.getBounds(), {duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [50, 350], paddingBottomRight: [50, 50]});
     }
     
     // Start drawing the path once map is done moving
