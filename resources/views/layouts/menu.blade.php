@@ -1,7 +1,7 @@
 <header class="mb-auto">
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <a href="{{ route('front') }}" class="navbar-brand">
-            <h3 class="mb-0 logo">Where2Fly</h3>
+        <a href="{{ route('front') }}" class="navbar-brand mb-0 logo">
+            Where2Fly
         </a>
         <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
