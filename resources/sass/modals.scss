@@ -1,0 +1,15 @@
+.modal{
+
+    &-title{
+        text-align: left;
+    }
+
+    &-content{
+        color: black;
+    }
+    
+    &-content ul li.highlight{
+        color: $success;
+        text-decoration: dotted underline;
+    }
+}

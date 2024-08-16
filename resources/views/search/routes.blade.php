@@ -11,14 +11,10 @@
 @vite('resources/js/sortable.js')
 @endsection
 
-<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    @include('layouts.title', ['title' => 'Search results'])
 
-    @include('layouts.menu')
-
-    <main>
-        <h1 class="mb-3 mt-5">Search Results</h1>
-
-        <div class="departure-container d-flex align-items-center">
+    <div class="container">
+        <div class="results-container d-flex align-items-center">
             <dl>
                 <dt>Departure<dt>
                 <dd>
@@ -50,21 +46,26 @@
                 <table class="table table-hover text-start sortable asc">
                     <thead>
                         <tr>
-                            <th scope="col"">Flight</th>
+                            <th scope="col">Flight</th>
                             <th scope="col">Airline</th>
-                            <th scope="col">Aircraft</th>
-                            <th scope="col">Last seen</th>
-                            <th scope="col" class="no-sort"></th>
+                            <th scope="col" width="10%">Aircraft</th>
+                            <th scope="col" width="25%">Last seen</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($routes as $route)
                             <tr>
-                                <td data-sort="{{ $route->flight_icao }}">{{ $route->flight_icao }}</td>
+                                <td data-sort="{{ $route->flight_icao }}">
+                                    <strong>{{ $route->flight_icao }}</strong>
+                                    <a class="fs-6 text-info link-underline-info link-underline-opacity-25-hover font-work-sans ps-0" href="https://dispatch.simbrief.com/options/custom?orig={{ $departure->icao }}&dest={{ $arrival->icao }}&airline={{ $route->airline->icao_code }}&fltnum={{ $route->flight_number }}" target="_blank">
+                                        <span>SimBrief</span> <i class="fas fa-up-right-from-square"></i>
+                                    </a>
+                                </td>
                                 <td data-sort="{{ $route->airline->iata_code }}">
                                     <img
-                                        class="airline-logo" 
+                                        class="airline-logo small nopadding" 
                                         src="{{ asset('img/airlines/'.$route->airline->iata_code.'.png') }}"
+                                        alt=""
                                     >
                                     {{ $route->airline->name }}
                                 </td>
@@ -72,28 +73,32 @@
                                     {{ $route->aircrafts->pluck('icao')->sort()->implode(', ') }}
                                 </td>
                                 <td>{{ $route->last_seen_at->format('Y-m-d') }}</td>
-                                <td>
-                                    <a class="btn btn-sm float-end font-work-sans text-muted" href="https://dispatch.simbrief.com/options/custom?orig={{ $departure->icao }}&dest={{ $arrival->icao }}&airline={{ $route->airline->icao_code }}&fltnum={{ $route->flight_number }}" target="_blank">
-                                        <span>SimBrief</span> <i class="fas fa-up-right-from-square"></i>
-                                    </a>
-                                </td>
                             </tr>
                         @endforeach                        
                     </tbody>
                 </table>
-
             </div>
-
-            @include('parts.discord')
         </div>
-
         @include('layouts.legend')
+    </div>
+@endsection
 
-    </main>
+@section('js')
+    @vite('resources/js/functions/tooltip.js')
+    @vite('resources/js/map.js')
+    <script>
+        var airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
+        var departure = '{{ $departure->icao }}';
+        var arrival = '{{ $arrival->icao }}';
+        var iconUrl = '{{ asset('img/circle.svg') }}';
 
-    @include('scripts.tooltip')
-  
-    @include('layouts.footer')
-</div>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize the map
+            initMap(airportCoordinates);
 
+            // Draw the from airport
+            drawMarker(departure, airportCoordinates[departure]['lat'], airportCoordinates[departure]['lon'], iconUrl);
+            drawRoute(departure, arrival, iconUrl);
+        });
+    </script>
 @endsection

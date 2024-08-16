@@ -9,6 +9,12 @@
 }
 
 @font-face {
+    font-family: 'Work Sans';
+    font-weight: 700;
+    src: url('../fonts/WorkSans-Bold.ttf') format('truetype');
+}
+
+@font-face {
     font-family: 'Kanit';
     font-weight: normal;
     src: url('../fonts/Kanit-Regular.ttf') format('truetype');
@@ -35,8 +41,19 @@
 @import "fontawesome/fontawesome.scss";
 @import "fontawesome/solid.scss";
 @import "fontawesome/brands.scss";
+@import "leaflet/dist/leaflet.css";
+@import "leaflet.markercluster/dist/MarkerCluster.css";
+@import "buttons.scss";
+@import "components.scss";
+@import "forms.scss";
+@import "filters.scss";
+@import "map.scss";
+@import "modals.scss";
 @import "multiselect.scss";
+@import "navigation.scss";
+@import "scrollbar.scss";
 @import "sortable.scss";
+@import "tables.scss";
 
 /*
 * Base structure
@@ -47,566 +64,86 @@ h1, h2, h3, h4, h5, h6, button, p, a, footer, .btn, .badge{
 }
 
 h1 {
-    text-align: center;
-
     @include media-breakpoint-down(sm) {
         font-size: calc(1.15rem + 1.2vw);
     }
 }
 
-.font-family-paragraph
-{
-    font-family: 'Work Sans', sans-serif; 
-}
-
 h2 {
-
-    &.front{
-        font-size: 1.2rem;
-        font-weight: normal;
-        @include media-breakpoint-between(sm, md) {
-            font-size: 1rem;
-        }
-        @include media-breakpoint-between(xs, sm) {
-            font-size: inherit;
-        }
-    }
-
-    &.top {
-        font-size: 1.1rem;
-        font-weight: normal;
-        @include media-breakpoint-between(xs, sm) {
-            font-size: inherit;
-        }
-    }
-
-}
-
-footer{
-    font-weight: 300;
-    text-align: center;
-}
-
-body {
-    background-image: url("/img/bg.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: 50% 50%;
-    background-attachment: fixed;
-}
-
-.testbadge{
-    position: absolute;
-    left: 0;
-    top: 0;
-    font-size: 1rem;
-}
-
-.form-control{
-    height: 42px;
-
-    // Set font size to 16px on mobile
-    @include media-breakpoint-down(sm) {
-        font-size: 1rem;
-    }
-}
-
-#submitBtn{
-    width: 100%;
-    height: 42px;
-
-    margin-top: 24px;
-}
-
-
-#filters{
-
-    .btn-group{
-        border-radius: 2px;
-
-        // Set fixed size for filter buttons
-        .btn-filter-width{
-            width: 32px;
-            height: 26px;
-            line-height: 17px;
-        }
-
-        .btn-filter-width-meteo{
-            min-width: 50px;
-            height: 26px;
-            line-height: 17px;
-        }
-
-        // Remove margin between buttons
-        & > :not(.btn-check:first-child) + .btn{
-            margin-left: 0px;
-        }
-
-        // Add hover effect
-        & .btn:hover{
-            background: rgba($gray-900, 0.2);
-        }
-    
-        // Tweak buttons
-        .btn{
-            color: #929292;
-            border: 0;
-
-            &-check.red:checked + .btn {
-                color: white;
-                background: rgba($danger, 0.5);
-            }
-
-            &-check.light:checked + .btn {
-                color: white;
-                background: var(--bs-btn-active-bg);
-            }
-
-            &-check.green:checked + .btn {
-                color: white;
-                background: rgba($success, 0.5);
-            }
-        }
-    }
-    
-}
-
-.filterbox{
-    background: rgba(0,0,0,0.2);
-    padding: 1rem 1rem;
-
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-
-    gap: 1rem;
-}
-
-#markdown{
-    padding: 2rem;
-    color: black;
-    background: white;
-    
-    @include media-breakpoint-between(xs, md) {
-        overflow-x: scroll;
-    }
-
-    h2{
-        padding-top: 1rem;
-        padding-bottom: 0.5rem;
-
-        &:not(:first-of-type){
-            border-top: 1px solid $gray-200;
-        }
-
-    }
-
-    h3, h4, h5, h6 {
-        padding-top: 0.5rem;
-    }
-
-    p{
-        font-family: "Work Sans", sans-serif;
-    }
-
-    code{
-        color: black;
-        background: #efefef;
-        padding: 2px 5px;
-    }
-
-    table{
-        width: 100%;
-
-        tr{
-            border-top: 1px solid $gray-200;
-        }
-
-        th,td{
-            padding-left: 1rem;
-        }
-    }
-}
-
-.hide-filters{
-    display: none;
-}
-
-.expandFilterGroup{
-
-    .divider{
-        width: 15vw;
-        height: 1px;
-        background: rgba($primary, 0.5);
-
-        margin-bottom: 3px;
-        display: inline-block;
-
-        @include media-breakpoint-down(sm) {
-            width: 8vw;
-        }
-    }
-
-    .button{
-        background: none;
-        color: white;
-        font-weight: 300;
-
-        padding: 0.5rem 1rem;
-        border: 1px solid rgba($primary, 0.5);
-
-        &:hover{
-            border: 1px solid rgba($primary, 1);
-        }
-    }
-}
-
-.bt{
-    border-top: 1px solid rgba($gray-500, 0.5);
-}
-
-.logo{
-    padding: .25rem 0;
-    border-bottom: .25rem solid $primary;
-
-    text-align: center;
-
-    &:hover{
-        border-bottom-color: #ffffff40;
-    }
-
-    @include media-breakpoint-between(xs, md) {
-        border-bottom-color: #ffffff40;
-        margin: auto;
-        width: 100%;
-        max-width: 280px;
-    }
-}
-
-table{
-
-    background: white;
-
-    // Add a bit margin to hide horizontal scroll fade
-    @include media-breakpoint-between(xs, md) {
-        background: transparent;
-        margin-right: 2rem;
-    }
-
-    th:first-child,td:first-child{
-        padding-left: 1rem !important;
-    }
-
-    th:last-child,td:last-child{
-        padding-right: 1rem !important;
-    }
-
-    .hover-show-group{
-        min-width: 125px;
-    }
-
-    tr .hover-show{
-        height: 1.5rem;
-        display: none;
-
-        @include media-breakpoint-between(sm, lg) {
-            display: block;
-        }
-
-        &.secondary{
-            @include media-breakpoint-between(sm, lg) {
-                display: none;
-            }
-        }
-    }
-
-    tr:hover .hover-show{
-        display: block;
-
-        &.secondary{
-            @include media-breakpoint-between(sm, lg) {
-                display: none;
-            }
-        }
-    }
-
-    tr.showmore-hidden{
-        display: none;
-    }
-
-    .airline-logo{
-        width: 18px;
-        height: 18px;
-    }
-
-}
-
-.scroll-fade{
-    position: relative;
-}
-
-.table-responsive{
-    background: transparent;
-
-    // Add horizontal scroll fade on smaller devices
-    @include media-breakpoint-between(xs, md) {
-        background: white;
-        &::after{
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 4rem;
-            background: linear-gradient(to right, rgba(255,255,255,0), #f9f9f9);
-            pointer-events: none;
-        }
-    }
-}
-
-
-.cover-container {
-    max-width: 72em;
-}
-
-main{
-
-    padding-bottom: 50px;
-
-    &.front{
-        padding-top: 200px;
-
-        @include media-breakpoint-between(xs, md) {
-            padding-top: 0;
-        }
-    }
-
-    @include media-breakpoint-between(xs, md) {
-        padding-right: .25rem!important;
-        padding-left: .25rem!important;
-    }
-}
-
-.departure-container{
-    padding: 1rem;
-    margin-bottom: 1rem;
-
-    color: black;
-    background: #fff;
-
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row;
-    gap: 1rem;
-
-    @include media-breakpoint-between(xs, md) {
-        overflow-x: scroll;
-    }
-    
-    dt{
-        margin-bottom: 1.35rem;
-    }
-
-    dd{
-        margin-bottom: 0;
-    }
-}
-
-#cookie-consent{
-    position: fixed;
-    bottom: .75rem;
-    right: .75rem;
-
-    color: $primary;
-    background-color: black;
-    border: 2px solid $primary;
-    width: 19rem;
-    max-width: 90%;
-    padding: 10px;
+    font-weight: normal;
 }
 
 .font-work-sans{
     font-family: 'Work Sans', sans-serif;
 }
 
-/*
-* Header
-*/
+header {
+    height: $header-height;
+    background: $secondary;
+}
 
-.nav-masthead{
-    .nav-link {
-        padding: .25rem 0;
-        font-weight: 400;
-        color: rgba(255, 255, 255, .5);
-        background-color: transparent;
-        border-bottom: .25rem solid transparent;
+main{
+    width: $sidebar-width;
+    height: calc(100vh - $header-height);
+    overflow-y: auto;
 
-        + .nav-link{
-            margin-left: 1rem;
+    background: $secondary;
+
+    @include media-breakpoint-down(lg) { 
+        width: $sidebar-width-min;
+    }
+
+    @include media-breakpoint-down(md) { 
+        width: 100%;
+    }
+
+    h2{
+        font-size: 1.5rem;
+    }
+
+    .title{
+        padding: 1.5rem 1rem;
+        background: #202538;
+
+        h1{
+            margin: 0;
         }
 
-        &:hover, &:focus{
-            border-bottom-color: rgba(255, 255, 255, .25);
+        h2{
+            font-size: 1rem;
         }
-    } 
-
-    .active{
-        color: #fff;
-        border-bottom-color: $primary;
-    }
-}
-
-/*
-* Modals
-*/
-
-.modal{
-
-    &-title{
-        text-align: left;
     }
 
-    &-content{
-        color: black;
-    }
-    
-    &-content ul li.highlight{
-        color: $success;
-        text-decoration: dotted underline;
-    }
-}
+    .container{
+        padding: 2rem 1rem 1rem 1rem;
 
-button {
-
-    padding-bottom: 2px;
-
-    &.airline-button{
-        background: transparent;
-        border: 0;
-        margin: 0;
-        padding: 0;
-    }
-
-    &.highlight{
-        border-bottom: 2px dotted $success;
-    }
-}
-
-/*
-* Components
-*/
-
-.badge{
-    font-weight: 400;
-}
-
-img.flag{
-    border: 1px solid #efefef;
-}
-
-.validation-error{
-    color: $primary;
-    background: black;
-    border: 2px solid $primary;
-    padding: .4rem .7rem;
-}
-
-
-.btn-primary{
-    box-shadow: 0px 0px 10px darken(#bdb517, 20%);
-    border: 2px solid darken($primary, 15%);
-    font-weight: 500;
-    
-    &:hover{
-        box-shadow: 0px 0px 6px #bdb517;
-        border: 2px solid darken($primary, 15%);
-    }
-}
-
-.btn-group{
-    &.filter{
-        width: 520px;
-
-        @include media-breakpoint-between(xs, sm) {
+        @include media-breakpoint-down(md) { 
+            margin: 0;
             width: 100%;
-        }
-
-        @include media-breakpoint-between(sm, md) {
-            width: 450px;
+            max-width: 100%;
         }
     }
 }
 
-.nav-pills{
-    .nav-link.active, .show>.nav-link{
-        font-size: 0.9em;
-        padding: 0.5em 1em;
-        color: white;
-        background: $secondary;
-    }
+footer{
+    height: $footer-height;
+    font-weight: 300;
+    text-align: center;
 
-    .nav-link, .show>.nav-link{
-        font-size: 0.9em;
-        padding: 0.5em 1em;
-        color: black;
-        background: #f5f5f5;
-    }
-}
+    padding: 2px .5rem 0 .5rem;
 
-#slider-airtime, #slider-rwy, #slider-elevation {
-    padding: 0 1rem;
-    
-    .noUi-connect {
-        background: #323121;
-    }
-    
-    .noUi-handle {
-        height: 26px;
-        top: -5px;
-        border-radius: 3px;
-        box-shadow: none;
-    }
-}
+    background: rgba($secondary, 0.75);
 
-.alert{
-    &.alert-discord{
-        background-color: #7289DA;
-        border-color: #7289DA;
-        text-align: center;
-    }
-}
+    position: absolute;
+    bottom: 0;
+    width: calc(100vw - $sidebar-width);
+    z-index: 2000;
 
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 
-/*
-* Overrides
-*/
-
-.form-check{
-    &.me-reduced{
-        margin-right: 0.6rem;
-    }
-}
-
-/* Make checkbox dark checkmark */ 
-.form-check-input{
-    &:checked[type=checkbox]{
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
-    }
-
-    &.exclusion{
-        &:checked[type=checkbox]{
-            background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyNy43LjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCAyMCAyMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMjAgMjA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOm5vbmU7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjM7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO30NCjwvc3R5bGU+DQo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNi45LDEyLjJsNi02Ii8+DQo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNi45LDYuMmw2LDYiLz4NCjwvc3ZnPg0K");
-        }
-    }
-
-    &:checked[type=radio] {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23000'/%3e%3c/svg%3e");
-    }
-}
-
-/* Make icons in checkbox labels equally wide */
-.form-check-label{
-    .fa{
-        width: 18px;
+    @include media-breakpoint-down(lg) { 
+        display: none;
     }
 }

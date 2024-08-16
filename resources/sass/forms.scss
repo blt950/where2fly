@@ -1,0 +1,74 @@
+.form-control{
+    height: 42px;
+
+    color: black;
+
+    // Set font size to 16px on mobile
+    @include media-breakpoint-down(sm) {
+        font-size: 1rem;
+    }
+}
+
+
+/*
+* Custom form checkboxes
+*/
+
+.form-check{
+    &.me-reduced{
+        margin-right: 0.6rem;
+    }
+}
+
+/* Make checkbox dark checkmark */ 
+.form-check-input{
+    &:checked[type=checkbox]{
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+
+    &.exclusion{
+        &:checked[type=checkbox]{
+            background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyNy43LjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCAyMCAyMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMjAgMjA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOm5vbmU7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjM7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO30NCjwvc3R5bGU+DQo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNi45LDEyLjJsNi02Ii8+DQo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNi45LDYuMmw2LDYiLz4NCjwvc3ZnPg0K");
+        }
+    }
+
+    &:checked[type=radio] {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23000'/%3e%3c/svg%3e");
+    }
+}
+
+/* Make icons in checkbox labels equally wide */
+.form-check-label{
+    .fa{
+        width: 18px;
+    }
+}
+
+/*
+* Other
+*/
+
+
+/* Make validation error own style */
+.validation-error{
+    color: $primary;
+    background: black;
+    border: 2px solid $primary;
+    padding: .4rem .7rem;
+}
+
+/* Make slider handles more visible */
+#slider-airtime, #slider-rwy, #slider-elevation {
+    padding: 0 1rem;
+    
+    .noUi-connect {
+        background: $secondary;
+    }
+    
+    .noUi-handle {
+        height: 26px;
+        top: -5px;
+        border-radius: 3px;
+        box-shadow: none;
+    }
+}

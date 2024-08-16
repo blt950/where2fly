@@ -1,0 +1,99 @@
+.logo{
+    padding: 0 0;
+    margin-top: -3px;
+    margin-left: 1rem;
+    border-bottom: .25rem solid $primary;
+
+    text-align: center;
+
+    font-family: "Kanit", "Work Sans", sans-serif;
+    font-size: 1.53125rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--bs-heading-color);
+
+    @include media-breakpoint-down(lg){
+        font-size: calc(1.15rem + 1.2vw);
+    }
+
+    &:hover{
+        border-bottom-color: #ffffff40;
+    }
+}
+
+.navbar{
+    height: $header-height;
+    padding: 0;
+
+    .navbar-nav{
+        .nav-link {
+            padding: 1rem 1rem 0.65rem 1rem;
+            font-weight: 400;
+            font-size: 1rem;
+            color: $gray-500;
+            background-color: transparent;
+    
+            border-bottom: .25rem solid transparent;
+            margin-left: 1rem;
+            margin-bottom: 2px;
+    
+            &:hover, &:focus{
+                border-bottom-color: rgba(255, 255, 255, .25);
+            }
+        } 
+    
+        .active{
+            color: #fff;
+            border-bottom-color: $primary;
+        }
+    }
+
+    .navbar-toggler{
+        border: 1px solid $gray;
+        margin-right: 1rem;
+
+        &:focus{
+            box-shadow: none;
+        }
+
+        // When class collapsed is not present, change the icon to an x
+        &:not(.collapsed) .navbar-toggler-icon{
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><path stroke="rgba(255, 255, 255, 0.5)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l22 22M4 26l22-22"/></svg>');
+        }
+    }
+
+    .navbar-collapse{
+        padding-right: 1rem;
+    }
+
+    .menu-overlay{
+        display: none;
+    }
+
+    @include media-breakpoint-down(lg){
+        .navbar-collapse{
+            position: absolute;
+            top: $header-height;
+            left: 0;
+
+            width: 100vw;
+            border: 1px solid $primary;
+            background: $secondary;
+            z-index: 900;
+        }
+
+        // Show overlay when menu is open
+        .navbar-collapse.show + .menu-overlay, .navbar-collapse.collapsing + .menu-overlay{
+            display: block;
+            position: fixed;
+            top: $header-height;
+            left: 0;
+            z-index: 10;
+    
+            width: 100vw;
+            height: 100vh;
+    
+            background: rgba(0, 0, 0, 0.8);
+        }
+    }
+}

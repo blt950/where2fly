@@ -23,8 +23,16 @@ class TopController extends Controller
         foreach($airportScores as $as){
             $airports->push($as->airport);
         }
+
+        $airportCoordinates = [];
+        foreach($airports as $airport){
+            $airportCoordinates[$airport->icao] = [
+                'lat' => $airport->coordinates->latitude,
+                'lon' => $airport->coordinates->longitude
+            ];
+        }
         
-        return view('top', compact('airports', 'continent', 'exclude'));
+        return view('top', compact('airports', 'airportCoordinates', 'continent', 'exclude'));
     }
 
 }
