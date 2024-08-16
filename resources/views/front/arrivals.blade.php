@@ -14,7 +14,7 @@
 
     <div class="container">
         @include('front.parts.tabs')
-        @include('front.parts.form', ['icao' => 'arrival', 'area' => 'origin'])
+        @include('front.parts.form', ['icao' => 'departure', 'area' => 'destination'])
     </div>
 @endsection
 

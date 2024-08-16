@@ -1,0 +1,36 @@
+button {
+    padding-bottom: 2px;
+
+    &.airline-button{
+        background: transparent;
+        border: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    &.highlight{
+        border-bottom: 2px dotted $success;
+    }
+}
+
+.btn-primary{
+    border: 2px solid darken($primary, 15%);
+    font-weight: 500;
+    
+    &:hover{
+        border: 2px solid darken($primary, 15%);
+    }
+}
+
+.btn-group{
+    &.filter{
+        width: 100%;
+    }
+}
+
+#submitBtn{
+    width: 100%;
+    height: 42px;
+
+    margin-top: 24px;
+}

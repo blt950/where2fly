@@ -1,0 +1,112 @@
+.map{
+    height: calc(100vh - $header-height);
+    width: calc(100vw - $sidebar-width);
+
+    @include media-breakpoint-down(lg) { 
+        width: calc(100vw - $sidebar-width-min);
+    }
+
+    @include media-breakpoint-down(md) { 
+        display: none;
+    }
+
+    &:focus-visible{
+        outline: none;
+    }
+}
+
+.leaflet-container {
+    background: #000;
+}
+
+.leaflet-tooltip.airport {
+
+    font-family: 'Work Sans', sans-serif;
+    background-color: transparent;
+    border: transparent;
+    box-shadow: none;
+
+    color: $primary;
+    font-weight: normal;
+    font-size: 1rem;
+
+    &:before{
+        display: none;
+    }
+}
+
+.leaflet-marker-icon.marker-cluster{
+    color: black;
+    background: $primary;
+    border-radius: 50%;
+
+    font-family: 'Work Sans', sans-serif;
+    font-size: 1rem;
+    text-align: center;
+    align-content: center;
+}
+
+.popup{
+
+    &-container{
+        height: calc(100vh - $header-height - $footer-height - 2rem);
+        width: 400px;
+        
+        position: absolute;
+        left: calc($sidebar-width + 1rem);
+        top: calc($header-height + 1rem);
+        
+        display: flex;
+        flex-flow: column;
+        gap: 1rem;
+
+        z-index: 500;
+        overflow-y: auto;
+        pointer-events: none;
+
+        @include media-breakpoint-down(lg) { 
+            width: 300px;
+            left: calc($sidebar-width-min + 1rem);
+        }
+
+        @include media-breakpoint-down(md) { 
+            display: none;
+        }
+    }
+
+    &-card{
+        width: 100%;
+        height: fit-content;
+
+        padding: 1rem;
+        background: rgba($secondary, 0.5);
+
+        pointer-events: all;
+        display: none;
+
+        @include media-breakpoint-down(md) { 
+            display: none;
+        }
+
+        &.show{
+            display: block;
+        }
+
+        &.show-flights{
+            display: block;
+        }
+
+        dl{
+            font-size: 0.875rem;
+
+            dt{
+                margin-top: 1rem;
+            }
+
+            dd{
+                margin: 0;
+            }
+        }
+
+    }
+}

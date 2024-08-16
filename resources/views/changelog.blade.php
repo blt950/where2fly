@@ -7,15 +7,19 @@
 @section('title', 'Changelog')
 @section('content')
 
-<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    @include('layouts.title', ['title' => 'Changelog'])
 
-    @include('layouts.menu')
-  
-    <main>
-        <h1 class="mb-3 mt-5">Changelog</h1>
-        
+    <div class="container">
         <div class="text-start">
             
+            <h2 class="mb-0">v2.0.0</h2>
+            <span class="badge ps-0 pb-2">2024-xx-xx</span>
+            <ul>
+                <li>New design with map view</li>
+                <li>Improved accessibility</li>
+                <li>Fixed TAF not working for departure airport</li>
+            </ul>
+
             <h2 class="mb-0">v1.8.0</h2>
             <span class="badge ps-0 pb-2">2024-07-27</span>
             <ul>
@@ -220,10 +224,14 @@
                 <li>Initial release</li>
             </ul>
         </div>
+    </div>
+@endsection
 
-    </main>
-  
-    @include('layouts.footer')
-</div>
-
+@section('js')
+    @vite('resources/js/map.js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        })
+    </script>
 @endsection

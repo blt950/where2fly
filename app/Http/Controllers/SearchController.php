@@ -24,7 +24,7 @@ class SearchController extends Controller
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
-        return view('front.index', compact('airlines', 'aircrafts', 'prefilledIcao'));
+        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao'));
     }
 
     /**
@@ -171,7 +171,19 @@ class SearchController extends Controller
             }
 
             if($suggestedAirports->count()){
-                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning'));
+
+                // Create an array with all airports coordinates
+                $airportCoordinates = [];
+                $airportCoordinates[$primaryAirport->icao]['lat'] = $primaryAirport->coordinates->latitude;
+                $airportCoordinates[$primaryAirport->icao]['lon'] = $primaryAirport->coordinates->longitude;
+
+                // Lets add the coordinates of the suggested airports
+                foreach($suggestedAirports as $airport){
+                    $airportCoordinates[$airport->icao]['lat'] = $airport->coordinates->latitude;
+                    $airportCoordinates[$airport->icao]['lon'] = $airport->coordinates->longitude;
+                }
+
+                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning'));
             }
 
         }
@@ -223,7 +235,15 @@ class SearchController extends Controller
         }
 
         if($routes->count()){
-            return view('search.routes', compact('routes', 'departure', 'arrival'));
+
+            // Create an array with all airports coordinates
+            $airportCoordinates = [];
+            $airportCoordinates[$departure->icao]['lat'] = $departure->coordinates->latitude;
+            $airportCoordinates[$departure->icao]['lon'] = $departure->coordinates->longitude;
+            $airportCoordinates[$arrival->icao]['lat'] = $arrival->coordinates->latitude;
+            $airportCoordinates[$arrival->icao]['lon'] = $arrival->coordinates->longitude;
+
+            return view('search.routes', compact('routes', 'departure', 'arrival', 'airportCoordinates'));
         } else {
             return back()->withErrors(['routeNotFound' => 'No routes found between '.$departure->icao.' and '.$arrival->icao]);
         }
