@@ -26,6 +26,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#" target="_blank">Donate</a>
                 </li>
+                @guest
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('register') }}">Register</a>
+                    </li>
+                @endguest
             </ul>
         </div>
         <div id="menu-overlay" class="menu-overlay d-md-none"></div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TopController;
 use Illuminate\Support\Facades\Route;
@@ -22,7 +23,11 @@ Route::get('/routes/', [SearchController::class, 'indexRouteSearch'])->name('fro
 Route::get('/top', [TopController::class, 'index'])->name('top');
 Route::get('/top/{continent}', [TopController::class, 'index'])->name('top.filtered');
 
+// User
+Route::post('/register', [LoginController::class, 'register'])->name('user.register');
+
 // Pure views
+Route::view('/register', 'register')->name('register');
 Route::view('/changelog', 'changelog')->name('changelog');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/api', 'api')->name('api');
