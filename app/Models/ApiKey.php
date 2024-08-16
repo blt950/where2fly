@@ -21,7 +21,8 @@ class ApiKey extends Model
         'disabled' => 'boolean',
     ];
 
-    public function logs(){
+    public function logs()
+    {
         return $this->hasMany(ApiLog::class);
     }
 }

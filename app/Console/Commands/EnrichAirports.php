@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Airport;
+use Illuminate\Console\Command;
 
 class EnrichAirports extends Command
 {
@@ -32,7 +32,7 @@ class EnrichAirports extends Command
         $processTime = microtime(true);
         $count = 0;
 
-        $this->info("> Enriching airports with additional data...");
+        $this->info('> Enriching airports with additional data...');
 
         // Create booleans of airports that has airline service
         $airlineQuery = Airport::where('scheduled_service', 'yes')->update(['w2f_scheduled_service' => true]);
@@ -54,7 +54,7 @@ class EnrichAirports extends Command
             ->update(['w2f_airforcebase' => true]);
 
         // Upsert the data
-        $this->info("> Done with enriching airports in ".round(microtime(true) - $processTime)." seconds!");
+        $this->info('> Done with enriching airports in ' . round(microtime(true) - $processTime) . ' seconds!');
 
         return Command::SUCCESS;
     }

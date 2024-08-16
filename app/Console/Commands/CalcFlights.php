@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Airline;
+use Illuminate\Console\Command;
 
 class CalcFlights extends Command
 {

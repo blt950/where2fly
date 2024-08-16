@@ -27,7 +27,7 @@ class ApiToken
             ], 401);
         }
 
-        if($key->disabled == true){
+        if ($key->disabled == true) {
             return response()->json([
                 'message' => 'Token temporarily suspended',
             ], 403);

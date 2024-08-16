@@ -30,20 +30,18 @@ class UpdateData extends Command
     {
 
         $processTime = microtime(true);
-        $this->info("> Calling all relevant data update commands...");
+        $this->info('> Calling all relevant data update commands...');
 
-        $this->info(">> fetch:metars running");
+        $this->info('>> fetch:metars running');
         Artisan::call('fetch:metars');
 
-        $this->info(">> fetch:vatsim running");
+        $this->info('>> fetch:vatsim running');
         Artisan::call('fetch:vatsim');
 
-        $this->info(">> calc:scores running");
+        $this->info('>> calc:scores running');
         Artisan::call('calc:scores');
 
-        $this->info("> Done with all commands in ".round(microtime(true) - $processTime)." seconds!");
+        $this->info('> Done with all commands in ' . round(microtime(true) - $processTime) . ' seconds!');
 
     }
 }
-
-

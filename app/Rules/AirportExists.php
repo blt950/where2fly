@@ -21,9 +21,9 @@ class AirportExists implements ValidationRule
             ->orWhere('local_code', $value)
             ->exists();
 
-        if(!$exists){
-            $fail("Airport not found.");
+        if (! $exists) {
+            $fail('Airport not found.');
         }
-        
+
     }
 }

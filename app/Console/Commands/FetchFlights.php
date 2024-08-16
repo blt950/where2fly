@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Support\Facades\Artisan;
 use App\Models\Flight;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 
 class FetchFlights extends Command
@@ -35,27 +35,28 @@ class FetchFlights extends Command
 
         $processTime = microtime(true);
         $touchCount = 0;
-        $this->info("Starting fetching of flights");
+        $this->info('Starting fetching of flights');
 
-        $response = Http::get('https://airlabs.co/api/v9/flights?api_key='.$apiKey);
-        if($response->successful()){
+        $response = Http::get('https://airlabs.co/api/v9/flights?api_key=' . $apiKey);
+        if ($response->successful()) {
             $flights = collect(json_decode($response->body(), false)->response);
-            
+
             $upsertData = [];
-            foreach($flights as $flight){
+            foreach ($flights as $flight) {
 
                 // Skip flights without data we need
-                if(
-                    !isset($flight->airline_icao) ||
-                    !isset($flight->airline_iata) ||
-                    !isset($flight->flight_number) ||
-                    !isset($flight->flight_icao) ||
-                    !isset($flight->dep_icao) ||
-                    !isset($flight->arr_icao) ||
-                    !isset($flight->aircraft_icao) ||
-                    !isset($flight->reg_number)
-                ){
+                if (
+                    ! isset($flight->airline_icao) ||
+                    ! isset($flight->airline_iata) ||
+                    ! isset($flight->flight_number) ||
+                    ! isset($flight->flight_icao) ||
+                    ! isset($flight->dep_icao) ||
+                    ! isset($flight->arr_icao) ||
+                    ! isset($flight->aircraft_icao) ||
+                    ! isset($flight->reg_number)
+                ) {
                     $this->info('Skipped flight due to missing data');
+
                     continue;
                 }
 
@@ -79,7 +80,7 @@ class FetchFlights extends Command
             }
 
             // Split array into chunks of 4000 each and upsert each individually
-            foreach(array_chunk($upsertData, 4000) as $chunk){
+            foreach (array_chunk($upsertData, 4000) as $chunk) {
                 Flight::upsert(
                     $chunk,
                     ['flight_icao', 'dep_icao', 'arr_icao'],
@@ -105,11 +106,11 @@ class FetchFlights extends Command
 
             // Enrich the flights with aircraft types
             Artisan::call('enrich:flights');
-            
+
         } else {
-            $this->error("Failed to fetch flights. API response not successful.");
+            $this->error('Failed to fetch flights. API response not successful.');
         }
 
-        $this->info("Touched ".$touchCount." flights finished in ".round(microtime(true) - $processTime)." seconds");
+        $this->info('Touched ' . $touchCount . ' flights finished in ' . round(microtime(true) - $processTime) . ' seconds');
     }
 }

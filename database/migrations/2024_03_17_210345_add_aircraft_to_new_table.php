@@ -2,8 +2,6 @@
 
 use App\Models\FlightAircraft;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -18,7 +16,7 @@ return new class extends Migration
         // Find and insert all aircraft to the new aircrafts table
         $aircrafts = FlightAircraft::select('aircraft_icao')->distinct()->get()->pluck('aircraft_icao');
         $upsertAircrafts = [];
-        foreach($aircrafts as $aircraft){
+        foreach ($aircrafts as $aircraft) {
             $upsertAircrafts[] = [
                 'icao' => $aircraft,
             ];
