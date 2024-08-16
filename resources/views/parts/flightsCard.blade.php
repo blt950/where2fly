@@ -5,7 +5,7 @@
             <img class="airline-logo small" alt="{{ $airline->name }} logo" src="{{asset('img/airlines/'.$airline->iata_code.'.png')}}"> {{ $airline->name }} flights
         </h2>
 
-        <button class="btn-close" data-card-event="close" data-card-type="flights" data-card-for="{{ $primaryAirport->icao . '-' . $airport->icao . '-' . $airline->icao_code }}"></button>
+        <button class="btn-close" aria-label="Close flights card" data-card-event="close" data-card-type="flights" data-card-for="{{ $primaryAirport->icao . '-' . $airport->icao . '-' . $airline->icao_code }}"></button>
     </div>
 
     <ul class="list-unstyled">
