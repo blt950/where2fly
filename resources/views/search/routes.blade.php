@@ -65,6 +65,7 @@
                                     <img
                                         class="airline-logo small nopadding" 
                                         src="{{ asset('img/airlines/'.$route->airline->iata_code.'.png') }}"
+                                        alt=""
                                     >
                                     {{ $route->airline->name }}
                                 </td>
