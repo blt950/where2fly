@@ -12,8 +12,8 @@
         @foreach($airport->runways->where('closed', false)->whereNotNull('length_ft') as $runway)
             <dd>
                 <strong>{{ $runway->le_ident }}/{{ $runway->he_ident }}:</strong>
-                {{ Illuminate\Support\Number::format($runway->length_ft, locale: 'de') }}ft
-                <span class="text-white-50">({{ Illuminate\Support\Number::format(round($runway->length_ft * .3048), locale: 'de') }}m)</span>
+                {{ Illuminate\Support\Number::format($runway->length_ft, locale: 'en_US') }}ft
+                <span class="text-white-50">({{ Illuminate\Support\Number::format(round($runway->length_ft * .3048), locale: 'en_US') }}m)</span>
             </dd>
         @endforeach
 

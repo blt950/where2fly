@@ -70,8 +70,8 @@
 
             <dl>
                 <dt>Runway<dt>
-                <dd class="rwy-feet">{{ Illuminate\Support\Number::format((int)$primaryAirport->longestRunway(), locale: 'de') }}ft</dd>
-                <dd class="rwy-meters text-opacity-50">{{ Illuminate\Support\Number::format(round((int)$primaryAirport->longestRunway()* .3048), locale: 'de') }}m</dd>
+                <dd class="rwy-feet">{{ Illuminate\Support\Number::format((int)$primaryAirport->longestRunway(), locale: 'en_US') }}ft</dd>
+                <dd class="rwy-meters text-opacity-50">{{ Illuminate\Support\Number::format(round((int)$primaryAirport->longestRunway()* .3048), locale: 'en_US') }}m</dd>
             </dl>
 
             @if($primaryAirport->scores->count() > 0)
