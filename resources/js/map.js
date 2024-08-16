@@ -125,15 +125,19 @@ function drawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirection
     if (Math.abs(latlng2[1] - latlng1[1]) > 180) {
         if (latlng1[1] > 0) {
             latlng1[1] -= 360;
+
+            // Remove the primary marker and redraw it with the adjusted lon
             if(primaryMarker) {
                 primaryMarker.remove()
-                primaryMarker = drawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']-360, iconUrl)
+                primaryMarker = drawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']-=360, iconUrl)
             }
         } else {
             latlng1[1] += 360;
+
+            // Remove the primary marker and redraw it with the adjusted lon
             if(primaryMarker) {
                 primaryMarker.remove()
-                primaryMarker = drawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']+360, iconUrl)
+                primaryMarker = drawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']+=360, iconUrl)
             }
         }
     }
