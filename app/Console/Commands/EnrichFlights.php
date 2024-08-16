@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Models\Aircraft;
 use App\Models\Flight;
 use App\Models\FlightAircraft;
-use App\Models\Aircraft;
+use Illuminate\Console\Command;
 
 class EnrichFlights extends Command
 {
@@ -48,7 +48,7 @@ class EnrichFlights extends Command
             'ZZZZ' => null,
         ];
 
-        foreach($flights as $flight){
+        foreach ($flights as $flight) {
             // Directly attempt to get the converted aircraft type or fallback to the original ICAO code.
             if (array_key_exists($flight->last_aircraft_icao, $aircraftTypeConversions) && $aircraftTypeConversions[$flight->last_aircraft_icao] == null) {
                 continue;
@@ -68,7 +68,7 @@ class EnrichFlights extends Command
         }
 
         // Split array into chunks of 4000 each and upsert each individually
-        foreach(array_chunk($upsertAircraftData, 4000) as $chunk){
+        foreach (array_chunk($upsertAircraftData, 4000) as $chunk) {
             FlightAircraft::upsert(
                 $chunk,
                 ['flight_id', 'aircraft_icao'],

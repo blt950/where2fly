@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Airline extends Model
 {
     use HasFactory;
+
     public $timestamps = false;
 
-    public function flights(){
+    public function flights()
+    {
         return $this->hasMany(Flight::class, 'airline_iata', 'iata_code');
     }
 }

@@ -2,37 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Request;
 use App\Models\AirportScore;
+use Illuminate\Http\Request;
 
 class TopController extends Controller
 {
- 
     /**
      * List all top airports
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function index(Request $request, string $continent = null){
+    public function index(Request $request, ?string $continent = null)
+    {
         $exclude = $request->input('exclude');
         $airportScores = AirportScore::getTopAirports($continent, null, 30, $exclude);
 
         $airports = collect();
-        foreach($airportScores as $as){
+        foreach ($airportScores as $as) {
             $airports->push($as->airport);
         }
 
         $airportCoordinates = [];
-        foreach($airports as $airport){
+        foreach ($airports as $airport) {
             $airportCoordinates[$airport->icao] = [
                 'lat' => $airport->coordinates->latitude,
-                'lon' => $airport->coordinates->longitude
+                'lon' => $airport->coordinates->longitude,
             ];
         }
-        
+
         return view('top', compact('airports', 'airportCoordinates', 'continent', 'exclude'));
     }
-
 }

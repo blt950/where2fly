@@ -2,23 +2,27 @@
 
 namespace App\Mixins;
 
-use App\Helpers\CalculationHelper;
 use App\Helpers\AirportFilterHelper;
-use App\Models\Airport;
+use App\Helpers\CalculationHelper;
 use App\Models\Airline;
+use App\Models\Airport;
 use App\Models\Flight;
 
-class CollectionAirportFilter{
+class CollectionAirportFilter
+{
+    public function sortByScores()
+    {
+        return function ($sortByScores) {
 
-    public function sortByScores(){
-        return function($sortByScores){
-
-            $result = $this->sort(function($a, $b) use ($sortByScores){
+            $result = $this->sort(function ($a, $b) use ($sortByScores) {
 
                 $aScore = $a->scores->whereIn('reason', $sortByScores)->count();
                 $bScore = $b->scores->whereIn('reason', $sortByScores)->count();
 
-                if($aScore == $bScore) return 0;
+                if ($aScore == $bScore) {
+                    return 0;
+                }
+
                 return ($aScore > $bScore) ? -1 : 1;
 
             });
@@ -27,14 +31,14 @@ class CollectionAirportFilter{
         };
     }
 
-
-    public function filterWithCriteria(){
-        return function($departureAirport, $codeletter, $airtimeMin, $airtimeMax, $requiredMetcon = null, $runwayLengthMin = null, $runwayLengthMax = null, $airportElevationMin = null, $airportElevationMax = null ){
+    public function filterWithCriteria()
+    {
+        return function ($departureAirport, $codeletter, $airtimeMin, $airtimeMax, $requiredMetcon = null, $runwayLengthMin = null, $runwayLengthMax = null, $airportElevationMin = null, $airportElevationMax = null) {
 
             $returnCollection = $this
-                ->transform(function ($arrivalAirport) use ($departureAirport, $codeletter){
+                ->transform(function ($arrivalAirport) use ($departureAirport, $codeletter) {
                     // Insert the calculated distance and airtime into the collection
-                    $distance = distance($departureAirport->latitude_deg, $departureAirport->longitude_deg, $arrivalAirport->latitude_deg, $arrivalAirport->longitude_deg, "N");
+                    $distance = distance($departureAirport->latitude_deg, $departureAirport->longitude_deg, $arrivalAirport->latitude_deg, $arrivalAirport->longitude_deg, 'N');
                     $arrivalAirport->distance = round($distance);
 
                     $airtime = ($distance / CalculationHelper::aircraftNmPerHour($codeletter)) + CalculationHelper::timeClimbDescend($codeletter);
@@ -51,8 +55,9 @@ class CollectionAirportFilter{
 
     }
 
-    public function addFlights(){
-        return function(Airport $airport, $direction){
+    public function addFlights()
+    {
+        return function (Airport $airport, $direction) {
 
             $arrivalAirportColumn = $direction === 'departure' ? 'airport_dep_id' : 'airport_arr_id';
             $departureAirportColumn = $direction === 'departure' ? 'airport_arr_id' : 'airport_dep_id';
@@ -61,19 +66,18 @@ class CollectionAirportFilter{
             $flights = Flight::where('seen_counter', '>', 3)->where($arrivalAirportColumn, $airport->id)->whereIn($departureAirportColumn, $this->pluck('id'))->with('aircrafts')->orderBy('last_seen_at')->get();
             $airlines = Airline::whereIn('icao_code', $flights->pluck('airline_icao')->unique())->get();
 
-            foreach($this as $airport){
+            foreach ($this as $airport) {
                 $airport->flights = $flights->where($departureAirportColumn, $airport->id);
                 $airport->airlines = $airlines->whereIn('icao_code', $airport->flights->pluck('airline_icao')->unique());
 
                 // Replace * with '' in all airline iata codes
-                foreach($airport->airlines as $airline){
+                foreach ($airport->airlines as $airline) {
                     $airline->iata_code = str_replace('*', '', $airline->iata_code);
                 }
             }
 
             return $this;
 
-        };  
+        };
     }
-
 }

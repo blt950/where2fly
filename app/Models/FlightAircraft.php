@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class FlightAircraft extends Model
 {
     use HasFactory;
+
     public $timestamps = false;
 
     protected $casts = [
@@ -15,11 +16,13 @@ class FlightAircraft extends Model
         'first_seen_at' => 'datetime',
     ];
 
-    public function flight(){
+    public function flight()
+    {
         return $this->belongsTo(Flight::class, 'flight_id');
     }
 
-    public function aircraft(){
+    public function aircraft()
+    {
         return $this->belongsTo(Aircraft::class, 'aircraft_id');
     }
 }

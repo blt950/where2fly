@@ -16,10 +16,10 @@ class FlightDirection implements ValidationRule
     {
 
         $allowedDirection = [
-            0, 'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'
+            0, 'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW',
         ];
 
-        if(!in_array($value, $allowedDirection)){
+        if (! in_array($value, $allowedDirection)) {
             $fail("The $attribute is invalid.");
         }
     }

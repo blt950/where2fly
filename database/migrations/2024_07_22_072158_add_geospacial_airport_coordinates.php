@@ -1,12 +1,11 @@
 <?php
 
+use App\Models\Airport;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use MatanYadaev\EloquentSpatial\Objects\Point;
 use MatanYadaev\EloquentSpatial\Enums\Srid;
-
-use App\Models\Airport;
+use MatanYadaev\EloquentSpatial\Objects\Point;
 
 return new class extends Migration
 {

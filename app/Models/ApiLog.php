@@ -10,9 +10,11 @@ class ApiLog extends Model
     use HasFactory;
 
     public $timestamps = false;
+
     public $fillable = ['api_key_id', 'time'];
 
-    public function key(){
+    public function key()
+    {
         return $this->belongsTo(ApiKey::class);
     }
 }

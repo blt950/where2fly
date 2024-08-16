@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
 use App\Models\Airport;
 use App\Models\Controller;
 use App\Models\Event;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 
 class FetchVatsim extends Command
 {
@@ -32,29 +32,29 @@ class FetchVatsim extends Command
      */
     public function handle()
     {
-        
+
         $processTime = microtime(true);
-        $this->info("Fetching and processing VATSIM data");
+        $this->info('Fetching and processing VATSIM data');
 
         $upsertEventsData = [];
         $upsertControllerData = [];
 
-        $this->info("Fetching events...");
+        $this->info('Fetching events...');
         $response = Http::get('https://my.vatsim.net/api/v2/events/latest');
-        if($response->successful()){
+        if ($response->successful()) {
             $data = json_decode($response->body(), false)->data;
 
-            foreach($data as $event){
-                if(count($event->airports)){
-                    foreach($event->airports as $airport){
+            foreach ($data as $event) {
+                if (count($event->airports)) {
+                    foreach ($event->airports as $airport) {
 
                         $a = Airport::where('icao', $airport->icao)->get();
-                        if($a->count() && $a->first()->id){
+                        if ($a->count() && $a->first()->id) {
                             $upsertEventsData[] = [
                                 'airport_id' => $a->first()->id,
                                 'event' => $event->name,
                                 'start_time' => Carbon::parse($event->start_time),
-                                'end_time' => Carbon::parse($event->end_time)
+                                'end_time' => Carbon::parse($event->end_time),
                             ];
                         }
 
@@ -64,14 +64,14 @@ class FetchVatsim extends Command
 
         }
 
-        $this->info("Fetching online controllers...");
+        $this->info('Fetching online controllers...');
         $response = Http::get('https://data.vatsim.net/v3/vatsim-data.json');
-        if($response->successful()){
+        if ($response->successful()) {
             $data = json_decode($response->body(), false)->controllers;
 
-            foreach($data as $controller){
+            foreach ($data as $controller) {
                 $callsign = substr($controller->callsign, 0, 4);
-                if(Airport::where('icao', $callsign)->get()->count()){
+                if (Airport::where('icao', $callsign)->get()->count()) {
                     $upsertControllerData[] = [
                         'airport_id' => Airport::where('icao', $callsign)->get()->first()->id,
                         'callsign' => $controller->callsign,
@@ -84,7 +84,7 @@ class FetchVatsim extends Command
 
         Event::truncate();
         Event::upsert(
-            $upsertEventsData, 
+            $upsertEventsData,
             ['airport_id'],
             ['event', 'start_time', 'end_time']
         );
@@ -96,7 +96,7 @@ class FetchVatsim extends Command
             ['callsign', 'logon_time']
         );
 
-        $this->info("Fetching of VATSIM data finished in ".round(microtime(true) - $processTime)." seconds");
+        $this->info('Fetching of VATSIM data finished in ' . round(microtime(true) - $processTime) . ' seconds');
 
     }
 }
