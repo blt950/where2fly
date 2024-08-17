@@ -28,6 +28,7 @@ Route::post('/register', [LoginController::class, 'register'])->name('user.regis
 
 // Pure views
 Route::view('/register', 'register')->name('register');
+Route::view('/login', 'login')->name('login');
 Route::view('/changelog', 'changelog')->name('changelog');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/api', 'api')->name('api');
