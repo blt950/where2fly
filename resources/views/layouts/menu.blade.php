@@ -41,11 +41,17 @@
                     </li>
                 @endguest
                 @auth
-                    <li class="nav-item">
-                        <a class="nav-link {{ Route::is('user.account') ? 'active' : '' }}" href="{{ route('user.account') }}">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ Route::is('user.account') ? 'active' : '' }}" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-user"></i>&nbsp;
                             {{ Auth::user()->username }}
                         </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{{ route('user.account') }}">Settings</a></li>
+                            <li><a class="dropdown-item" href="#">My Lists</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('user.logout') }}">Logout</a></li>
+                        </ul>
                     </li>
                 @endauth
             </ul>

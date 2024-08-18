@@ -6,7 +6,7 @@
     @include('layouts.title', ['title' => 'Account Settings'])
 
     <div class="container">
-        <a href="{{ route('user.logout') }}" class="btn btn-primary">Log out</a>
+        
     </div>
 @endsection
 

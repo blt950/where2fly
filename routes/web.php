@@ -4,7 +4,6 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TopController;
 use App\Http\Controllers\UserController;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,45 +17,59 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [SearchController::class, 'indexArrivalSearch'])->name('front');
-Route::get('/departures/', [SearchController::class, 'indexDepartureSearch'])->name('front.departures');
-Route::get('/routes/', [SearchController::class, 'indexRouteSearch'])->name('front.routes');
+// SearchController
+Route::controller(SearchController::class)->group(function () {
+    Route::get('/', 'indexArrivalSearch')->name('front');
+    Route::get('/departures/', 'indexDepartureSearch')->name('front.departures');
+    Route::get('/routes/', 'indexRouteSearch')->name('front.routes');
 
-Route::get('/top', [TopController::class, 'index'])->name('top');
-Route::get('/top/{continent}', [TopController::class, 'index'])->name('top.filtered');
+    Route::post('/search', 'search')->name('search');
+    Route::post('/search/routes', 'searchRoutes')->name('search.routes');
+});
+
+// TopController
+Route::controller(TopController::class)->group(function () {
+    Route::get('/top', 'index')->name('top');
+    Route::get('/top/{continent}', 'index')->name('top.filtered');
+});
 
 // User account related routes
-Route::view('/login', 'account.login')->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('user.login');
+Route::controller(LoginController::class)->group(function () {
+    Route::get('/register', 'showRegister')->name('register');
+    Route::get('/login', 'showLogin')->name('login');
+    Route::post('/login', 'login')->name('user.login');
+    Route::get('/logout', 'logout')->name('user.logout');
+});
 
-Route::view('/register', 'account.register')->name('register');
-Route::post('/register', [UserController::class, 'store'])->name('user.register');
+// User account related routes
+Route::controller(UserController::class)->group(function () {
 
-Route::view('/account/reset', 'account.reset')->name('user.reset');
-Route::post('/account/reset', [UserController::class, 'reset'])->middleware('guest')->name('user.reset.post');
-Route::view('/reset-password', 'account.reset-password')->name('password.request');
-Route::post('/reset-password', [UserController::class, 'showResetForm'])->middleware('guest')->name('password.update');
-Route::get('/reset-password/{token}', function (string $token) {
-    return view('account.reset-password', ['token' => $token]);
-})->middleware('guest')->name('password.reset');
+    // Account creation
+    Route::post('/register', 'store')->middleware('guest')->name('user.register');
 
-Route::get('/logout', [LoginController::class, 'logout'])->name('user.logout');
-Route::get('/account', [UserController::class, 'show'])->middleware(['auth', 'verified'])->name('user.account');
+    // Account reset
+    Route::middleware('guest')->group(function () {
+        Route::get('/account/recovery', 'resetRequestForm')->name('account.recovery');
+        Route::post('/account/recovery', 'resetSendLink');
+        Route::get('/account/recovery/reset/{token}', 'resetForm')->name('password.reset');
+        Route::post('/account/recovery/reset/', 'resetPassword')->name('password.update');
+    });
 
-// User account related emails
-Route::get('/email/verify', [UserController::class, 'verificationNotice'])->name('verification.notice');
-Route::get('/email/verify/{id}/{hash}', [UserController::class, 'verifyEmail'])->middleware(['auth', 'signed'])->name('verification.verify');
-Route::post('/email/verification-notification', [UserController::class, 'veryEmailResend'])->middleware(['auth', 'throttle:1,10'])->name('verification.send');
+    // Account pages
+    Route::get('/account', 'show')->middleware(['auth', 'verified'])->name('user.account');
+
+    // Account email verification
+    Route::get('/account/verify/', 'verifyNotice')->name('verification.notice');
+    Route::get('/account/verify/{id}/{hash}', 'verifyEmail')->middleware(['auth', 'signed'])->name('verification.verify');
+    Route::post('/account/verify/resend', 'verifyResendEmail')->middleware(['auth', 'throttle:1,10'])->name('verification.send');
+});
 
 // Pure views
 Route::view('/changelog', 'changelog')->name('changelog');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/api', 'api')->name('api');
 
-// Search
-Route::post('/search', [SearchController::class, 'search'])->name('search');
-Route::post('/search/routes', [SearchController::class, 'searchRoutes'])->name('search.routes');
-
+// Redirects
 Route::get('/search', function () {
     return redirect(route('front'));
 });

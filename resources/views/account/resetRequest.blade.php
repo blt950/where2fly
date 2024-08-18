@@ -8,7 +8,7 @@
     <div class="container">
         <div>
 
-            <form method="POST" action="{{ route('user.reset') }}">
+            <form method="POST" action="{{ route('account.recovery') }}">
                 @csrf
                 <div class="mb-3">
                     <label for="email">Email address</label>

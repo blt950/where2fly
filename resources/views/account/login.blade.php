@@ -36,7 +36,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <a href="{{ route('user.reset') }}">Forgot your password?</a>
+                    <a href="{{ route('account.recovery') }}">Forgot your password?</a>
                 </div>
 
                 <button class="btn btn-primary">LOGIN</button>
