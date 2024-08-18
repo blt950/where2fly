@@ -34,7 +34,7 @@
                             @csrf
                             <button class="btn btn-sm btn-primary text-secondary mt-2">Resend verification email</button>
                         </form>
-                        <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-primary mt-2 text-secondary">Log out</a>
+                        <a href="{{ route('user.logout') }}" class="btn btn-sm btn-outline-primary mt-2 text-secondary">Log out</a>
                     </div>
                     @endif
 

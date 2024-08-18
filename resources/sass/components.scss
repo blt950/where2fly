@@ -56,6 +56,9 @@
 
 /* Add Discord colored alert */
 .alert{
+
+    margin-bottom: 0;
+
     &.alert-discord{
         background-color: #7289DA;
         border-color: #7289DA;

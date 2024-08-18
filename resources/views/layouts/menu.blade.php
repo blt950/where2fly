@@ -42,7 +42,7 @@
                 @endguest
                 @auth
                     <li class="nav-item">
-                        <a class="nav-link {{ Route::is('profile') ? 'active' : '' }}" href="{{ route('profile') }}">
+                        <a class="nav-link {{ Route::is('user.account') ? 'active' : '' }}" href="{{ route('user.account') }}">
                             <i class="fas fa-user"></i>&nbsp;
                             {{ Auth::user()->username }}
                         </a>

@@ -27,6 +27,9 @@ class Kernel extends ConsoleKernel
         // Backups
         $schedule->command('backup:clean')->daily()->at('01:00');
         $schedule->command('backup:run')->daily()->at('01:30');
+
+        // Clear expired password reset tokens
+        $schedule->command('auth:clear-resets')->everyFifteenMinutes();
     }
 
     /**

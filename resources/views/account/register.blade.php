@@ -23,7 +23,7 @@
                     <span>Preferences to view only the simulators relevant for you</span>
                 </div>
                 <div>
-                    <i class="fas fa-check-circle text-success"></i>
+                    <i class="fas fa-circle-dashed text-success"></i>
                     <span>Save searches (Coming soon)</span>
                 </div>
             </div>

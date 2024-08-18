@@ -4,7 +4,7 @@
 <meta name="description" content="Login into your account">
 @endsection
 
-@section('title', 'Register')
+@section('title', 'Login')
 @section('content')
 
     @include('layouts.title', ['title' => 'Login'])
@@ -12,13 +12,15 @@
     <div class="container">
         <div>
             <div class="mb-4">
-                <a href="{{ route('register') }}">Don't have an account? Register here</a>
+                <a href="{{ route('register') }}">
+                    <i class="fas fa-user-plus"></i> Don't have an account? Register here
+                </a>
             </div>
 
-            <form method="POST" action="{{ route('user.register') }}">
+            <form method="POST" action="{{ route('user.login') }}">
                 @csrf
                 <div class="mb-3">
-                    <label for="username">Username or e-mail</label>
+                    <label for="username">Username</label>
                     <input name="username" type="text" class="form-control" id="username" value="{{ old('username') }}">
                     @error('username')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -31,6 +33,10 @@
                     @error('password')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
+                </div>
+
+                <div class="mb-4">
+                    <a href="{{ route('user.reset') }}">Forgot your password?</a>
                 </div>
 
                 <button class="btn btn-primary">LOGIN</button>

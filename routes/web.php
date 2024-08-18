@@ -25,10 +25,23 @@ Route::get('/routes/', [SearchController::class, 'indexRouteSearch'])->name('fro
 Route::get('/top', [TopController::class, 'index'])->name('top');
 Route::get('/top/{continent}', [TopController::class, 'index'])->name('top.filtered');
 
-// User
-Route::get('/account', [UserController::class, 'show'])->middleware(['auth', 'verified'])->name('profile');
+// User account related routes
+Route::view('/login', 'account.login')->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('user.login');
+
+Route::view('/register', 'account.register')->name('register');
 Route::post('/register', [UserController::class, 'store'])->name('user.register');
-Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::view('/account/reset', 'account.reset')->name('user.reset');
+Route::post('/account/reset', [UserController::class, 'reset'])->middleware('guest')->name('user.reset.post');
+Route::view('/reset-password', 'account.reset-password')->name('password.request');
+Route::post('/reset-password', [UserController::class, 'showResetForm'])->middleware('guest')->name('password.update');
+Route::get('/reset-password/{token}', function (string $token) {
+    return view('account.reset-password', ['token' => $token]);
+})->middleware('guest')->name('password.reset');
+
+Route::get('/logout', [LoginController::class, 'logout'])->name('user.logout');
+Route::get('/account', [UserController::class, 'show'])->middleware(['auth', 'verified'])->name('user.account');
 
 // User account related emails
 Route::get('/email/verify', [UserController::class, 'verificationNotice'])->name('verification.notice');
@@ -36,8 +49,6 @@ Route::get('/email/verify/{id}/{hash}', [UserController::class, 'verifyEmail'])-
 Route::post('/email/verification-notification', [UserController::class, 'veryEmailResend'])->middleware(['auth', 'throttle:1,10'])->name('verification.send');
 
 // Pure views
-Route::view('/register', 'account.register')->name('register');
-Route::view('/login', 'account.login')->name('login');
 Route::view('/changelog', 'changelog')->name('changelog');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/api', 'api')->name('api');
