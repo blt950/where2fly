@@ -25,6 +25,19 @@
                     </div>
                     @endif
 
+
+                    @if(!Session::has('success') && auth()->user() && auth()->user()->email_verified_at == null)
+                    <div class="alert alert-warning" role="alert">
+                        Your account is awaiting email verification.
+                        
+                        <form method="POST" action="{{ route('verification.send') }}">
+                            @csrf
+                            <button class="btn btn-sm btn-primary text-secondary mt-2">Resend verification email</button>
+                        </form>
+                        <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-primary mt-2 text-secondary">Log out</a>
+                    </div>
+                    @endif
+
                     @yield('content')
                 </main>
 

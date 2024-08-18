@@ -26,23 +26,18 @@ Route::get('/top', [TopController::class, 'index'])->name('top');
 Route::get('/top/{continent}', [TopController::class, 'index'])->name('top.filtered');
 
 // User
-Route::get('/profile', [UserController::class, 'show'])->name('profile');
-Route::post('/register', [LoginController::class, 'store'])->name('user.register');
+Route::get('/account', [UserController::class, 'show'])->middleware(['auth', 'verified'])->name('profile');
+Route::post('/register', [UserController::class, 'store'])->name('user.register');
+Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Emails
-Route::get('/email/verify', function () {
-    return view('/')->with('success', 'Your account has been created. Check your email to verify your account.');
-})->middleware('auth')->name('verification.notice');
-
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
-
-    return redirect(route('front'));
-})->middleware(['auth', 'signed'])->name('verification.verify');
+// User account related emails
+Route::get('/email/verify', [UserController::class, 'verificationNotice'])->name('verification.notice');
+Route::get('/email/verify/{id}/{hash}', [UserController::class, 'verifyEmail'])->middleware(['auth', 'signed'])->name('verification.verify');
+Route::post('/email/verification-notification', [UserController::class, 'veryEmailResend'])->middleware(['auth', 'throttle:1,10'])->name('verification.send');
 
 // Pure views
-Route::view('/register', 'register')->name('register');
-Route::view('/login', 'login')->name('login');
+Route::view('/register', 'account.register')->name('register');
+Route::view('/login', 'account.login')->name('login');
 Route::view('/changelog', 'changelog')->name('changelog');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/api', 'api')->name('api');
