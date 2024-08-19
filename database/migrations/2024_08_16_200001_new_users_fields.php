@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('name', 'username');
+            $table->string('username', 32)->change();
             $table->timestamp('last_activity_at')->nullable();
 
-            $table->unique('username')->change();
         });
     }
 
@@ -26,6 +26,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('username', 'name');
+            $table->string('name', 255)->change();
             $table->dropColumn('last_activity_at');
 
             $table->dropUnique('users_username_unique');
