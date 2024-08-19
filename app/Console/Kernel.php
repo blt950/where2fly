@@ -30,6 +30,9 @@ class Kernel extends ConsoleKernel
 
         // Clear expired password reset tokens
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
+
+        // Fetch new disposable domains
+        $schedule->command('disposable:update')->daily();
     }
 
     /**

@@ -24,7 +24,7 @@ class UserController extends Controller
     {
         $data = $request->validate([
             'username' => ['required', 'string', 'min:2', 'max:32', 'unique:' . User::class],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'indisposable', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', 'min:8', 'max:255'],
             'cf-turnstile-response' => ['required', Rule::turnstile()],
         ]);

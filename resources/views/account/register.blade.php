@@ -2,6 +2,9 @@
 
 @section('meta-description')
     <meta name="description" content="Register for an Where2Fly account.">
+@endsection
+
+@section('resources')
     @turnstileScripts()
 @endsection
 
@@ -68,6 +71,9 @@
                     data-theme="light"
                     data-language="en"
                 />
+                @error('cf-turnstile-response')
+                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
 
                 <button class="btn btn-primary mt-2">REGISTER</button>
             </form>
