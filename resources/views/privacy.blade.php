@@ -33,7 +33,7 @@
             <h2 class="mt-4 pt-4 border-top">For Where2Fly account holders</h2>
             <p class="font-work-sans">When you register an account, the following data is collected and used:</p>
             <ul>
-                <li><u>E-mail address:</u> Used to verify your account, recover your account, notify you of security breaches, and send important service-related updates (excluding marketing).</li>
+                <li><u>E-mail address:</u> Used to verify your account, recover your account, notify you of security breaches, and send important service-related updates (not including marketing).</li>
                 <li><u>Username:</u> Used for login and visible to other users as your identifier.</li>
                 <li><u>Password:</u> Stored securely and hashed in the database.</li>
             </ul>
