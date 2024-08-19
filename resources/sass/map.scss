@@ -110,3 +110,23 @@
 
     }
 }
+
+.hint{
+
+    height: auto;
+    width: 275px;
+    
+    position: absolute;
+    right: 1rem;
+    top: calc($header-height + 1rem);
+    padding: 1rem;
+
+    background: rgba($secondary, 0.5);
+
+    z-index: 500;
+    pointer-events: none;
+
+    @include media-breakpoint-down(xl) { 
+        display: none;
+    }
+}
