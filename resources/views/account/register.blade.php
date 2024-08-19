@@ -1,7 +1,8 @@
 @extends('layouts.app')
 
 @section('meta-description')
-<meta name="description" content="Register for an Where2Fly account.">
+    <meta name="description" content="Register for an Where2Fly account.">
+    @turnstileScripts()
 @endsection
 
 @section('title', 'Register')
@@ -62,7 +63,13 @@
                     @enderror
                 </div>
 
-                <button class="btn btn-primary">REGISTER</button>
+                <x-turnstile
+                    data-action="register"
+                    data-theme="light"
+                    data-language="en"
+                />
+
+                <button class="btn btn-primary mt-2">REGISTER</button>
             </form>
         </div>
     </div>

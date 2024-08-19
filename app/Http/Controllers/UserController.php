@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -25,6 +26,7 @@ class UserController extends Controller
             'username' => ['required', 'string', 'min:2', 'max:64', 'unique:' . User::class],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', 'min:8'],
+            'cf-turnstile-response' => ['required', Rule::turnstile()],
         ]);
 
         // Hash the password
