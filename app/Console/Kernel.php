@@ -28,6 +28,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('backup:clean')->daily()->at('01:00');
         $schedule->command('backup:run')->daily()->at('01:30');
 
+        // Delete users who haven't verified their email address
+        $schedule->command('account:clear-unverified')->daily();
+
         // Clear expired password reset tokens
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
 
