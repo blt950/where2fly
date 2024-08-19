@@ -12,7 +12,7 @@
     <div class="container">
         <div>
             <div class="mb-4">
-                <a href="{{ route('register') }}">
+                <a class="font-size-1rem" href="{{ route('register') }}">
                     <i class="fas fa-user-plus"></i> Don't have an account? Register here
                 </a>
             </div>

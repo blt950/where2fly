@@ -3,10 +3,10 @@
 namespace App\Providers;
 
 use App\Mixins\CollectionAirportFilter;
-use Illuminate\Support\Collection;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Collection;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
