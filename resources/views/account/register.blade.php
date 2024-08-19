@@ -38,6 +38,7 @@
                 @csrf
                 <div class="mb-3">
                     <label for="username">Username</label>
+                    <small class="form-text text-white-50">Used to login and it's visible to other users.</small>
                     <input name="username" type="text" class="form-control" id="username" value="{{ old('username') }}">
                     @error('username')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -46,6 +47,7 @@
 
                 <div class="mb-3">
                     <label for="email">Email address</label>
+                    <small class="form-text text-white-50">Only used to verify or recover your account, no marketing.</small>
                     <input name="email" type="email" class="form-control" id="email" value="{{ old('email') }}">
                     @error('email')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -56,6 +58,8 @@
                     <input name="password" type="password" class="form-control" id="password">
                     @error('password')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    @else
+                        
                     @enderror
                 </div>
                 <div class="mb-3">
