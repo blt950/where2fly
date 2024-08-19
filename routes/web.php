@@ -57,6 +57,7 @@ Route::controller(UserController::class)->group(function () {
 
     // Account pages
     Route::get('/account', 'show')->middleware(['auth', 'verified'])->name('user.account');
+    Route::post('/account/delete', 'destroy')->name('user.delete');
 
     // Account email verification
     Route::get('/account/verify/', 'verifyNotice')->name('verification.notice');

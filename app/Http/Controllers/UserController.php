@@ -63,7 +63,7 @@ class UserController extends Controller
         $user = $request->user();
         $user->delete();
 
-        return redirect()->route('front')->with('success', 'Your account has been deleted.');
+        return redirect()->route('front')->with('success', 'Your account and all data has been deleted.');
     }
 
     /**
