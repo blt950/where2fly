@@ -39,7 +39,7 @@
                 <div class="mb-3">
                     <label for="username">Username</label>
                     <small class="form-text text-white-50">Used to login and it's visible to other users.</small>
-                    <input name="username" type="text" class="form-control" id="username" value="{{ old('username') }}">
+                    <input name="username" type="text" class="form-control" id="username" value="{{ old('username') }}" required>
                     @error('username')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
@@ -48,14 +48,14 @@
                 <div class="mb-3">
                     <label for="email">Email address</label>
                     <small class="form-text text-white-50">Only used to verify or recover your account, no marketing.</small>
-                    <input name="email" type="email" class="form-control" id="email" value="{{ old('email') }}">
+                    <input name="email" type="email" class="form-control" id="email" value="{{ old('email') }}" required>
                     @error('email')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
                 <div class="mb-3">
                     <label for="password">Password</label>
-                    <input name="password" type="password" class="form-control" id="password">
+                    <input name="password" type="password" class="form-control" id="password" required>
                     @error('password')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                     @else
@@ -64,8 +64,17 @@
                 </div>
                 <div class="mb-3">
                     <label for="confirmPassword">Confirm Password</label>
-                    <input name="password_confirmation" type="password" class="form-control" id="confirmPassword">
+                    <input name="password_confirmation" type="password" class="form-control" id="confirmPassword" required>
                     @error('confirm_password')
+                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- accept terms checkbox -->
+                <div class="form-check mb-3">
+                    <input name="privacy_policy" type="checkbox" class="form-check-input" id="acceptTerms" required>
+                    <label class="form-check-label" for="acceptTerms">I accept the <a href="{{ route('privacy') }}" target="_blank">privacy policy</a></label>
+                    @error('privacy_policy')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
