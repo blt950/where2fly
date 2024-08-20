@@ -22,8 +22,12 @@
     @vite('resources/js/functions/searchForm.js')
     @vite('resources/js/map.js')
     <script>
+
+        var userLists = '{!! json_encode($userLists) !!}';
+
         document.addEventListener('DOMContentLoaded', function() {
             initMap();
+            drawUserLists(userLists);
         })
     </script>
     @include('front.parts.sliders')

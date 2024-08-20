@@ -140,4 +140,5 @@ class UserListController extends Controller
 
         return redirect()->route('list.index')->with('success', 'List deleted successfully');
     }
+
 }

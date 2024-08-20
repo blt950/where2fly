@@ -9,6 +9,7 @@ import '@elfalem/leaflet-curve';
 import 'leaflet.markercluster';
 
 window.initMap = initMap;
+window.drawUserLists = drawUserLists;
 window.createCluster = createCluster;
 window.drawMarker = drawMarker;
 window.drawRoute = drawRoute;
@@ -72,6 +73,24 @@ function initMap(airportCoordinates = null, focusAirport = null, focusContinent 
 }
 
 /*
+* Function to draw a user's lists
+*/
+function drawUserLists(lists){
+    var cluster = createCluster();
+    var drawnAirports = [];
+
+    JSON.parse(lists).forEach(list => {
+        list.airports.forEach(airport => {
+            if(drawnAirports.includes(airport.icao)) return;
+            drawnAirports.push(airport.icao);
+            drawDivMarker(airport.icao, airport.lat, airport.lon, list.color, cluster);
+        });
+    });
+
+    map.addLayer(cluster);
+}
+
+/*
 * Function to create a cluster
 */
 function createCluster(){
@@ -99,6 +118,25 @@ function drawMarker(text, lat, lon, iconUrl, clickFunction = ()=>{}, cluster = f
     } else {
         marker.addTo(map);
     }
+
+    return marker
+
+}
+
+/*
+* Function to draw a div marker
+*/
+function drawDivMarker(text, lat, lon, iconColor, cluster){
+
+    var icon = L.divIcon({
+        iconSize: [12, 12],
+        html: '<span style="display: block; width: 10px; height: 10px; border-radius: 50%; background: '+iconColor+'"></span>'
+    });
+
+    var marker = new L.marker([lat, lon], { icon:icon });
+    marker.bindTooltip(`<span style="color: ${iconColor};">${text}</span`, {permanent: true, direction: 'left', className: "listed-airport"});
+
+    cluster.addLayer(marker);
 
     return marker
 

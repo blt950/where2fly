@@ -15,6 +15,11 @@
     }
 }
 
+.leaflet-div-icon{
+    background: transparent;
+    border: 0;
+}
+
 .leaflet-container {
     background: #000;
 }
@@ -27,6 +32,20 @@
     box-shadow: none;
 
     color: $primary;
+    font-weight: normal;
+    font-size: 1rem;
+
+    &:before{
+        display: none;
+    }
+}
+
+.leaflet-tooltip.listed-airport {
+    font-family: 'Work Sans', sans-serif;
+    background-color: transparent;
+    border: transparent;
+    box-shadow: none;
+
     font-weight: normal;
     font-size: 1rem;
 

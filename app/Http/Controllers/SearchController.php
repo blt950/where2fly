@@ -32,7 +32,10 @@ class SearchController extends Controller
             $lists = UserList::where('public', true)->get();
         }
 
-        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists'));
+        // Get user lists in a way that it's structured with list, then airports with only the icao and coordinates, then conver this to an array
+        $userLists = UserList::getMapListArray(Auth::user());
+
+        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'userLists'));
     }
 
     /**
