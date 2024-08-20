@@ -7,9 +7,13 @@ use App\Models\Simulator;
 use App\Models\UserList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class UserListController extends Controller
 {
+
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      *
@@ -81,6 +85,7 @@ class UserListController extends Controller
      */
     public function edit(UserList $list)
     {
+        $this->authorize('update', $list);
         $simulators = Simulator::all();
 
         return view('list.edit', compact('list', 'simulators'));
@@ -91,6 +96,7 @@ class UserListController extends Controller
      */
     public function update(Request $request, UserList $list)
     {
+        $this->authorize('update', $list);
         $request->validate([
             'color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'name' => 'required|max:32',
@@ -130,6 +136,7 @@ class UserListController extends Controller
      */
     public function destroy(UserList $list)
     {
+        $this->authorize('delete', $list);
         $list->delete();
 
         return redirect()->route('list.index')->with('success', 'List deleted successfully');
