@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TopController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserListController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -63,6 +64,17 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/account/verify/', 'verifyNotice')->name('verification.notice');
     Route::get('/account/verify/{id}/{hash}', 'verifyEmail')->middleware(['auth', 'signed'])->name('verification.verify');
     Route::post('/account/verify/resend', 'verifyResendEmail')->middleware(['auth', 'throttle:1,10'])->name('verification.send');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::controller(UserListController::class)->group(function () {
+        Route::get('/lists', 'index')->name('list.index');
+        Route::get('/lists/create', 'create')->name('list.create');
+        Route::post('/lists/create', 'store')->name('list.store');
+        Route::get('/lists/{list}/edit', 'edit')->name('list.edit');
+        Route::post('/lists/{list}/edit', 'update')->name('list.update');
+        Route::get('/lists/{list}/delete', 'destroy')->name('list.delete');
+    });
 });
 
 // Pure views

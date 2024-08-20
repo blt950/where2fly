@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('user_lists', function (Blueprint $table) {
             $table->id();
             $table->string('name', 32);
-            $table->string('color')->nullable();
+            $table->string('color', 7)->nullable();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('simulator_id')->nullable()->constrained('simulators')->onDelete('SET NULL');
             $table->boolean('public')->default(false);

@@ -9,15 +9,18 @@ class UserList extends Model
 {
     use HasFactory;
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function simulator(){
+    public function simulator()
+    {
         return $this->belongsTo(Simulators::class);
     }
 
-    public function airports(){
+    public function airports()
+    {
         return $this->belongsToMany(Airport::class);
     }
 }

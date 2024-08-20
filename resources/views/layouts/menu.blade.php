@@ -48,7 +48,7 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="{{ route('user.account') }}">Settings</a></li>
-                            <li><a class="dropdown-item" href="#">My Lists</a></li>
+                            <li><a class="dropdown-item" href="{{ route('list.index') }}">My Lists</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ route('user.logout') }}">Logout</a></li>
                         </ul>
