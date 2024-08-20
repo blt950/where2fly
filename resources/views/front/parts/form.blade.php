@@ -76,6 +76,21 @@
             </div>
         </div>
 
+        <div class="col-xs-12 text-start">
+            <label>Whitelists</label>
+                <select multiple 
+                    multiselect-search="true" 
+                    multiselect-select-all="true"
+                    multiselect-max-items="1"
+                    multiselect-hide-x="false"
+                    name="whitelists[]"
+                    placeholder="Search within only these airports">
+                    @foreach($lists as $list)
+                        <option value="{{ $list->id }}">{{ $list->name }}</option>
+                    @endforeach
+            </select>
+        </div>
+
         <div class="col-sm-12 align-self-start">
             <button type="submit" id="submitBtn" class="btn btn-primary text-uppercase">
                 Search <i class="fas fa-search"></i>

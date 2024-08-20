@@ -10,6 +10,8 @@ use App\Models\Flight;
 use App\Rules\AirportExists;
 use App\Rules\FlightDirection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\UserList;
 
 class SearchController extends Controller
 {
@@ -24,7 +26,13 @@ class SearchController extends Controller
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
 
-        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao'));
+        if(Auth::check()) {
+            $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
+        } else {
+            $lists = UserList::where('public', true)->get();
+        }
+
+        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists'));
     }
 
     /**
@@ -36,7 +44,13 @@ class SearchController extends Controller
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
 
-        return view('front.departures', compact('airlines', 'aircrafts', 'prefilledIcao'));
+        if(Auth::check()) {
+            $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
+        } else {
+            $lists = UserList::where('public', true)->get();
+        }
+
+        return view('front.departures', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists'));
     }
 
     /**
@@ -67,6 +81,7 @@ class SearchController extends Controller
             'airtimeMax' => 'required|numeric|between:0,12',
             'sortByWeather' => 'in:0,1',
             'sortByATC' => 'in:0,1',
+            'whitelists' => 'sometimes|array',
             'scores' => 'sometimes|array',
             'metcondition' => 'required|in:IFR,VFR,ANY',
             'destinationWithRoutesOnly' => 'required|numeric|between:-1,1',
@@ -95,6 +110,10 @@ class SearchController extends Controller
         $sortByScores = [];
         isset($data['sortByWeather']) ? $sortByScores = array_merge($sortByScores, ScoreController::getWeatherTypes()) : null;
         isset($data['sortByATC']) ? $sortByScores = array_merge($sortByScores, ScoreController::getVatsimTypes()) : null;
+
+        $whitelist = null;
+        $whitelist = UserList::whereIn('id', $data['whitelists'])->get();
+        $whitelist = $whitelist->pluck('airports')->flatten()->pluck('icao')->unique()->toArray();
 
         $filterByScores = array_map('intval', $data['scores']);
 
@@ -133,6 +152,7 @@ class SearchController extends Controller
                 $primaryAirport = Airport::airportOpen()->isAirportSize($destinationAirportSize)->inContinent($continent)
                     ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                     ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                    ->returnOnlyWhitelistedIcao($whitelist)
                     ->has('metar')->with('runways', 'scores', 'metar')->get();
 
                 if (! $primaryAirport || ! $primaryAirport->count()) {
@@ -149,6 +169,7 @@ class SearchController extends Controller
                 ->inContinent($continent, $primaryAirport->iso_country)->withinDistance($primaryAirport, $minDistance, $maxDistance, $primaryAirport->icao)->withinBearing($primaryAirport, $flightDirection, $minDistance, $maxDistance)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                 ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                ->returnOnlyWhitelistedIcao($whitelist)
                 ->has('metar')->with('runways', 'scores', 'metar')->get();
 
             // Filter the eligible airports
