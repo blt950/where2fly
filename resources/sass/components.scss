@@ -63,6 +63,10 @@
     strong{
         margin-left: 1rem;
         width: 150px;
+
+        @include media-breakpoint-down(md) {
+            width: 100px;
+        }
     }
 }
 
