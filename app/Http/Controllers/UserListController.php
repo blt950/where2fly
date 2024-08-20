@@ -5,13 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Airport;
 use App\Models\Simulator;
 use App\Models\UserList;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class UserListController extends Controller
 {
-
     use AuthorizesRequests;
 
     /**

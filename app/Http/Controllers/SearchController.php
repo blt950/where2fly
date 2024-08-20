@@ -7,11 +7,11 @@ use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
 use App\Models\Flight;
+use App\Models\UserList;
 use App\Rules\AirportExists;
 use App\Rules\FlightDirection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\UserList;
 
 class SearchController extends Controller
 {
@@ -26,7 +26,7 @@ class SearchController extends Controller
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
 
-        if(Auth::check()) {
+        if (Auth::check()) {
             $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
         } else {
             $lists = UserList::where('public', true)->get();
@@ -44,7 +44,7 @@ class SearchController extends Controller
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
 
-        if(Auth::check()) {
+        if (Auth::check()) {
             $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
         } else {
             $lists = UserList::where('public', true)->get();

@@ -4,11 +4,9 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\UserList;
-use Illuminate\Auth\Access\Response;
 
 class UserListPolicy
 {
-
     /**
      * Determine whether the user can view the model.
      */
