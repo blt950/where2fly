@@ -26,14 +26,14 @@ class SearchController extends Controller
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
 
+        $userLists = [];
         if (Auth::check()) {
             $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
+            // Get user lists in a way that it's structured with list, then airports with only the icao and coordinates, then conver this to an array
+            $userLists = UserList::getMapListArray(Auth::user());
         } else {
             $lists = UserList::where('public', true)->get();
         }
-
-        // Get user lists in a way that it's structured with list, then airports with only the icao and coordinates, then conver this to an array
-        $userLists = UserList::getMapListArray(Auth::user());
 
         return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'userLists'));
     }
