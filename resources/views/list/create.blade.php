@@ -9,7 +9,7 @@
             @csrf
             <div class="mb-3">
                 <label for="color" class="form-label">Color</label>
-                <input type="color" id="color" value="#ff0000" name="color" class="d-block">
+                <input type="color" id="color" value="#8596e7" name="color" class="d-block">
             </div>
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
