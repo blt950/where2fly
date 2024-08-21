@@ -60,11 +60,18 @@ class UserListController extends Controller
 
         // Explode based on line breaks and attach each airport to the list
         $airports = explode("\r\n", $request->airports);
+        $addedAirports = collect();
         $notFoundAirports = collect();
         foreach ($airports as $airport) {
+            // Skip if we already added it
+            if($addedAirports->contains($airport)) {
+                continue;
+            }
+
             $airportModel = Airport::where('icao', strtoupper($airport))->first();
             if ($airportModel) {
                 $list->airports()->attach($airportModel);
+                $addedAirports->push($airport);
             } else {
                 $notFoundAirports->push($airport);
             }
@@ -111,11 +118,18 @@ class UserListController extends Controller
         // Explode based on line breaks and attach each airport to the list
         $airports = explode("\r\n", $request->airports);
         $notFoundAirports = collect();
+        $addedAirports = collect();
         $list->airports()->detach();
         foreach ($airports as $airport) {
+            // Skip if we already added it
+            if($addedAirports->contains($airport)) {
+                continue;
+            }
+
             $airportModel = Airport::where('icao', strtoupper($airport))->first();
             if ($airportModel) {
                 $list->airports()->attach($airportModel);
+                $addedAirports->push($airport);
             } else {
                 $notFoundAirports->push($airport);
             }
