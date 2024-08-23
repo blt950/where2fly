@@ -40,20 +40,6 @@
     }
 }
 
-.leaflet-tooltip.listed-airport {
-    font-family: 'Work Sans', sans-serif;
-    background-color: transparent;
-    border: transparent;
-    box-shadow: none;
-
-    font-weight: normal;
-    font-size: 1rem;
-
-    &:before{
-        display: none;
-    }
-}
-
 .leaflet-marker-icon.marker-cluster{
     color: black;
     background: $primary;
