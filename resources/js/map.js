@@ -8,17 +8,18 @@ import L, { icon } from 'leaflet';
 import '@elfalem/leaflet-curve';
 import 'leaflet.markercluster';
 
-window.initMap = initMap;
-window.drawUserLists = drawUserLists;
-window.createCluster = createCluster;
-window.drawMarker = drawMarker;
-window.drawRoute = drawRoute;
+window.mapInit = mapInit;
+window.mapDrawClickableAirports = mapDrawClickableAirports;
+window.mapEventCardOpenPan = mapEventCardOpenPan;
+window.mapCreateCluster = mapCreateCluster;
+window.mapDrawMarker = mapDrawMarker;
+window.mapDrawRoute = mapDrawRoute;
 window.map = map;
 
 /*
 * Function to initialize the map
 */
-function initMap(airportCoordinates = null, focusAirport = null, focusContinent = null){
+function mapInit(airportCoordinates = null, focusAirport = null, focusContinent = null){
 
     // Default lat and lon (Berlin, Europe)
     var lat = 52.51843039016386;
@@ -73,27 +74,41 @@ function initMap(airportCoordinates = null, focusAirport = null, focusContinent 
 }
 
 /*
-* Function to draw a user's lists
+* Function to draw clickable airports
 */
-function drawUserLists(lists){
-    var cluster = createCluster();
-    var drawnAirports = [];
+function mapDrawClickableAirports(airportMapData, cluster = null){
+    Object.values(airportMapData).forEach(airport => {
 
-    JSON.parse(lists).forEach(list => {
-        list.airports.forEach(airport => {
-            if(drawnAirports.includes(airport.icao)) return;
-            drawnAirports.push(airport.icao);
-            drawDivMarker(airport.icao, airport.lat, airport.lon, list.color, cluster);
-        });
+        // Prepare the on click function
+        const onClickFunc = () => {
+            var card = document.querySelector('[data-card-id="' + airport.icao + '"]')
+            if(card){
+                cardOpen(card, 'airport')
+            }
+        }
+
+        // Draw the marker
+        mapDrawMarker(airport.icao, airportMapData[airport.icao].lat, airportMapData[airport.icao].lon, airportMapData[airport.icao].color, onClickFunc, cluster);
+    })
+}
+
+/*
+* Function to pan to an airport when card is opened
+*/
+function mapEventCardOpenPan(airportMapData){
+    document.addEventListener('cardOpened', function(event) {
+        var airport = event.detail.cardId;
+
+        // Focus on the airport
+        map.panTo([airportMapData[airport].lat, airportMapData[airport].lon],
+            {animate: true, duration: 0.5, easeLinearity: 0.25});
     });
-
-    map.addLayer(cluster);
 }
 
 /*
 * Function to create a cluster
 */
-function createCluster(){
+function mapCreateCluster(){
     return L.markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 40
@@ -103,15 +118,17 @@ function createCluster(){
 /*
 * Function to draw a marker
 */
-function drawMarker(text, lat, lon, iconUrl, clickFunction = ()=>{}, cluster = false){
+function mapDrawMarker(text, lat, lon, iconColor = null, clickFunction = ()=>{}, cluster = false){
 
-    var icon = L.icon({
-        iconUrl: iconUrl,
+    var color = (iconColor !== null) ? iconColor : "#ddb81c";
+
+    var icon = L.divIcon({
         iconSize: [12, 12],
+        html: '<span style="display: block; width: 10px; height: 10px; border-radius: 50%; background: '+color+'"></span>'
     });
 
     var marker = new L.marker([lat, lon], { icon:icon }).on('click', clickFunction);
-    marker.bindTooltip(text, {permanent: true, direction: 'left', className: "airport"});
+    marker.bindTooltip(`<span style="color: ${color};">${text}</span`, {permanent: true, direction: 'left', className: "airport", interactive: true});
 
     if(cluster !== false){
         cluster.addLayer(marker);
@@ -124,30 +141,11 @@ function drawMarker(text, lat, lon, iconUrl, clickFunction = ()=>{}, cluster = f
 }
 
 /*
-* Function to draw a div marker
-*/
-function drawDivMarker(text, lat, lon, iconColor, cluster){
-
-    var icon = L.divIcon({
-        iconSize: [12, 12],
-        html: '<span style="display: block; width: 10px; height: 10px; border-radius: 50%; background: '+iconColor+'"></span>'
-    });
-
-    var marker = new L.marker([lat, lon], { icon:icon });
-    marker.bindTooltip(`<span style="color: ${iconColor};">${text}</span`, {permanent: true, direction: 'left', className: "listed-airport"});
-
-    cluster.addLayer(marker);
-
-    return marker
-
-}
-
-/*
 * Function to draw a route
 */
 var routePath = null;
 var secondaryMarker = null;
-function drawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirection = false){
+function mapDrawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirection = false){
     var latlng1 = [];
     var latlng2 = [];
 
@@ -167,7 +165,7 @@ function drawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirection
             // Remove the primary marker and redraw it with the adjusted lon
             if(primaryMarker) {
                 primaryMarker.remove()
-                primaryMarker = drawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']-=360, iconUrl)
+                primaryMarker = mapDrawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']-=360, iconUrl)
             }
         } else {
             latlng1[1] += 360;
@@ -175,7 +173,7 @@ function drawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirection
             // Remove the primary marker and redraw it with the adjusted lon
             if(primaryMarker) {
                 primaryMarker.remove()
-                primaryMarker = drawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']+=360, iconUrl)
+                primaryMarker = mapDrawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']+=360, iconUrl)
             }
         }
     }
@@ -205,7 +203,7 @@ function drawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirection
     if(secondaryMarker) { secondaryMarker.remove() }
 
     // Draw the destination airport marker
-    secondaryMarker = drawMarker(destinationAirport, airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon'], iconUrl)
+    secondaryMarker = mapDrawMarker(destinationAirport, airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon'], iconUrl)
 
     // Draw the path
     routePath = L.curve(

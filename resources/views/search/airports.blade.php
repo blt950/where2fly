@@ -228,19 +228,19 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             // Apply click events on card related triggers
-            initCardEvents()
+            cardsInitEvents()
 
             // Apply initial map
-            initMap(airportCoordinates, focusAirport);
-            primaryMarker = drawMarker(focusAirport, airportCoordinates[focusAirport]['lat'], airportCoordinates[focusAirport]['lon'], iconUrl);
+            mapInit(airportCoordinates, focusAirport);
+            primaryMarker = mapDrawMarker(focusAirport, airportCoordinates[focusAirport]['lat'], airportCoordinates[focusAirport]['lon'], iconUrl);
         })
 
         document.addEventListener('cardOpened', function(event) {
             if(event.detail.type == 'airport'){
                 var airport = event.detail.cardId;
-                drawRoute(focusAirport, airport, iconUrl, (direction == 'departure' ? false : true))
+                mapDrawRoute(focusAirport, airport, iconUrl, (direction == 'departure' ? false : true))
 
-                closeAllCards('flights')
+                cardCloseAll('flights')
             }
         })
     </script>

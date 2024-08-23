@@ -16,19 +16,16 @@
         @include('front.parts.tabs')
         @include('front.parts.form', ['icao' => 'departure', 'area' => 'destination'])
     </div>
+
+    @isset($airportsMapCollection)
+        @include('parts.popupContainer', ['airportsMapCollection' => ($airportsMapCollection)])
+    @endisset
 @endsection
 
 @section('js')
     @vite('resources/js/functions/searchForm.js')
+    @vite('resources/js/cards.js')
     @vite('resources/js/map.js')
-    <script>
-
-        var userLists = '{!! json_encode($userLists) !!}';
-
-        document.addEventListener('DOMContentLoaded', function() {
-            initMap();
-            drawUserLists(userLists);
-        })
-    </script>
+    @include('scripts.defaultMap')
     @include('front.parts.sliders')
 @endsection

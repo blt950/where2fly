@@ -13,13 +13,14 @@
             <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your account?')">Delete account</button>
         </form>
     </div>
+
+    @isset($airportsMapCollection)
+        @include('parts.popupContainer', ['airportsMapCollection' => ($airportsMapCollection)])
+    @endisset
 @endsection
 
 @section('js')
+    @vite('resources/js/cards.js')
     @vite('resources/js/map.js')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            initMap();
-        })
-    </script>
+    @include('scripts.defaultMap')
 @endsection

@@ -64,7 +64,7 @@ class UserListController extends Controller
         $notFoundAirports = collect();
         foreach ($airports as $airport) {
             // Skip if we already added it
-            if($addedAirports->contains($airport)) {
+            if ($addedAirports->contains($airport)) {
                 continue;
             }
 
@@ -122,7 +122,7 @@ class UserListController extends Controller
         $list->airports()->detach();
         foreach ($airports as $airport) {
             // Skip if we already added it
-            if($addedAirports->contains($airport)) {
+            if ($addedAirports->contains($airport)) {
                 continue;
             }
 
@@ -154,5 +154,4 @@ class UserListController extends Controller
 
         return redirect()->route('list.index')->with('success', 'List deleted successfully');
     }
-
 }

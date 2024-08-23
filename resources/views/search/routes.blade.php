@@ -94,11 +94,11 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize the map
-            initMap(airportCoordinates);
+            mapInit(airportCoordinates);
 
             // Draw the from airport
-            drawMarker(departure, airportCoordinates[departure]['lat'], airportCoordinates[departure]['lon'], iconUrl);
-            drawRoute(departure, arrival, iconUrl);
+            mapDrawMarker(departure, airportCoordinates[departure]['lat'], airportCoordinates[departure]['lon'], iconUrl);
+            mapDrawRoute(departure, arrival, iconUrl);
         });
     </script>
 @endsection

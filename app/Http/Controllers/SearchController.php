@@ -26,16 +26,13 @@ class SearchController extends Controller
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
 
-        $userLists = [];
         if (Auth::check()) {
             $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
-            // Get user lists in a way that it's structured with list, then airports with only the icao and coordinates, then conver this to an array
-            $userLists = UserList::getMapListArray(Auth::user());
         } else {
             $lists = UserList::where('public', true)->get();
         }
 
-        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'userLists'));
+        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists'));
     }
 
     /**
@@ -115,8 +112,10 @@ class SearchController extends Controller
         isset($data['sortByATC']) ? $sortByScores = array_merge($sortByScores, ScoreController::getVatsimTypes()) : null;
 
         $whitelist = null;
-        $whitelist = UserList::whereIn('id', $data['whitelists'])->get();
-        $whitelist = $whitelist->pluck('airports')->flatten()->pluck('icao')->unique()->toArray();
+        if (isset($data['whitelists'])) {
+            $whitelist = UserList::whereIn('id', $data['whitelists'])->get();
+            $whitelist = $whitelist->pluck('airports')->flatten()->pluck('icao')->unique()->toArray();
+        }
 
         $filterByScores = array_map('intval', $data['scores']);
 

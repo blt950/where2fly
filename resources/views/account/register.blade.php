@@ -98,7 +98,7 @@
     @vite('resources/js/map.js')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            initMap();
+            mapInit();
         })
     </script>
 @endsection

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\MapHelper;
 use App\Models\AirportScore;
 use Illuminate\Http\Request;
 
@@ -22,14 +23,8 @@ class TopController extends Controller
             $airports->push($as->airport);
         }
 
-        $airportCoordinates = [];
-        foreach ($airports as $airport) {
-            $airportCoordinates[$airport->icao] = [
-                'lat' => $airport->coordinates->latitude,
-                'lon' => $airport->coordinates->longitude,
-            ];
-        }
+        $airportMapData = MapHelper::generateAirportMapData($airports);
 
-        return view('top', compact('airports', 'airportCoordinates', 'continent', 'exclude'));
+        return view('top', compact('airports', 'airportMapData', 'continent', 'exclude'));
     }
 }
