@@ -145,7 +145,7 @@ function mapDrawMarker(text, lat, lon, iconColor = null, clickFunction = ()=>{},
 */
 var routePath = null;
 var secondaryMarker = null;
-function mapDrawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirection = false){
+function mapDrawRoute(primaryAirport, destinationAirport, reverseDirection = false){
     var latlng1 = [];
     var latlng2 = [];
 
@@ -165,7 +165,7 @@ function mapDrawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirect
             // Remove the primary marker and redraw it with the adjusted lon
             if(primaryMarker) {
                 primaryMarker.remove()
-                primaryMarker = mapDrawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']-=360, iconUrl)
+                primaryMarker = mapDrawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']-=360)
             }
         } else {
             latlng1[1] += 360;
@@ -173,7 +173,7 @@ function mapDrawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirect
             // Remove the primary marker and redraw it with the adjusted lon
             if(primaryMarker) {
                 primaryMarker.remove()
-                primaryMarker = mapDrawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']+=360, iconUrl)
+                primaryMarker = mapDrawMarker(primaryAirport, airportCoordinates[primaryAirport]['lat'], airportCoordinates[primaryAirport]['lon']+=360)
             }
         }
     }
@@ -203,7 +203,7 @@ function mapDrawRoute(primaryAirport, destinationAirport, iconUrl, reverseDirect
     if(secondaryMarker) { secondaryMarker.remove() }
 
     // Draw the destination airport marker
-    secondaryMarker = mapDrawMarker(destinationAirport, airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon'], iconUrl)
+    secondaryMarker = mapDrawMarker(destinationAirport, airportCoordinates[destinationAirport]['lat'], airportCoordinates[destinationAirport]['lon'])
 
     // Draw the path
     routePath = L.curve(
