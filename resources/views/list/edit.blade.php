@@ -13,7 +13,10 @@
             </div>
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" name="name" value="{{ $list->name }}" required>
+                <input type="text" class="form-control" id="name" name="name" value="{{ $list->name }}" maxlength="32" required>
+                @error('name')
+                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
             </div>
             <div class="mb-3">
                 <label for="simulator" class="form-label">Simulator</label>
@@ -22,11 +25,17 @@
                         <option value="{{ $simulator->id }}" {{ $list->simulator_id == $simulator->id ? 'selected' : '' }}>{{ $simulator->name }}</option>
                     @endforeach
                 </select>
+                @error('simulator')
+                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
             </div>
             <div class="mb-3">
                 <label for="airports" class="form-label">Airports</label>
                 <small class="form-text text-white-50">Separate airports by new line</small>
                 <textarea class="form-control h-100" id="airports" name="airports" rows="8" required>{{ $list->airports->pluck('icao')->sort()->implode("\r\n") }}</textarea>
+                @error('airports')
+                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
             </div>
             
             <div class="d-flex justify-content-between">
