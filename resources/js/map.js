@@ -9,6 +9,7 @@ import '@elfalem/leaflet-curve';
 import 'leaflet.markercluster';
 
 window.mapInit = mapInit;
+window.mapSaveView = mapSaveView;
 window.mapDrawClickableAirports = mapDrawClickableAirports;
 window.mapEventCardOpenPan = mapEventCardOpenPan;
 window.mapCreateCluster = mapCreateCluster;
@@ -24,6 +25,13 @@ function mapInit(airportCoordinates = null, focusAirport = null, focusContinent 
     // Default lat and lon (Berlin, Europe)
     var lat = 52.51843039016386;
     var lon = 13.395199187248908;
+
+    // Get the last map position from local storage
+    var mapPosition = localStorage.getItem('mapPosition');
+    if(mapPosition){
+        lat = JSON.parse(mapPosition).lat;
+        lon = JSON.parse(mapPosition).lng;
+    }
 
     // If focusAirport is set, set focus there instead
     if(focusAirport !== null && airportCoordinates !== undefined && Object.keys(airportCoordinates).length > 0){
@@ -71,6 +79,15 @@ function mapInit(airportCoordinates = null, focusAirport = null, focusContinent 
         minZoom: 3,
         maxZoom: 17,
     }).addTo(map);
+}
+
+/*
+* Save the current map view position to local storage
+*/
+function mapSaveView(){
+    map.on('moveend', function() {
+        localStorage.setItem('mapPosition', JSON.stringify(map.getCenter()));
+    });
 }
 
 /*

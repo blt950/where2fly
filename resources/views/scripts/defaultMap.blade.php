@@ -9,5 +9,6 @@
         map.addLayer(cluster);
 
         mapEventCardOpenPan(airportMapData);
+        mapSaveView();
     })
 </script>
