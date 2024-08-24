@@ -142,7 +142,21 @@
     z-index: 500;
     pointer-events: none;
 
+    border: 1px solid white;
+
     @include media-breakpoint-down(xl) { 
         display: none;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: -10px; /* Adjust as needed */
+        right: 30px; /* Adjust as needed */
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 10px solid #f9f9f9; /* Same color as the background of the div */
     }
 }
