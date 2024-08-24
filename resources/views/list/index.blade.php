@@ -1,8 +1,8 @@
 @extends('layouts.app')
-@section('title', 'Your Lists')
+@section('title', 'My Lists')
 @section('content')
 
-    @include('layouts.title', ['title' => 'Your lists'])
+    @include('layouts.title', ['title' => 'My Lists'])
 
     <div class="container">
         
