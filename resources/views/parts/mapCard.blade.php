@@ -19,7 +19,11 @@
 
         <dt>METAR</dt>
         <dd>
-            {{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHi\Z') }} {{ $airport->metar->metar }}
+            @if($airport->metar)
+                {{ \Carbon\Carbon::parse($airport->metar->last_update)->format('dHi\Z') }} {{ $airport->metar->metar }}
+            @else
+                Not Available
+            @endif
         </dd>
 
         <dt>TAF</dt>
