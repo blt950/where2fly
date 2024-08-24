@@ -476,7 +476,10 @@ class Airport extends Model
         if (isset($filterByScores) && ! empty($filterByScores)) {
             return $query->leftJoin('airport_scores', 'airports.id', '=', 'airport_scores.airport_id')
                 ->selectRaw('airports.*, COUNT(airport_scores.id) as score_count')
-                ->whereIn('airport_scores.reason', $filterByScores)
+                ->where(function($query) use ($filterByScores) {
+                    $query->whereIn('airport_scores.reason', $filterByScores)
+                          ->orWhereNull('airport_scores.reason');
+                })
                 ->groupBy('airports.id')
                 ->orderBy('score_count', 'desc')
                 ->orderByRaw('RAND()'); // Randomize the order of airports with the same score count
