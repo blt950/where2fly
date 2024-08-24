@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Helpers\CalculationHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Airport;
 use App\Rules\AirportExists;
@@ -56,6 +57,8 @@ class SearchController extends Controller
         isset($data['arrivalWhitelist']) ? $arrivalWhitelist = $data['arrivalWhitelist'] : $arrivalWhitelist = null;
         isset($data['limit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
 
+        [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
+
         if (($arrival && $departure) || (! $arrival && ! $departure)) {
             // Dont allow this, return error json
             return response()->json([
@@ -74,16 +77,15 @@ class SearchController extends Controller
 
         $airports = collect();
         $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
-            ->inContinent($continent)->withinDistance($codeletter, $airtimeMin, $airtimeMax, $airport->icao)
+            ->inContinent($continent)->withinDistance($airport, $minDistance, $maxDistance, $airport->icao)
             ->filterRunwayLights($destinationRunwayLights)->filterAirbases($destinationAirbases)->filterByScores($filterByScores)
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
-            ->has('metar')->with('runways', 'scores', 'metar')->get();
+            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : null)
+            ->has('metar')->with('runways', 'scores', 'metar')
+            ->limit($resultLimit)
+            ->get();
 
         $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
-        $suggestedAirports = $suggestedAirports->shuffle();
-
-        $suggestedAirports = $suggestedAirports->sortByScores($filterByScores);
-        $suggestedAirports = $suggestedAirports->splice(0, $resultLimit);
 
         /**
          *  Prepare the data for the response

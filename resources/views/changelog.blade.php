@@ -20,6 +20,7 @@
                 <li>Added user defined airport lists</li>
                 <li>Fixed TAF not working for departure airport</li>
                 <li>Improved accessibility</li>
+                <li>Optimized search times</li>
             </ul>
 
             <h2 class="mb-0">v1.8.0</h2>

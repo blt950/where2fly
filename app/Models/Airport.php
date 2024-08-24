@@ -467,4 +467,19 @@ class Airport extends Model
             $query->whereIn('icao', $whitelistedArrivals);
         }
     }
+
+    /**
+     * Scope a query to only include airports that have the given scores
+     */
+    public function scopeSortByScores($query, $filterByScores)
+    {
+        if (isset($filterByScores) && ! empty($filterByScores)) {
+            return $query->leftJoin('airport_scores', 'airports.id', '=', 'airport_scores.airport_id')
+                ->selectRaw('airports.*, COUNT(airport_scores.id) as score_count')
+                ->whereIn('airport_scores.reason', $filterByScores)
+                ->groupBy('airports.id')
+                ->orderBy('score_count', 'desc')
+                ->orderByRaw('RAND()'); // Randomize the order of airports with the same score count
+        }
+    }
 }

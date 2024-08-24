@@ -10,27 +10,6 @@ use App\Models\Flight;
 
 class CollectionAirportFilter
 {
-    public function sortByScores()
-    {
-        return function ($sortByScores) {
-
-            $result = $this->sort(function ($a, $b) use ($sortByScores) {
-
-                $aScore = $a->scores->whereIn('reason', $sortByScores)->count();
-                $bScore = $b->scores->whereIn('reason', $sortByScores)->count();
-
-                if ($aScore == $bScore) {
-                    return 0;
-                }
-
-                return ($aScore > $bScore) ? -1 : 1;
-
-            });
-
-            return $result;
-        };
-    }
-
     public function filterWithCriteria()
     {
         return function ($departureAirport, $codeletter, $airtimeMin, $airtimeMax, $requiredMetcon = null, $runwayLengthMin = null, $runwayLengthMax = null, $airportElevationMin = null, $airportElevationMax = null) {
