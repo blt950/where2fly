@@ -64,6 +64,9 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/account/verify/', 'verifyNotice')->name('verification.notice');
     Route::get('/account/verify/{id}/{hash}', 'verifyEmail')->middleware(['auth', 'signed'])->name('verification.verify');
     Route::post('/account/verify/resend', 'verifyResendEmail')->middleware(['auth', 'throttle:1,10'])->name('verification.send');
+
+    // Admin
+    Route::get('/admin', 'showAdmin')->middleware(['auth', 'verified'])->name('admin');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

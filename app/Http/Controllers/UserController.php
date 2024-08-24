@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserList;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -173,5 +174,18 @@ class UserController extends Controller
         return $status === Password::PASSWORD_RESET
                     ? redirect()->route('login')->with('success', __($status))
                     : back()->with('error', __($status));
+    }
+
+    /**
+     * Show admin
+     */
+    public function showAdmin()
+    {
+        $this->authorize('showAdmin', User::class);
+
+        $usersCount = User::count();
+        $listsCount = UserList::count();
+
+        return view('account.admin', compact('usersCount', 'listsCount'));
     }
 }
