@@ -58,7 +58,7 @@
                 <select multiple 
                     multiselect-search="true" 
                     multiselect-select-all="true"
-                    multiselect-max-items="4"
+                    multiselect-max-items="1"
                     multiselect-hide-x="false"
                     name="whitelists[]"
                     placeholder="Restrict your search">
