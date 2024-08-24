@@ -171,7 +171,7 @@ function mapCreateCluster(style = null){
         showCoverageOnHover: false,
         maxClusterRadius: 40,
         iconCreateFunction: function(cluster) {
-            return L.divIcon({ html: '<div class="leaflet-marker-icon marker-cluster '+style+'">' + cluster.getChildCount() + '</div>' });
+            return L.divIcon({ iconSize: [40, 40], html: '<div class="leaflet-marker-icon marker-cluster '+style+'">' + cluster.getChildCount() + '</div>' });
         }
     });
 }
