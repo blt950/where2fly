@@ -15,4 +15,9 @@ class Simulator extends Model
     {
         return $this->hasMany(UserList::class);
     }
+
+    public function scenery()
+    {
+        return $this->hasMany(Scenery::class);
+    }
 }

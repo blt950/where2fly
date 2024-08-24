@@ -126,10 +126,13 @@ function mapDrawClickableAirports(airportMapData, cluster = null){
 function mapEventCardOpenPan(airportMapData){
     document.addEventListener('cardOpened', function(event) {
         var airport = event.detail.cardId;
+        var type = event.detail.type;
 
         // Focus on the airport
-        map.panTo([airportMapData[airport].lat, airportMapData[airport].lon],
-            {animate: true, duration: 0.5, easeLinearity: 0.25});
+        if(type == 'airport'){
+            map.panTo([airportMapData[airport].lat, airportMapData[airport].lon],
+                {animate: true, duration: 0.5, easeLinearity: 0.25});
+        }
     });
 }
 

@@ -48,6 +48,11 @@
     </dl>
 
     <div class="d-flex flex-wrap gap-2">
+
+        <button class="btn btn-outline-primary btn-sm font-work-sans" data-card-event="open" data-card-type="scenery" data-card-for="{{ $airport->icao }}-scenery">
+            <i class="fas fa-map"></i> Scenery
+        </button>
+
         <a class="btn btn-outline-primary btn-sm font-work-sans" href="https://windy.com/{{ $airport->icao }}" target="_blank">
             Windy <i class="fas fa-up-right-from-square"></i>
         </a>
@@ -71,8 +76,7 @@
             <a class="btn btn-outline-primary btn-sm font-work-sans" href="https://dispatch.simbrief.com/options/custom?dest={{ $airport->icao }}" target="_blank">
                 <span>SimBrief</span> <i class="fas fa-up-right-from-square"></i>
             </a>
-
-        @endif
+        @endif        
     </div>
 
 </div>

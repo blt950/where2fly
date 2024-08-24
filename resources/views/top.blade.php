@@ -79,7 +79,7 @@
         @include('layouts.legend')
     </div>
 
-    @include('parts.popupContainer', ['airportsMapCollection' => $airports])
+    @include('parts.popupContainer', ['airportsMapCollection' => $airports, 'sceneries' => $sceneriesCollection])
 
 @endsection
 
@@ -105,6 +105,12 @@
 
             // Pan upon clicking on a card
             mapEventCardOpenPan(airportMapData);
+        })
+
+        document.addEventListener('cardOpened', function(event) {
+            if(event.detail.type == 'airport'){
+                cardCloseAll('scenery')
+            }
         })
     </script>
 @endsection
