@@ -27,7 +27,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ Route::is('donate') ? 'active' : '' }}" href="#" target="_blank">
+                    <a class="nav-link {{ Route::is('donate') ? 'active' : '' }}" href="{{ route('donate') }}">
                         <i class="fas fa-donate"></i>&nbsp;
                         Donate
                     </a>

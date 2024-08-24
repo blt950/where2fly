@@ -93,6 +93,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::view('/changelog', 'changelog')->name('changelog');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/api', 'api')->name('api');
+Route::view('/donate', 'donate')->name('donate');
 
 // Redirects
 Route::get('/search', function () {
