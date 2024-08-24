@@ -167,21 +167,22 @@ class SearchController extends Controller
 
             // Get airports according to filter
             $airports = collect();
+            dd($sortByScores);
             $airports = Airport::airportOpen()->notIcao($primaryAirport->icao)->isAirportSize($destinationAirportSize)
                 ->inContinent($continent, $primaryAirport->iso_country)->withinDistance($primaryAirport, $minDistance, $maxDistance, $primaryAirport->icao)->withinBearing($primaryAirport, $flightDirection, $minDistance, $maxDistance)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                 ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                 ->returnOnlyWhitelistedIcao($whitelist)
-                ->has('metar')->with('runways', 'scores', 'metar')->get();
+                ->sortByScores($sortByScores)
+                ->has('metar')->with('runways', 'scores', 'metar')
+                ->limit(20)
+                ->get();
 
             // Filter the eligible airports
             $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
             // Shuffle the results before sort as slim results will quickly show airports from close by location
             // Sort the suggested airports based on the intended filters
-            $suggestedAirports = $suggestedAirports->shuffle();
-            $suggestedAirports = $suggestedAirports->sortByScores($sortByScores);
-            $suggestedAirports = $suggestedAirports->splice(0, 20);
             $suggestedAirports = $suggestedAirports->addFlights($primaryAirport, $direction);
 
             // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy
