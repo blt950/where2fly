@@ -68,6 +68,16 @@ function mapInit(airportCoordinates = null, focusAirport = null, focusContinent 
         attributionControl: false,
         zoomControl: false,
     }).setView([lat, lon], 4);
+    
+    // Set bounds based on search results so that the map is not too zoomed out
+    if(focusAirport !== null && airportCoordinates !== undefined && airportCoordinates !== null){
+        var bounds = [];
+        Object.values(airportCoordinates).forEach(airport => {
+            bounds.push([airport['lat'], airport['lon']]);
+        });
+
+        map.fitBounds(bounds, {padding: [50, 50], animate: false, duration: 0});
+    }
 
     // Set max bounds for map
     map.setMaxBounds([
