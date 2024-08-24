@@ -12,6 +12,7 @@ window.mapInit = mapInit;
 window.mapSaveView = mapSaveView;
 window.mapDrawClickableAirports = mapDrawClickableAirports;
 window.mapEventCardOpenPan = mapEventCardOpenPan;
+window.mapEventZoomTooltips = mapEventZoomTooltips;
 window.mapCreateCluster = mapCreateCluster;
 window.mapDrawMarker = mapDrawMarker;
 window.mapDrawRoute = mapDrawRoute;
@@ -123,6 +124,36 @@ function mapEventCardOpenPan(airportMapData){
 }
 
 /*
+* Function to hide/show tooltips based on airport size and zoom level
+*/
+function mapEventZoomTooltips(){
+
+    var zoomEvent = () => {
+        if(map.getZoom() >= 8){
+            map.eachLayer(function(layer) {
+                if(layer.airportType == 'small_airport') layer.openTooltip()
+            })
+        } else if(map.getZoom() < 8 && map.getZoom() > 5){
+            map.eachLayer(function(layer) {
+                if(layer.airportType == 'small_airport') layer.closeTooltip()
+                if(layer.airportType == 'medium_airport') layer.openTooltip()
+            })
+        } else if(map.getZoom() <= 5){
+            map.eachLayer(function(layer) {
+                if(layer.airportType == 'small_airport') layer.closeTooltip()
+                if(layer.airportType == 'medium_airport') layer.closeTooltip()
+            })
+        }
+    }
+
+    zoomEvent()
+
+    map.on('zoomend', function() {
+        zoomEvent()
+    });
+}
+
+/*
 * Function to create a cluster
 */
 function mapCreateCluster(style = null){
@@ -138,17 +169,25 @@ function mapCreateCluster(style = null){
 /*
 * Function to draw a marker
 */
-function mapDrawMarker(text, lat, lon, iconColor = null, clickFunction = ()=>{}, cluster = false){
 
+function mapDrawMarker(text, lat, lon, iconColor = null, clickFunction = ()=>{}, cluster = false, airportType = null){
     var color = (iconColor !== null) ? iconColor : "#ddb81c";
 
+    var iconSizePx = 10;
+    if(airportType == 'medium_airport'){
+        iconSizePx = 7;
+    } else if(airportType == 'small_airport'){
+        iconSizePx = 5;
+    }
+
     var icon = L.divIcon({
-        iconSize: [12, 12],
-        html: '<span style="display: block; width: 10px; height: 10px; border-radius: 50%; background: '+color+'"></span>'
+        iconSize: [iconSizePx, iconSizePx],
+        html: `<span style="display: block; width: ${iconSizePx}px; height: ${iconSizePx}px; border-radius: 50%; background: ${color}"></span>`
     });
 
     var marker = new L.marker([lat, lon], { icon:icon }).on('click', clickFunction);
-    marker.bindTooltip(`<span style="color: ${color};">${text}</span`, {permanent: true, direction: 'left', className: "airport", interactive: true});
+    marker.bindTooltip(`<span data-airport-type="${airportType}" style="color: ${color};">${text}</span>`, {permanent: true, direction: 'left', className: "airport", interactive: true})
+    marker.airportType = airportType;
 
     if(cluster !== false){
         cluster.addLayer(marker);
@@ -157,7 +196,6 @@ function mapDrawMarker(text, lat, lon, iconColor = null, clickFunction = ()=>{},
     }
 
     return marker
-
 }
 
 /*

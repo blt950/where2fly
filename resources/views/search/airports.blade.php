@@ -232,6 +232,24 @@
             // Apply initial map
             mapInit(airportCoordinates, focusAirport);
             primaryMarker = mapDrawMarker(focusAirport, airportCoordinates[focusAirport]['lat'], airportCoordinates[focusAirport]['lon']);
+
+            // Draw all results as grey markers
+            var cluster = mapCreateCluster('inverted');
+            for (var airport in airportCoordinates) {
+                if(airport != focusAirport){
+                    (function(airport) {
+                        mapDrawMarker(airport, airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon'], 'grey', () => {
+                            var card = document.querySelector('[data-card-id="' + airport + '"]')
+                            if(card){
+                                cardOpen(card, 'airport')
+                            }
+                        }, false, airportCoordinates[airport]['type']);
+                    })(airport)
+                }
+            }
+
+            // Toggle tooltips based on airport size to avoid big clusters
+            mapEventZoomTooltips()
         })
 
         document.addEventListener('cardOpened', function(event) {
@@ -242,5 +260,6 @@
                 cardCloseAll('flights')
             }
         })
+        
     </script>
 @endsection
