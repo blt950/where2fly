@@ -24,7 +24,7 @@
                 </div>
                 <div>
                     <i class="fas fa-check-circle text-success"></i>
-                    <span>Preferences to view only the simulators relevant for you</span>
+                    <span>Contribute with scenery links for airports</span>
                 </div>
                 <div>
                     <i class="fas fa-circle-dashed text-success"></i>
