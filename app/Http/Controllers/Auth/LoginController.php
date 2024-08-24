@@ -30,6 +30,11 @@ class LoginController extends Controller
         if ($user && Hash::check($request->password, $user->password)) {
             Auth::login($user);
 
+            // Route to the original url the user was trying to access before promoted with login
+            if ($request->session()->has('url.intended')) {
+                return redirect()->intended()->with('success', 'You have been logged in.');
+            }
+
             return redirect()->route('front')->with('success', 'You have been logged in.');
         } else {
             return back()->with('error', 'Invalid login credentials. Please try again.');
