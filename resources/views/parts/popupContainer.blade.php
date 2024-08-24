@@ -5,4 +5,10 @@
             @include('parts.mapCard', ['airport' => $airport])
         @endforeach
     @endisset
+
+    @isset($sceneriesCollection)
+        @foreach($airports as $airport)
+            @include('parts.sceneryCard', ['airport' => $airport, 'sceneries' => $sceneriesCollection])
+        @endforeach
+    @endisset
 </div>

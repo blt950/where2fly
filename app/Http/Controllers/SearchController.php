@@ -7,6 +7,7 @@ use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
 use App\Models\Flight;
+use App\Models\Scenery;
 use App\Models\UserList;
 use App\Rules\AirportExists;
 use App\Rules\FlightDirection;
@@ -204,7 +205,9 @@ class SearchController extends Controller
                     $airportCoordinates[$airport->icao]['type'] = $airport->type;
                 }
 
-                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning'));
+                $sceneriesCollection = Scenery::where('published', true)->whereIn('airport_id', $suggestedAirports->pluck('id'))->with('simulator')->get();
+
+                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning', 'sceneriesCollection'));
             }
 
         }

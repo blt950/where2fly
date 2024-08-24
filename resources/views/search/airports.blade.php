@@ -209,6 +209,10 @@
                 @include('parts.flightsCard', ['primaryAirport' => $primaryAirport, 'airport' => $airport, 'airline' => $airline, 'filterByAircrafts' => $filterByAircrafts])
             @endforeach
         @endforeach
+
+        @foreach($suggestedAirports as $airport)
+            @include('parts.sceneryCard', ['airport' => $airport, 'sceneries' => $sceneriesCollection])
+        @endforeach
     </div>
 
 @endsection
@@ -257,13 +261,14 @@
                 var airport = event.detail.cardId;
                 mapDrawRoute(focusAirport, airport, (direction == 'departure' ? false : true))
                 cardCloseAll('flights')
+                cardCloseAll('scenery')
 
                 // Give the respective row in table active class
                 var tableRow = document.querySelector('[data-card-for="' + airport + '"]')
                 if(tableRow){
                     tableRow.classList.add('active')
                 }
-                
+
                 // Remove from other table rows
                 var tableRows = document.querySelectorAll('[data-card-for]')
                 tableRows.forEach(function(row){

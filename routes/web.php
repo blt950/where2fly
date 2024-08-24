@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\SceneryController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TopController;
 use App\Http\Controllers\UserController;
@@ -77,6 +78,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/lists/{list}/edit', 'edit')->name('list.edit');
         Route::post('/lists/{list}/edit', 'update')->name('list.update');
         Route::get('/lists/{list}/delete', 'destroy')->name('list.delete');
+    });
+
+    Route::controller(SceneryController::class)->group(function () {
+        Route::get('/scenery/create', 'create')->name('scenery.create');
+        Route::post('/scenery/create', 'store')->name('scenery.store');
+        Route::get('/scenery/{scenery}/edit', 'edit')->name('scenery.edit');
+        Route::post('/scenery/{scenery}/edit', 'update')->name('scenery.update');
+        Route::get('/scenery/{scenery}/delete', 'destroy')->name('scenery.delete');
     });
 });
 

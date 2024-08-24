@@ -24,4 +24,9 @@ class Aircraft extends Model
     {
         return $this->belongsToMany(Flight::class, 'flight_aircraft', 'aircraft_id', 'flight_id');
     }
+
+    public function scenery()
+    {
+        return $this->belongsToMany(Scenery::class);
+    }
 }

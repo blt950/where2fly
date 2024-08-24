@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Scenery;
 use App\Models\User;
 use App\Models\UserList;
 use Illuminate\Auth\Events\PasswordReset;
@@ -185,7 +186,10 @@ class UserController extends Controller
 
         $usersCount = User::count();
         $listsCount = UserList::count();
+        $sceneriesCount = Scenery::count();
 
-        return view('account.admin', compact('usersCount', 'listsCount'));
+        $sceneries = Scenery::where('published', false)->get();
+
+        return view('account.admin', compact('usersCount', 'listsCount', 'sceneriesCount', 'sceneries'));
     }
 }
