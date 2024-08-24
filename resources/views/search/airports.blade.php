@@ -256,8 +256,21 @@
             if(event.detail.type == 'airport'){
                 var airport = event.detail.cardId;
                 mapDrawRoute(focusAirport, airport, (direction == 'departure' ? false : true))
-
                 cardCloseAll('flights')
+
+                // Give the respective row in table active class
+                var tableRow = document.querySelector('[data-card-for="' + airport + '"]')
+                if(tableRow){
+                    tableRow.classList.add('active')
+                }
+                
+                // Remove from other table rows
+                var tableRows = document.querySelectorAll('[data-card-for]')
+                tableRows.forEach(function(row){
+                    if(row != tableRow){
+                        row.classList.remove('active')
+                    }
+                })
             }
         })
         
