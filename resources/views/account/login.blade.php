@@ -4,6 +4,10 @@
 <meta name="description" content="Login into your account">
 @endsection
 
+@section('resources')
+    @turnstileScripts()
+@endsection
+
 @section('title', 'Login')
 @section('content')
 
@@ -34,6 +38,15 @@
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
+
+                <x-turnstile
+                    data-action="login"
+                    data-theme="light"
+                    data-language="en"
+                />
+                @error('cf-turnstile-response')
+                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
 
                 <div class="mb-4">
                     <a href="{{ route('account.recovery') }}">Forgot your password?</a>
