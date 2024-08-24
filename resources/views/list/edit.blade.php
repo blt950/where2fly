@@ -37,6 +37,18 @@
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
+
+            @if(Auth::user()->admin)
+                <div class="mb-3">
+                    <input class="form-check-input" type="checkbox" id="public" value="1" name="public" {{ $list->public ? 'checked' : null }}>
+                    <label class="form-check-label" for="public">
+                        Public
+                    </label>
+                    @error('public')
+                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    @enderror
+                </div>
+            @endif
             
             <div class="d-flex justify-content-between">
                 <a href="{{ route('list.delete', $list) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this list?')">

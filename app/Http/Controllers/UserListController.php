@@ -49,13 +49,20 @@ class UserListController extends Controller
             'name' => 'required|max:32',
             'simulator' => 'required|exists:simulators,id',
             'airports' => 'required|string',
+            'public' => 'boolean',
         ]);
+
+        $request->public = $request->public ? true : false;
+        if($request->public) {
+            $this->authorize('public', UserList::class);
+        }
 
         $list = new UserList();
         $list->color = $request->color;
         $list->name = $request->name;
         $list->simulator_id = $request->simulator;
         $list->user_id = Auth::id();
+        $list->public = $request->public;
         $list->save();
 
         // Explode based on line breaks and attach each airport to the list
@@ -108,11 +115,18 @@ class UserListController extends Controller
             'name' => 'required|max:32',
             'simulator' => 'required|exists:simulators,id',
             'airports' => 'required|string',
+            'public' => 'boolean',
         ]);
+
+        $request->public = $request->public ? true : false;
+        if($request->public) {
+            $this->authorize('public', UserList::class);
+        }
 
         $list->color = $request->color;
         $list->name = $request->name;
         $list->simulator_id = $request->simulator;
+        $list->public = $request->public;
         $list->save();
 
         // Explode based on line breaks and attach each airport to the list

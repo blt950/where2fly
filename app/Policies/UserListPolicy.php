@@ -30,4 +30,11 @@ class UserListPolicy
     {
         return $user->id === $userList->user_id;
     }
+
+    /**
+     * Determine whether the user can make the list public.
+     */
+    public function public(User $user){
+        return $user->admin;
+    }
 }

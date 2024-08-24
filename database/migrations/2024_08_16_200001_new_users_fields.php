@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('name', 'username');
             $table->string('username', 32)->change();
+            $table->boolean('admin')->default(false)->after('password');
             $table->timestamp('last_activity_at')->nullable();
 
         });
@@ -27,6 +28,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('username', 'name');
             $table->string('name', 255)->change();
+            $table->dropColumn('admin');
             $table->dropColumn('last_activity_at');
 
             $table->dropUnique('users_username_unique');
