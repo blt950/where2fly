@@ -34,7 +34,8 @@ class UserListPolicy
     /**
      * Determine whether the user can make the list public.
      */
-    public function public(User $user){
+    public function public(User $user)
+    {
         return $user->admin;
     }
 }

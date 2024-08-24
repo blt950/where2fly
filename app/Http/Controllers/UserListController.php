@@ -53,7 +53,7 @@ class UserListController extends Controller
         ]);
 
         $request->public = $request->public ? true : false;
-        if($request->public) {
+        if ($request->public) {
             $this->authorize('public', UserList::class);
         }
 
@@ -119,7 +119,7 @@ class UserListController extends Controller
         ]);
 
         $request->public = $request->public ? true : false;
-        if($request->public) {
+        if ($request->public) {
             $this->authorize('public', UserList::class);
         }
 

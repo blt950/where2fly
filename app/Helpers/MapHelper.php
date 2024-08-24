@@ -3,14 +3,13 @@
 namespace App\Helpers;
 
 use App\Models\User;
-use App\Models\UserList;
 use Illuminate\Support\Collection;
 
 class MapHelper
 {
     /**
      * Generate airport map data from airports
-     * @param Collection|array $airports
+     *
      * @return string
      */
     public static function generateAirportMapDataFromAirports(Collection|array $airports)
@@ -30,7 +29,7 @@ class MapHelper
 
     /**
      * Get airports from user lists
-     * @param Collection $userLists
+     *
      * @return array
      */
     public static function getAirportsFromUserLists(Collection $userLists)

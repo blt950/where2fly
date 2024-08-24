@@ -3,10 +3,10 @@
 namespace App\Providers;
 
 use App\Helpers\MapHelper;
+use App\Models\UserList;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use App\Models\UserList;
 
 class UserListsProvider extends ServiceProvider
 {
