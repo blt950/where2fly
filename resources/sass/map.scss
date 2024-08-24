@@ -45,10 +45,21 @@
     background: $primary;
     border-radius: 50%;
 
+    width: 40px;
+    height: 40px;
+
+    margin-left: -20px;
+    margin-top: -20px;
+
     font-family: 'Work Sans', sans-serif;
     font-size: 1rem;
     text-align: center;
     align-content: center;
+
+    &.inverted{
+        color: $primary;
+        background: #202538;
+    }
 }
 
 .popup{

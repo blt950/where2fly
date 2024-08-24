@@ -125,10 +125,13 @@ function mapEventCardOpenPan(airportMapData){
 /*
 * Function to create a cluster
 */
-function mapCreateCluster(){
+function mapCreateCluster(style = null){
     return L.markerClusterGroup({
         showCoverageOnHover: false,
-        maxClusterRadius: 40
+        maxClusterRadius: 40,
+        iconCreateFunction: function(cluster) {
+            return L.divIcon({ html: '<div class="leaflet-marker-icon marker-cluster '+style+'">' + cluster.getChildCount() + '</div>' });
+        }
     });
 }
 

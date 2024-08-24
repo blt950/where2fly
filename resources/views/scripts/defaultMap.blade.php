@@ -4,7 +4,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         mapInit();
 
-        var cluster = mapCreateCluster();
+        var cluster = mapCreateCluster('inverted');
         mapDrawClickableAirports(airportMapData, cluster);
         map.addLayer(cluster);
 
