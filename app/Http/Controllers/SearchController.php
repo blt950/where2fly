@@ -156,13 +156,16 @@ class SearchController extends Controller
                     ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                     ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                     ->returnOnlyWhitelistedIcao($whitelist)
-                    ->has('metar')->with('runways', 'scores', 'metar')->get();
+                    ->sortByScores($sortByScores)
+                    ->has('metar')->with('runways', 'scores', 'metar')
+                    ->limit(10)
+                    ->get();
 
                 if (! $primaryAirport || ! $primaryAirport->count()) {
                     return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
                 }
 
-                $primaryAirport = $primaryAirport->sortByScores($filterByScores)->shuffle()->slice(0, 10)->random();
+                $primaryAirport = $primaryAirport->random();
                 $suggestedAirport = true;
             }
 
