@@ -15,6 +15,11 @@
     }
 }
 
+.leaflet-div-icon{
+    background: transparent;
+    border: 0;
+}
+
 .leaflet-container {
     background: #000;
 }
@@ -40,10 +45,21 @@
     background: $primary;
     border-radius: 50%;
 
+    width: 40px;
+    height: 40px;
+
+    margin-left: -20px;
+    margin-top: -20px;
+
     font-family: 'Work Sans', sans-serif;
     font-size: 1rem;
     text-align: center;
     align-content: center;
+
+    &.inverted{
+        color: white;
+        background: #202538;
+    }
 }
 
 .popup{
@@ -108,5 +124,40 @@
             }
         }
 
+    }
+}
+
+.hint{
+
+    height: auto;
+    width: 275px;
+    
+    position: absolute;
+    right: 1rem;
+    top: calc($header-height + 1rem);
+    padding: 1rem;
+
+    background: rgba($secondary, 0.5);
+
+    z-index: 500;
+    pointer-events: none;
+
+    color: $gray-200;
+    border: 1px solid $gray-500;
+
+    @include media-breakpoint-down(xl) { 
+        display: none;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: -10px; /* Adjust as needed */
+        right: 30px; /* Adjust as needed */
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 10px solid $gray-500; /* Same color as the background of the div */
     }
 }

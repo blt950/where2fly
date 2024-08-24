@@ -223,24 +223,23 @@
     <script>
         var airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
         var focusAirport = '{{ $primaryAirport->icao }}';
-        var iconUrl = '{{ asset('img/circle.svg') }}';
         var direction = '{{ $direction }}';
 
         document.addEventListener('DOMContentLoaded', function() {
             // Apply click events on card related triggers
-            initCardEvents()
+            cardsInitEvents()
 
             // Apply initial map
-            initMap(airportCoordinates, focusAirport);
-            primaryMarker = drawMarker(focusAirport, airportCoordinates[focusAirport]['lat'], airportCoordinates[focusAirport]['lon'], iconUrl);
+            mapInit(airportCoordinates, focusAirport);
+            primaryMarker = mapDrawMarker(focusAirport, airportCoordinates[focusAirport]['lat'], airportCoordinates[focusAirport]['lon']);
         })
 
         document.addEventListener('cardOpened', function(event) {
             if(event.detail.type == 'airport'){
                 var airport = event.detail.cardId;
-                drawRoute(focusAirport, airport, iconUrl, (direction == 'departure' ? false : true))
+                mapDrawRoute(focusAirport, airport, (direction == 'departure' ? false : true))
 
-                closeAllCards('flights')
+                cardCloseAll('flights')
             }
         })
     </script>

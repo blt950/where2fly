@@ -79,12 +79,7 @@
         @include('layouts.legend')
     </div>
 
-    <div class="popup-container">
-        {{-- Let's draw all airport cards here --}}
-        @foreach($airports as $airport)
-            @include('parts.mapCard', ['airport' => $airport])
-        @endforeach
-    </div>
+    @include('parts.popupContainer', ['airportsMapCollection' => $airports])
 
 @endsection
 
@@ -96,42 +91,20 @@
     @vite('resources/js/cards.js')
     @vite('resources/js/map.js')
     <script>
-        var airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
+        var airportMapData = {!! isset($airportMapData) ? $airportMapData : '[]' !!}
         var focusContinent = {!! isset($continent) ? '\''.$continent.'\'' : 'null' !!};
-        var iconUrl = '{{ asset('img/circle.svg') }}';
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Apply click events on card related triggers
-            initCardEvents()
+            cardsInitEvents()
+            mapInit(airportMapData, null, focusContinent);
 
-            // Initialize the map
-            initMap(airportCoordinates, null, focusContinent);
-
-            // Draw the top airports
-            var cluster = createCluster();
-            Object.keys(airportCoordinates).forEach(airport => {
-                // Prepare the on click function
-                onClickFunc = () => {
-                    var card = document.querySelector('[data-card-id="' + airport + '"]')
-                    if(card){
-                        openCard(card, 'airport')
-                    }
-                }
-
-                // Draw the marker
-                drawMarker(airport, airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon'], iconUrl, onClickFunc, cluster);
-            })
-
-            // Add the cluster to the map
+            // Draw the top airports and click events
+            var cluster = mapCreateCluster();
+            mapDrawClickableAirports(airportMapData, cluster);
             map.addLayer(cluster);
-        })
 
-        document.addEventListener('cardOpened', function(event) {
-            var airport = event.detail.cardId;
-
-            // Focus on the airport
-            map.panTo([airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon']],
-                {animate: true, duration: 0.5, easeLinearity: 0.25});
+            // Pan upon clicking on a card
+            mapEventCardOpenPan(airportMapData);
         })
     </script>
 @endsection

@@ -4,15 +4,15 @@
     ***
 */
 
-window.initCardEvents = initCardEvents;
-window.openCard = openCard;
-window.closeCard = closeCard;
-window.closeAllCards = closeAllCards;
+window.cardsInitEvents = cardsInitEvents;
+window.cardOpen = cardOpen;
+window.cardClose = cardClose;
+window.cardCloseAll = cardCloseAll;
 
 /*
 * Function to open a card
 */
-function initCardEvents(){
+function cardsInitEvents(){
 
     // Fetch all elements with data-card-event="open" attribute and add click event
     document.querySelectorAll('[data-card-event="open"]').forEach(function(element){
@@ -20,7 +20,7 @@ function initCardEvents(){
         var type = element.getAttribute('data-card-type')
         var card = document.querySelector('[data-card-id="'+cardId+'"]')
         element.addEventListener('click', function(){
-            openCard(card, type);
+            cardOpen(card, type);
         });
     });
 
@@ -30,7 +30,7 @@ function initCardEvents(){
         var type = element.getAttribute('data-card-type')
         var card = document.querySelector('[data-card-id="'+cardId+'"]')
         element.addEventListener('click', function(){
-            closeCard(card, type);
+            cardClose(card, type);
         });
     });
 
@@ -40,8 +40,8 @@ function initCardEvents(){
 * Function to open a card
 */
 var openCards = []
-function openCard(element, type){
-    closeAllCards(type)
+function cardOpen(element, type){
+    cardCloseAll(type)
     
     // Show the new card
     element.classList.add('show')
@@ -63,7 +63,7 @@ function openCard(element, type){
 /*
 * Function to close a card
 */
-function closeCard(element, type){
+function cardClose(element, type){
     element.classList.remove('show')
 
     // Remove from openCards array
@@ -75,11 +75,11 @@ function closeCard(element, type){
 /*
 * Function to close all open cards
 */
-function closeAllCards(type){
+function cardCloseAll(type){
     if(openCards[type] === undefined){ openCards[type] = [] }
 
     openCards[type].forEach(function(card){
-        closeCard(card, type);
+        cardClose(card, type);
     });
 
     openCards[type] = [];

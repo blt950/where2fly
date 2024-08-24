@@ -54,8 +54,27 @@
     padding: 10px;
 }
 
+.list-title{
+    div{
+        height: 1.5rem;
+        width: 1.5rem;
+    }
+
+    strong{
+        margin-left: 1rem;
+        width: 150px;
+
+        @include media-breakpoint-down(md) {
+            width: 100px;
+        }
+    }
+}
+
 /* Add Discord colored alert */
 .alert{
+
+    margin-bottom: 0;
+
     &.alert-discord{
         background-color: #7289DA;
         border-color: #7289DA;
