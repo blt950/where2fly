@@ -26,7 +26,7 @@
                 <a class="btn btn-sm {{ $continent == 'SA' ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('top.filtered', 'SA') }}">South America</a>
             </span>
 
-            <span><strong class="d-block">VATSIM</strong>
+            <span><strong class="d-block">VATSIM Conditions</strong>
                 <a class="btn btn-sm {{ $exclude === null ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route(Route::currentRouteName(), $continent) }}">Include</a>
                 <a class="btn btn-sm {{ $exclude == 'vatsim' ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route(Route::currentRouteName(), $continent) }}?exclude=vatsim">Exclude</a>
             </span>
