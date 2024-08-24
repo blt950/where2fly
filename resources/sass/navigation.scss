@@ -46,6 +46,27 @@
             color: #fff;
             border-bottom-color: $primary;
         }
+
+        .dropdown-menu{
+            left: auto;
+            right: 0;
+
+            color: white;
+            background: $secondary;
+
+            a{
+                color: white;
+            }
+
+            a:hover{
+                color: black;
+                background: white;
+            }
+
+            .dropdown-divider{
+                border-top: 1px solid $gray;
+            }
+        }
     }
 
     .navbar-toggler{

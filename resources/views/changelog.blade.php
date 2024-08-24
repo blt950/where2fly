@@ -16,8 +16,10 @@
             <span class="badge ps-0 pb-2">2024-xx-xx</span>
             <ul>
                 <li>New design with map view</li>
-                <li>Improved accessibility</li>
+                <li>Added account creation</li>
+                <li>Added user defined airport lists</li>
                 <li>Fixed TAF not working for departure airport</li>
+                <li>Improved accessibility</li>
             </ul>
 
             <h2 class="mb-0">v1.8.0</h2>
@@ -225,13 +227,15 @@
             </ul>
         </div>
     </div>
+
+    @isset($airportsMapCollection)
+        @include('parts.popupContainer', ['airportsMapCollection' => ($airportsMapCollection)])
+    @endisset
 @endsection
 
 @section('js')
+    @vite('resources/js/functions/taf.js')
+    @vite('resources/js/cards.js')
     @vite('resources/js/map.js')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            initMap();
-        })
-    </script>
+    @include('scripts.defaultMap')
 @endsection

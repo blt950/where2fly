@@ -48,7 +48,6 @@
 @import "forms.scss";
 @import "filters.scss";
 @import "map.scss";
-@import "modals.scss";
 @import "multiselect.scss";
 @import "navigation.scss";
 @import "scrollbar.scss";
@@ -146,4 +145,8 @@ footer{
     @include media-breakpoint-down(lg) { 
         display: none;
     }
+}
+
+.font-size-1rem {
+    font-size: 1rem;
 }

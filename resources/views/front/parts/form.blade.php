@@ -52,6 +52,21 @@
             <div id="slider-airtime" class="mt-1 mb-1"></div>
             <span id="slider-airtime-text">0-12 hours</span>
         </div>
+
+        <div class="col-xs-12 text-start">
+            <label>Whitelist</label>
+                <select multiple 
+                    multiselect-search="true" 
+                    multiselect-select-all="true"
+                    multiselect-max-items="4"
+                    multiselect-hide-x="false"
+                    name="whitelists[]"
+                    placeholder="Restrict your search">
+                    @foreach($lists as $list)
+                        <option value="{{ $list->id }}">{{ $list->name }}</option>
+                    @endforeach
+            </select>
+        </div>
         
         <div class="col-xs-12 text-start">
             <label>Order by</label>

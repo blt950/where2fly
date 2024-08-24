@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TopController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserListController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,22 +18,71 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [SearchController::class, 'indexArrivalSearch'])->name('front');
-Route::get('/departures/', [SearchController::class, 'indexDepartureSearch'])->name('front.departures');
-Route::get('/routes/', [SearchController::class, 'indexRouteSearch'])->name('front.routes');
+// SearchController
+Route::controller(SearchController::class)->group(function () {
+    Route::get('/', 'indexArrivalSearch')->name('front');
+    Route::get('/departures/', 'indexDepartureSearch')->name('front.departures');
+    Route::get('/routes/', 'indexRouteSearch')->name('front.routes');
 
-Route::get('/top', [TopController::class, 'index'])->name('top');
-Route::get('/top/{continent}', [TopController::class, 'index'])->name('top.filtered');
+    Route::post('/search', 'search')->name('search');
+    Route::post('/search/routes', 'searchRoutes')->name('search.routes');
+});
+
+// TopController
+Route::controller(TopController::class)->group(function () {
+    Route::get('/top', 'index')->name('top');
+    Route::get('/top/{continent}', 'index')->name('top.filtered');
+});
+
+// User account related routes
+Route::controller(LoginController::class)->group(function () {
+    Route::get('/register', 'showRegister')->name('register');
+    Route::get('/login', 'showLogin')->name('login');
+    Route::post('/login', 'login')->name('user.login');
+    Route::get('/logout', 'logout')->name('user.logout');
+});
+
+// User account related routes
+Route::controller(UserController::class)->group(function () {
+
+    // Account creation
+    Route::post('/register', 'store')->middleware('guest')->name('user.register');
+
+    // Account reset
+    Route::middleware('guest')->group(function () {
+        Route::get('/account/recovery', 'resetRequestForm')->name('account.recovery');
+        Route::post('/account/recovery', 'resetSendLink');
+        Route::get('/account/recovery/reset/{token}', 'resetForm')->name('password.reset');
+        Route::post('/account/recovery/reset/', 'resetPassword')->name('password.update');
+    });
+
+    // Account pages
+    Route::get('/account', 'show')->middleware(['auth', 'verified'])->name('user.account');
+    Route::post('/account/delete', 'destroy')->name('user.delete');
+
+    // Account email verification
+    Route::get('/account/verify/', 'verifyNotice')->name('verification.notice');
+    Route::get('/account/verify/{id}/{hash}', 'verifyEmail')->middleware(['auth', 'signed'])->name('verification.verify');
+    Route::post('/account/verify/resend', 'verifyResendEmail')->middleware(['auth', 'throttle:1,10'])->name('verification.send');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::controller(UserListController::class)->group(function () {
+        Route::get('/lists', 'index')->name('list.index');
+        Route::get('/lists/create', 'create')->name('list.create');
+        Route::post('/lists/create', 'store')->name('list.store');
+        Route::get('/lists/{list}/edit', 'edit')->name('list.edit');
+        Route::post('/lists/{list}/edit', 'update')->name('list.update');
+        Route::get('/lists/{list}/delete', 'destroy')->name('list.delete');
+    });
+});
 
 // Pure views
 Route::view('/changelog', 'changelog')->name('changelog');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/api', 'api')->name('api');
 
-// Search
-Route::post('/search', [SearchController::class, 'search'])->name('search');
-Route::post('/search/routes', [SearchController::class, 'searchRoutes'])->name('search.routes');
-
+// Redirects
 Route::get('/search', function () {
     return redirect(route('front'));
 });
