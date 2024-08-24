@@ -6,6 +6,7 @@ use App\Helpers\MapHelper;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use App\Models\UserList;
 
 class UserListsProvider extends ServiceProvider
 {
@@ -16,13 +17,11 @@ class UserListsProvider extends ServiceProvider
     {
         View::composer('*', function ($view) {
             if (Auth::check()) {
-                if (! $view->offsetExists('airportsMapCollection')) {
-                    $airportsMapCollection = Auth::user()->getAirportsFromLists();
+                if (! $view->offsetExists('airportsMapCollection') && ! $view->offsetExists('airportMapData')) {
+                    $userLists = UserList::where('user_id', Auth::id())->with('airports', 'airports.metar', 'airports.runways')->get();
+                    $airportsMapCollection = MapHelper::getAirportsFromUserLists($userLists);
+                    $airportMapData = MapHelper::generateAirportMapDataFromAirports($airportsMapCollection);
                     $view->with('airportsMapCollection', $airportsMapCollection);
-                }
-
-                if (! $view->offsetExists('airportMapData')) {
-                    $airportMapData = MapHelper::generateAirportMapDataFromUserLists(Auth::user());
                     $view->with('airportMapData', $airportMapData);
                 }
             }

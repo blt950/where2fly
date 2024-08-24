@@ -12,7 +12,7 @@
                 <div style="background: {{ $list->color }}"></div>
                 <strong>{{ $list->name }}</strong>
             </div>
-            <span>{{ $list->airports->count() }} airports</span>
+            <span>{{ $list->airports_count }} airports</span>
             <div>
                 <a href="{{ route('list.edit', $list) }}" class="btn btn-outline-primary"><i class="fas fa-pencil"></i> Edit</a>
             </div>

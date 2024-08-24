@@ -23,7 +23,7 @@ class TopController extends Controller
             $airports->push($as->airport);
         }
 
-        $airportMapData = MapHelper::generateAirportMapData($airports);
+        $airportMapData = MapHelper::generateAirportMapDataFromAirports($airports);
 
         return view('top', compact('airports', 'airportMapData', 'continent', 'exclude'));
     }
