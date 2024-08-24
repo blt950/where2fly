@@ -20,6 +20,7 @@
 @endsection
 
 @section('js')
+    @vite('resources/js/functions/taf.js')
     @vite('resources/js/cards.js')
     @vite('resources/js/map.js')
     @include('scripts.defaultMap')
