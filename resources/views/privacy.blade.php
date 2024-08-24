@@ -29,7 +29,7 @@
             <h3 class="fs-5 fw-normal mt-3">Subprocessors</h3>
             <p class="font-work-sans">
             <ul>
-                <li><u>Mailtrap:</u> Used as a subprocessor for sending out emails, ensuring that your email address is handled securely.</li>
+                <li><u>Scaleway:</u> EU-based service for sending out emails, ensuring that your email address is handled securely.</li>
                 <li><u>Self-hosted Plausible Analytics:</u> Used for website analytics with privacy in mind, without tracking your personal data.</li>
             </ul>
         
