@@ -142,7 +142,8 @@
     z-index: 500;
     pointer-events: none;
 
-    border: 1px solid white;
+    color: $gray-200;
+    border: 1px solid $gray-500;
 
     @include media-breakpoint-down(xl) { 
         display: none;
@@ -157,6 +158,6 @@
         height: 0;
         border-left: 10px solid transparent;
         border-right: 10px solid transparent;
-        border-bottom: 10px solid #f9f9f9; /* Same color as the background of the div */
+        border-bottom: 10px solid $gray-500; /* Same color as the background of the div */
     }
 }
