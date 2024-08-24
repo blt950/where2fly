@@ -18,6 +18,7 @@
                 <li>New design with map view</li>
                 <li>Added account creation</li>
                 <li>Added user defined airport lists</li>
+                <li>Added scenery links for airports</li>
                 <li>Fixed TAF not working for departure airport</li>
                 <li>Improved accessibility</li>
                 <li>Optimized search times</li>
