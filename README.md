@@ -25,6 +25,12 @@ A web service suggesting where to fly next.
 - Update the Docker container
 - Remember to run `docker exec -it where2fly php artisan migrate`
 
+## Updating Airports Database
+- Download the latest Airports & Runways data from OurAirports as CSV
+- Truncate the airports database
+- Import the CSV into the database
+- Run all the enrich commands to enrich the data of airports and other connections
+
 ## Data Sources
 Airports & Runways: https://ourairports.com/
 
