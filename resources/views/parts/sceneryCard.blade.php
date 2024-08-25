@@ -13,9 +13,14 @@
                 <span class="badge bg-blue">
                     {{ $scenery->simulator->shortened_name }}
                 </span>
-                <span class="badge bg-{{ ($scenery->payware) ? 'info' : 'success' }}">
-                    {{ ($scenery->payware) ? 'Payware' : 'Freeware' }}
-                </span>
+                @if($scenery->payware == -1)
+                    <span class="badge bg-danger">Included</span>
+                @elseif($scenery->payware == 0)
+                    <span class="badge bg-success">Freeware</span>
+                @else
+                    <span class="badge bg-info">Payware</span>
+                @endif
+
                 &nbsp;{{ $scenery->author }} <i class="fas fa-up-right-from-square float-end pt-1"></i>
             </a>
         @endforeach
