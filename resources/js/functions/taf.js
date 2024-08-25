@@ -13,6 +13,8 @@ tafButtons.forEach(element => {
 
 function fetchTAF(icao, element){
 
+    plausible('Interactions', {props: {fetch: 'TAF'}});
+
     fetch('https://api.met.no/weatherapi/tafmetar/1.0/taf.txt?icao='+icao)
         .then(response => {
             if (!response.ok) {
