@@ -24,7 +24,12 @@ class UserListsProvider extends ServiceProvider
                     $airportMapData = MapHelper::generateAirportMapDataFromAirports($airportsMapCollection);
 
                     $airports = collect($airportsMapCollection);
-                    $sceneriesCollection = Scenery::where('published', true)->whereIn('airport_id', collect($airports)->pluck('id'))->with('simulator')->get();
+                    $sceneriesCollection = Scenery::where('published', true)
+                        ->whereIn('airport_id', collect($airports)->pluck('id'))
+                        ->with('simulator')
+                        ->orderBy('payware', 'desc')
+                        ->orderBy('author', 'asc')
+                        ->get();
 
                     $view->with('airportsMapCollection', $airportsMapCollection);
                     $view->with('airportMapData', $airportMapData);
