@@ -92,7 +92,7 @@ addEventListener('pageshow', (event) => {
 
     // Expand filters if they were expanded prior to page navigation
     if(sessionStorage.getItem('filterExpanded') == 'true'){
-        expandFilters()
+        expandFilters(true)
     }
 });
 
@@ -101,8 +101,13 @@ addEventListener('pageshow', (event) => {
 //
 
 var filterExpanded = false;
-function toggleFilters(){
+function toggleFilters(goingBack = false){
     if (!filterExpanded) {
+
+        if(!goingBack){
+            plausible('Interactions', {props: {interaction: 'Expand Filters'}});
+        }
+
         expandFilters();
     } else {
         contractFilters();
@@ -131,7 +136,6 @@ function expandFilters(filter){
 
 if(document.getElementById('expandFilters') !== null){
     document.getElementById('expandFilters').addEventListener('click', function () {
-        plausible('Interactions', {props: {interaction: 'Toggle Filters'}});
         toggleFilters()
     });
 }
