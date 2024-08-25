@@ -8,16 +8,25 @@
 // Search
 //
 
-var button = document.getElementById('submitBtn');
-button.addEventListener('click', function() {
-    button.setAttribute('disabled', '')
-    button.innerHTML = 'Search&nbsp;&nbsp;<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
-    document.getElementById('form').submit()
+var submitButtons = Array.from(document.getElementsByClassName('submitBtn'));
+submitButtons.forEach(function(button) {
+    button.addEventListener('click', function() {
+        var btns = Array.from(document.getElementsByClassName('submitBtn'));
+        btns.forEach(function(btn) {
+            btn.setAttribute('disabled', '')
+            btn.innerHTML = 'Search&nbsp;&nbsp;<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
+        });
+
+        document.getElementById('form').submit()
+    });
 });
 
 addEventListener('pageshow', (event) => {
-    button.removeAttribute('disabled')
-    button.innerHTML = 'Search&nbsp;&nbsp;<i class="fas fa-search"></i>'
+
+    submitButtons.forEach(function(button) {
+        button.removeAttribute('disabled')
+        button.innerHTML = 'Search&nbsp;&nbsp;<i class="fas fa-search"></i>'
+    });
 
     // Expand filters if they were expanded prior to page navigation
     if(sessionStorage.getItem('filterExpanded') == 'true'){
