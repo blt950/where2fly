@@ -13,7 +13,7 @@
         <div class="text-start">
             
             <h2 class="mb-0">v2.0.0</h2>
-            <span class="badge ps-0 pb-2">2024-xx-xx</span>
+            <span class="badge ps-0 pb-2">2024-08-25</span>
             <ul>
                 <li>New design with map view</li>
                 <li>Added account creation</li>
