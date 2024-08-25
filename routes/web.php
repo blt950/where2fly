@@ -50,12 +50,10 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/register', 'store')->middleware('guest')->name('user.register');
 
     // Account reset
-    Route::middleware('guest')->group(function () {
-        Route::get('/account/recovery', 'resetRequestForm')->name('account.recovery');
-        Route::post('/account/recovery', 'resetSendLink');
-        Route::get('/account/recovery/reset/{token}', 'resetForm')->name('password.reset');
-        Route::post('/account/recovery/reset/', 'resetPassword')->name('password.update');
-    });
+    Route::get('/account/recovery', 'resetRequestForm')->name('account.recovery');
+    Route::post('/account/recovery', 'resetSendLink');
+    Route::get('/account/recovery/reset/{token}', 'resetForm')->name('password.reset');
+    Route::post('/account/recovery/reset/', 'resetPassword')->name('password.update');
 
     // Account pages
     Route::get('/account', 'show')->middleware(['auth', 'verified'])->name('user.account');
