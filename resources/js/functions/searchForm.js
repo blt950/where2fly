@@ -8,6 +8,75 @@
 // Search
 //
 
+function submitFormMetrics(){
+    var form = document.getElementById('form');
+    var includeCheckboxes = [
+        'scores[METAR_WINDY]',
+        'scores[METAR_GUSTS]',
+        'scores[METAR_CROSSWIND]',
+        'scores[METAR_SIGHT]',
+        'scores[METAR_RVR]',
+        'scores[METAR_CEILING]',
+        'scores[METAR_FOGGY]',
+        'scores[METAR_HEAVY_RAIN]',
+        'scores[METAR_HEAVY_SNOW]',
+        'scores[METAR_THUNDERSTORM]',
+        'metcondition',
+        'scores[VATSIM_ATC]',
+        'scores[VATSIM_EVENT]',
+        'scores[VATSIM_POPULAR]',
+        'destinationWithRoutesOnly',
+        'destinationRunwayLights',
+        'destinationAirbases',
+        'flightDirection'
+    ]
+    var props = {}
+    Array.from(form.elements).forEach(function(element){
+        //console.log(element.name + ' ' + element.value)
+
+        if(element.name == 'icao'){
+            props.icao = element.value || 'Random';
+            console.log('ICAO: ' + props.icao);
+        }
+
+        if(element.name == 'continent'){
+            var selected = element.options[element.selectedIndex];
+            props.continent = selected.value;
+            console.log('Continent: ' + selected.value);
+        }
+
+        if(element.name == 'codeletter'){
+            var selected = element.options[element.selectedIndex];
+            props.codeletter = selected.value;
+            console.log('Code Letter: ' + selected.value);
+        }
+
+        if(element.name == 'sortByWeather'){
+            props.sortByWeather = (element.checked) ? true : false;
+            console.log('Sort By Weather: ' + props.sortByWeather);
+        }
+
+        if(element.name == 'sortByATC'){
+            props.sortByATC = (element.checked) ? true : false;
+            console.log('Sort By ATC: ' + props.sortByATC);
+        }
+
+        includeCheckboxes.forEach(function(checkbox){
+            if(element.name == checkbox & element.checked){
+                // Remove the scores in name
+                if(checkbox.includes('scores[')){
+                    checkbox = checkbox.replace('scores[', '');
+                    checkbox = checkbox.replace(']', '');
+                }
+                props[checkbox] = element.value;
+                console.log('checkbox: ' + checkbox + ' ' + element.value);
+            }
+        });
+    });
+
+    plausible('Search', {props: props});
+}
+
 var submitButtons = Array.from(document.getElementsByClassName('submitBtn'));
 submitButtons.forEach(function(button) {
     button.addEventListener('click', function() {
@@ -17,6 +86,7 @@ submitButtons.forEach(function(button) {
             btn.innerHTML = 'Search&nbsp;&nbsp;<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
         });
 
+        submitFormMetrics();
         document.getElementById('form').submit()
     });
 });
@@ -69,6 +139,7 @@ function expandFilters(filter){
 
 if(document.getElementById('expandFilters') !== null){
     document.getElementById('expandFilters').addEventListener('click', function () {
+        plausible('Interactions', {props: {interaction: 'Toggle Filters'}});
         toggleFilters()
     });
 }
