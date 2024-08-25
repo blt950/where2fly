@@ -32,33 +32,26 @@ function submitFormMetrics(){
     ]
     var props = {}
     Array.from(form.elements).forEach(function(element){
-        //console.log(element.name + ' ' + element.value)
-
         if(element.name == 'icao'){
             props.icao = element.value || 'Random';
-            console.log('ICAO: ' + props.icao);
         }
 
         if(element.name == 'continent'){
             var selected = element.options[element.selectedIndex];
             props.continent = selected.value;
-            console.log('Continent: ' + selected.value);
         }
 
         if(element.name == 'codeletter'){
             var selected = element.options[element.selectedIndex];
             props.codeletter = selected.value;
-            console.log('Code Letter: ' + selected.value);
         }
 
         if(element.name == 'sortByWeather'){
             props.sortByWeather = (element.checked) ? true : false;
-            console.log('Sort By Weather: ' + props.sortByWeather);
         }
 
         if(element.name == 'sortByATC'){
             props.sortByATC = (element.checked) ? true : false;
-            console.log('Sort By ATC: ' + props.sortByATC);
         }
 
         includeCheckboxes.forEach(function(checkbox){
@@ -69,7 +62,6 @@ function submitFormMetrics(){
                     checkbox = checkbox.replace(']', '');
                 }
                 props[checkbox] = element.value;
-                console.log('checkbox: ' + checkbox + ' ' + element.value);
             }
         });
     });
