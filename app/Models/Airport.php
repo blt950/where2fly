@@ -471,7 +471,7 @@ class Airport extends Model
     /**
      * Scope a query to only include airports that have the given scores
      */
-    public function scopeSortByScores($query, $filterByScores)
+    public function scopeSortByScores(Builder $query, $filterByScores)
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
             return $query->leftJoin('airport_scores', 'airports.id', '=', 'airport_scores.airport_id')
@@ -481,8 +481,15 @@ class Airport extends Model
                         ->orWhereNull('airport_scores.reason');
                 })
                 ->groupBy('airports.id')
-                ->orderBy('score_count', 'desc')
-                ->orderByRaw('RAND()'); // Randomize the order of airports with the same score count
+                ->orderBy('score_count', 'desc');
         }
+    }
+
+    /**
+     * Shuffle results around. Randomize the order of airports.
+     */
+    public function scopeShuffleAndSort(Builder $query)
+    {
+        $query->orderByRaw('RAND()');
     }
 }
