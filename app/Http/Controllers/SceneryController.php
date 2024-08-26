@@ -86,7 +86,7 @@ class SceneryController extends Controller
         $scenery->suggested_by_user_id = ($scenery->suggested_by_user_id) ? $scenery->suggested_by_user_id : Auth::id();
         $scenery->save();
 
-        return redirect()->route('scenery.edit', $scenery)->with('success', 'Scenery updated successfully.');
+        return redirect()->route('admin')->with('success', 'Scenery updated successfully.');
     }
 
     /**
