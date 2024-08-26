@@ -158,6 +158,7 @@ class SearchController extends Controller
                     ->returnOnlyWhitelistedIcao($whitelist)
                     ->sortByScores($sortByScores)
                     ->has('metar')->with('runways', 'scores', 'metar')
+                    ->shuffleAndSort()
                     ->limit(10)
                     ->get();
 
@@ -178,6 +179,7 @@ class SearchController extends Controller
                 ->returnOnlyWhitelistedIcao($whitelist)
                 ->sortByScores($sortByScores)
                 ->has('metar')->with('runways', 'scores', 'metar')
+                ->shuffleAndSort()
                 ->limit(20)
                 ->get();
 

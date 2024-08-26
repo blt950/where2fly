@@ -82,6 +82,7 @@ class SearchController extends Controller
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
             ->sortByScores(($filterByScores) ? array_flip($filterByScores) : null)
             ->has('metar')->with('runways', 'scores', 'metar')
+            ->shuffleAndSort()
             ->limit($resultLimit)
             ->get();
 
