@@ -136,7 +136,7 @@ class UserListController extends Controller
         $list->airports()->detach();
         foreach ($airports as $airport) {
             // Skip if we already added it
-            if ($addedAirports->contains($airport)) {
+            if ($addedAirports->contains(strtoupper($airport))) {
                 continue;
             }
 

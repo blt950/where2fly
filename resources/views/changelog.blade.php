@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2024-08-27</span>
             <ul>
                 <li>Fixed missing "Remember me" checkbox when logging in.</li>
+                <li>Fixed server error when editing a list and providing duplicates</li>
                 <li>Fixed searches without "Worst Weather" and "ATC coverage" checkboxes serving destinations in a cluster and far away</li>
             </ul>
             
