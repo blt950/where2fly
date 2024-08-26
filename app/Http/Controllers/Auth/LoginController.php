@@ -21,14 +21,21 @@ class LoginController extends Controller
         $request->validate([
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
+            'remember' => ['nullable', 'boolean'],
             'cf-turnstile-response' => ['required', Rule::turnstile()],
         ]);
 
         $user = User::where('username', $request->username)->first();
+        $remember = ($request->remember) ? true : false;
 
         // Check if the user exists and the password is correct
         if ($user && Hash::check($request->password, $user->password)) {
-            Auth::login($user);
+
+            if($remember) {
+                Auth::login($user, true);
+            } else {
+                Auth::login($user);
+            }
 
             // Route to the original url the user was trying to access before promoted with login
             if ($request->session()->has('url.intended')) {

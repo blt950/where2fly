@@ -19,6 +19,7 @@
             
             <h3 class="fs-5 fw-normal">Session Cookies</h3>
             <p class="font-work-sans">"where2fly_session" and "XSRF-token" are session cookies strictly required to perform and secure searches, and provide this service. They are deleted when the browser window is closed and do not collect or store personal data.</p>
+            <p class="font-work-sans">"remember_web_xxxxxx" is a cookie that remembers your login so you don't need to login each day.</p>
         
             <h3 class="fs-5 fw-normal mt-3">Browser data</h3>
             <p class="font-work-sans">Automatically recorded by our servers for security, optimization, and functionality purposes. This may include your IP address, browser type, and language.</p>
