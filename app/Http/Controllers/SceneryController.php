@@ -83,7 +83,7 @@ class SceneryController extends Controller
         $scenery->simulator_id = $request->simulator;
         $scenery->payware = $request->payware ? true : false;
         $scenery->published = $request->published ? true : false;
-        $scenery->suggested_by_user_id = Auth::id();
+        $scenery->suggested_by_user_id = ($scenery->suggested_by_user_id) ? $scenery->suggested_by_user_id : Auth::id();
         $scenery->save();
 
         return redirect()->route('scenery.edit', $scenery)->with('success', 'Scenery updated successfully.');
