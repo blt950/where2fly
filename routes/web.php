@@ -21,8 +21,8 @@ use Illuminate\Support\Facades\Route;
 
 // SearchController
 Route::controller(SearchController::class)->group(function () {
-    Route::get('/', 'indexArrivalSearch')->name('front');
-    Route::get('/departures/', 'indexDepartureSearch')->name('front.departures');
+    Route::get('/', 'indexArrivalSearch')->name('front'); // If you change this path, remember correcting it in searchForm.js for metrics as well
+    Route::get('/departures/', 'indexDepartureSearch')->name('front.departures'); // If you change this path, remember correcting it in searchForm.js for metrics as well
     Route::get('/routes/', 'indexRouteSearch')->name('front.routes');
 
     Route::post('/search', 'search')->name('search');
