@@ -11,6 +11,13 @@
 
     <div class="container">
         <div class="text-start">
+
+            <h2 class="mb-0">v2.0.1</h2>
+            <span class="badge ps-0 pb-2">2024-08-27</span>
+            <ul>
+                <li>Fixed missing "Remember me" checkbox when logging in.</li>
+                <li>Fixed searches without "Worst Weather" and "ATC coverage" checkboxes serving destinations in a cluster and far away</li>
+            </ul>
             
             <h2 class="mb-0">v2.0.0</h2>
             <span class="badge ps-0 pb-2">2024-08-25</span>
