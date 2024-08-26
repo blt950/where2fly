@@ -78,7 +78,11 @@ submitButtons.forEach(function(button) {
             btn.innerHTML = 'Search&nbsp;&nbsp;<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
         });
 
-        submitFormMetrics();
+        // Only submit if we're on / or /departures url, this way route search is not submitted
+        if(window.location.pathname === '/' || window.location.pathname === '/departures'){
+            submitFormMetrics();
+        }
+
         document.getElementById('form').submit()
     });
 });
