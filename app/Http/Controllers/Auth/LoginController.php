@@ -31,7 +31,7 @@ class LoginController extends Controller
         // Check if the user exists and the password is correct
         if ($user && Hash::check($request->password, $user->password)) {
 
-            if($remember) {
+            if ($remember) {
                 Auth::login($user, true);
             } else {
                 Auth::login($user);
