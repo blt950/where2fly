@@ -32,7 +32,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="password">Password</label>
+                    <label for="password">Password <a class="ms-1" href="{{ route('account.recovery') }}">Forgot your password?</a></label>
                     <input name="password" type="password" class="form-control" id="password">
                     @error('password')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -48,9 +48,12 @@
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
 
-                <div class="mb-4">
-                    <a href="{{ route('account.recovery') }}">Forgot your password?</a>
+                <div class="mt-2 mb-3">
+                    <input name="remember" type="checkbox" class="form-check-input" id="remember" value="1" {{ old('remember') ? 'checked' : '' }}>
+                    <label for="remember">Remember me</label>
                 </div>
+
+                
 
                 <button class="btn btn-primary">LOGIN</button>
             </form>
