@@ -19,7 +19,13 @@ class UserListsProvider extends ServiceProvider
         View::composer('*', function ($view) {
             if (Auth::check()) {
                 if (! $view->offsetExists('airportsMapCollection') && ! $view->offsetExists('airportMapData') && ! $view->offsetExists('sceneriesCollection')) {
-                    $userLists = UserList::where('user_id', Auth::id())->with('airports', 'airports.metar', 'airports.runways')->get();
+                    $userLists = UserList::where('user_id', Auth::id())
+                        ->with(['airports' => function ($query) {
+                            $query->take(501)
+                                ->with('metar', 'runways');
+                        }])
+                        ->get();
+
                     $airportsMapCollection = MapHelper::getAirportsFromUserLists($userLists);
                     $airportMapData = MapHelper::generateAirportMapDataFromAirports($airportsMapCollection);
 
@@ -36,6 +42,14 @@ class UserListsProvider extends ServiceProvider
 
                     $view->with('sceneriesCollection', $sceneriesCollection);
                     $view->with('airports', $airports);
+
+                    // TODO remove this and introduce eager loading instead
+                    // Issue a warning if a user has more than 500 airports in a list?
+                    foreach ($userLists as $list) {
+                        if ($list->airports->count() > 500) {
+                            $view->with('warningAirportListAmount', true);
+                        }
+                    }
                 }
             }
         });

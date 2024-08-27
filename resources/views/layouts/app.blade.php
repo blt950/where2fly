@@ -13,6 +13,12 @@
             <div class="d-flex flex-row">
                 <main>
 
+                    @isset($warningAirportListAmount)
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fa fa-lg fa-exclamation-circle"></i> Only the first 500 airports are displayed from your lists to avoid timeouts. We plan to improve this in the future.
+                        </div>
+                    @endif
+
                     @if(Session::has('error') || isset($error))
                         <div class="alert alert-danger" role="alert">
                             <i class="fa fa-lg fa-exclamation-circle"></i> {!! Session::has('error') ? Session::pull("error") : $error !!}
