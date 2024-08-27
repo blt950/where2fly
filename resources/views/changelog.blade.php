@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.0.2</h2>
+            <span class="badge ps-0 pb-2">2024-08-27</span>
+            <ul>
+                <li>Fixed timeouts for users with very big lists by limiting loaded airports</li>
+            </ul>
+
             <h2 class="mb-0">v2.0.1</h2>
             <span class="badge ps-0 pb-2">2024-08-27</span>
             <ul>
