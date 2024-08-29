@@ -1,7 +1,7 @@
 <script>
     var airportMapData = {!! isset($airportMapData) ? $airportMapData : '[]' !!}
 
-    document.addEventListener('DOMContentLoaded', function() {
+    /*document.addEventListener('DOMContentLoaded', function() {
         cardsInitEvents()
         mapInit();
 
@@ -17,5 +17,5 @@
                 cardCloseAll('scenery')
             }
         })
-    })
+    })*/
 </script>

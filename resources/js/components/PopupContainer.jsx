@@ -1,17 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import AirportCard from './AirportCard';
 
-function PopupContainer() {
+function PopupContainer({ showAirportCard }) {
     return (
-        <div className="card">
-            hello
+        <div className="popup-container">
+            {showAirportCard && <AirportCard />}
         </div>
     );
 }
 
 export default PopupContainer;
-
-const root = ReactDOM.createRoot(document.getElementById('popup-container'));
-root.render(
-    <PopupContainer/>
-);

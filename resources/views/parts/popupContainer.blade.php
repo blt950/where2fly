@@ -1,4 +1,4 @@
-<div class="popup-container">
+<div class="popup-container" id="popup-container">
     {{-- Let's draw all airport cards here --}}
     @isset($airportsMapCollection)
         @foreach($airportsMapCollection as $airport)
