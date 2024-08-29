@@ -12,6 +12,13 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.0.3</h2>
+            <span class="badge ps-0 pb-2">2024-08-29</span>
+            <ul>
+                <li>Fixed errors related to creation and editing of lists</li>
+                <li>Fixed missing border on flags causing white flags to disappear</li>
+            </ul>
+
             <h2 class="mb-0">v2.0.2</h2>
             <span class="badge ps-0 pb-2">2024-08-27</span>
             <ul>
