@@ -65,24 +65,7 @@ class UserListController extends Controller
         $list->public = $request->public;
         $list->save();
 
-        // Explode based on line breaks and attach each airport to the list
-        $airports = explode("\r\n", $request->airports);
-        $addedAirports = collect();
-        $notFoundAirports = collect();
-        foreach ($airports as $airport) {
-            // Skip if we already added it
-            if ($addedAirports->contains($airport)) {
-                continue;
-            }
-
-            $airportModel = Airport::where('icao', strtoupper($airport))->first();
-            if ($airportModel) {
-                $list->airports()->attach($airportModel);
-                $addedAirports->push($airport);
-            } else {
-                $notFoundAirports->push($airport);
-            }
-        }
+        $notFoundAirports = $this->processAirports($list, $request->airports);
 
         if (count($notFoundAirports) > 0) {
             return redirect()->route('list.index')->with('warning', 'List created successfully, however following airports could not be found: ' . $notFoundAirports->implode(', '));
@@ -129,31 +112,51 @@ class UserListController extends Controller
         $list->public = $request->public;
         $list->save();
 
-        // Explode based on line breaks and attach each airport to the list
-        $airports = explode("\r\n", $request->airports);
-        $notFoundAirports = collect();
-        $addedAirports = collect();
         $list->airports()->detach();
-        foreach ($airports as $airport) {
-            // Skip if we already added it
-            if ($addedAirports->contains(strtoupper($airport))) {
-                continue;
-            }
-
-            $airportModel = Airport::where('icao', strtoupper($airport))->first();
-            if ($airportModel) {
-                $list->airports()->attach($airportModel);
-                $addedAirports->push($airport);
-            } else {
-                $notFoundAirports->push($airport);
-            }
-        }
+        $notFoundAirports = $this->processAirports($list, $request->airports);
 
         if (count($notFoundAirports) > 0) {
             return redirect()->route('list.index')->with('warning', 'List updated successfully, however following airports could not be found: ' . $notFoundAirports->implode(', '));
         }
 
         return redirect()->route('list.index')->with('success', 'List updated successfully');
+    }
+
+    /**
+     * Process the airports and save the models
+     *
+     * @return \Illuminate\Support\Collection $notFoundAirports
+     */
+    private function processAirports(UserList $list, string $input)
+    {
+        $airportsInput = explode("\r\n", $input);
+        $airportsInput = array_map('strtoupper', $airportsInput);
+        $airportModels = Airport::whereIn('icao', $airportsInput)->get();
+
+        $addedAirports = collect();
+        $notFoundAirports = collect();
+        $airportsToAttach = collect();
+
+        foreach ($airportsInput as $airportInput) {
+            // Skip if we already added it
+            if ($addedAirports->contains($airportInput)) {
+                continue;
+            }
+
+            $airportModel = $airportModels->where('icao', $airportInput)->first();
+            if ($airportModel) {
+                $airportsToAttach->push($airportModel);
+                $addedAirports->push($airportInput);
+            } else {
+                $notFoundAirports->push($airportInput);
+            }
+        }
+
+        if (! $airportsToAttach->isEmpty()) {
+            $list->airports()->attach($airportsToAttach->pluck('id'));
+        }
+
+        return $notFoundAirports;
     }
 
     /**
