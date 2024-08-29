@@ -34,6 +34,7 @@
     <script defer data-domain="qa.where2fly.today" src="https://metrics.blt950.com/js/script.js"></script>
 @endif
 
+@viteReactRefresh
 @vite('resources/js/app.js')
 
 @yield('resources')
