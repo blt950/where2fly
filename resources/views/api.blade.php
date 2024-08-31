@@ -13,10 +13,6 @@
         {{ Illuminate\Mail\Markdown::parse(file_get_contents(base_path() . '/API.md')) }}
     </div>
 
-    @isset($airportsMapCollection)
-        @include('parts.popupContainer', ['airportsMapCollection' => ($airportsMapCollection)])
-    @endisset
-
 @endsection
 
 @section('js')

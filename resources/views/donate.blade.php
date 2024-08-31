@@ -28,10 +28,6 @@
             </div>
         </div>
     </div>
-
-    @isset($airportsMapCollection)
-        @include('parts.popupContainer', ['airportsMapCollection' => ($airportsMapCollection)])
-    @endisset
 @endsection
 
 @section('js')

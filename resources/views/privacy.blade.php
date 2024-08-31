@@ -48,10 +48,6 @@
             <p class="font-work-sans"><strong>Contact Us:</strong> For any questions or concerns about this privacy policy, please contact Blt950 on Discord.</p>
         </div>        
     </div>
-
-    @isset($airportsMapCollection)
-        @include('parts.popupContainer', ['airportsMapCollection' => ($airportsMapCollection)])
-    @endisset
 @endsection
 
 @section('js')

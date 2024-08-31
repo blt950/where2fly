@@ -21,8 +21,6 @@ function AirportCard({ airportId }) {
         }
     }, [airportId]);
 
-    console.log("airport", data);
-
     return (
         <div className="popup-card show">
             {data ? (

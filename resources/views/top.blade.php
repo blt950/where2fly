@@ -78,9 +78,6 @@
         </div>
         @include('layouts.legend')
     </div>
-
-    @include('parts.popupContainer', ['airportsMapCollection' => $airports, 'sceneries' => $sceneriesCollection])
-
 @endsection
 
 @section('js')

@@ -16,10 +16,6 @@
         @include('front.parts.tabs')
         @include('front.parts.form', ['icao' => 'arrival', 'area' => 'origin'])
     </div>
-
-    @isset($airportsMapCollection)
-        @include('parts.popupContainer', ['airportsMapCollection' => ($airportsMapCollection)])
-    @endisset
 @endsection
 
 @section('js')

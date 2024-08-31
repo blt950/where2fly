@@ -17,10 +17,6 @@
             <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your account?')">Delete account</button>
         </form>
     </div>
-
-    @isset($airportsMapCollection)
-        @include('parts.popupContainer', ['airportsMapCollection' => ($airportsMapCollection)])
-    @endisset
 @endsection
 
 @section('js')

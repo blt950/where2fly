@@ -27,10 +27,6 @@
             <p>No scenery contributions</p>
         @endisset
     </div>
-
-    @isset($airportsMapCollection)
-        @include('parts.popupContainer', ['airportsMapCollection' => ($airportsMapCollection)])
-    @endisset
 @endsection
 
 @section('js')

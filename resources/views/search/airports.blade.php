@@ -197,24 +197,6 @@
         @include('layouts.legend')
     </div>
 
-    <div class="popup-container">
-        {{-- Let's draw all airport cards here --}}
-        @foreach($suggestedAirports as $airport)
-            @include('parts.mapCard', ['airport' => $airport])
-        @endforeach
-
-        {{-- Let's draw all airline cards here --}}
-        @foreach($modalAirports as $airport)
-            @foreach($airport->airlines as $airline)
-                @include('parts.flightsCard', ['primaryAirport' => $primaryAirport, 'airport' => $airport, 'airline' => $airline, 'filterByAircrafts' => $filterByAircrafts])
-            @endforeach
-        @endforeach
-
-        @foreach($suggestedAirports as $airport)
-            @include('parts.sceneryCard', ['airport' => $airport, 'sceneries' => $sceneriesCollection])
-        @endforeach
-    </div>
-
 @endsection
 
 @section('js')

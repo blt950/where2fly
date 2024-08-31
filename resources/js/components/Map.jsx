@@ -5,10 +5,6 @@ import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet'
 import PopupContainer from './PopupContainer';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 
-// Default lat and lon (Berlin, Europe)
-var lat = 52.51843039016386;
-var lon = 13.395199187248908;
-
 const createIcon = (color = '#ddb81c') => new DivIcon({
     iconSize: [10, 10],
     html: `<span style="display: block; width: 10px; height: 10px; border-radius: 50%; background: ${color}"></span>`
@@ -19,15 +15,23 @@ function Map() {
     const [airports, setAirports] = useState([]);
     const [showAirportCard, setShowAirportCard] = useState(false);
     const [airportId, setAirportId] = useState(null);
+    const [mapPosition, setMapPosition] = useState([52.51843039016386, 13.395199187248908]);
 
     useEffect(() => {
+        // Fetch the user's airports list
         fetch(route('api.lists.airports'))
             .then(response => response.json())
             .then(data => setAirports(data.data))
             .catch(error => console.error(error.message));
-    }, []);
 
-    console.log("airports", airports);
+        // Set the last map position from local storage
+        var storedPosition = localStorage.getItem('mapPosition');
+        if (storedPosition) {
+            const { lat, lng } = JSON.parse(storedPosition);
+            setMapPosition([lat, lng]);
+        }
+
+    }, []);
 
     const eventHandlers = (airportId) => ({
         click: (e) => {
@@ -46,7 +50,7 @@ function Map() {
 
     return (
         <>
-        <MapContainer className="map" center={[lat, lon]} zoom={4} attributionControl={false} zoomControl={false} >
+        <MapContainer className="map" center={mapPosition} zoom={4} attributionControl={false} zoomControl={false} >
             <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
             />
