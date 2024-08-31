@@ -24,13 +24,30 @@ const createIcon = (color, airportType = 'large_airport') => {
 };
 
 const isDefaultView = () => {
-    if (!route().current('top') && !route().current('search')) {
+    if (!route().current('top') && !route().current('top.filtered') && !route().current('search')) {
         return true;
     }
     return false
 }
 
 const getMapPosition = () => {
+
+    // Set position based on current top list filter
+    if(route().current('top.filtered', 'AF')){
+        return [7.1881, 21.0936];
+    } else if(route().current('top.filtered', 'AS')){
+        return [34.0479, 100.6197];
+    } else if(route().current('top.filtered', 'EU')){
+        return [54.5260, 15.2551];
+    } else if(route().current('top.filtered', 'NA')){
+        return [37.0902, -95.7129];
+    } else if(route().current('top.filtered', 'OC')){
+        return [-25.2744, 133.7751];
+    } else if(route().current('top.filtered', 'SA')){
+        return [-8.7832, -55.4915];
+    }
+
+    // Set position based on localStorage
     var storedPosition = localStorage.getItem('mapPosition');
     if (storedPosition) {
         const { lat, lng } = JSON.parse(storedPosition);
