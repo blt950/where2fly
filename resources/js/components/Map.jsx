@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet'
 import PopupContainer from './PopupContainer';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 
 // Default lat and lon (Berlin, Europe)
 var lat = 52.51843039016386;
@@ -35,35 +36,45 @@ function Map() {
         }
     });
 
+    const iconCreateFunction = (cluster) => {
+        const style = 'inverted';
+        return L.divIcon({ 
+            iconSize: [40, 40], 
+            html: `<div class="leaflet-marker-icon marker-cluster ${style}">${cluster.getChildCount()}</div>` 
+        });
+    };
+
     return (
         <>
         <MapContainer className="map" center={[lat, lon]} zoom={4} attributionControl={false} zoomControl={false} >
             <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
             />
-            {Object.keys(airports).map(key => {
-                const airport = airports[key];
-                const icon = createIcon(airport.color);
-                return (
-                    <Marker
-                        key={airport.id}
-                        position={[airport.lat, airport.lon]}
-                        icon={icon}
-                        eventHandlers={eventHandlers(airport.id)}
-                    >
-                        <Tooltip
-                            direction="left"
-                            className="airport"
-                            interactive={true}
-                            permanent
+            <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={40} iconCreateFunction={iconCreateFunction}>
+                {Object.keys(airports).map(key => {
+                    const airport = airports[key];
+                    const icon = createIcon(airport.color);
+                    return (
+                        <Marker
+                            key={airport.id}
+                            position={[airport.lat, airport.lon]}
+                            icon={icon}
+                            eventHandlers={eventHandlers(airport.id)}
                         >
-                            <span style={{ color: airport.color }}>
-                                {airport.icao}
-                            </span>
-                        </Tooltip>
-                    </Marker>
-                );
-            })}
+                            <Tooltip
+                                direction="left"
+                                className="airport"
+                                interactive={true}
+                                permanent
+                            >
+                                <span style={{ color: airport.color }}>
+                                    {airport.icao}
+                                </span>
+                            </Tooltip>
+                        </Marker>
+                    );
+                })}
+            </MarkerClusterGroup>
         </MapContainer>
         {showAirportCard && <PopupContainer airportId={airportId} />}
         </>
