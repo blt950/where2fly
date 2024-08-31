@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom/client';
 import { MapContainer, TileLayer, Marker, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import PopupContainer from './PopupContainer';
 import MarkerClusterGroup from 'react-leaflet-cluster';
+import PanEvent from './PanEvent';
+import SaveViewEvent from './SaveViewEvent';
 
 const createIcon = (color = '#ddb81c', airportType = 'large_airport') => {
     let sizePx = 10;
@@ -20,35 +22,14 @@ const createIcon = (color = '#ddb81c', airportType = 'large_airport') => {
     });
 };
 
-const MapComponent = () => {
-    const map = useMapEvents({
-        moveend() {
-            localStorage.setItem('mapPosition', JSON.stringify(map.getCenter()));
-        },
-    });
-
-    return null;
-};
-
-
-function MyMapComponent({ flyToCoordinates }) {
-    const map = useMap();
-
-    useEffect(() => {
-        if (flyToCoordinates) {
-            map.panTo(flyToCoordinates, 13, {animate: true, duration: 0.5, easeLinearity: 0.25});
-        }
-    }, [flyToCoordinates, map]);
-
-    return null;
-}
-
 const getMapPosition = () => {
     var storedPosition = localStorage.getItem('mapPosition');
     if (storedPosition) {
         const { lat, lng } = JSON.parse(storedPosition);
         return [lat, lng];
     }
+
+    // Default to Berlin
     return [52.51843039016386, 13.395199187248908];
 }
 
@@ -70,9 +51,9 @@ function Map() {
 
     const eventHandlers = (airport) => ({
         click: (e) => {
+            setCoordinates([airport.lat, airport.lon]);
             setAirportId(airport.id);
             setShowAirportCard(true);
-            setCoordinates([airport.lat, airport.lon]);
         },
         flyTo: (e) => {
             setCoordinates([airport.lat, airport.lon]);
@@ -91,7 +72,7 @@ function Map() {
         <>
         <MapContainer 
             className="map" 
-            center={mapPosition} 
+            center={mapPosition}
             zoom={4} 
             attributionControl={false} 
             zoomControl={false}
@@ -127,8 +108,8 @@ function Map() {
                     );
                 })}
             </MarkerClusterGroup>
-            <MapComponent />
-            <MyMapComponent flyToCoordinates={coordinates} />
+            <SaveViewEvent />
+            <PanEvent flyToCoordinates={coordinates} />
         </MapContainer>
         {showAirportCard && <PopupContainer airportId={airportId} />}
         </>
