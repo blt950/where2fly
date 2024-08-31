@@ -38,7 +38,7 @@ function AirportCard({ airportId }) {
                     {data.runways.map(runway => (
                         <dd key={runway.id}>
                             <strong>{runway.le_ident}/{runway.he_ident}:</strong>
-                            &nbsp;{runway.length_ft.toLocaleString('en-US')}ft <span className="text-white-50">({Math.round(runway.length_ft * .3048, 0)}m)</span>
+                            &nbsp;{runway.length_ft.toLocaleString('en-US')}ft <span className="text-white-50">({Math.round(runway.length_ft * .3048, 0).toLocaleString('en-US')}m)</span>
                         </dd>
                     ))}
 
