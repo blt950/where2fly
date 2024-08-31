@@ -1,14 +1,15 @@
 import { DivIcon } from 'leaflet';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
-import { MapContainer, TileLayer, Marker, Tooltip, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet'
 import PopupContainer from './PopupContainer';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import PanEvent from './PanEvent';
 import SaveViewEvent from './SaveViewEvent';
 
-const createIcon = (color = '#ddb81c', airportType = 'large_airport') => {
+const createIcon = (color, airportType = 'large_airport') => {
     let sizePx = 10;
+    if(color === null){ color = '#ddb81c'; }
 
     if (airportType === 'medium_airport') {
         sizePx = 7;
@@ -40,14 +41,39 @@ function Map() {
     const [airportId, setAirportId] = useState(null);
     const [mapPosition, setMapPosition] = useState(getMapPosition());
     const [coordinates, setCoordinates] = useState(null);
+    const [focusAirport, setFocusAirport] = useState(null);
+
+    const setAirportsRef = useRef(null);
 
     useEffect(() => {
-        // Fetch the user's airports list
-        fetch(route('api.lists.airports'))
-            .then(response => response.json())
-            .then(data => setAirports(data.data))
-            .catch(error => console.error(error.message));
+        setAirportsRef.current = setAirports;
+        window.setAirportsData = (data) => {
+            if (typeof setAirportsRef.current === 'function') {
+                setAirports(data);
+                setAirportsRef.current(data);
+            }
+        };
+
+        window.setFocusAirport = (icao) => {
+            setFocusAirport(icao);
+        };
+    
+        // Dispatch a custom event when the map is ready
+        const event = new Event('mapReady');
+        window.dispatchEvent(event);
+    
+        return () => {
+            delete window.setAirportsData;
+        };
     }, []);
+
+    useEffect(() => {
+        if (focusAirport !== null) {
+            setCoordinates([airports[focusAirport].lat, airports[focusAirport].lon]);
+            setAirportId(airports[focusAirport].id);
+            setShowAirportCard(true);
+        }
+    }, [focusAirport]);
 
     const eventHandlers = (airport) => ({
         click: (e) => {

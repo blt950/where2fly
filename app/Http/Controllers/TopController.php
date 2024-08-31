@@ -24,7 +24,7 @@ class TopController extends Controller
             $airports->push($as->airport);
         }
 
-        $airportMapData = MapHelper::generateAirportMapDataFromAirports($airports);
+        $airportMapData = json_encode(MapHelper::generateAirportMapDataFromAirports($airports));
         $sceneriesCollection = Scenery::where('published', true)->whereIn('airport_id', $airports->pluck('id'))->with('simulator')->get();
 
         return view('top', compact('airports', 'airportMapData', 'continent', 'exclude', 'sceneriesCollection'));
