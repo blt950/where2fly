@@ -30,6 +30,19 @@ const MapComponent = () => {
     return null;
 };
 
+
+function MyMapComponent({ flyToCoordinates }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (flyToCoordinates) {
+            map.panTo(flyToCoordinates, 13, {animate: true, duration: 0.5, easeLinearity: 0.25});
+        }
+    }, [flyToCoordinates, map]);
+
+    return null;
+}
+
 const getMapPosition = () => {
     var storedPosition = localStorage.getItem('mapPosition');
     if (storedPosition) {
@@ -45,6 +58,7 @@ function Map() {
     const [showAirportCard, setShowAirportCard] = useState(false);
     const [airportId, setAirportId] = useState(null);
     const [mapPosition, setMapPosition] = useState(getMapPosition());
+    const [coordinates, setCoordinates] = useState(null);
 
     useEffect(() => {
         // Fetch the user's airports list
@@ -54,10 +68,14 @@ function Map() {
             .catch(error => console.error(error.message));
     }, []);
 
-    const eventHandlers = (airportId) => ({
+    const eventHandlers = (airport) => ({
         click: (e) => {
-            setAirportId(airportId);
+            setAirportId(airport.id);
             setShowAirportCard(true);
+            setCoordinates([airport.lat, airport.lon]);
+        },
+        flyTo: (e) => {
+            setCoordinates([airport.lat, airport.lon]);
         }
     });
 
@@ -93,7 +111,7 @@ function Map() {
                             key={airport.id}
                             position={[airport.lat, airport.lon]}
                             icon={icon}
-                            eventHandlers={eventHandlers(airport.id)}
+                            eventHandlers={eventHandlers(airport)}
                         >
                             <Tooltip
                                 direction="left"
@@ -110,6 +128,7 @@ function Map() {
                 })}
             </MarkerClusterGroup>
             <MapComponent />
+            <MyMapComponent flyToCoordinates={coordinates} />
         </MapContainer>
         {showAirportCard && <PopupContainer airportId={airportId} />}
         </>
