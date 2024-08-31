@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import AirportCard from './AirportCard';
 
-function PopupContainer({ showAirportCard }) {
+function PopupContainer({ airportId }) {
     return (
         <div className="popup-container">
-            {showAirportCard && <AirportCard />}
+            {airportId && <AirportCard airportId={airportId} />}
         </div>
     );
 }

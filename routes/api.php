@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\MapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,4 +18,9 @@ Route::group(['middleware' => ['api-token']], function () {
     Route::get('/top', [App\Http\Controllers\API\TopController::class, 'index'])->name('api.top.index');
     Route::post('/top', [App\Http\Controllers\API\TopController::class, 'indexWhitelist'])->name('api.top.index.whitelist');
     Route::post('/search', [App\Http\Controllers\API\SearchController::class, 'search'])->name('api.search');
+});
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/lists/airports', [MapController::class, 'getListAirports'])->name('api.lists.airports');
+    Route::get('/airport/{id}', [MapController::class, 'getAirport'])->name('api.airport.show');
 });

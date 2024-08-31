@@ -16,3 +16,4 @@ import '../sass/app.scss';
 import './components/Map';
 import './components/PopupContainer';
 import './components/AirportCard';
+import './components/TAF';

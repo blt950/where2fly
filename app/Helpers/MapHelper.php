@@ -17,6 +17,7 @@ class MapHelper
         $airportData = [];
         foreach ($airports as $airport) {
             $airportData[$airport->icao] = [
+                'id' => $airport->id,
                 'icao' => $airport->icao,
                 'lat' => $airport->coordinates->latitude,
                 'lon' => $airport->coordinates->longitude,
@@ -24,7 +25,7 @@ class MapHelper
             ];
         }
 
-        return json_encode($airportData);
+        return $airportData;
     }
 
     /**

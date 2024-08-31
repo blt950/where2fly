@@ -1,30 +1,39 @@
 import { DivIcon } from 'leaflet';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet'
-import AirportCard from './AirportCard';
-import { useState } from 'react';
 import PopupContainer from './PopupContainer';
 
 // Default lat and lon (Berlin, Europe)
 var lat = 52.51843039016386;
 var lon = 13.395199187248908;
 
-const icon = new DivIcon({
+const createIcon = (color = '#ddb81c') => new DivIcon({
     iconSize: [10, 10],
-    html: `<span style="display: block; width: 10px; height: 10px; border-radius: 50%; background: #ddb81c"></span>`
+    html: `<span style="display: block; width: 10px; height: 10px; border-radius: 50%; background: ${color}"></span>`
 });
 
 function Map() {
 
+    const [airports, setAirports] = useState([]);
     const [showAirportCard, setShowAirportCard] = useState(false);
+    const [airportId, setAirportId] = useState(null);
 
-    const eventHandlers = {
+    useEffect(() => {
+        fetch(route('api.lists.airports'))
+            .then(response => response.json())
+            .then(data => setAirports(data.data))
+            .catch(error => console.error(error.message));
+    }, []);
+
+    console.log("airports", airports);
+
+    const eventHandlers = (airportId) => ({
         click: (e) => {
-            console.log("hi")
+            setAirportId(airportId);
             setShowAirportCard(true);
         }
-    };
+    });
 
     return (
         <>
@@ -32,18 +41,31 @@ function Map() {
             <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
             />
-            <Marker position={[51.505, -0.09]} icon={icon}>
-                <Tooltip direction="left" className="airport" interactive={true} permanent>
-                    EGLL
-                </Tooltip>
-            </Marker>
-            <Marker position={[71.505, -0.09]} icon={icon} eventHandlers={eventHandlers}>
-                <Tooltip direction="left" className="airport" interactive={true} permanent>
-                    EGLL
-                </Tooltip>
-            </Marker>
+            {Object.keys(airports).map(key => {
+                const airport = airports[key];
+                const icon = createIcon(airport.color);
+                return (
+                    <Marker
+                        key={airport.id}
+                        position={[airport.lat, airport.lon]}
+                        icon={icon}
+                        eventHandlers={eventHandlers(airport.id)}
+                    >
+                        <Tooltip
+                            direction="left"
+                            className="airport"
+                            interactive={true}
+                            permanent
+                        >
+                            <span style={{ color: airport.color }}>
+                                {airport.icao}
+                            </span>
+                        </Tooltip>
+                    </Marker>
+                );
+            })}
         </MapContainer>
-        <PopupContainer showAirportCard={showAirportCard} />
+        {showAirportCard && <PopupContainer airportId={airportId} />}
         </>
     );
 }
