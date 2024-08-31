@@ -77,9 +77,12 @@ function Map() {
             zoom={4} 
             attributionControl={false} 
             zoomControl={false}
+            maxBounds={[[-85, -360], [85, 360]]}
         >
             <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+                minZoom={3}
+                maxZoom={17}
             />
             <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={40} iconCreateFunction={iconCreateFunction}>
                 {Object.keys(airports).map(key => {
