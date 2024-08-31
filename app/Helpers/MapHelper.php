@@ -22,6 +22,7 @@ class MapHelper
                 'lat' => $airport->coordinates->latitude,
                 'lon' => $airport->coordinates->longitude,
                 'color' => $airport->color,
+                'type' => $airport->type,
             ];
         }
 

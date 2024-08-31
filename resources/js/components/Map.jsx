@@ -1,21 +1,50 @@
 import { DivIcon } from 'leaflet';
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import PopupContainer from './PopupContainer';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 
-const createIcon = (color = '#ddb81c') => new DivIcon({
-    iconSize: [10, 10],
-    html: `<span style="display: block; width: 10px; height: 10px; border-radius: 50%; background: ${color}"></span>`
-});
+const createIcon = (color = '#ddb81c', airportType = 'large_airport') => {
+    let sizePx = 10;
+
+    if (airportType === 'medium_airport') {
+        sizePx = 7;
+    } else if (airportType === 'small_airport') {
+        sizePx = 5;
+    }
+
+    return new DivIcon({
+        iconSize: [sizePx, sizePx],
+        html: `<span style="display: block; width: ${sizePx}px; height: ${sizePx}px; border-radius: 50%; background: ${color}"></span>`
+    });
+};
+
+const MapComponent = () => {
+    const map = useMapEvents({
+        moveend() {
+            localStorage.setItem('mapPosition', JSON.stringify(map.getCenter()));
+        },
+    });
+
+    return null;
+};
+
+const getMapPosition = () => {
+    var storedPosition = localStorage.getItem('mapPosition');
+    if (storedPosition) {
+        const { lat, lng } = JSON.parse(storedPosition);
+        return [lat, lng];
+    }
+    return [52.51843039016386, 13.395199187248908];
+}
 
 function Map() {
 
     const [airports, setAirports] = useState([]);
     const [showAirportCard, setShowAirportCard] = useState(false);
     const [airportId, setAirportId] = useState(null);
-    const [mapPosition, setMapPosition] = useState([52.51843039016386, 13.395199187248908]);
+    const [mapPosition, setMapPosition] = useState(getMapPosition());
 
     useEffect(() => {
         // Fetch the user's airports list
@@ -23,14 +52,6 @@ function Map() {
             .then(response => response.json())
             .then(data => setAirports(data.data))
             .catch(error => console.error(error.message));
-
-        // Set the last map position from local storage
-        var storedPosition = localStorage.getItem('mapPosition');
-        if (storedPosition) {
-            const { lat, lng } = JSON.parse(storedPosition);
-            setMapPosition([lat, lng]);
-        }
-
     }, []);
 
     const eventHandlers = (airportId) => ({
@@ -50,14 +71,20 @@ function Map() {
 
     return (
         <>
-        <MapContainer className="map" center={mapPosition} zoom={4} attributionControl={false} zoomControl={false} >
+        <MapContainer 
+            className="map" 
+            center={mapPosition} 
+            zoom={4} 
+            attributionControl={false} 
+            zoomControl={false}
+        >
             <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
             />
             <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={40} iconCreateFunction={iconCreateFunction}>
                 {Object.keys(airports).map(key => {
                     const airport = airports[key];
-                    const icon = createIcon(airport.color);
+                    const icon = createIcon(airport.color, airport.type);
                     return (
                         <Marker
                             key={airport.id}
@@ -79,6 +106,7 @@ function Map() {
                     );
                 })}
             </MarkerClusterGroup>
+            <MapComponent />
         </MapContainer>
         {showAirportCard && <PopupContainer airportId={airportId} />}
         </>
