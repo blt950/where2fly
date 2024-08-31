@@ -268,10 +268,16 @@ class SearchController extends Controller
 
             // Create an array with all airports coordinates
             $airportCoordinates = [];
+            $airportCoordinates[$departure->icao]['id'] = $departure->id;
+            $airportCoordinates[$arrival->icao]['id'] = $arrival->id;
+            $airportCoordinates[$departure->icao]['icao'] = $departure->icao;
+            $airportCoordinates[$arrival->icao]['icao'] = $arrival->icao;
             $airportCoordinates[$departure->icao]['lat'] = $departure->coordinates->latitude;
             $airportCoordinates[$departure->icao]['lon'] = $departure->coordinates->longitude;
             $airportCoordinates[$arrival->icao]['lat'] = $arrival->coordinates->latitude;
             $airportCoordinates[$arrival->icao]['lon'] = $arrival->coordinates->longitude;
+            $airportCoordinates[$departure->icao]['type'] = $departure->type;
+            $airportCoordinates[$arrival->icao]['type'] = $arrival->type;
 
             return view('search.routes', compact('routes', 'departure', 'arrival', 'airportCoordinates'));
         } else {

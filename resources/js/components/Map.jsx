@@ -9,7 +9,7 @@ import SaveViewEvent from './SaveViewEvent';
 
 const createIcon = (color, airportType = 'large_airport') => {
     let sizePx = 10;
-    if(color === null){ color = '#ddb81c'; }
+    if(color === null || color === undefined){ color = '#ddb81c'; }
 
     if (airportType === 'medium_airport') {
         sizePx = 7;
@@ -24,7 +24,10 @@ const createIcon = (color, airportType = 'large_airport') => {
 };
 
 const isDefaultView = () => {
-    if (!route().current('top') && !route().current('top.filtered') && !route().current('search')) {
+    if (!route().current('top') 
+        && !route().current('top.filtered')
+        && !route().current('search')
+        && route().current() !== undefined) {
         return true;
     }
     return false
