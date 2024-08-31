@@ -23,6 +23,13 @@ const createIcon = (color, airportType = 'large_airport') => {
     });
 };
 
+const isDefaultView = () => {
+    if (!route().current('top') && !route().current('search')) {
+        return true;
+    }
+    return false
+}
+
 const getMapPosition = () => {
     var storedPosition = localStorage.getItem('mapPosition');
     if (storedPosition) {
@@ -46,17 +53,20 @@ function Map() {
     const setAirportsRef = useRef(null);
 
     useEffect(() => {
-        setAirportsRef.current = setAirports;
         window.setAirportsData = (data) => {
-            if (typeof setAirportsRef.current === 'function') {
-                setAirports(data);
-                setAirportsRef.current(data);
-            }
+            setAirports(data);
         };
 
         window.setFocusAirport = (icao) => {
             setFocusAirport(icao);
         };
+
+        if (isDefaultView()) {
+            fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
+                .then(response => response.json())
+                .then(data => setAirports(data.data))
+                .catch(error => console.error(error.message));
+        }
     
         // Dispatch a custom event when the map is ready
         const event = new Event('mapReady');
@@ -89,7 +99,7 @@ function Map() {
     const iconCreateFunction = (cluster) => {
         // if url not ends with /top or /search, set style to 'inverted'
         var style = '';
-        if (!window.location.pathname.endsWith('/top') && !window.location.pathname.endsWith('/search')) {
+        if (isDefaultView()) {
             style = 'inverted';
         }
         
@@ -139,7 +149,7 @@ function Map() {
                     );
                 })}
             </MarkerClusterGroup>
-            <SaveViewEvent />
+            {isDefaultView() && <SaveViewEvent />}
             <PanEvent flyToCoordinates={coordinates} />
         </MapContainer>
         {showAirportCard && <PopupContainer airportId={airportId} />}
