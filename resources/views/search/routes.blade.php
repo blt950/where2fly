@@ -85,7 +85,6 @@
 
 @section('js')
     @vite('resources/js/functions/tooltip.js')
-    @vite('resources/js/map.js')
     <script>
         var airportMapData = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
         var departure = '{{ $departure->icao }}';

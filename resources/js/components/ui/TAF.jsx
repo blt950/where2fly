@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom/client';
+import { useState, useEffect, useRef } from 'react';
 
 function TAF({ icao }) {
     const [tafReport, setTafReport] = useState(null);

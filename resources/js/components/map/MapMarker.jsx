@@ -1,26 +1,25 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Marker, Tooltip } from 'react-leaflet';
-import { createIcon } from './utils/icon'; // Assuming these functions are defined in utils.js
+import { createMarkerIcon } from '../utils/MarkerIcon';
 import { useMapEvents } from 'react-leaflet';
-import { set } from 'lodash';
-import DrawRoute from './DrawRoute';
-import { FocusAirportContext } from './context/FocusAirportContext';
-import { MapContext } from './context/MapContext';
+import { MapContext } from '../context/MapContext';
 
 const MapMarker = ({ airport }) => {
+    const { focusAirport, setFocusAirport } = useContext(MapContext);
 
     const [zoomLevel, setZoomLevel] = useState(0);
     const [showTooltip, setShowTooltip] = useState(true);
     const [ignoreZoomFilter, setIgnoreZoomFilter] = useState(false);
     const [color, setColor] = useState(airport.color);
-    const { airports, focusAirport, setFocusAirport } = useContext(MapContext);
 
+    // Fetch zoom level
     const map = useMapEvents({
         zoomend() {
             setZoomLevel(map.getZoom());
         },
     });
 
+    // When zoomlevel changes, hide/show tooltips based on airport size
     useEffect(() => {
         if(route().current('search') || route().current() === undefined){
             if(airport.type == 'small_airport'){
@@ -33,6 +32,7 @@ const MapMarker = ({ airport }) => {
         }
     }, [zoomLevel]);
 
+    // When focusAirport changes, change color and ignore zoom filter
     useEffect(() => {
         if(focusAirport === airport.icao){
             setColor('#ddb81c');
@@ -43,13 +43,14 @@ const MapMarker = ({ airport }) => {
         }
     }, [focusAirport]);
 
+    // When you click on an airport, set it as the focus airport
     const eventHandlers = (airport) => ({
         click: (e) => {
             setFocusAirport(airport.icao);
         }
     });
 
-    const icon = createIcon(color, airport.type);
+    const icon = createMarkerIcon(color, airport.type);
 
     return (
         <Marker

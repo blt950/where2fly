@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 
-function PanEvent({ flyToCoordinates }) {
+function MapPan({ flyToCoordinates }) {
     const map = useMap();
 
     useEffect(() => {
@@ -13,4 +13,4 @@ function PanEvent({ flyToCoordinates }) {
     return null;
 }
 
-export default PanEvent;
+export default MapPan;

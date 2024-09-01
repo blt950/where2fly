@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { useMap } from 'react-leaflet';
-import MapMarker from './MapMarker';
+import '@elfalem/leaflet-curve';
 
-const DrawRoute = ({ airports, departure, arrival, reverseDirection = false }) => {
+import { MapContext } from '../context/MapContext';
+
+const MapDrawRoute = ({ departure, arrival, reverseDirection = false }) => {
+
+    const {airports} = useContext(MapContext);
+
     const routePath = useRef(null);
     const map = useMap();
     
@@ -117,4 +122,4 @@ const DrawRoute = ({ airports, departure, arrival, reverseDirection = false }) =
     };
 };
         
-export default DrawRoute;
+export default MapDrawRoute;

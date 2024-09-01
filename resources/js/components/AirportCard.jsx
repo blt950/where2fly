@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
-import TAF from './TAF';
-import SimbriefLink from './SimbriefLink';
+import { useEffect, useState, useRef } from 'react';
+import TAF from './ui/TAF';
+import SimbriefLink from './ui/SimbriefLink';
 
 function AirportCard({ airportId }) {
     const [data, setData] = useState(null);

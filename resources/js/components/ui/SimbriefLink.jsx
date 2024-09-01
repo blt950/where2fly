@@ -1,5 +1,3 @@
-import React from 'react';
-
 const SimbriefLink = ({ direction, primaryIcao, secondaryIcao }) => {
     const simbriefUrl = `orig=${direction === 'departure' ? primaryIcao : secondaryIcao}&dest=${direction === 'departure' ? secondaryIcao : primaryIcao}`;
 

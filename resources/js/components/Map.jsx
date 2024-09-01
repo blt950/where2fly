@@ -1,16 +1,21 @@
 
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet'
+
+import { MapContext } from './context/MapContext';
+
+import { createClusterIcon } from './utils/ClusterIcon';
 import PopupContainer from './PopupContainer';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import PanEvent from './PanEvent';
-import SaveViewEvent from './SaveViewEvent';
-import DrawRoute from './DrawRoute';
-import MapMarkerGroup from './MapMarkerGroup';
-import { MapContext } from './context/MapContext';
-import BoundEvent from './BoundEvent';
+import { MapContainer, TileLayer } from 'react-leaflet'
 
+import MapBound from './map/MapBound';
+import MapDrawRoute from './map/MapDrawRoute';
+import MapMarkerGroup from './map/MapMarkerGroup';
+import MapPan from './map/MapPan';
+import MapSaveView from './map/MapSaveView';
+
+// Check if the current route is the default view
 const isDefaultView = () => {
     if (!route().current('top') 
         && !route().current('top.filtered')
@@ -21,7 +26,8 @@ const isDefaultView = () => {
     return false
 }
 
-const getMapPosition = () => {
+// Get the initial map position
+const getInitMapPosition = () => {
 
     // Set position based on current top list filter
     if(route().current('top.filtered', 'AF')){
@@ -52,42 +58,26 @@ const getMapPosition = () => {
 function Map() {
 
     const [airports, setAirports] = useState([]);
-    const [showAirportCard, setShowAirportCard] = useState(false);
-    const [airportId, setAirportId] = useState(null);
-    const [mapPosition, setMapPosition] = useState(getMapPosition());
-    const [coordinates, setCoordinates] = useState(null);
-    const [focusAirport, setFocusAirport] = useState(null);
-    const [drawRoute, setDrawRoute] = useState(null);
     const [cluster, setCluster] = useState(true);
-    const [primaryAirport, setPrimaryAirport] = useState(null);
+    const [coordinates, setCoordinates] = useState(null);
+    const [drawRoute, setDrawRoute] = useState(null);
+    const [focusAirport, setFocusAirport] = useState(null);
     const [mapBounds, setMapBounds] = useState(null);
+    const [primaryAirport, setPrimaryAirport] = useState(null);
     const [reverseDirection, setReverseDirection] = useState(false);
+    const [showAirportIdCard, setShowAirportIdCard] = useState(null);
 
+    // On initial load
     useEffect(() => {
-        window.setAirportsData = (data) => {
-            setAirports(data);
-        };
+        window.setAirportsData = (data) => { setAirports(data) }
+        window.setCluster = (boolean) => { setCluster(boolean) }
+        window.setDrawRoute = (route) => { setDrawRoute(route) }
+        window.setFocusAirport = (icao) => { setFocusAirport(icao) }
+        window.setPrimaryAirport = (airport) => { setPrimaryAirport(airport) }
+        window.setReverseDirection = (boolean) => { setReverseDirection(boolean) }
+        window.isDefaultView = isDefaultView;
 
-        window.setFocusAirport = (icao) => {
-            setFocusAirport(icao);
-        };
-
-        window.setDrawRoute = (route) => {
-            setDrawRoute(route);
-        }
-
-        window.setReverseDirection = (boolean) => {
-            setReverseDirection(boolean);
-        }
-
-        window.setPrimaryAirport = (airport) => {
-            setPrimaryAirport(airport);
-        }
-
-        window.setCluster = (cluster) => {
-            setCluster(cluster);
-        }
-
+        // Fetch user's lists if on default view
         if (isDefaultView()) {
             fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
                 .then(response => response.json())
@@ -96,27 +86,27 @@ function Map() {
         }
     
         // Dispatch a custom event when the map is ready
-        const event = new Event('mapReady');
-        window.dispatchEvent(event);
-    
-        return () => {
-            delete window.setAirportsData;
-        };
+        window.dispatchEvent(new Event('mapReady'));
+
     }, []);
 
+    // When focusAirport changes, pan to the airport and show the card.
     useEffect(() => {
         if (focusAirport !== null && focusAirport !== undefined) {
             setCoordinates([airports[focusAirport].lat, airports[focusAirport].lon]);
-            setAirportId(airports[focusAirport].id);
-            setShowAirportCard(true);
+            setShowAirportIdCard(airports[focusAirport].id);
+
+            // For routes which define a primary airport, we want to draw the route as well
             if(primaryAirport){
                 setDrawRoute([primaryAirport, airports[focusAirport].icao]);
             }
-            console.log("trigger")
+
+            // Dispatch a custom event when the map focuses on an airport
             window.dispatchEvent(new CustomEvent('mapFocusAirport', { detail: { focusAirport } }));
         }
     }, [focusAirport]);
 
+    // When airports data change, set the map bounds
     useEffect(() => {
         if (!isDefaultView() && airports && Object.keys(airports).length > 0) {
             var bounds = [];
@@ -127,24 +117,11 @@ function Map() {
         }
     }, [airports]);
 
-    const iconCreateFunction = (cluster) => {
-        // if url not ends with /top or /search, set style to 'inverted'
-        var style = '';
-        if (isDefaultView()) {
-            style = 'inverted';
-        }
-        
-        return L.divIcon({ 
-            iconSize: [40, 40], 
-            html: `<div class="leaflet-marker-icon marker-cluster ${style}">${cluster.getChildCount()}</div>` 
-        });
-    };
-
     return (
-        <MapContext.Provider value={{ airports, focusAirport, setFocusAirport, setAirportId, setShowAirportCard, reverseDirection }}>
+        <MapContext.Provider value={{ airports, focusAirport, setFocusAirport, setShowAirportIdCard }}>
             <MapContainer 
                 className="map" 
-                center={mapPosition}
+                center={getInitMapPosition()}
                 zoom={4} 
                 attributionControl={false} 
                 zoomControl={false}
@@ -157,19 +134,19 @@ function Map() {
                 />
 
                 {cluster ? (
-                    <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={40} iconCreateFunction={iconCreateFunction}>
-                        <MapMarkerGroup airports={airports}/>
+                    <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={40} iconCreateFunction={createClusterIcon}>
+                        <MapMarkerGroup/>
                     </MarkerClusterGroup>
                 ) : (
-                    <MapMarkerGroup airports={airports}/>
+                    <MapMarkerGroup/>
                 )}
 
-                {isDefaultView() && <SaveViewEvent />}
-                {mapBounds && <BoundEvent mapBounds={mapBounds} />}
-                <PanEvent flyToCoordinates={coordinates} />
-                {drawRoute && <DrawRoute airports={airports} departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
+                {isDefaultView() && <MapSaveView />}
+                {mapBounds && <MapBound mapBounds={mapBounds} />}
+                <MapPan flyToCoordinates={coordinates} />
+                {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
             </MapContainer>
-            {showAirportCard && <PopupContainer airportId={airportId} />}
+            {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
     );
 }

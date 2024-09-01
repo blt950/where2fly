@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 
-function BoundEvent({ mapBounds }) {
+function MapBound({ mapBounds }) {
     const map = useMap();
 
     useEffect(() => {
@@ -13,4 +13,4 @@ function BoundEvent({ mapBounds }) {
     return null;
 }
 
-export default BoundEvent;
+export default MapBound;

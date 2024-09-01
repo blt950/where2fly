@@ -1,7 +1,6 @@
-import React from 'react';
 import { useMapEvents } from 'react-leaflet';
 
-const SaveViewEvent = () => {
+const MapSaveView = () => {
     const map = useMapEvents({
         moveend() {
             localStorage.setItem('mapPosition', JSON.stringify(map.getCenter()));
@@ -11,4 +10,4 @@ const SaveViewEvent = () => {
     return null;
 };
 
-export default SaveViewEvent;
+export default MapSaveView;

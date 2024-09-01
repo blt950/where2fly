@@ -1,8 +1,11 @@
-import React from 'react';
-import { Marker, Tooltip } from 'react-leaflet';
+import { useContext } from 'react';
 import MapMarker from './MapMarker';
+import { MapContext } from '../context/MapContext';
 
-const MapMarkerGroup = ({ airports }) => {
+const MapMarkerGroup = () => {
+
+    const {airports} = useContext(MapContext);
+
     return (
         Object.keys(airports).map(key => {
             const airport = airports[key];

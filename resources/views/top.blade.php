@@ -83,10 +83,6 @@
 @section('js')
 
     @vite('resources/js/functions/tooltip.js')
-    @vite('resources/js/functions/taf.js')
-
-    @vite('resources/js/cards.js')
-    @vite('resources/js/map.js')
     <script>
         var airportMapData = {!! isset($airportMapData) ? $airportMapData : '[]' !!}
         var focusContinent = {!! isset($continent) ? '\''.$continent.'\'' : 'null' !!};

@@ -1,7 +1,6 @@
-import React from 'react';
 import { DivIcon } from 'leaflet';
 
-const createIcon = (color, airportType = 'large_airport') => {
+const createMarkerIcon = (color, airportType = 'large_airport') => {
     let sizePx = 10;
     if(color === null || color === undefined){ color = '#ddb81c'; }
 
@@ -17,4 +16,4 @@ const createIcon = (color, airportType = 'large_airport') => {
     });
 };
 
-export { createIcon };
+export { createMarkerIcon };

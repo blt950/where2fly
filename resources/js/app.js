@@ -1,19 +1,33 @@
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes React and other helpers. It's a great starting point while
- * building robust, powerful web applications using React + Laravel.
- */
-
 import './bootstrap';
 import '../sass/app.scss';
 
-/**
- * Next, we will create a fresh React component instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
-
+// React
 import './components/Map';
 import './components/PopupContainer';
 import './components/AirportCard';
-import './components/TAF';
+import './components/ui/TAF';
+
+// Metrics
+document.querySelectorAll('a[href^="http"]').forEach(link => {
+    // Check if the link is not pointing to your own domain
+    if (link.hostname !== window.location.hostname) {
+        link.addEventListener('click', function (e) {
+            // Only get the domain of the link to avoid sending the full URL
+            let url = new URL(link.href);
+            let domain = url.hostname;
+
+            plausible('External Link Click', {
+                props: {
+                    url: domain
+                }
+            });
+        });
+    }
+});
+
+document.addEventListener('cardOpened', function(event) {
+    var type = event.detail.type;
+    if (type == 'flights' || type == 'scenery') {
+        plausible('Interactions', {props: {interaction: `Open ${type} card`}});
+    }
+});
