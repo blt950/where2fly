@@ -47,7 +47,7 @@ function AirportCard({ airportId }) {
         if(reverseDirection === false){
             setDepartureAirportId(airports[primaryAirport].id);
             setArrivalAirportId(airports[focusAirport].id);
-        } else {
+        } else if (reverseDirection === true) {
             setDepartureAirportId(airports[focusAirport].id);
             setArrivalAirportId(airports[primaryAirport].id);
         }
