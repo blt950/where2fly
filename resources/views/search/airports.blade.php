@@ -215,6 +215,7 @@
         window.addEventListener('mapReady', function() {
             setCluster(false);
             setPrimaryAirport(primaryAirport);
+            setReverseDirection((direction == 'departure' ? false : true));
             setAirportsData(airportMapData);
         });
 

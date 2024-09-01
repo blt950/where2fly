@@ -3,7 +3,7 @@ import L from 'leaflet';
 import { useMap } from 'react-leaflet';
 import MapMarker from './MapMarker';
 
-const DrawRoute = ({ airports, departure, arrival, reverseDirection = true }) => {
+const DrawRoute = ({ airports, departure, arrival, reverseDirection = false }) => {
     const routePath = useRef(null);
     const map = useMap();
     
@@ -12,11 +12,11 @@ const DrawRoute = ({ airports, departure, arrival, reverseDirection = true }) =>
         let latlng2 = [];
         
         if (reverseDirection) {
-            latlng1 = [airports[departure].lat, airports[departure].lon];
-            latlng2 = [airports[arrival].lat, airports[arrival].lon];
-        } else {
             latlng1 = [airports[arrival].lat, airports[arrival].lon];
             latlng2 = [airports[departure].lat, airports[departure].lon];
+        } else {
+            latlng1 = [airports[departure].lat, airports[departure].lon];
+            latlng2 = [airports[arrival].lat, airports[arrival].lon];
         }
         
         // Adjust for shortest path across the International Date Line

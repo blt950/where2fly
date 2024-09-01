@@ -61,6 +61,7 @@ function Map() {
     const [cluster, setCluster] = useState(true);
     const [primaryAirport, setPrimaryAirport] = useState(null);
     const [mapBounds, setMapBounds] = useState(null);
+    const [reverseDirection, setReverseDirection] = useState(false);
 
     useEffect(() => {
         window.setAirportsData = (data) => {
@@ -73,6 +74,10 @@ function Map() {
 
         window.setDrawRoute = (route) => {
             setDrawRoute(route);
+        }
+
+        window.setReverseDirection = (boolean) => {
+            setReverseDirection(boolean);
         }
 
         window.setPrimaryAirport = (airport) => {
@@ -136,7 +141,7 @@ function Map() {
     };
 
     return (
-        <MapContext.Provider value={{ airports, focusAirport, setFocusAirport, setAirportId, setShowAirportCard }}>
+        <MapContext.Provider value={{ airports, focusAirport, setFocusAirport, setAirportId, setShowAirportCard, reverseDirection }}>
             <MapContainer 
                 className="map" 
                 center={mapPosition}
@@ -162,7 +167,7 @@ function Map() {
                 {isDefaultView() && <SaveViewEvent />}
                 {mapBounds && <BoundEvent mapBounds={mapBounds} />}
                 <PanEvent flyToCoordinates={coordinates} />
-                {drawRoute && <DrawRoute airports={airports} departure={drawRoute[0]} arrival={drawRoute[1]}/>}
+                {drawRoute && <DrawRoute airports={airports} departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
             </MapContainer>
             {showAirportCard && <PopupContainer airportId={airportId} />}
         </MapContext.Provider>
