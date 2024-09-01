@@ -3,6 +3,7 @@ import { MapContext } from './context/MapContext';
 import { CardContext } from './context/CardContext';
 
 import FlightsCard from './FlightsCard';
+import SceneryCard from './SceneryCard';
 import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
@@ -10,6 +11,7 @@ function AirportCard({ airportId, highlightedAircrafts }) {
     const dataCache = useRef({});
     const [data, setData] = useState(null);
     const [showFlightsIdCard, setShowFlightsIdCard] = useState(null);
+    const [showSceneryIdCard, setShowSceneryIdCard] = useState(null);
     const [departureAirportId, setDepartureAirportId] = useState(null);
     const [arrivalAirportId, setArrivalAirportId] = useState(null);
     const { airports, primaryAirport, focusAirport, reverseDirection } = useContext(MapContext);
@@ -45,6 +47,7 @@ function AirportCard({ airportId, highlightedAircrafts }) {
         }
 
         setShowFlightsIdCard(null);
+        setShowSceneryIdCard(null);
 
         if(reverseDirection === false){
             setDepartureAirportId(airports[primaryAirport].id);
@@ -65,7 +68,7 @@ function AirportCard({ airportId, highlightedAircrafts }) {
     }, [data]);
 
     return (
-        <CardContext.Provider value={{ showFlightsIdCard, setShowFlightsIdCard }}>
+        <CardContext.Provider value={{ showFlightsIdCard, setShowFlightsIdCard, setShowSceneryIdCard }}>
             <div className="popup-card">
                 {data ? (
                     <>
@@ -118,7 +121,7 @@ function AirportCard({ airportId, highlightedAircrafts }) {
                         </dl>
 
                         <div className="d-flex flex-wrap gap-2">
-                            <button className="btn btn-outline-primary btn-sm font-work-sans">
+                            <button className="btn btn-outline-primary btn-sm font-work-sans" onClick={() => setShowSceneryIdCard(data.airport.icao)}>
                                 <i className="fas fa-map"></i> Scenery
                             </button>
 
@@ -151,6 +154,7 @@ function AirportCard({ airportId, highlightedAircrafts }) {
                 )}
             </div>
             {showFlightsIdCard && <FlightsCard airlineId={showFlightsIdCard} departureAirportId={departureAirportId} arrivalAirportId={arrivalAirportId} highlightedAircrafts={highlightedAircrafts} />}
+            {showSceneryIdCard && <SceneryCard airportId={showSceneryIdCard} />}
         </CardContext.Provider>
     );
 }

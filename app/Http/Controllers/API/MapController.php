@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Rules\AirportExists;
 use App\Models\Flight;
 use App\Models\Airline;
+use App\Models\Scenery;
+use App\Models\Simulator;
 
 class MapController extends Controller
 {
@@ -130,6 +132,25 @@ class MapController extends Controller
         }
     }
 
+    /**
+     * Get scenery
+     */
+    public function getScenery(Request $request){
+        $data = request()->validate([
+            'airportIcao' => ['required', 'exists:airports,icao'],
+        ]);
 
+        $airportIcao = $data['airportIcao'];
+        $sceneries = Scenery::where('icao', $airportIcao)->where('published', true)->get();
+        $simulators = Simulator::all();
 
+        if(isset($sceneries)){
+            return response()->json(['message' => 'Success', 'data' => [
+                'sceneries' => $sceneries,
+                'simulators' => $simulators,
+            ]], 200);
+        } else {
+            return response()->json(['message' => 'Scenery not found'], 404);
+        }
+    }
 }
