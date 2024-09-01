@@ -20,26 +20,15 @@ const DrawRoute = ({ airports, departure, arrival, reverseDirection = true }) =>
         }
         
         // Adjust for shortest path across the International Date Line
-        /*
         if (Math.abs(latlng2[1] - latlng1[1]) > 180) {
-        if (latlng1[1] > 0) {
-        latlng1[1] -= 360;
-        
-        // Remove the primary marker and redraw it with the adjusted lon
-        if (primaryMarker) {
-        primaryMarker.remove();
-        setPrimaryMarker(mapDrawMarker(primaryAirport, airportCoordinates[primaryAirport].lat, airportCoordinates[primaryAirport].lon -= 360));
+            if (latlng1[1] > 0) {
+                latlng1[1] -= 360;
+                airports[primaryAirport].lon = airports[primaryAirport].lon -= 360
+            } else {
+                latlng1[1] += 360;
+                airports[primaryAirport].lon = airports[primaryAirport].lon += 360
+            }
         }
-        } else {
-        latlng1[1] += 360;
-        
-        // Remove the primary marker and redraw it with the adjusted lon
-        if (primaryMarker) {
-        primaryMarker.remove();
-        setPrimaryMarker(mapDrawMarker(primaryAirport, airportCoordinates[primaryAirport].lat, airportCoordinates[primaryAirport].lon += 360));
-        }
-        }
-        }*/
         
         // Path color and weight
         const pathOptions = {
