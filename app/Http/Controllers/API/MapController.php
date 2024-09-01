@@ -75,6 +75,33 @@ class MapController extends Controller
         }
     }
 
+    /**
+     * Get flights for the airport pair and given airline
+     */
+    public function getFlights(Request $request){
+        $data = request()->validate([
+            'departureAirportId' => ['required', 'exists:airports,id'],
+            'arrivalAirportId' => ['required', 'exists:airports,id'],
+            'airlineId' => ['required', 'exists:airlines,icao_code'],
+        ]);
+
+        $departureAirportId = $data['departureAirportId'];
+        $arrivalAirportId = $data['arrivalAirportId'];
+        $airlineIcao = $data['airlineId'];
+
+        $airline = Airline::where('icao_code', $airlineIcao)->first();
+        $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departureAirportId)->where('airport_arr_id', $arrivalAirportId)->where('airline_icao', $airlineIcao)->with('aircrafts')->orderBy('last_seen_at')->get();
+
+        if(isset($flights)){
+            return response()->json(['message' => 'Success', 'data' => [
+                'flights' => $flights,
+                'airline' => $airline,   
+            ]], 200);
+        } else {
+            return response()->json(['message' => 'Flights not found'], 404);
+        }
+    }
+
 
 
 }

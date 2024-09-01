@@ -23,4 +23,5 @@ Route::group(['middleware' => ['api-token']], function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/lists/airports', [MapController::class, 'getListAirports'])->name('api.lists.airports');
     Route::post('/airport', [MapController::class, 'getAirport'])->name('api.airport.show');
+    Route::post('/flights', [MapController::class, 'getFlights'])->name('api.airport.flights');
 });
