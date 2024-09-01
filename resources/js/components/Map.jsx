@@ -6,6 +6,7 @@ import PopupContainer from './PopupContainer';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import PanEvent from './PanEvent';
 import SaveViewEvent from './SaveViewEvent';
+import DrawRoute from './DrawRoute';
 
 const createIcon = (color, airportType = 'large_airport') => {
     let sizePx = 10;
@@ -69,6 +70,7 @@ function Map() {
     const [mapPosition, setMapPosition] = useState(getMapPosition());
     const [coordinates, setCoordinates] = useState(null);
     const [focusAirport, setFocusAirport] = useState(null);
+    const [drawRoute, setDrawRoute] = useState(null);
 
     const setAirportsRef = useRef(null);
 
@@ -80,6 +82,10 @@ function Map() {
         window.setFocusAirport = (icao) => {
             setFocusAirport(icao);
         };
+
+        window.setDrawRoute = (route) => {
+            setDrawRoute(route);
+        }
 
         if (isDefaultView()) {
             fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
@@ -171,6 +177,7 @@ function Map() {
             </MarkerClusterGroup>
             {isDefaultView() && <SaveViewEvent />}
             <PanEvent flyToCoordinates={coordinates} />
+            {drawRoute && <DrawRoute airports={airports} departure={drawRoute[0]} arrival={drawRoute[1]}/>}
         </MapContainer>
         {showAirportCard && <PopupContainer airportId={airportId} />}
         </>

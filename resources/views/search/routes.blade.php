@@ -94,6 +94,7 @@
         // Listen for the custom event indicating the map is ready
         window.addEventListener('mapReady', function() {
             setAirportsData(airportMapData);
+            setDrawRoute([departure, arrival]);
         });
     </script>
 @endsection
