@@ -9,6 +9,7 @@ import SaveViewEvent from './SaveViewEvent';
 import DrawRoute from './DrawRoute';
 import MapMarkerGroup from './MapMarkerGroup';
 import { MapContext } from './context/MapContext';
+import BoundEvent from './BoundEvent';
 
 const isDefaultView = () => {
     if (!route().current('top') 
@@ -59,6 +60,7 @@ function Map() {
     const [drawRoute, setDrawRoute] = useState(null);
     const [cluster, setCluster] = useState(true);
     const [primaryAirport, setPrimaryAirport] = useState(null);
+    const [mapBounds, setMapBounds] = useState(null);
 
     useEffect(() => {
         window.setAirportsData = (data) => {
@@ -110,6 +112,16 @@ function Map() {
         }
     }, [focusAirport]);
 
+    useEffect(() => {
+        if (!isDefaultView() && airports && Object.keys(airports).length > 0) {
+            var bounds = [];
+            Object.values(airports).forEach(airport => {
+                bounds.push([airport.lat, airport.lon]);
+            });
+            setMapBounds(bounds);
+        }
+    }, [airports]);
+
     const iconCreateFunction = (cluster) => {
         // if url not ends with /top or /search, set style to 'inverted'
         var style = '';
@@ -148,6 +160,7 @@ function Map() {
                 )}
 
                 {isDefaultView() && <SaveViewEvent />}
+                {mapBounds && <BoundEvent mapBounds={mapBounds} />}
                 <PanEvent flyToCoordinates={coordinates} />
                 {drawRoute && <DrawRoute airports={airports} departure={drawRoute[0]} arrival={drawRoute[1]}/>}
             </MapContainer>
