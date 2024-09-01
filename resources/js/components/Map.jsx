@@ -1,4 +1,4 @@
-import { DivIcon } from 'leaflet';
+
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet'
@@ -7,22 +7,7 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import PanEvent from './PanEvent';
 import SaveViewEvent from './SaveViewEvent';
 import DrawRoute from './DrawRoute';
-
-const createIcon = (color, airportType = 'large_airport') => {
-    let sizePx = 10;
-    if(color === null || color === undefined){ color = '#ddb81c'; }
-
-    if (airportType === 'medium_airport') {
-        sizePx = 7;
-    } else if (airportType === 'small_airport') {
-        sizePx = 5;
-    }
-
-    return new DivIcon({
-        iconSize: [sizePx, sizePx],
-        html: `<span style="display: block; width: ${sizePx}px; height: ${sizePx}px; border-radius: 50%; background: ${color}"></span>`
-    });
-};
+import MapMarkerGroup from './MapMarkerGroup';
 
 const isDefaultView = () => {
     if (!route().current('top') 
@@ -71,6 +56,7 @@ function Map() {
     const [coordinates, setCoordinates] = useState(null);
     const [focusAirport, setFocusAirport] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
+    const [cluster, setCluster] = useState(true);
 
     const setAirportsRef = useRef(null);
 
@@ -85,6 +71,10 @@ function Map() {
 
         window.setDrawRoute = (route) => {
             setDrawRoute(route);
+        }
+
+        window.setCluster = (cluster) => {
+            setCluster(cluster);
         }
 
         if (isDefaultView()) {
@@ -110,17 +100,6 @@ function Map() {
             setShowAirportCard(true);
         }
     }, [focusAirport]);
-
-    const eventHandlers = (airport) => ({
-        click: (e) => {
-            setCoordinates([airport.lat, airport.lon]);
-            setAirportId(airport.id);
-            setShowAirportCard(true);
-        },
-        flyTo: (e) => {
-            setCoordinates([airport.lat, airport.lon]);
-        }
-    });
 
     const iconCreateFunction = (cluster) => {
         // if url not ends with /top or /search, set style to 'inverted'
@@ -150,31 +129,15 @@ function Map() {
                 minZoom={3}
                 maxZoom={17}
             />
-            <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={40} iconCreateFunction={iconCreateFunction}>
-                {Object.keys(airports).map(key => {
-                    const airport = airports[key];
-                    const icon = createIcon(airport.color, airport.type);
-                    return (
-                        <Marker
-                            key={airport.id}
-                            position={[airport.lat, airport.lon]}
-                            icon={icon}
-                            eventHandlers={eventHandlers(airport)}
-                        >
-                            <Tooltip
-                                direction="left"
-                                className="airport"
-                                interactive={true}
-                                permanent
-                            >
-                                <span style={{ color: airport.color }}>
-                                    {airport.icao}
-                                </span>
-                            </Tooltip>
-                        </Marker>
-                    );
-                })}
-            </MarkerClusterGroup>
+
+            {cluster ? (
+                <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={40} iconCreateFunction={iconCreateFunction}>
+                    <MapMarkerGroup airports={airports}/>
+                </MarkerClusterGroup>
+            ) : (
+                <MapMarkerGroup airports={airports}/>
+            )}
+
             {isDefaultView() && <SaveViewEvent />}
             <PanEvent flyToCoordinates={coordinates} />
             {drawRoute && <DrawRoute airports={airports} departure={drawRoute[0]} arrival={drawRoute[1]}/>}

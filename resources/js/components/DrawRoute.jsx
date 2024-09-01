@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import L from 'leaflet';
 import { useMap } from 'react-leaflet';
+import MapMarker from './MapMarker';
 
 const DrawRoute = ({ airports, departure, arrival, reverseDirection = true }) => {
   const [routePath, setRoutePath] = useState(null);
+  const [arrivalMarker, setArrivalMarker] = useState(false);
   const [secondaryMarker, setSecondaryMarker] = useState(null);
   const [primaryMarker, setPrimaryMarker] = useState(null);
 
@@ -66,7 +68,9 @@ const DrawRoute = ({ airports, departure, arrival, reverseDirection = true }) =>
 
       // Delete old path and secondary marker if applicable
       if (routePath) routePath.remove();
-      if (secondaryMarker) secondaryMarker.remove();
+      //if (secondaryMarker) secondaryMarker.remove();
+      setArrivalMarker(true);
+      airports[arrival].color = '#ddb81c';
 
       // Draw the destination airport marker
       //setSecondaryMarker(mapDrawMarker(destinationAirport, airportCoordinates[destinationAirport].lat, airportCoordinates[destinationAirport].lon));
@@ -147,7 +151,11 @@ const DrawRoute = ({ airports, departure, arrival, reverseDirection = true }) =>
     return [[midpointY, midpointX], r];
   };
 
-  return null;
+  return (
+    <>
+    {arrivalMarker && <MapMarker airport={airports[arrival]} ignoreZoom={true} colorOverride="#ddb81c" />}
+    </>
+  )
 };
 
 export default DrawRoute;

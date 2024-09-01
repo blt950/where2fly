@@ -200,14 +200,20 @@ class SearchController extends Controller
 
                 // Create an array with all airports coordinates
                 $airportCoordinates = [];
+                $airportCoordinates[$primaryAirport->icao]['id'] = $primaryAirport->id;
+                $airportCoordinates[$primaryAirport->icao]['icao'] = $primaryAirport->icao;
                 $airportCoordinates[$primaryAirport->icao]['lat'] = $primaryAirport->coordinates->latitude;
                 $airportCoordinates[$primaryAirport->icao]['lon'] = $primaryAirport->coordinates->longitude;
+                $airportCoordinates[$primaryAirport->icao]['type'] = $primaryAirport->type;
 
                 // Lets add the coordinates of the suggested airports
                 foreach ($suggestedAirports as $airport) {
+                    $airportCoordinates[$airport->icao]['id'] = $airport->id;
+                    $airportCoordinates[$airport->icao]['icao'] = $airport->icao;
                     $airportCoordinates[$airport->icao]['lat'] = $airport->coordinates->latitude;
                     $airportCoordinates[$airport->icao]['lon'] = $airport->coordinates->longitude;
                     $airportCoordinates[$airport->icao]['type'] = $airport->type;
+                    $airportCoordinates[$airport->icao]['color'] = "grey";
                 }
 
                 $sceneriesCollection = Scenery::where('published', true)->whereIn('airport_id', $suggestedAirports->pluck('id'))->with('simulator')->get();

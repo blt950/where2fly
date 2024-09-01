@@ -138,7 +138,7 @@
                     @endif
 
                     @foreach($suggestedAirports as $airport)
-                        <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-card-event="open" data-card-type="airport" data-card-for="{{ $airport->icao }}">
+                        <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-airport-icao="{{ $airport->icao }}">
                             <th scope="row">{{ $count }}</th>
                             <td data-sort="{{ $airport->icao }}">
                                 <div>
@@ -207,10 +207,34 @@
     @vite('resources/js/cards.js')
     @vite('resources/js/map.js')
     <script>
-        var airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
-        var focusAirport = '{{ $primaryAirport->icao }}';
+        var airportMapData = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
+        var primaryAirport = '{{ $primaryAirport->icao }}';
         var direction = '{{ $direction }}';
 
+        // Listen for the custom event indicating the map is ready
+        window.addEventListener('mapReady', function() {
+            setCluster(false);
+            setAirportsData(airportMapData);
+        });
+
+        // Add click event listener to each table row
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll('tr[data-airport-icao]');
+            rows.forEach(row => {
+                row.addEventListener('click', function() {
+                    // Get the lat and lon from data attributes
+                    const icao = this.getAttribute('data-airport-icao');
+
+                    setDrawRoute([primaryAirport, icao]);
+
+                    // Remove 'active' class from all rows and add to the clicked row
+                    rows.forEach(r => r.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+
+        /*
         document.addEventListener('DOMContentLoaded', function() {
             // Apply click events on card related triggers
             cardsInitEvents()
@@ -259,7 +283,7 @@
                     }
                 })
             }
-        })
+        })*/
         
     </script>
 @endsection
