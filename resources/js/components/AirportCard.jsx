@@ -5,16 +5,30 @@ import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
 function AirportCard({ airportId }) {
-    const [data, setData] = useState(null);
     const dataCache = useRef({});
-    const { primaryAirport, focusAirport, reverseDirection } = useContext(MapContext);
+    const [data, setData] = useState(null);
+    const { airports, primaryAirport, focusAirport, reverseDirection } = useContext(MapContext);
 
     // Fetch airport data if it's not in the cache
     useEffect(() => {
         if (dataCache.current[airportId]) {
             setData(dataCache.current[airportId]);
         } else {
-            fetch(route('api.airport.show', airportId), { credentials: 'include', headers: { 'Accept': 'application/json' } })
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            fetch(route('api.airport.show'), {
+                    method: "POST",    
+                    credentials: 'include',
+                    headers: { 
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({ 
+                        primaryAirport: (primaryAirport ? airports[primaryAirport].id : null),
+                        secondaryAirport: airports[focusAirport].id, 
+                        reverseDirection
+                    })
+                })
                 .then(response => response.json())
                 .then(data => {
                     dataCache.current[airportId] = data.data;
@@ -23,6 +37,14 @@ function AirportCard({ airportId }) {
                 .catch(error => console.error(error.message));
         }
     }, [airportId]);
+
+    // When data changes, initialize tooltips
+    useEffect(() => {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
+            container: 'body'
+        }));
+    }, [data]);
 
     return (
         <div className="popup-card">
@@ -50,6 +72,29 @@ function AirportCard({ airportId }) {
                         <dd>
                             <TAF icao={data.airport.icao}/>
                         </dd>
+
+                        {data.airlines && data.airlines.length > 0 && (
+                            <>
+                                <dt>Airlines</dt>
+                                <dd className="d-flex flex-wrap gap-1">
+                                    {data.airlines.map(airline => (
+                                        <button
+                                            key={airline.id}
+                                            type="button"
+                                            className={`airline-button ${airline.highlight ? 'highlight' : null}`}
+                                        >
+                                            <img
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title={`See all ${airline.name} flights`}
+                                                className="airline-logo"
+                                                src={`/img/airlines/${airline.iata_code}.png`}
+                                                alt={`See all ${airline.name} flights`}
+                                            />
+                                        </button>
+                                    ))}
+                                </dd>
+                            </>
+                        )}
                     </dl>
 
                     <div className="d-flex flex-wrap gap-2">

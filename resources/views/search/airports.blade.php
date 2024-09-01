@@ -200,6 +200,7 @@
 @endsection
 
 @section('js')
+    @vite('resources/js/functions/tooltip.js')
     @vite('resources/js/functions/searchResults.js')
     @vite('resources/js/functions/taf.js')
     <script>
