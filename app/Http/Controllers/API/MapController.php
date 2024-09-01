@@ -92,6 +92,8 @@ class MapController extends Controller
         $airline = Airline::where('icao_code', $airlineIcao)->first();
         $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departureAirportId)->where('airport_arr_id', $arrivalAirportId)->where('airline_icao', $airlineIcao)->with('aircrafts')->orderByDesc('last_seen_at')->get();
 
+        $airline->iata_code = str_replace('*', '', $airline->iata_code);
+
         if(isset($flights)){
             return response()->json(['message' => 'Success', 'data' => [
                 'flights' => $flights,
