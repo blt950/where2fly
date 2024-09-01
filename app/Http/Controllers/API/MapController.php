@@ -29,14 +29,14 @@ class MapController extends Controller
      */
     public function getAirport(int $airportId)
     {
-        $airport = Airport::select('id', 'icao', 'name', 'iso_country')->with('runways')->where('id', $airportId)->get()->first();
-        $runways = $airport->runways->where('closed', false)->whereNotNull('length_ft');
+        $airport = Airport::select('id', 'icao', 'name', 'iso_country')->with(['runways' => function ($query) {
+            $query->where('closed', false)->whereNotNull('length_ft');
+        }])->where('id', $airportId)->first();
         $metar = $airport->metar;
 
         if(isset($airport)) {
             return response()->json(['message' => 'Success', 'data' => [
                 'airport' => $airport->toArray(),
-                'runways' => $runways->toArray(),
                 'metar' => $metar->metar
             ]], 200);
         } else {
