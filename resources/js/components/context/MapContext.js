@@ -4,5 +4,7 @@ export const MapContext = createContext({
     airports: [],
     focusAirport: undefined,
     setFocusAirport: undefined,
-    setShowAirportIdCard: undefined
+    setShowAirportIdCard: undefined,
+    reverseDirection: undefined,
+    primaryAirport: undefined,
 });

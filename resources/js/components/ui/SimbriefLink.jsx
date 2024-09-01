@@ -1,14 +1,14 @@
 const SimbriefLink = ({ direction, primaryIcao, secondaryIcao }) => {
-    const simbriefUrl = `orig=${direction === 'departure' ? primaryIcao : secondaryIcao}&dest=${direction === 'departure' ? secondaryIcao : primaryIcao}`;
+    const simbriefUrl = `orig=${direction == false ? primaryIcao : secondaryIcao}&dest=${direction == false ? secondaryIcao : primaryIcao}`;
 
     return (
         <>
-            {direction ? (
-                <a className="btn btn-outline-primary btn-sm font-work-sans" href={`https://dispatch.simbrief.com/options/custom?${simbriefUrl}`} target="_blank">
+            {primaryIcao !== null ? (
+                <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://dispatch.simbrief.com/options/custom?${simbriefUrl}`} target="_blank">
                     <span>SimBrief</span> <i className="fas fa-up-right-from-square"></i>
                 </a>
             ) : (
-                <a className="btn btn-outline-primary btn-sm font-work-sans" href={`https://dispatch.simbrief.com/options/custom?dest=${primaryIcao}`} target="_blank">
+                <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://dispatch.simbrief.com/options/custom?dest=${secondaryIcao}`} target="_blank">
                     <span>SimBrief</span> <i className="fas fa-up-right-from-square"></i>
                 </a>
             )}

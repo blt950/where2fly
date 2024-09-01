@@ -64,7 +64,7 @@ function Map() {
     const [focusAirport, setFocusAirport] = useState(null);
     const [mapBounds, setMapBounds] = useState(null);
     const [primaryAirport, setPrimaryAirport] = useState(null);
-    const [reverseDirection, setReverseDirection] = useState(false);
+    const [reverseDirection, setReverseDirection] = useState(null);
     const [showAirportIdCard, setShowAirportIdCard] = useState(null);
 
     // On initial load
@@ -118,7 +118,7 @@ function Map() {
     }, [airports]);
 
     return (
-        <MapContext.Provider value={{ airports, focusAirport, setFocusAirport, setShowAirportIdCard }}>
+        <MapContext.Provider value={{ airports, focusAirport, setFocusAirport, setShowAirportIdCard, reverseDirection, primaryAirport }}>
             <MapContainer 
                 className="map" 
                 center={getInitMapPosition()}
