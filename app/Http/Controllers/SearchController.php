@@ -186,10 +186,6 @@ class SearchController extends Controller
             // Filter the eligible airports
             $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
-            // Shuffle the results before sort as slim results will quickly show airports from close by location
-            // Sort the suggested airports based on the intended filters
-            $suggestedAirports = $suggestedAirports->addFlights($primaryAirport, $direction);
-
             // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy
             $bearingWarning = false;
             if ($maxDistance > 2300 && isset($flightDirection)) {
