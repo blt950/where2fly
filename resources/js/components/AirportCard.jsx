@@ -25,7 +25,7 @@ function AirportCard({ airportId }) {
     }, [airportId]);
 
     return (
-        <div className="popup-card show">
+        <div className="popup-card">
             {data ? (
                 <>
                     <div>
