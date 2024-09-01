@@ -70,7 +70,6 @@ const DrawRoute = ({ airports, departure, arrival, reverseDirection = true }) =>
       if (routePath) routePath.remove();
       //if (secondaryMarker) secondaryMarker.remove();
       setArrivalMarker(true);
-      airports[arrival].color = '#ddb81c';
 
       // Draw the destination airport marker
       //setSecondaryMarker(mapDrawMarker(destinationAirport, airportCoordinates[destinationAirport].lat, airportCoordinates[destinationAirport].lon));
@@ -150,12 +149,6 @@ const DrawRoute = ({ airports, departure, arrival, reverseDirection = true }) =>
 
     return [[midpointY, midpointX], r];
   };
-
-  return (
-    <>
-    {arrivalMarker && <MapMarker airport={airports[arrival]} ignoreZoom={true} colorOverride="#ddb81c" />}
-    </>
-  )
 };
 
 export default DrawRoute;

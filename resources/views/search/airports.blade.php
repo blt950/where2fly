@@ -214,6 +214,7 @@
         // Listen for the custom event indicating the map is ready
         window.addEventListener('mapReady', function() {
             setCluster(false);
+            setPrimaryAirport(primaryAirport);
             setAirportsData(airportMapData);
         });
 
@@ -225,13 +226,24 @@
                     // Get the lat and lon from data attributes
                     const icao = this.getAttribute('data-airport-icao');
 
-                    setDrawRoute([primaryAirport, icao]);
+                    setFocusAirport(icao);
 
                     // Remove 'active' class from all rows and add to the clicked row
                     rows.forEach(r => r.classList.remove('active'));
                     this.classList.add('active');
                 });
             });
+        });
+
+        // Event listener if user clicks on map dot, to mark active in table
+        window.addEventListener('mapFocusAirport', function(event) {
+            const focusAirport = event.detail.focusAirport;
+            
+            const rows = document.querySelectorAll('tr[data-airport-icao]');
+            rows.forEach(r => r.classList.remove('active'));
+
+            const focusRow = document.querySelector(`tr[data-airport-icao="${focusAirport}"]`);
+            focusRow.classList.add('active');
         });
 
         /*

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import ReactDOM from 'react-dom/client';
 import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet'
 import PopupContainer from './PopupContainer';
@@ -8,6 +8,7 @@ import PanEvent from './PanEvent';
 import SaveViewEvent from './SaveViewEvent';
 import DrawRoute from './DrawRoute';
 import MapMarkerGroup from './MapMarkerGroup';
+import { MapContext } from './context/MapContext';
 
 const isDefaultView = () => {
     if (!route().current('top') 
@@ -57,8 +58,7 @@ function Map() {
     const [focusAirport, setFocusAirport] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
     const [cluster, setCluster] = useState(true);
-
-    const setAirportsRef = useRef(null);
+    const [primaryAirport, setPrimaryAirport] = useState(null);
 
     useEffect(() => {
         window.setAirportsData = (data) => {
@@ -71,6 +71,10 @@ function Map() {
 
         window.setDrawRoute = (route) => {
             setDrawRoute(route);
+        }
+
+        window.setPrimaryAirport = (airport) => {
+            setPrimaryAirport(airport);
         }
 
         window.setCluster = (cluster) => {
@@ -94,10 +98,15 @@ function Map() {
     }, []);
 
     useEffect(() => {
-        if (focusAirport !== null) {
+        if (focusAirport !== null && focusAirport !== undefined) {
             setCoordinates([airports[focusAirport].lat, airports[focusAirport].lon]);
             setAirportId(airports[focusAirport].id);
             setShowAirportCard(true);
+            if(primaryAirport){
+                setDrawRoute([primaryAirport, airports[focusAirport].icao]);
+            }
+            console.log("trigger")
+            window.dispatchEvent(new CustomEvent('mapFocusAirport', { detail: { focusAirport } }));
         }
     }, [focusAirport]);
 
@@ -115,35 +124,35 @@ function Map() {
     };
 
     return (
-        <>
-        <MapContainer 
-            className="map" 
-            center={mapPosition}
-            zoom={4} 
-            attributionControl={false} 
-            zoomControl={false}
-            maxBounds={[[-85, -360], [85, 360]]}
-        >
-            <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-                minZoom={3}
-                maxZoom={17}
-            />
+        <MapContext.Provider value={{ airports, focusAirport, setFocusAirport, setAirportId, setShowAirportCard }}>
+            <MapContainer 
+                className="map" 
+                center={mapPosition}
+                zoom={4} 
+                attributionControl={false} 
+                zoomControl={false}
+                maxBounds={[[-85, -360], [85, 360]]}
+            >
+                <TileLayer
+                    url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+                    minZoom={3}
+                    maxZoom={17}
+                />
 
-            {cluster ? (
-                <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={40} iconCreateFunction={iconCreateFunction}>
+                {cluster ? (
+                    <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={40} iconCreateFunction={iconCreateFunction}>
+                        <MapMarkerGroup airports={airports}/>
+                    </MarkerClusterGroup>
+                ) : (
                     <MapMarkerGroup airports={airports}/>
-                </MarkerClusterGroup>
-            ) : (
-                <MapMarkerGroup airports={airports}/>
-            )}
+                )}
 
-            {isDefaultView() && <SaveViewEvent />}
-            <PanEvent flyToCoordinates={coordinates} />
-            {drawRoute && <DrawRoute airports={airports} departure={drawRoute[0]} arrival={drawRoute[1]}/>}
-        </MapContainer>
-        {showAirportCard && <PopupContainer airportId={airportId} />}
-        </>
+                {isDefaultView() && <SaveViewEvent />}
+                <PanEvent flyToCoordinates={coordinates} />
+                {drawRoute && <DrawRoute airports={airports} departure={drawRoute[0]} arrival={drawRoute[1]}/>}
+            </MapContainer>
+            {showAirportCard && <PopupContainer airportId={airportId} />}
+        </MapContext.Provider>
     );
 }
 
