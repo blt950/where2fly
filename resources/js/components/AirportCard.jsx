@@ -6,7 +6,7 @@ import FlightsCard from './FlightsCard';
 import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
-function AirportCard({ airportId }) {
+function AirportCard({ airportId, highlightedAircrafts }) {
     const dataCache = useRef({});
     const [data, setData] = useState(null);
     const [showFlightsIdCard, setShowFlightsIdCard] = useState(null);
@@ -32,7 +32,8 @@ function AirportCard({ airportId }) {
                     body: JSON.stringify({ 
                         primaryAirport: (primaryAirport ? airports[primaryAirport].id : null),
                         secondaryAirport: airports[focusAirport].id, 
-                        reverseDirection
+                        reverseDirection,
+                        highlightedAircrafts
                     })
                 })
                 .then(response => response.json())
@@ -44,6 +45,7 @@ function AirportCard({ airportId }) {
         }
 
         setShowFlightsIdCard(null);
+
         if(reverseDirection === false){
             setDepartureAirportId(airports[primaryAirport].id);
             setArrivalAirportId(airports[focusAirport].id);
@@ -98,7 +100,7 @@ function AirportCard({ airportId }) {
                                             <button
                                                 key={airline.id}
                                                 type="button"
-                                                className={`airline-button ${airline.highlight ? 'highlight' : null}`}
+                                                className={`airline-button ${airline.highlighted ? 'highlight' : 'mb-1'}`}
                                                 onClick={() => setShowFlightsIdCard(airline.icao_code)}
                                             >
                                                 <img
@@ -148,7 +150,7 @@ function AirportCard({ airportId }) {
                     <p>Loading ...</p>
                 )}
             </div>
-            {showFlightsIdCard && <FlightsCard airlineId={showFlightsIdCard} departureAirportId={departureAirportId} arrivalAirportId={arrivalAirportId} />}
+            {showFlightsIdCard && <FlightsCard airlineId={showFlightsIdCard} departureAirportId={departureAirportId} arrivalAirportId={arrivalAirportId} highlightedAircrafts={highlightedAircrafts} />}
         </CardContext.Provider>
     );
 }

@@ -36,11 +36,13 @@ class MapController extends Controller
             'primaryAirport' => ['nullable', 'exists:airports,id'],
             'secondaryAirport' => ['required', 'exists:airports,id'],
             'reverseDirection' => ['nullable'],
+            'highlightedAircrafts' => ['nullable', 'array'],
         ]);   
 
         $primaryAirport = $data['primaryAirport'];
         $secondaryAirport = $data['secondaryAirport'];
         $direction = $data['reverseDirection'];
+        $highlightedAircrafts = isset($data['highlightedAircrafts']) ? collect($data['highlightedAircrafts']) : null;
 
         // If direction is set, let's search for airlines
         $airlines = null;
@@ -50,8 +52,19 @@ class MapController extends Controller
             $departureAirportColumn = $direction == true ? 'airport_arr_id' : 'airport_dep_id';
 
             // Get flights and airlines for the suggested airports
-            $flights = Flight::select('airline_icao')->where('seen_counter', '>', 3)->where($arrivalAirportColumn, $secondaryAirport)->where($departureAirportColumn, $primaryAirport)->distinct()->get();
-            $airlines = Airline::whereIn('icao_code', $flights->pluck('airline_icao'))->get();
+            $flights = Flight::select('id', 'airline_icao')->where('seen_counter', '>', 3)->where($arrivalAirportColumn, $secondaryAirport)->where($departureAirportColumn, $primaryAirport)->with('aircrafts')->get();
+            $airlines = Airline::whereIn('icao_code', $flights->pluck('airline_icao')->unique())->get();
+
+            // Highlight airlines that have the aircrafts in the list
+            if(isset($highlightedAircrafts)){
+                foreach($flights as $flight){
+                    foreach($flight->aircrafts as $aircraft){
+                        if($highlightedAircrafts->contains($aircraft->icao)){
+                            $airlines->where('icao_code', $flight->airline_icao)->first()->highlighted = true;
+                        }
+                    }
+                }
+            }
 
             // Replace * with '' in all airline iata codes
             foreach ($airlines as $airline) {
@@ -83,14 +96,27 @@ class MapController extends Controller
             'departureAirportId' => ['required', 'exists:airports,id'],
             'arrivalAirportId' => ['required', 'exists:airports,id'],
             'airlineId' => ['required', 'exists:airlines,icao_code'],
+            'highlightedAircrafts' => ['nullable', 'array'],
         ]);
 
         $departureAirportId = $data['departureAirportId'];
         $arrivalAirportId = $data['arrivalAirportId'];
         $airlineIcao = $data['airlineId'];
+        $highlightedAircrafts = isset($data['highlightedAircrafts']) ? collect($data['highlightedAircrafts']) : null;
 
         $airline = Airline::where('icao_code', $airlineIcao)->first();
         $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departureAirportId)->where('airport_arr_id', $arrivalAirportId)->where('airline_icao', $airlineIcao)->with('aircrafts')->orderByDesc('last_seen_at')->get();
+
+        // Highlight airlines that have the aircrafts in the list
+        if(isset($highlightedAircrafts)){
+            foreach($flights as $flight){
+                foreach($flight->aircrafts as $aircraft){
+                    if($highlightedAircrafts->contains($aircraft->icao)){
+                        $flight->highlighted = true;
+                    }
+                }
+            }
+        }
 
         $airline->iata_code = str_replace('*', '', $airline->iata_code);
 

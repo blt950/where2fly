@@ -207,6 +207,7 @@
         var airportMapData = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
         var primaryAirport = '{{ $primaryAirport->icao }}';
         var direction = '{{ $direction }}';
+        var highlightedAircrafts = {!! isset($filterByAircrafts) ? json_encode($filterByAircrafts) : '[]' !!};
 
         // Listen for the custom event indicating the map is ready
         window.addEventListener('mapReady', function() {
@@ -214,6 +215,7 @@
             setPrimaryAirport(primaryAirport);
             setReverseDirection((direction == 'departure' ? false : true));
             setAirportsData(airportMapData);
+            setHighlightedAircrafts(highlightedAircrafts);
         });
 
         // Add click event listener to each table row

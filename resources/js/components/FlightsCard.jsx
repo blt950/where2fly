@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useContext } from 'react';
 import { CardContext } from './context/CardContext';
 import moment from 'moment';
 
-function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
+function FlightsCard({ airlineId, departureAirportId, arrivalAirportId, highlightedAircrafts }) {
 
     const dataCache = useRef({});
     const [data, setData] = useState(null);
@@ -22,7 +22,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrfToken
                     },
-                    body: JSON.stringify({ airlineId, departureAirportId, arrivalAirportId })
+                    body: JSON.stringify({ airlineId, departureAirportId, arrivalAirportId, highlightedAircrafts })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -48,7 +48,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
 
                     <ul className="list-unstyled">
                         {data.flights.map(flight => (
-                            <li key={flight.id}>
+                            <li key={flight.id} className={flight.highlighted ? 'text-success' : ''}>
                                 {flight.flight_icao}&nbsp;({flight.aircrafts.map(aircraft => aircraft.icao).join(',')})&nbsp;{moment(flight.last_seen_at).fromNow()}
                             </li>
                         ))}

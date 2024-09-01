@@ -212,9 +212,7 @@ class SearchController extends Controller
                     $airportCoordinates[$airport->icao]['color'] = "grey";
                 }
 
-                $sceneriesCollection = Scenery::where('published', true)->whereIn('airport_id', $suggestedAirports->pluck('id'))->with('simulator')->get();
-
-                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning', 'sceneriesCollection'));
+                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning'));
             }
 
         }

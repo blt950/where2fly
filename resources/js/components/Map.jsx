@@ -62,10 +62,12 @@ function Map() {
     const [coordinates, setCoordinates] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
     const [focusAirport, setFocusAirport] = useState(null);
+    const [highlightedAircrafts, setHighlightedAircrafts] = useState([]);
     const [mapBounds, setMapBounds] = useState(null);
     const [primaryAirport, setPrimaryAirport] = useState(null);
     const [reverseDirection, setReverseDirection] = useState(null);
     const [showAirportIdCard, setShowAirportIdCard] = useState(null);
+    
 
     // On initial load
     useEffect(() => {
@@ -73,6 +75,7 @@ function Map() {
         window.setCluster = (boolean) => { setCluster(boolean) }
         window.setDrawRoute = (route) => { setDrawRoute(route) }
         window.setFocusAirport = (icao) => { setFocusAirport(icao) }
+        window.setHighlightedAircrafts = (data) => { setHighlightedAircrafts(data) }
         window.setPrimaryAirport = (airport) => { setPrimaryAirport(airport) }
         window.setReverseDirection = (boolean) => { setReverseDirection(boolean) }
         window.isDefaultView = isDefaultView;
@@ -146,7 +149,7 @@ function Map() {
                 <MapPan flyToCoordinates={coordinates} />
                 {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
             </MapContainer>
-            {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
+            {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} highlightedAircrafts={highlightedAircrafts} />}
         </MapContext.Provider>
     );
 }

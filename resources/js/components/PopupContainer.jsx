@@ -4,7 +4,7 @@ import AirportCard from './AirportCard';
 function PopupContainer({ airportId }) {
     return (
         <div className="popup-container">
-            {airportId && <AirportCard airportId={airportId} />}
+            {airportId && <AirportCard airportId={airportId} highlightedAircrafts={highlightedAircrafts} />}
         </div>
     );
 }
