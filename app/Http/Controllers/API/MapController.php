@@ -50,8 +50,8 @@ class MapController extends Controller
             $departureAirportColumn = $direction == true ? 'airport_arr_id' : 'airport_dep_id';
 
             // Get flights and airlines for the suggested airports
-            $flights = Flight::select('airline_icao')->where('seen_counter', '>', 3)->where($arrivalAirportColumn, $secondaryAirport)->where($departureAirportColumn, $primaryAirport)->get();
-            $airlines = Airline::whereIn('icao_code', $flights->pluck('airline_icao')->unique())->get();
+            $flights = Flight::select('airline_icao')->where('seen_counter', '>', 3)->where($arrivalAirportColumn, $secondaryAirport)->where($departureAirportColumn, $primaryAirport)->distinct()->get();
+            $airlines = Airline::whereIn('icao_code', $flights->pluck('airline_icao'))->get();
 
             // Replace * with '' in all airline iata codes
             foreach ($airlines as $airline) {
@@ -90,7 +90,7 @@ class MapController extends Controller
         $airlineIcao = $data['airlineId'];
 
         $airline = Airline::where('icao_code', $airlineIcao)->first();
-        $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departureAirportId)->where('airport_arr_id', $arrivalAirportId)->where('airline_icao', $airlineIcao)->with('aircrafts')->orderBy('last_seen_at')->get();
+        $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departureAirportId)->where('airport_arr_id', $arrivalAirportId)->where('airline_icao', $airlineIcao)->with('aircrafts')->orderByDesc('last_seen_at')->get();
 
         if(isset($flights)){
             return response()->json(['message' => 'Success', 'data' => [
