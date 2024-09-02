@@ -7,18 +7,17 @@ import SceneryCard from './SceneryCard';
 import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
-function AirportCard({ airportId, highlightedAircrafts }) {
+function AirportCard({ airportId }) {
     const dataCache = useRef({});
     const [data, setData] = useState(null);
     const [showFlightsIdCard, setShowFlightsIdCard] = useState(null);
     const [showSceneryIdCard, setShowSceneryIdCard] = useState(null);
     const [departureAirportId, setDepartureAirportId] = useState(null);
     const [arrivalAirportId, setArrivalAirportId] = useState(null);
-    const { airports, primaryAirport, focusAirport, reverseDirection, userAuthenticated } = useContext(MapContext);
+    const { airports, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts } = useContext(MapContext);
 
     // Fetch airport data if it's not in the cache
     useEffect(() => {
-
         if (dataCache.current[airportId]) {
             setData(dataCache.current[airportId]);
         } else {
@@ -56,7 +55,6 @@ function AirportCard({ airportId, highlightedAircrafts }) {
             setDepartureAirportId(airports[focusAirport].id);
             setArrivalAirportId(airports[primaryAirport].id);
         }
-
     }, [airportId]);
 
     // When data changes, initialize tooltips
@@ -73,7 +71,14 @@ function AirportCard({ airportId, highlightedAircrafts }) {
                 {data ? (
                     <>
                         <div>
-                            <img className="flag border-0" src={`/img/flags/${ data.airport.iso_country.toLowerCase() }.svg`} height="16" data-bs-toggle="tooltip" data-bs-title={ data.airport.country_name } alt={`Flag of ${data.airport.country_name}`}></img>
+                            <img 
+                                className="flag border-0" 
+                                src={`/img/flags/${ data.airport.iso_country.toLowerCase() }.svg`} 
+                                height="16" 
+                                data-bs-toggle="tooltip" 
+                                data-bs-title={ data.airport.country_name } 
+                                alt={`Flag of ${data.airport.country_name}`}
+                            />
                             &nbsp;{data.airport.icao}
                         </div>
                         <h2>{data.airport.name}</h2>
@@ -153,7 +158,7 @@ function AirportCard({ airportId, highlightedAircrafts }) {
                     <p>Loading ...</p>
                 )}
             </div>
-            {showFlightsIdCard && <FlightsCard airlineId={showFlightsIdCard} departureAirportId={departureAirportId} arrivalAirportId={arrivalAirportId} highlightedAircrafts={highlightedAircrafts} />}
+            {showFlightsIdCard && <FlightsCard airlineId={showFlightsIdCard} departureAirportId={departureAirportId} arrivalAirportId={arrivalAirportId} />}
             {showSceneryIdCard && <SceneryCard airportId={showSceneryIdCard} />}
         </CardContext.Provider>
     );

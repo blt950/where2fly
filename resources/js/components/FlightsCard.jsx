@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef, useContext } from 'react';
 import { CardContext } from './context/CardContext';
+import { MapContext } from './context/MapContext';
 import moment from 'moment';
 
-function FlightsCard({ airlineId, departureAirportId, arrivalAirportId, highlightedAircrafts }) {
+function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
 
     const dataCache = useRef({});
     const [data, setData] = useState(null);
-    const { showFlightsIdCard, setShowFlightsIdCard } = useContext(CardContext);
+    const { highlightedAircrafts } = useContext(MapContext);
+    const { setShowFlightsIdCard } = useContext(CardContext);
 
     // Fetch airport data if it's not in the cache
     useEffect(() => {

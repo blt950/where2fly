@@ -129,7 +129,16 @@ function Map() {
     }, [airports]);
 
     return (
-        <MapContext.Provider value={{ airports, focusAirport, setFocusAirport, setShowAirportIdCard, reverseDirection, primaryAirport, userAuthenticated }}>
+        <MapContext.Provider value={{ 
+            airports, 
+            focusAirport, 
+            highlightedAircrafts,
+            primaryAirport,
+            reverseDirection,
+            setFocusAirport, 
+            setShowAirportIdCard, 
+            userAuthenticated, 
+            }}>
             <MapContainer 
                 className="map" 
                 center={getInitMapPosition()}
@@ -154,10 +163,10 @@ function Map() {
 
                 {isDefaultView() && <MapSaveView />}
                 {mapBounds && <MapBound mapBounds={mapBounds} />}
-                <MapPan flyToCoordinates={coordinates} />
                 {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
+                <MapPan flyToCoordinates={coordinates} />
             </MapContainer>
-            {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} highlightedAircrafts={highlightedAircrafts} />}
+            {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
     );
 }

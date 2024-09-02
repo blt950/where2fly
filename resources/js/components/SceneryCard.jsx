@@ -2,10 +2,9 @@ import { useEffect, useState, useRef, useContext } from 'react';
 import { CardContext } from './context/CardContext';
 
 function SceneryCard({ airportId }) {
-
     const dataCache = useRef({});
     const [data, setData] = useState(null);
-    const { showSceneryIdCard, setShowSceneryIdCard } = useContext(CardContext);
+    const { setShowSceneryIdCard } = useContext(CardContext);
 
     // Fetch airport data if it's not in the cache
     useEffect(() => {
