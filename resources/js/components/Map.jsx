@@ -163,8 +163,8 @@ function Map() {
 
                 {isDefaultView() && <MapSaveView />}
                 {mapBounds && <MapBound mapBounds={mapBounds} />}
+                {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
-                <MapPan flyToCoordinates={coordinates} />
             </MapContainer>
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
