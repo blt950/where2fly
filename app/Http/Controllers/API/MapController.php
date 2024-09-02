@@ -18,6 +18,14 @@ class MapController extends Controller
 {
 
     /**
+     * Check if user is authenticated
+     */
+    public function isAuthenticated(Request $request){
+        $loggedIn = Auth::guard('sanctum')->check();
+        return response()->json(['message' => 'Authenticated', 'data' => $loggedIn], 200);
+    }
+
+    /**
      * Get airports from lists
      */
     public function getListAirports(){

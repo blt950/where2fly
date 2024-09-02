@@ -67,7 +67,7 @@ function Map() {
     const [primaryAirport, setPrimaryAirport] = useState(null);
     const [reverseDirection, setReverseDirection] = useState(null);
     const [showAirportIdCard, setShowAirportIdCard] = useState(null);
-    
+    const [userAuthenticated, setUserAuthenticated] = useState(false);
 
     // On initial load
     useEffect(() => {
@@ -80,18 +80,26 @@ function Map() {
         window.setReverseDirection = (boolean) => { setReverseDirection(boolean) }
         window.isDefaultView = isDefaultView;
 
-        // Fetch user's lists if on default view
-        if (isDefaultView()) {
-            fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
-                .then(response => response.json())
-                .then(data => setAirports(data.data))
-                .catch(error => console.error(error.message));
-        }
+        // Check if user is authenticated
+        fetch(route('api.user.authenticated'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
+            .then(response => response.json())
+            .then(data => setUserAuthenticated(data.data))
+            .catch(error => console.error(error.message));
     
         // Dispatch a custom event when the map is ready
         window.dispatchEvent(new Event('mapReady'));
 
     }, []);
+
+    // Fetch the user's list if they are authenticated
+    useEffect(() => {
+        if (isDefaultView() && userAuthenticated) {
+            fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
+                .then(response => response.json())
+                .then(data => setAirports(data.data))
+                .catch(error => console.error(error.message));
+        }
+    }, [userAuthenticated]);
 
     // When focusAirport changes, pan to the airport and show the card.
     useEffect(() => {
@@ -121,7 +129,7 @@ function Map() {
     }, [airports]);
 
     return (
-        <MapContext.Provider value={{ airports, focusAirport, setFocusAirport, setShowAirportIdCard, reverseDirection, primaryAirport }}>
+        <MapContext.Provider value={{ airports, focusAirport, setFocusAirport, setShowAirportIdCard, reverseDirection, primaryAirport, userAuthenticated }}>
             <MapContainer 
                 className="map" 
                 center={getInitMapPosition()}

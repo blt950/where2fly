@@ -14,7 +14,7 @@ function AirportCard({ airportId, highlightedAircrafts }) {
     const [showSceneryIdCard, setShowSceneryIdCard] = useState(null);
     const [departureAirportId, setDepartureAirportId] = useState(null);
     const [arrivalAirportId, setArrivalAirportId] = useState(null);
-    const { airports, primaryAirport, focusAirport, reverseDirection } = useContext(MapContext);
+    const { airports, primaryAirport, focusAirport, reverseDirection, userAuthenticated } = useContext(MapContext);
 
     // Fetch airport data if it's not in the cache
     useEffect(() => {

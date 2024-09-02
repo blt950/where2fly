@@ -7,4 +7,5 @@ export const MapContext = createContext({
     setShowAirportIdCard: undefined,
     reverseDirection: undefined,
     primaryAirport: undefined,
+    userAuthenticated: false
 });
