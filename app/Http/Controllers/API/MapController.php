@@ -85,12 +85,12 @@ class MapController extends Controller
         $airport = Airport::select('id', 'icao', 'name', 'iso_country')->with(['runways' => function ($query) {
             $query->where('closed', false)->whereNotNull('length_ft');
         }])->where('id', $secondaryAirport)->first();
-        $metar = $airport->metar;
+        $metar = isset($airport->metar) ? $airport->metar->metar : null;
 
         if(isset($airport)) {
             return response()->json(['message' => 'Success', 'data' => [
                 'airport' => $airport->toArray(),
-                'metar' => $metar->metar,
+                'metar' => $metar,
                 'airlines' => $airlines,
             ]], 200);
         } else {
