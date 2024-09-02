@@ -171,7 +171,7 @@ function Map() {
                 {clusterRadius && (
                     <>
                     {cluster ? (
-                        <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={clusterRadius} iconCreateFunction={createClusterIcon}>
+                        <MarkerClusterGroup showCoverageOnHover={true} polygonOptions={{ color: '#46517c', fillColor: '#6676b6' }} maxClusterRadius={clusterRadius} iconCreateFunction={createClusterIcon}>
                             <MapMarkerGroup/>
                         </MarkerClusterGroup>
                     ) : (
