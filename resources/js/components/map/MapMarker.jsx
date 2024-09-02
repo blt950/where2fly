@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import { Marker, Tooltip } from 'react-leaflet';
 import { createMarkerIcon } from '../utils/MarkerIcon';
 import { useMapEvents } from 'react-leaflet';
@@ -44,26 +44,28 @@ const MapMarker = ({ airport }) => {
     }, [focusAirport]);
 
     // When you click on an airport, set it as the focus airport
-    const eventHandlers = (airport) => ({
+    const eventHandlers = useMemo(() => ({
         click: (e) => {
             setFocusAirport(airport.icao);
         }
-    });
+    }), [airport.icao]);
 
-    const icon = createMarkerIcon(color, airport.type);
+    const icon = useMemo(() => createMarkerIcon(color, airport.type), [color, airport.type]);
 
-    return (
+    return useMemo(() => (
         <Marker
             key={airport.id}
             position={[airport.lat, airport.lon]}
             icon={icon}
-            eventHandlers={eventHandlers(airport)}
+            renderer={L.canvas()}
+            eventHandlers={eventHandlers}
         >
             {(ignoreZoomFilter || showTooltip) && (
                 <Tooltip
                     direction="left"
                     className="airport"
                     interactive={true}
+                    renderer={L.canvas()}
                     permanent
                 >
                     <span style={{ color: color }}>
@@ -72,7 +74,7 @@ const MapMarker = ({ airport }) => {
                 </Tooltip>
             )}
         </Marker>
-    );
+    ), [airport.id, airport.lat, airport.lon, icon, eventHandlers, ignoreZoomFilter, showTooltip, color, airport.icao]);
 };
 
 export default MapMarker;

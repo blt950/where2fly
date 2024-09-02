@@ -59,6 +59,7 @@ function Map() {
 
     const [airports, setAirports] = useState([]);
     const [cluster, setCluster] = useState(true);
+    const [clusterRadius, setClusterRadius] = useState(null);
     const [coordinates, setCoordinates] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
     const [focusAirport, setFocusAirport] = useState(null);
@@ -119,13 +120,27 @@ function Map() {
 
     // When airports data change, set the map bounds
     useEffect(() => {
-        if (!isDefaultView() && airports && Object.keys(airports).length > 0) {
+
+        const airportsKeys = Object.keys(airports);
+
+        if (!isDefaultView() && airports && airportsKeys.length > 0) {
             var bounds = [];
             Object.values(airports).forEach(airport => {
                 bounds.push([airport.lat, airport.lon]);
             });
             setMapBounds(bounds);
         }
+        
+        if(airportsKeys.length > 0){
+            if (airportsKeys.length >= 1000) {
+                setClusterRadius(200);
+            } else if(airportsKeys.length > 200 && airportsKeys.length < 1000) {
+                setClusterRadius(80)
+            } else {
+                setClusterRadius(40);
+            }
+        }
+
     }, [airports]);
 
     return (
@@ -153,12 +168,16 @@ function Map() {
                     maxZoom={17}
                 />
 
-                {cluster ? (
-                    <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={40} iconCreateFunction={createClusterIcon}>
+                {clusterRadius && (
+                    <>
+                    {cluster ? (
+                        <MarkerClusterGroup showCoverageOnHover={false} maxClusterRadius={clusterRadius} iconCreateFunction={createClusterIcon}>
+                            <MapMarkerGroup/>
+                        </MarkerClusterGroup>
+                    ) : (
                         <MapMarkerGroup/>
-                    </MarkerClusterGroup>
-                ) : (
-                    <MapMarkerGroup/>
+                    )}
+                    </>
                 )}
 
                 {isDefaultView() && <MapSaveView />}
