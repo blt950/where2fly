@@ -46,7 +46,7 @@ function SceneryCard({ airportId }) {
                     data.sceneries.map((scenery) => (
                         <a key={scenery.id} href={scenery.link} className="d-block btn btn-outline-light font-work-sans text-start mt-2" target="_blank">
                             <span className="badge bg-blue me-1">
-                                {data.simulators[scenery.simulator_id-1].shortened_name}
+                                {data.simulators[scenery.simulator_id].shortened_name}
                             </span>
                             {scenery.payware === -1 ? (
                                 <span className="badge bg-danger">Included</span>

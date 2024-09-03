@@ -150,7 +150,7 @@ class MapController extends Controller
 
         $airportIcao = $data['airportIcao'];
         $sceneries = Scenery::where('icao', $airportIcao)->where('published', true)->get();
-        $simulators = Simulator::all();
+        $simulators = Simulator::all()->keyBy('id')->toArray();
 
         if(isset($sceneries)){
             return response()->json(['message' => 'Success', 'data' => [
