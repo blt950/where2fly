@@ -42,6 +42,9 @@ const getInitMapPosition = () => {
         return [-25.2744, 133.7751];
     } else if(route().current('top.filtered', 'SA')){
         return [-8.7832, -55.4915];
+    } else if(route().current('top')){
+        // A place in the middle of the ocean to avoid stretching the map bounds
+        return [45.14777, -35.4521]
     }
 
     // Set position based on localStorage
@@ -181,7 +184,7 @@ function Map() {
                 )}
 
                 {isDefaultView() && <MapSaveView />}
-                {mapBounds && <MapBound mapBounds={mapBounds} />}
+                {(mapBounds && !route().current('top*')) && <MapBound mapBounds={mapBounds} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
             </MapContainer>
