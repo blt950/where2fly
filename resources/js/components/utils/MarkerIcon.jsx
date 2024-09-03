@@ -12,7 +12,7 @@ const createMarkerIcon = (color, airportType = 'large_airport') => {
 
     return new DivIcon({
         iconSize: [sizePx, sizePx],
-        html: `<span style="display: block; width: ${sizePx}px; height: ${sizePx}px; border-radius: 50%; background: ${color}"></span>`
+        html: `<span class="dot" style="display: block; width: ${sizePx}px; height: ${sizePx}px; border-radius: 50%; background: ${color}"></span>`
     });
 };
 
