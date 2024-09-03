@@ -57,6 +57,9 @@ function AirportCard({ airportId }) {
         }
     }, [airportId]);
 
+    useEffect(() => { if(showFlightsIdCard !== null) plausible('Interactions', {props: {interaction: `Open flights card`}}) }, [showFlightsIdCard]);
+    useEffect(() => { if(showSceneryIdCard !== null) plausible('Interactions', {props: {interaction: `Open scenery card`}}) }, [showSceneryIdCard]);
+
     // When data changes, initialize tooltips
     useEffect(() => {
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');

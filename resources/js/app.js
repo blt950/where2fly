@@ -24,10 +24,3 @@ document.querySelectorAll('a[href^="http"]').forEach(link => {
         });
     }
 });
-
-document.addEventListener('cardOpened', function(event) {
-    var type = event.detail.type;
-    if (type == 'flights' || type == 'scenery') {
-        plausible('Interactions', {props: {interaction: `Open ${type} card`}});
-    }
-});
