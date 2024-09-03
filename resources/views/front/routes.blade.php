@@ -60,16 +60,8 @@
             
         </form>
     </div>
-
-    @isset($airportsMapCollection)
-        @include('parts.popupContainer', ['airportsMapCollection' => ($airportsMapCollection)])
-    @endisset
 @endsection
 
 @section('js')
     @vite('resources/js/functions/searchForm.js')
-    @vite('resources/js/functions/taf.js')
-    @vite('resources/js/cards.js')
-    @vite('resources/js/map.js')
-    @include('scripts.defaultMap')
 @endsection

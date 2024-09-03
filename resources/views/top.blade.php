@@ -44,7 +44,7 @@
                 <tbody>
                     @php $count = 1; @endphp
                     @foreach($airports as $airport)
-                        <tr class="pointer" data-card-event="open" data-card-type="airport" data-card-for="{{ $airport->icao }}">
+                        <tr class="pointer" data-airport-icao={{ $airport->icao }}>
                             <th scope="row">{{ $count }}</th>
                             <td data-sort="{{ $airport->icao }}">
                                 <div>
@@ -78,54 +78,39 @@
         </div>
         @include('layouts.legend')
     </div>
-
-    @include('parts.popupContainer', ['airportsMapCollection' => $airports, 'sceneries' => $sceneriesCollection])
-
 @endsection
 
 @section('js')
 
     @vite('resources/js/functions/tooltip.js')
-    @vite('resources/js/functions/taf.js')
-
-    @vite('resources/js/cards.js')
-    @vite('resources/js/map.js')
     <script>
         var airportMapData = {!! isset($airportMapData) ? $airportMapData : '[]' !!}
         var focusContinent = {!! isset($continent) ? '\''.$continent.'\'' : 'null' !!};
 
-        document.addEventListener('DOMContentLoaded', function() {
-            cardsInitEvents()
-            mapInit(airportMapData, null, focusContinent);
+        // Listen for the custom event indicating the map is ready
+        window.addEventListener('mapReady', function() {
+            setAirportsData(airportMapData);
+        });
 
-            // Draw the top airports and click events
-            var cluster = mapCreateCluster();
-            mapDrawClickableAirports(airportMapData, cluster);
-            map.addLayer(cluster);
+        // Add click event listener to each table row
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll('tr[data-airport-icao]');
+            rows.forEach(row => {
+                row.addEventListener('click', function() {
+                    // Get the lat and lon from data attributes
+                    const icao = this.getAttribute('data-airport-icao');
 
-            // Pan upon clicking on a card
-            mapEventCardOpenPan(airportMapData);
-        })
-
-        document.addEventListener('cardOpened', function(event) {
-            if(event.detail.type == 'airport'){
-                var airport = event.detail.cardId;
-                cardCloseAll('scenery')
-
-                // Give the respective row in table active class
-                var tableRow = document.querySelector('[data-card-for="' + airport + '"]')
-                if(tableRow){
-                    tableRow.classList.add('active')
-                }
-
-                // Remove from other table rows
-                var tableRows = document.querySelectorAll('[data-card-for]')
-                tableRows.forEach(function(row){
-                    if(row != tableRow){
-                        row.classList.remove('active')
+                    // Set the coordinates in the React component
+                    if (window.setFocusAirport) {
+                        window.setFocusAirport(icao);
                     }
-                })
-            }
-        })
+
+                    // Remove 'active' class from all rows and add to the clicked row
+                    rows.forEach(r => r.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+        
     </script>
 @endsection

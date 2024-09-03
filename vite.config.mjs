@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
     server: {
@@ -11,16 +12,14 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/nouislider.js',
                 'resources/js/multiselect.js',
-                'resources/js/map.js',
-                'resources/js/cards.js',
-                'resources/js/leaflet.js',
                 'resources/js/sortable.js',
                 'resources/js/functions/searchResults.js',
                 'resources/js/functions/searchForm.js',
-                'resources/js/functions/taf.js',
                 'resources/js/functions/tooltip.js',
+                'resources/js/functions/taf.js',
             ],
             refresh: true,
         }),
+        react(),
     ],
 });

@@ -7,7 +7,6 @@ use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
 use App\Models\Flight;
-use App\Models\Scenery;
 use App\Models\UserList;
 use App\Rules\AirportExists;
 use App\Rules\FlightDirection;
@@ -186,10 +185,6 @@ class SearchController extends Controller
             // Filter the eligible airports
             $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
-            // Shuffle the results before sort as slim results will quickly show airports from close by location
-            // Sort the suggested airports based on the intended filters
-            $suggestedAirports = $suggestedAirports->addFlights($primaryAirport, $direction);
-
             // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy
             $bearingWarning = false;
             if ($maxDistance > 2300 && isset($flightDirection)) {
@@ -200,19 +195,23 @@ class SearchController extends Controller
 
                 // Create an array with all airports coordinates
                 $airportCoordinates = [];
+                $airportCoordinates[$primaryAirport->icao]['id'] = $primaryAirport->id;
+                $airportCoordinates[$primaryAirport->icao]['icao'] = $primaryAirport->icao;
                 $airportCoordinates[$primaryAirport->icao]['lat'] = $primaryAirport->coordinates->latitude;
                 $airportCoordinates[$primaryAirport->icao]['lon'] = $primaryAirport->coordinates->longitude;
+                $airportCoordinates[$primaryAirport->icao]['type'] = $primaryAirport->type;
 
                 // Lets add the coordinates of the suggested airports
                 foreach ($suggestedAirports as $airport) {
+                    $airportCoordinates[$airport->icao]['id'] = $airport->id;
+                    $airportCoordinates[$airport->icao]['icao'] = $airport->icao;
                     $airportCoordinates[$airport->icao]['lat'] = $airport->coordinates->latitude;
                     $airportCoordinates[$airport->icao]['lon'] = $airport->coordinates->longitude;
                     $airportCoordinates[$airport->icao]['type'] = $airport->type;
+                    $airportCoordinates[$airport->icao]['color'] = 'grey';
                 }
 
-                $sceneriesCollection = Scenery::where('published', true)->whereIn('airport_id', $suggestedAirports->pluck('id'))->with('simulator')->get();
-
-                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning', 'sceneriesCollection'));
+                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning'));
             }
 
         }
@@ -268,10 +267,16 @@ class SearchController extends Controller
 
             // Create an array with all airports coordinates
             $airportCoordinates = [];
+            $airportCoordinates[$departure->icao]['id'] = $departure->id;
+            $airportCoordinates[$arrival->icao]['id'] = $arrival->id;
+            $airportCoordinates[$departure->icao]['icao'] = $departure->icao;
+            $airportCoordinates[$arrival->icao]['icao'] = $arrival->icao;
             $airportCoordinates[$departure->icao]['lat'] = $departure->coordinates->latitude;
             $airportCoordinates[$departure->icao]['lon'] = $departure->coordinates->longitude;
             $airportCoordinates[$arrival->icao]['lat'] = $arrival->coordinates->latitude;
             $airportCoordinates[$arrival->icao]['lon'] = $arrival->coordinates->longitude;
+            $airportCoordinates[$departure->icao]['type'] = $departure->type;
+            $airportCoordinates[$arrival->icao]['type'] = $arrival->type;
 
             return view('search.routes', compact('routes', 'departure', 'arrival', 'airportCoordinates'));
         } else {
