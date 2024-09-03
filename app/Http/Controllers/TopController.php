@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Helpers\MapHelper;
 use App\Models\AirportScore;
-use App\Models\Scenery;
 use Illuminate\Http\Request;
 
 class TopController extends Controller
@@ -24,9 +23,8 @@ class TopController extends Controller
             $airports->push($as->airport);
         }
 
-        $airportMapData = MapHelper::generateAirportMapDataFromAirports($airports);
-        $sceneriesCollection = Scenery::where('published', true)->whereIn('airport_id', $airports->pluck('id'))->with('simulator')->get();
+        $airportMapData = json_encode(MapHelper::generateAirportMapDataFromAirports($airports));
 
-        return view('top', compact('airports', 'airportMapData', 'continent', 'exclude', 'sceneriesCollection'));
+        return view('top', compact('airports', 'airportMapData', 'continent', 'exclude'));
     }
 }

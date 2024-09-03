@@ -23,12 +23,3 @@
         </div>
     </div>
 @endsection
-
-@section('js')
-    @vite('resources/js/map.js')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            mapInit();
-        })
-    </script>
-@endsection

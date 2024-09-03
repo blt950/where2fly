@@ -17,14 +17,16 @@ class MapHelper
         $airportData = [];
         foreach ($airports as $airport) {
             $airportData[$airport->icao] = [
+                'id' => $airport->id,
                 'icao' => $airport->icao,
                 'lat' => $airport->coordinates->latitude,
                 'lon' => $airport->coordinates->longitude,
                 'color' => $airport->color,
+                'type' => $airport->type,
             ];
         }
 
-        return json_encode($airportData);
+        return $airportData;
     }
 
     /**

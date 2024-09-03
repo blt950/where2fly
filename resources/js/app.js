@@ -1,6 +1,12 @@
 import './bootstrap';
 import '../sass/app.scss';
 
+// React
+import './components/Map';
+import './components/PopupContainer';
+import './components/AirportCard';
+import './components/ui/TAF';
+
 // Metrics
 document.querySelectorAll('a[href^="http"]').forEach(link => {
     // Check if the link is not pointing to your own domain
@@ -16,12 +22,5 @@ document.querySelectorAll('a[href^="http"]').forEach(link => {
                 }
             });
         });
-    }
-});
-
-document.addEventListener('cardOpened', function(event) {
-    var type = event.detail.type;
-    if (type == 'flights' || type == 'scenery') {
-        plausible('Interactions', {props: {interaction: `Open ${type} card`}});
     }
 });

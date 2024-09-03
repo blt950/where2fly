@@ -138,7 +138,7 @@
                     @endif
 
                     @foreach($suggestedAirports as $airport)
-                        <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-card-event="open" data-card-type="airport" data-card-for="{{ $airport->icao }}">
+                        <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-airport-icao="{{ $airport->icao }}">
                             <th scope="row">{{ $count }}</th>
                             <td data-sort="{{ $airport->icao }}">
                                 <div>
@@ -197,87 +197,54 @@
         @include('layouts.legend')
     </div>
 
-    <div class="popup-container">
-        {{-- Let's draw all airport cards here --}}
-        @foreach($suggestedAirports as $airport)
-            @include('parts.mapCard', ['airport' => $airport])
-        @endforeach
-
-        {{-- Let's draw all airline cards here --}}
-        @foreach($modalAirports as $airport)
-            @foreach($airport->airlines as $airline)
-                @include('parts.flightsCard', ['primaryAirport' => $primaryAirport, 'airport' => $airport, 'airline' => $airline, 'filterByAircrafts' => $filterByAircrafts])
-            @endforeach
-        @endforeach
-
-        @foreach($suggestedAirports as $airport)
-            @include('parts.sceneryCard', ['airport' => $airport, 'sceneries' => $sceneriesCollection])
-        @endforeach
-    </div>
-
 @endsection
 
 @section('js')
+    @vite('resources/js/functions/tooltip.js')
     @vite('resources/js/functions/searchResults.js')
     @vite('resources/js/functions/taf.js')
-    @vite('resources/js/functions/tooltip.js')
-
-    @vite('resources/js/cards.js')
-    @vite('resources/js/map.js')
     <script>
-        var airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
-        var focusAirport = '{{ $primaryAirport->icao }}';
+        var airportMapData = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
+        var primaryAirport = '{{ $primaryAirport->icao }}';
         var direction = '{{ $direction }}';
+        var highlightedAircrafts = {!! isset($filterByAircrafts) ? json_encode($filterByAircrafts) : '[]' !!};
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Apply click events on card related triggers
-            cardsInitEvents()
+        // Listen for the custom event indicating the map is ready
+        window.addEventListener('mapReady', function() {
+            setCluster(false);
+            setPrimaryAirport(primaryAirport);
+            setReverseDirection((direction == 'departure' ? false : true));
+            setAirportsData(airportMapData);
+            setHighlightedAircrafts(highlightedAircrafts);
+        });
 
-            // Apply initial map
-            mapInit(airportCoordinates, focusAirport);
-            primaryMarker = mapDrawMarker(focusAirport, airportCoordinates[focusAirport]['lat'], airportCoordinates[focusAirport]['lon']);
+        // Add click event listener to each table row
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll('tr[data-airport-icao]');
+            rows.forEach(row => {
+                row.addEventListener('click', function() {
+                    // Get the lat and lon from data attributes
+                    const icao = this.getAttribute('data-airport-icao');
 
-            // Draw all results as grey markers
-            var cluster = mapCreateCluster('inverted');
-            for (var airport in airportCoordinates) {
-                if(airport != focusAirport){
-                    (function(airport) {
-                        mapDrawMarker(airport, airportCoordinates[airport]['lat'], airportCoordinates[airport]['lon'], 'grey', () => {
-                            var card = document.querySelector('[data-card-id="' + airport + '"]')
-                            if(card){
-                                cardOpen(card, 'airport')
-                            }
-                        }, false, airportCoordinates[airport]['type']);
-                    })(airport)
-                }
-            }
+                    setFocusAirport(icao);
 
-            // Toggle tooltips based on airport size to avoid big clusters
-            mapEventZoomTooltips()
-        })
+                    // Remove 'active' class from all rows and add to the clicked row
+                    rows.forEach(r => r.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
 
-        document.addEventListener('cardOpened', function(event) {
-            if(event.detail.type == 'airport'){
-                var airport = event.detail.cardId;
-                mapDrawRoute(focusAirport, airport, (direction == 'departure' ? false : true))
-                cardCloseAll('flights')
-                cardCloseAll('scenery')
+        // Event listener if user clicks on map dot, to mark active in table
+        window.addEventListener('mapFocusAirport', function(event) {
+            const focusAirport = event.detail.focusAirport;
+            
+            const rows = document.querySelectorAll('tr[data-airport-icao]');
+            rows.forEach(r => r.classList.remove('active'));
 
-                // Give the respective row in table active class
-                var tableRow = document.querySelector('[data-card-for="' + airport + '"]')
-                if(tableRow){
-                    tableRow.classList.add('active')
-                }
-
-                // Remove from other table rows
-                var tableRows = document.querySelectorAll('[data-card-for]')
-                tableRows.forEach(function(row){
-                    if(row != tableRow){
-                        row.classList.remove('active')
-                    }
-                })
-            }
-        })
+            const focusRow = document.querySelector(`tr[data-airport-icao="${focusAirport}"]`);
+            focusRow.classList.add('active');
+        });
         
     </script>
 @endsection

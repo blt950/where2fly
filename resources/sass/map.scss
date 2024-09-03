@@ -95,18 +95,9 @@
         background: rgba($secondary, 0.5);
 
         pointer-events: all;
-        display: none;
 
         @include media-breakpoint-down(md) { 
             display: none;
-        }
-
-        &.show{
-            display: block;
-        }
-
-        &.show-flights{
-            display: block;
         }
 
         dl{

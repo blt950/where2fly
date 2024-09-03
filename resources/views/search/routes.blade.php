@@ -85,19 +85,15 @@
 
 @section('js')
     @vite('resources/js/functions/tooltip.js')
-    @vite('resources/js/map.js')
     <script>
-        var airportCoordinates = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
+        var airportMapData = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
         var departure = '{{ $departure->icao }}';
         var arrival = '{{ $arrival->icao }}';
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize the map
-            mapInit(airportCoordinates);
-
-            // Draw the from airport
-            mapDrawMarker(departure, airportCoordinates[departure]['lat'], airportCoordinates[departure]['lon']);
-            mapDrawRoute(departure, arrival);
+        // Listen for the custom event indicating the map is ready
+        window.addEventListener('mapReady', function() {
+            setAirportsData(airportMapData);
+            setDrawRoute([departure, arrival]);
         });
     </script>
 @endsection
