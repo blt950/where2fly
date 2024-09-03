@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Helpers\MapHelper;
 use App\Models\AirportScore;
-use App\Models\Scenery;
 use Illuminate\Http\Request;
 
 class TopController extends Controller

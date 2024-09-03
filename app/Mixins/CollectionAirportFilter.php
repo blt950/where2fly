@@ -4,9 +4,6 @@ namespace App\Mixins;
 
 use App\Helpers\AirportFilterHelper;
 use App\Helpers\CalculationHelper;
-use App\Models\Airline;
-use App\Models\Airport;
-use App\Models\Flight;
 
 class CollectionAirportFilter
 {
