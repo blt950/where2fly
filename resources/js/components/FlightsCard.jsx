@@ -57,7 +57,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                     </ul>
                 </>
             ) : (
-                <p>Loading ...</p>
+                <p className="mb-0"><i className="fas fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
             )}
             </div>
         </>

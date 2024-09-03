@@ -158,7 +158,7 @@ function AirportCard({ airportId }) {
                         </div>
                     </>
                 ) : (
-                    <p>Loading ...</p>
+                    <p className="mb-0"><i className="fas fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
                 )}
             </div>
             {showFlightsIdCard && <FlightsCard airlineId={showFlightsIdCard} departureAirportId={departureAirportId} arrivalAirportId={arrivalAirportId} />}
