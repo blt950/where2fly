@@ -12,6 +12,17 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.0.4</h2>
+            <span class="badge ps-0 pb-2">2024-09-03</span>
+            <ul>
+                <li>Improved map performance by loading data dynamically, only when needed, instead of all at once.</li>
+                <li>Removed restrictions on the number of airports that can be displayed in large lists.</li>
+                <li>Fixed an issue where hovering over a cluster now displays its coverage area correctly.</li>
+                <li>Fixed an issue where the destination label would not consistently turn yellow when selected in search results.</li>
+                <li>Fixed a bug where the airport card would not appear when an airport is opened in flight results.</li>
+                <li>Ensured that airports selected from the list are now highlighted on the map as well.</li>
+            </ul>
+
             <h2 class="mb-0">v2.0.3</h2>
             <span class="badge ps-0 pb-2">2024-08-29</span>
             <ul>
@@ -251,3 +262,4 @@
             </ul>
         </div>
     </div>
+@endsection
