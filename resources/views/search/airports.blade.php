@@ -123,10 +123,6 @@
                         <th scope="col">Time</th>
                         <th scope="col">Conditions</th>
                     </tr>
-                </thead>
-                <tbody>
-                    @php $count = 1; @endphp
-
                     @if( !empty($sortByScores) && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
 
                         <tr class="font-work-sans">
@@ -136,6 +132,9 @@
                         </tr>
 
                     @endif
+                </thead>
+                <tbody>
+                    @php $count = 1; @endphp
 
                     @foreach($suggestedAirports as $airport)
                         <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-airport-icao="{{ $airport->icao }}">
