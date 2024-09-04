@@ -8,5 +8,5 @@ export const MapContext = createContext({
     reverseDirection: undefined,
     setFocusAirport: undefined,
     setShowAirportIdCard: undefined,
-    userAuthenticated: false,
+    userAuthenticated: undefined,
 });

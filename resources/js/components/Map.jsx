@@ -71,7 +71,7 @@ function Map() {
     const [primaryAirport, setPrimaryAirport] = useState(null);
     const [reverseDirection, setReverseDirection] = useState(null);
     const [showAirportIdCard, setShowAirportIdCard] = useState(null);
-    const [userAuthenticated, setUserAuthenticated] = useState(false);
+    const [userAuthenticated, setUserAuthenticated] = useState(null);
 
     // On initial load
     useEffect(() => {
@@ -83,6 +83,12 @@ function Map() {
         window.setPrimaryAirport = (airport) => { setPrimaryAirport(airport) }
         window.setReverseDirection = (boolean) => { setReverseDirection(boolean) }
         window.isDefaultView = isDefaultView;
+
+        // Fetch from local storage cache
+        const cachedAirports = localStorage.getItem('userListAirportsCache');
+        if (isDefaultView() && cachedAirports && cachedAirports != undefined) {
+            setAirports(JSON.parse(cachedAirports));
+        }
 
         // Check if user is authenticated
         fetch(route('api.user.authenticated'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
@@ -100,8 +106,14 @@ function Map() {
         if (isDefaultView() && userAuthenticated) {
             fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
                 .then(response => response.json())
-                .then(data => setAirports(data.data))
+                .then(data => {
+                    localStorage.setItem('userListAirportsCache', JSON.stringify(data.data));
+                    setAirports(data.data);
+                })
                 .catch(error => console.error(error.message));
+        } else if(isDefaultView() && userAuthenticated == false) {
+            setAirports([]);
+            localStorage.removeItem('userListAirportsCache');
         }
     }, [userAuthenticated]);
 
