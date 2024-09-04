@@ -111,6 +111,17 @@
                 });
             });
         });
+
+        // Event listener if user clicks on map dot, to mark active in table
+        window.addEventListener('mapFocusAirport', function(event) {
+            const focusAirport = event.detail.focusAirport;
+            
+            const rows = document.querySelectorAll('tr[data-airport-icao]');
+            rows.forEach(r => r.classList.remove('active'));
+
+            const focusRow = document.querySelector(`tr[data-airport-icao="${focusAirport}"]`);
+            focusRow.classList.add('active');
+        });
         
     </script>
 @endsection
