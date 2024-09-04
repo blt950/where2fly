@@ -24,8 +24,10 @@
     background: #000;
 }
 
-.leaflet-marker-icon .dot{
-    animation: fadeIn 300ms ease-in-out;
+.leaflet-tooltip {
+    text-align: right;
+    min-width: 64px;
+    min-height: 36px;
 }
 
 .leaflet-tooltip.airport {
@@ -39,22 +41,8 @@
     font-weight: normal;
     font-size: 1rem;
 
-    animation: fadeIn 300ms ease-in-out;
-
     &:before{
         display: none;
-    }
-}
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-    }
-    50% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 0.9;
     }
 }
 
