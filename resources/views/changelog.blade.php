@@ -12,6 +12,15 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.0.5</h2>
+            <span class="badge ps-0 pb-2">2024-09-05</span>
+            <ul>
+                <li>Optimized loading of user's airport lists by caching the result</li>
+                <li>Fixed table in top list not showing active row if airport is clicked on map</li>
+                <li>Fixed flashing labels when clicking on the map</li>
+                <li>Fixed 'remember me' on login not working</li>
+            </ul>
+
             <h2 class="mb-0">v2.0.4</h2>
             <span class="badge ps-0 pb-2">2024-09-03</span>
             <ul>
