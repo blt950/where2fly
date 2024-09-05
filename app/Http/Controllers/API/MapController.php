@@ -71,7 +71,8 @@ class MapController extends Controller
                 foreach ($flights as $flight) {
                     foreach ($flight->aircrafts as $aircraft) {
                         if ($highlightedAircrafts->contains($aircraft->icao)) {
-                            $airlines->where('icao_code', $flight->airline_icao)->first()->highlighted = true;
+                            $airlineIcao = $airlines->where('icao_code', $flight->airline_icao);
+                            if($airlineIcao) $airlineIcao->first()->highlighted = true;
                         }
                     }
                 }
