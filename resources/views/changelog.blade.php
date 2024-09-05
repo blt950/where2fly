@@ -17,6 +17,7 @@
             <ul>
                 <li>Optimized loading of user's airport lists by caching the result</li>
                 <li>Fixed table in top list not showing active row if airport is clicked on map</li>
+                <li>Fixed flights sometimes not showing when filtering on aircraft type</li>
                 <li>Fixed flashing labels when clicking on the map</li>
                 <li>Fixed 'remember me' on login not working</li>
             </ul>
