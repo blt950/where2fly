@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.0.6</h2>
+            <span class="badge ps-0 pb-2">2024-09-06</span>
+            <ul>
+                <li>Fixed an issue where flights would not always load when using aircraft filter in some search results</li>
+            </ul>
+
             <h2 class="mb-0">v2.0.5</h2>
             <span class="badge ps-0 pb-2">2024-09-05</span>
             <ul>
