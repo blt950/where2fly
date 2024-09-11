@@ -65,3 +65,9 @@
         
     </div>
 @endsection
+
+@section('js')
+    <script>
+        plausible('pageview', { u: "{{ route('list.edit', 'x') }}" + window.location.search });
+    </script>
+@endsection

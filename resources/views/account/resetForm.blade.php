@@ -42,3 +42,9 @@
         </div>
     </div>
 @endsection
+
+@section('js')
+    <script>
+        plausible('pageview', { u: "{{ route('password.reset', 'x') }}" + window.location.search });
+    </script>
+@endsection
