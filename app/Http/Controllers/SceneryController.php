@@ -7,6 +7,7 @@ use App\Models\Scenery;
 use App\Models\Simulator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class SceneryController extends Controller
 {
@@ -56,6 +57,9 @@ class SceneryController extends Controller
 
         $simulators = Simulator::all();
         $suggestedByUser = $scenery->suggestedByUser;
+
+        // Use the manual plausible tracking script on this page
+        View::share('manualTracking', true);
 
         return view('scenery.edit', compact('scenery', 'simulators', 'suggestedByUser'));
     }

@@ -27,12 +27,7 @@
 <meta property="og:image" content="https://where2fly.today/img/thumb.jpg">
 <meta property="og:image:type" content="image/jpg">
 
-@if(config('app.env') == 'production')
-    <script defer data-domain="where2fly.today" src="https://metrics.blt950.com/js/script.js"></script>
-@else
-    <meta name="robots" content="noindex">
-    <script defer data-domain="qa.where2fly.today" src="https://metrics.blt950.com/js/script.js"></script>
-@endif
+@include('layouts.tracking')
 
 @routes
 @viteReactRefresh

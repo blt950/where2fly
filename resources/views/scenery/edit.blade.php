@@ -80,3 +80,9 @@
         </form>
     </div>
 @endsection
+
+@section('js')
+    <script>
+        plausible('pageview', { u: "{{ route('scenery.edit', 'x') }}" + window.location.search });
+    </script>
+@endsection

@@ -8,6 +8,7 @@ use App\Models\UserList;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class UserListController extends Controller
 {
@@ -83,6 +84,9 @@ class UserListController extends Controller
     {
         $this->authorize('update', $list);
         $simulators = Simulator::all();
+
+        // Use the manual plausible tracking script on this page
+        View::share('manualTracking', true);
 
         return view('list.edit', compact('list', 'simulators'));
     }
