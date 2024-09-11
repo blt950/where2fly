@@ -53,6 +53,11 @@ class EnrichAirports extends Command
             ->orWhere('icao', 'like', 'ET__')
             ->update(['w2f_airforcebase' => true]);
 
+        // Transfer the gps_code to icao to make sure newest icao codes are used by default
+        $gpsCodeToIcao = Airport::where('gps_code', '!=', '')
+            ->whereColumn('gps_code', '!=', 'icao')
+            ->update(['icao' => \DB::raw('gps_code')]);
+
         // Upsert the data
         $this->info('> Done with enriching airports in ' . round(microtime(true) - $processTime) . ' seconds!');
 

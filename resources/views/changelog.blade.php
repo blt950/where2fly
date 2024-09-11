@@ -12,6 +12,13 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.0.7</h2>
+            <span class="badge ps-0 pb-2">2024-09-11</span>
+            <ul>
+                <li>Fixed an issue where airports with new ICAO codes would not be found when adding to lists</li>
+                <li>Fixed local codes (e.g. N68) not working to add airports to lists, especially relevant for US airfields</li>
+            </ul>
+
             <h2 class="mb-0">v2.0.6</h2>
             <span class="badge ps-0 pb-2">2024-09-06</span>
             <ul>
