@@ -131,7 +131,9 @@ class UserListController extends Controller
     {
         $airportsInput = explode("\r\n", $input);
         $airportsInput = array_map('strtoupper', $airportsInput);
-        $airportModels = Airport::whereIn('icao', $airportsInput)->get();
+        $airportModels = Airport::whereIn('icao', $airportsInput)
+            ->orWhereIn('local_code', $airportsInput)
+            ->get();
 
         $addedAirports = collect();
         $notFoundAirports = collect();
@@ -143,7 +145,10 @@ class UserListController extends Controller
                 continue;
             }
 
-            $airportModel = $airportModels->where('icao', $airportInput)->first();
+            $airportModel = $airportModels->first(function ($model) use ($airportInput) {
+                return $model->icao === $airportInput || $model->local_code === $airportInput;
+            });
+
             if ($airportModel) {
                 $airportsToAttach->push($airportModel);
                 $addedAirports->push($airportInput);
