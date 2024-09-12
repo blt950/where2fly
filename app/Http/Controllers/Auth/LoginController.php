@@ -25,7 +25,7 @@ class LoginController extends Controller
             'cf-turnstile-response' => ['required', Rule::turnstile()],
         ]);
 
-        $user = User::where('username', $request->username)->first();
+        $user = User::where('username', $request->username)->orWhere('email', $request->username)->first();
         $remember = ($request->remember) ? true : false;
 
         // Check if the user exists and the password is correct
