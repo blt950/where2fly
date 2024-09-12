@@ -151,7 +151,7 @@ class SearchController extends Controller
                 $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->get()->first();
             } else {
                 // Select primary airport based on the criteria
-                $primaryAirport = Airport::airportOpen()->isAirportSize($destinationAirportSize)->inContinent($continent)
+                $primaryAirport = Airport::airportOpen()->isAirportSize($destinationAirportSize)
                     ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                     ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                     ->returnOnlyWhitelistedIcao($whitelist)
