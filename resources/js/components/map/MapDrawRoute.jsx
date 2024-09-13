@@ -7,7 +7,7 @@ import { MapContext } from '../context/MapContext';
 
 const MapDrawRoute = ({ departure, arrival, reverseDirection = false }) => {
 
-    const {airports} = useContext(MapContext);
+    const {airports, setAirports} = useContext(MapContext);
 
     const routePath = useRef(null);
     const map = useMap();
@@ -28,10 +28,26 @@ const MapDrawRoute = ({ departure, arrival, reverseDirection = false }) => {
         if (Math.abs(latlng2[1] - latlng1[1]) > 180) {
             if (latlng1[1] > 0) {
                 latlng1[1] -= 360;
-                airports[primaryAirport].lon = airports[primaryAirport].lon -= 360
+
+                // Update the lon value in a way that triggers a render
+                setAirports(prevAirports => ({
+                    ...prevAirports,
+                    [primaryAirport]: {
+                        ...prevAirports[primaryAirport],
+                        lon: prevAirports[primaryAirport].lon -= 360
+                    }
+                }));
             } else {
                 latlng1[1] += 360;
-                airports[primaryAirport].lon = airports[primaryAirport].lon += 360
+
+                // Update the lon value in a way that triggers a render
+                setAirports(prevAirports => ({
+                    ...prevAirports,
+                    [primaryAirport]: {
+                        ...prevAirports[primaryAirport],
+                        lon: prevAirports[primaryAirport].lon += 360
+                    }
+                }));
             }
         }
         
