@@ -5,7 +5,7 @@ import { useMapEvents } from 'react-leaflet';
 import { MapContext } from '../context/MapContext';
 
 const MapMarker = ({ airport }) => {
-    const { focusAirport, setFocusAirport } = useContext(MapContext);
+    const { focusAirport, setFocusAirport, primaryAirport } = useContext(MapContext);
 
     const [zoomLevel, setZoomLevel] = useState(0);
     const [showTooltip, setShowTooltip] = useState(true);
@@ -40,6 +40,10 @@ const MapMarker = ({ airport }) => {
         } else {
             setColor(airport.color);
             setIgnoreZoomFilter(false);
+        }
+
+        if(primaryAirport === airport.icao){
+            setIgnoreZoomFilter(true);
         }
     }, [focusAirport]);
 
