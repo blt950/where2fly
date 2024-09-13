@@ -2,6 +2,7 @@ import { createContext } from "react";
 
 export const MapContext = createContext({
     airports: [],
+    setAirports: undefined,
     focusAirport: undefined,
     highlightedAircrafts: [],
     primaryAirport: undefined,

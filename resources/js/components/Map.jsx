@@ -161,6 +161,7 @@ function Map() {
     return (
         <MapContext.Provider value={{ 
             airports, 
+            setAirports,
             focusAirport, 
             highlightedAircrafts,
             primaryAirport,
