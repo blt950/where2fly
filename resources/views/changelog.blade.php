@@ -12,6 +12,15 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.0.8</h2>
+            <span class="badge ps-0 pb-2">2024-09-13</span>
+            <ul>
+                <li>Fixed issue with long-haul searches with random ICAO returning no or limited results</li>
+                <li>Fixed login functionality to allow using email as username</li>
+                <li>Fixed airports displaying incorrectly on the map for certain long-haul results over the pacific</li>
+                <li>Fixed issue where ICAO codes were not consistently visible when zooming out on airport results</li>
+            </ul>
+
             <h2 class="mb-0">v2.0.7</h2>
             <span class="badge ps-0 pb-2">2024-09-11</span>
             <ul>
