@@ -37,7 +37,7 @@
                                     
                                     <form method="POST" action="{{ route('verification.send') }}">
                                         @csrf
-                                        <button class="btn btn-sm btn-primary text-secondary mt-2">Resend verification email</button>
+                                        <button class="btn btn-sm btn-primary text-secondary mt-2">Resend verification email to {{ auth()->user()->email }}</button>
                                     </form>
                                 </div>
                             @endif
