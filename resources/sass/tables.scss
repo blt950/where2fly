@@ -60,4 +60,16 @@ table{
         display: none;
     }
 
+    &.no-padding > thead > tr> th, &.no-padding > tbody > tr > td{
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    &.card-table{
+        --bs-table-color: white;
+        --bs-table-bg: transparent;
+        border-color: $gray-800;
+        margin-bottom: 0 !important;
+    }
+
 }

@@ -48,13 +48,24 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                         <button className="btn-close" aria-label="Close flights card" onClick={() => setShowFlightsIdCard(null)}></button>
                     </div>
 
-                    <ul className="list-unstyled">
-                        {data.flights.map(flight => (
-                            <li key={flight.id} className={flight.highlighted ? 'text-success' : ''}>
-                                {flight.flight_icao}&nbsp;({flight.aircrafts.map(aircraft => aircraft.icao).join(',')})&nbsp;{moment(flight.last_seen_at).fromNow()}
-                            </li>
-                        ))}
-                    </ul>
+                    <table className="table card-table no-padding sortable asc">
+                        <thead>
+                            <tr>
+                                <th scope="col" style={{'max-width': '25%'}}>Flight</th>
+                                <th scope="col" style={{'width': '50%'}}>Aircraft</th>
+                                <th scope="col" style={{'max-width': '25%'}}>Last seen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.flights.map(flight => (
+                                <tr key={flight.id} className={flight.highlighted ? 'text-success' : ''}>
+                                    <td data-sort={flight.flight_icao}>{flight.flight_icao}</td>
+                                    <td>{flight.aircrafts.map(aircraft => aircraft.icao).join(', ')}</td>
+                                    <td data-sort={flight.last_seen_at}>{moment(flight.last_seen_at).fromNow()}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </>
             ) : (
                 <p className="mb-0"><i className="fas fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
