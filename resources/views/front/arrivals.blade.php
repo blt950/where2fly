@@ -19,6 +19,7 @@
 @endsection
 
 @section('js')
+    @vite('resources/js/functions/tooltip.js')
     @vite('resources/js/functions/searchForm.js')
     @include('front.parts.sliders')
 @endsection
