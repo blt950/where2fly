@@ -117,7 +117,7 @@ function AirportCard({ airportId }) {
                                                 <img
                                                     data-bs-toggle="tooltip"
                                                     data-bs-title={`See all ${airline.name} flights`}
-                                                    className="airline-logo"
+                                                    className="airline-logo button"
                                                     src={`/img/airlines/${airline.iata_code}.png`}
                                                     alt={`See all ${airline.name} flights`}
                                                 />

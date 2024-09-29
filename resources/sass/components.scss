@@ -25,11 +25,15 @@
 }
 
 .airline-logo{
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
 
     background: white;
     padding: 2px;
+
+    &.button{
+        border: 2px solid $primary;
+    }
 
     &.small{
         width: 24px;
