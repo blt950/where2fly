@@ -14,9 +14,9 @@ class Scenery extends Model
         return $this->belongsTo(Airport::class);
     }
 
-    public function simulator()
+    public function simulators()
     {
-        return $this->belongsTo(Simulator::class);
+        return $this->belongsToMany(Simulator::class, 'scenery_simulators');
     }
 
     public function suggestedByUser()

@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2024-xx-xx</span>
             <ul>
                 <li>Added question mark to explain the aircraft code letter in search</li>
+                <li>Added support for multiple simulators for scenery</li>
                 <li>Redesigned the flights card on the map to use a sortable table</li>
                 <li>Tweaked the awaiting email verification message to show your email to detect mistakes</li>
                 <li>Tweaked login page</li>
