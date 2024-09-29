@@ -19,7 +19,7 @@
                 @foreach($sceneries as $scenery)
                     <li>
                         <a href="{{ route('scenery.edit', $scenery) }}">{{ $scenery->icao }}</a>
-                        <span class="text-white-50">by {{ $scenery->author }}</span>
+                        <span class="text-white-50">by {{ isset($scenery->suggested_by_user_id) ? App\Models\User::find($scenery->suggested_by_user_id)->username : 'System' }}</span>
                     </li>
                 @endforeach
             </ul>
