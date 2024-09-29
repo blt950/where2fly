@@ -24,7 +24,7 @@
             <form method="POST" action="{{ route('user.login') }}">
                 @csrf
                 <div class="mb-3">
-                    <label for="username">Username</label>
+                    <label for="username">Username <small class="form-text text-white-50">or e-mail</small></label>
                     <input name="username" type="text" class="form-control" id="username" value="{{ old('username') }}">
                     @error('username')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -32,8 +32,9 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="password">Password <a class="ms-1" href="{{ route('account.recovery') }}">Forgot your password?</a></label>
+                    <label for="password">Password</label>
                     <input name="password" type="password" class="form-control" id="password">
+                    <a class="" href="{{ route('account.recovery') }}">Forgot your password?</a>
                     @error('password')
                         <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
