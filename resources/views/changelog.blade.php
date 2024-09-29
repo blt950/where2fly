@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.1.0</h2>
+            <span class="badge ps-0 pb-2">2024-xx-xx</span>
+            <ul>
+                <li>Added question mark to explain the aircraft code letter in search</li>
+            </ul>
+
             <h2 class="mb-0">v2.0.8</h2>
             <span class="badge ps-0 pb-2">2024-09-13</span>
             <ul>

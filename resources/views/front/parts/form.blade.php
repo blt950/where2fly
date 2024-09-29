@@ -30,7 +30,7 @@
         </div>
         
         <div class="col-xs-12 text-start">
-            <label for="codeletter">Aircraft Code Letter</label>
+            <label for="codeletter">Aircraft Code Letter <i class="fas fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Select the aircraft closest to what you want to fly. This is used to calculate airtime and find compatible airports"></i></label>
             <select class="form-control" id="codeletter" name="codeletter">
                 <option disabled selected>Choose</option>
                 <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A - PIPER/CESSNA etc.</option>
