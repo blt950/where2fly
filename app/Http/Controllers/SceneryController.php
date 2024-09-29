@@ -30,8 +30,8 @@ class SceneryController extends Controller
             'icao' => 'required|max:4|min:4|exists:airports,icao',
             'author' => 'required|string',
             'link' => 'required|url',
-            'simulator' => 'required|exists:simulators,id',
-            'payware' => 'boolean',
+            'payware' => 'required|boolean',
+            'simulators' => 'required|array',
         ]);
 
         $scenery = new Scenery();
@@ -39,11 +39,15 @@ class SceneryController extends Controller
         $scenery->author = $request->author;
         $scenery->link = $request->link;
         $scenery->airport_id = Airport::where('icao', $request->icao)->get()->first()->id;
-        $scenery->simulator_id = $request->simulator;
         $scenery->payware = $request->payware ? true : false;
         $scenery->published = false;
         $scenery->suggested_by_user_id = Auth::id();
         $scenery->save();
+
+        // Attach the simulator to the scenery
+        if($request->simulators){
+            $scenery->simulators()->attach($request->simulators);
+        }
 
         return redirect()->route('scenery.create')->with('success', 'Thank you for your contribution. We will review it and add it to the database if it meets our criteria.');
     }
@@ -75,8 +79,8 @@ class SceneryController extends Controller
             'icao' => 'required|max:4|min:4|exists:airports,icao',
             'author' => 'required|string',
             'link' => 'required|url',
-            'simulator' => 'required|exists:simulators,id',
-            'payware' => 'boolean',
+            'payware' => 'required|boolean',
+            'simulators' => 'required|array',
             'published' => 'boolean',
         ]);
 
@@ -84,11 +88,15 @@ class SceneryController extends Controller
         $scenery->author = $request->author;
         $scenery->link = $request->link;
         $scenery->airport_id = Airport::where('icao', $request->icao)->get()->first()->id;
-        $scenery->simulator_id = $request->simulator;
         $scenery->payware = $request->payware ? true : false;
         $scenery->published = $request->published ? true : false;
         $scenery->suggested_by_user_id = ($scenery->suggested_by_user_id) ? $scenery->suggested_by_user_id : Auth::id();
         $scenery->save();
+
+        // Attach the simulator to the scenery
+        if($request->simulators){
+            $scenery->simulators()->sync($request->simulators);
+        }
 
         return redirect()->route('admin')->with('success', 'Scenery updated successfully.');
     }

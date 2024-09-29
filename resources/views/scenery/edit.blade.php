@@ -39,23 +39,30 @@
             </div>
 
             <div class="mb-3">
-                <label for="simulator" class="form-label">Simulator</label>
-                <select class="form-select" id="simulator" name="simulator" required>
-                    @foreach($simulators as $simulator)
-                        <option value="{{ $simulator->id }}" @if($simulator->id == $scenery->simulator_id) selected @endif>{{ $simulator->name }}</option>
-                    @endforeach
+                <label class="form-label" for="payware">Payware</label>
+                <select class="form-select" id="payware" name="payware" required>
+                    <option disabled selected>Select</option>
+                    <option value="1" @if($scenery->payware == 1) selected @endif>Payware</option>
+                    <option value="0" @if($scenery->payware == 0) selected @endif>Freeware</option>
                 </select>
-                @error('simulator')
+                @error('payware')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
             <div class="mb-3">
-                <input class="form-check-input" type="checkbox" id="payware" value="1" name="payware" {{ ($scenery->payware) ? 'checked' : null }}>
-                <label class="form-check-label" for="payware">
-                    Payware
-                </label>
-                @error('payware')
+                <label class="form-label">Simulators</label>
+                <small class="form-text text-white-50">Choose only simulator(s) the scenery officially supports</small>
+                @foreach($simulators as $simulator)
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="simulator_{{ $simulator->id }}" name="simulators[]" value="{{ $simulator->id }}" 
+                        @if(in_array($simulator->id, $scenery->simulators->pluck('id')->toArray())) checked @endif>
+                        <label class="form-check-label" for="simulator_{{ $simulator->id }}">
+                            {{ $simulator->name }}
+                        </label>
+                    </div>
+                @endforeach
+                @error('simulators')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
@@ -63,7 +70,7 @@
             <div class="mb-3">
                 <input class="form-check-input" type="checkbox" id="published" value="1" name="published" {{ ($scenery->published) ? 'checked' : null }}>
                 <label class="form-check-label" for="published">
-                    Published
+                    <b>Published</b>
                 </label>
                 @error('published')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
