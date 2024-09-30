@@ -163,3 +163,43 @@ img.flag{
     }
 }
 
+.scenery-row{
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+
+    background: $secondary;
+
+    .title{
+        .developer{
+            font-family: $font-family-sans-serif;
+            font-size: 1.25rem;
+        }
+
+        .star{
+            color: $primary;
+            font-size: 1rem;
+            
+            .far{
+                padding-right: 0.25rem;
+            }
+        }
+
+        .badge{
+            font-size: .75rem;
+        }
+    }
+
+    .link{
+        a{
+            font-family: $font-family-sans-serif;
+
+            &:hover{
+                text-decoration: none;
+            }
+        }
+    }
+
+    .btn{
+        margin-top: 0.5rem;
+    }
+}

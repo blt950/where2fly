@@ -40,31 +40,56 @@ function SceneryCard({ airportId }) {
                     <button className="btn-close" aria-label="Close scenery card" onClick={() => setShowSceneryIdCard(null)}></button>
                 </div>
 
-                {!data.sceneries.length ? (
+                {!Object.keys(data).length ? (
                     <p>No scenery available</p>
                 ) : (
-                    data.sceneries.map((scenery) => (
-                        <a key={scenery.id} href={scenery.link} className="d-block btn btn-outline-light font-work-sans text-start mt-2" target="_blank">
+                    Object.keys(data).map((key) => (
+                        <div key={key}>
+                            <h2>{key}</h2>
+                            {data[key].map((item, index) => (
+                                <div key={index} className="scenery-row">
+                                    
+                                    <div className="title d-flex flex-row justify-content-between align-items-center">
+                                        <div className="d-flex align-items-center gap-2">
+                                            <span className="developer">{item.developer}</span>
+                                            {(item.fsac && item.ratingAverage > 0) && (
+                                                <span className="star"><i className="far fa-star"></i>{parseFloat(item.ratingAverage).toFixed(1)}</span>
+                                            )}
+                                        </div>
+                                        {item.payware > 0 ? (
+                                            <span className="badge bg-info">Payware</span>
+                                        ) : (
+                                            (item.payware == -1 ? (
+                                                <span className="badge bg-danger">Included</span>
+                                            ) : (
+                                                <span className="badge bg-success">Freeware</span>
+                                            ))
+                                        )}
+                                    </div>
 
-                            {scenery.simulators.map((simulator) => (
-                                <span key={simulator.id} className="badge bg-blue me-1">
-                                    {simulator.shortened_name}
-                                </span>
+                                    {item.fsac && (
+                                        <div className="link">
+                                            <a href={item.cheapestLink} target="_blank" className="text-white">€{parseFloat(item.cheapestPrice.EUR).toFixed(2)} at {item.cheapestStore}</a> <i className="fas fa-up-right-from-square"></i>
+                                        </div>
+                                    )}
+
+                                    {item.fsac ? (
+                                        <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm">See more prices <i className="fas fa-up-right-from-square"></i></a>
+                                    ) : (
+                                        (item.link == 'https://www.flightsimulator.com/') ? (
+                                            <i>Included in the simulator</i>
+                                        ) : (
+                                            <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm">{item.linkDomain} <i className="fas fa-up-right-from-square"></i></a>
+                                        )
+                                    )}
+                                    
+                                </div>
                             ))}
-
-                            {scenery.payware === -1 ? (
-                                <span className="badge bg-danger">Included</span>
-                            ) : scenery.payware === 0 ? (
-                                <span className="badge bg-success">Freeware</span>
-                            ) : (
-                                <span className="badge bg-info">Payware</span>
-                            )}
-                            &nbsp;{scenery.author} <i className="fas fa-up-right-from-square float-end pt-1"></i>
-                        </a>
+                        </div>
                     ))
                 )}
 
-                <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-primary btn-sm font-work-sans mt-2" target="_blank">
+                <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-2" target="_blank">
                     <i className="fas fa-plus"></i> Add missing scenery
                 </a>
             </>
