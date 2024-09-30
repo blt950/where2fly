@@ -203,3 +203,16 @@ img.flag{
         margin-top: 0.5rem;
     }
 }
+
+u-tab {
+    color: $primary;
+    background: $secondary;
+
+    border: 1px solid $primary;
+    padding: .5em;
+}
+
+u-tab[aria-selected="true"] {
+    color: black;
+    background: $primary;
+}

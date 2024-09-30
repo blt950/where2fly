@@ -43,51 +43,59 @@ function SceneryCard({ airportId }) {
                 {!Object.keys(data).length ? (
                     <p>No scenery available</p>
                 ) : (
-                    Object.keys(data).map((key) => (
-                        <div key={key}>
-                            <h2>{key}</h2>
-                            {data[key].map((item, index) => (
-                                <div key={index} className="scenery-row">
-                                    
-                                    <div className="title d-flex flex-row justify-content-between align-items-center">
-                                        <div className="d-flex align-items-center gap-2">
-                                            <span className="developer">{item.developer}</span>
-                                            {(item.fsac && item.ratingAverage > 0) && (
-                                                <span className="star"><i className="far fa-star"></i>{parseFloat(item.ratingAverage).toFixed(1)}</span>
+
+                    <u-tabs>
+                        <u-tablist>
+                            {Object.keys(data).map((key) => (
+                                <u-tab key={key}>{key}</u-tab>
+                            ))}
+                        </u-tablist>
+                    
+                        {Object.keys(data).map((key) => (
+                            <u-tabpanel key={key}>
+                                {data[key].map((item, index) => (
+                                    <div key={index} className="scenery-row">
+                                        
+                                        <div className="title d-flex flex-row justify-content-between align-items-center">
+                                            <div className="d-flex align-items-center gap-2">
+                                                <span className="developer">{item.developer}</span>
+                                                {(item.fsac && item.ratingAverage > 0) && (
+                                                    <span className="star"><i className="far fa-star"></i>{parseFloat(item.ratingAverage).toFixed(1)}</span>
+                                                )}
+                                            </div>
+                                            {item.payware > 0 ? (
+                                                <span className="badge bg-info">Payware</span>
+                                            ) : (
+                                                (item.payware == -1 ? (
+                                                    <span className="badge bg-danger">Included</span>
+                                                ) : (
+                                                    <span className="badge bg-success">Freeware</span>
+                                                ))
                                             )}
                                         </div>
-                                        {item.payware > 0 ? (
-                                            <span className="badge bg-info">Payware</span>
-                                        ) : (
-                                            (item.payware == -1 ? (
-                                                <span className="badge bg-danger">Included</span>
-                                            ) : (
-                                                <span className="badge bg-success">Freeware</span>
-                                            ))
+
+                                        {(item.fsac && item.cheapestPrice.EUR > 0) && (
+                                            <div className="link">
+                                                <a href={item.cheapestLink} target="_blank" className="text-white">
+                                                    €{parseFloat(item.cheapestPrice.EUR).toFixed(2)} at {item.cheapestStore}</a> <i className="fas fa-up-right-from-square"></i>
+                                            </div>
                                         )}
-                                    </div>
 
-                                    {(item.fsac && item.cheapestPrice.EUR > 0) && (
-                                        <div className="link">
-                                            <a href={item.cheapestLink} target="_blank" className="text-white">
-                                                €{parseFloat(item.cheapestPrice.EUR).toFixed(2)} at {item.cheapestStore}</a> <i className="fas fa-up-right-from-square"></i>
-                                        </div>
-                                    )}
-
-                                    {(item.fsac && item.cheapestPrice.EUR > 0) ? (
-                                        <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm">See more prices <i className="fas fa-up-right-from-square"></i></a>
-                                    ) : (
-                                        (item.link == 'https://www.flightsimulator.com/') ? (
-                                            <i>Included in the simulator</i>
+                                        {(item.fsac && item.cheapestPrice.EUR > 0) ? (
+                                            <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm">See more prices <i className="fas fa-up-right-from-square"></i></a>
                                         ) : (
-                                            <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm">{item.linkDomain ? item.linkDomain : 'FS Addon Compare'} <i className="fas fa-up-right-from-square"></i></a>
-                                        )
-                                    )}
-                                    
-                                </div>
-                            ))}
-                        </div>
-                    ))
+                                            (item.link == 'https://www.flightsimulator.com/') ? (
+                                                <i>Included in the simulator</i>
+                                            ) : (
+                                                <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm">{item.linkDomain ? item.linkDomain : 'FS Addon Compare'} <i className="fas fa-up-right-from-square"></i></a>
+                                            )
+                                        )}
+                                        
+                                    </div>
+                                ))}
+                            </u-tabpanel>
+                        ))}
+                    </u-tabs>
                 )}
 
                 <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-2" target="_blank">
