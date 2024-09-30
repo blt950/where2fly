@@ -161,35 +161,35 @@ class MapController extends Controller
         $fsacResponse = Http::withHeaders([
             'Authorization' => config('app.fsaddoncompare_key'),
         ])->get('https://api.fsaddoncompare.com/partner/search/icao/' . strtoupper($airportIcao));
-        
-        if($fsacResponse->successful()) {            
+
+        if ($fsacResponse->successful()) {
             $msfs = Simulator::find(1);
             $fsacSceneries = collect(json_decode($fsacResponse->body(), false)->results);
             $fsacSceneryDevelopers = $fsacSceneries->pluck('developer');
-            
+
             // Loop through own database and remove the sceneries that are already in our database
             $w2fSceneries = Scenery::where('icao', $airportIcao)->where('published', true)->with('simulators')->get();
-            foreach($w2fSceneries as $scenery) {
-                if($fsacSceneryDevelopers->contains($scenery->author)) {
-                    $fsacSceneryDevelopers = $fsacSceneryDevelopers->reject(fn($value) => $value == $scenery->author);
+            foreach ($w2fSceneries as $scenery) {
+                if ($fsacSceneryDevelopers->contains($scenery->author)) {
+                    $fsacSceneryDevelopers = $fsacSceneryDevelopers->reject(fn ($value) => $value == $scenery->author);
                 }
             }
 
             // Take the FSAddonCompare sceneries we don't have present in our database and save them
-            foreach($fsacSceneryDevelopers as $developer) {
+            foreach ($fsacSceneryDevelopers as $developer) {
                 $fsacScenery = $fsacSceneries->where('developer', $developer)->first();
 
                 // Find the official store link, if not found backup to our whitelisted domains
                 $prices = collect($fsacScenery->prices);
                 $store = $prices->where('isDeveloper', true)->first();
-                if(!$store){
+                if (! $store) {
                     $domainWhitelist = collect('simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to');
 
-                    foreach($domainWhitelist as $domain){
+                    foreach ($domainWhitelist as $domain) {
                         $result = $prices->first(function ($price) use ($domain) {
                             return strpos($price->link, $domain) !== false;
                         });
-                        if($result){
+                        if ($result) {
                             $store = $result;
                             break;
                         }
@@ -197,7 +197,7 @@ class MapController extends Controller
                 }
 
                 // If still no store is found, skip this scenery without saving
-                if(!$store){
+                if (! $store) {
                     continue;
                 }
 
@@ -216,13 +216,13 @@ class MapController extends Controller
             }
 
             // Return data for each scenery
-            foreach($fsacSceneries as $scenery){
+            foreach ($fsacSceneries as $scenery) {
 
                 // Find cheapest store
                 $stores = collect($scenery->prices);
                 $cheapestStore = $stores->first();
-                foreach($stores as $store){
-                    if($store->currencyPrice->EUR < $cheapestStore->currencyPrice->EUR){
+                foreach ($stores as $store) {
+                    if ($store->currencyPrice->EUR < $cheapestStore->currencyPrice->EUR) {
                         $cheapestStore = $store;
                     }
                 }
@@ -242,8 +242,8 @@ class MapController extends Controller
             }
 
             // Return data for each W2F scenery that's not covered by FSAddonCompare
-            foreach($w2fSceneries->whereNotIn('author', $fsacSceneries->pluck('developer')) as $scenery){
-                foreach($scenery->simulators as $simulator){
+            foreach ($w2fSceneries->whereNotIn('author', $fsacSceneries->pluck('developer')) as $scenery) {
+                foreach ($scenery->simulators as $simulator) {
                     $returnData[$simulator->shortened_name][] = [
                         'developer' => $scenery->author,
                         'link' => $scenery->link,
@@ -257,13 +257,13 @@ class MapController extends Controller
                     ];
                 }
             }
-            
+
         } else {
             // If FSAddonCompare API doesn't work, just return our own database
             $sceneries = Scenery::where('icao', $airportIcao)->where('published', true)->with('simulators')->get();
 
-            foreach($sceneries as $scenery){
-                foreach($scenery->simulators as $simulator){
+            foreach ($sceneries as $scenery) {
+                foreach ($scenery->simulators as $simulator) {
                     $returnData[$simulator->shortened_name][] = [
                         'developer' => $scenery->author,
                         'link' => $scenery->link,
@@ -280,17 +280,19 @@ class MapController extends Controller
         }
 
         // Sort the sceneries within each simulator. First by alphabetical order, then by payware/free
-        foreach($returnData as $simulator => $sceneries){
-            usort($sceneries, function($a, $b){
-                if($a['developer'] == $b['developer']){
+        foreach ($returnData as $simulator => $sceneries) {
+            usort($sceneries, function ($a, $b) {
+                if ($a['developer'] == $b['developer']) {
                     return 0;
                 }
+
                 return ($a['developer'] < $b['developer']) ? -1 : 1;
             });
-            usort($sceneries, function($a, $b){
-                if($a['payware'] == $b['payware']){
+            usort($sceneries, function ($a, $b) {
+                if ($a['payware'] == $b['payware']) {
                     return 0;
                 }
+
                 return ($a['payware'] < $b['payware']) ? -1 : 1;
             });
             $returnData[$simulator] = $sceneries;
