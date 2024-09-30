@@ -207,7 +207,7 @@ class MapController extends Controller
                 $sceneryModel->author = $developer;
                 $sceneryModel->link = $this->getEmbeddedUrl($store->link);
                 $sceneryModel->airport_id = Airport::where('icao', $airportIcao)->first()->id;
-                $sceneryModel->payware = 1;
+                $sceneryModel->payware = ($store->currencyPrice->EUR > 0) ? 1 : 0;
                 $sceneryModel->published = true;
                 $sceneryModel->save();
 
@@ -236,7 +236,7 @@ class MapController extends Controller
                     'cheapestStore' => $cheapestStore->store,
                     'cheapestPrice' => $cheapestStore->currencyPrice,
                     'ratingAverage' => $scenery->ratingAverage,
-                    'payware' => 1,
+                    'payware' => ($cheapestStore->currencyPrice->EUR > 0) ? 1 : 0,
                     'fsac' => true,
                 ];
             }
