@@ -79,21 +79,21 @@ function SceneryCard({ airportId }) {
                                             )}
                                         </div>
 
-                                        {(item.fsac && item.cheapestPrice.EUR > 0) && (
-                                            <div className="link">
-                                                <a href={item.cheapestLink} target="_blank" className="text-white">
-                                                    €{parseFloat(item.cheapestPrice.EUR).toFixed(2)} at {item.cheapestStore}</a> <i className="fas fa-up-right-from-square"></i>
-                                            </div>
-                                        )}
-
                                         {(item.fsac && item.cheapestPrice.EUR > 0) ? (
-                                            <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm">See more prices <i className="fas fa-up-right-from-square"></i></a>
+                                            <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">See all prices <i className="fas fa-up-right-from-square"></i></a>
                                         ) : (
                                             (item.link == 'https://www.flightsimulator.com/') ? (
                                                 <i>Included in the simulator</i>
                                             ) : (
-                                                <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm">{item.linkDomain ? item.linkDomain : 'FS Addon Compare'} <i className="fas fa-up-right-from-square"></i></a>
+                                                <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">{item.linkDomain ? item.linkDomain : 'FS Addon Compare'} <i className="fas fa-up-right-from-square"></i></a>
                                             )
+                                        )}
+
+                                        {(item.fsac && item.cheapestPrice.EUR > 0) && (
+                                            <a href={item.cheapestLink} target="_blank" className="btn btn-outline-light btn-sm">
+                                                Cheapest: {item.cheapestStore} €{parseFloat(item.cheapestPrice.EUR).toFixed(2)} 
+                                                <i className="fas fa-up-right-from-square ms-1"></i>
+                                            </a>
                                         )}
                                         
                                     </div>
