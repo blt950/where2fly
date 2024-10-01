@@ -163,6 +163,19 @@ img.flag{
     }
 }
 
+.btn-group{
+    .dropdown-menu{
+        li .dropdown-item:hover{
+            color: black;
+            background: $primary;
+        }
+    
+        &.show{
+            --bs-dropdown-min-width: 0rem;
+        }
+    }
+}
+
 .scenery-row{
     margin: 0.5rem 0;
     padding: 0.75rem 1rem 1rem 1rem;

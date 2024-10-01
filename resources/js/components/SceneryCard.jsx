@@ -1,10 +1,19 @@
 import { useEffect, useState, useRef, useContext } from 'react';
 import { CardContext } from './context/CardContext';
+import CurrencyDropdown from './ui/CurrencyDropdown';
 
 function SceneryCard({ airportId }) {
     const dataCache = useRef({});
     const [data, setData] = useState(null);
+    const [currency, setCurrency] = useState(localStorage.getItem('currency') || 'EUR');
     const { setShowSceneryIdCard } = useContext(CardContext);
+
+    const currencies = [
+        { code: 'EUR', symbol: '€' },
+        { code: 'USD', symbol: '$' },
+        { code: 'GBP', symbol: '£' },
+        { code: 'AUD', symbol: 'A$' }
+    ]
 
     // Fetch airport data if it's not in the cache
     useEffect(() => {
@@ -36,6 +45,10 @@ function SceneryCard({ airportId }) {
         }
     }, [airportId]);
 
+    useEffect(() => {
+        localStorage.setItem('currency', currency);
+    }, [currency]);
+
     return (
         <div className="popup-card">
         {data !== null ? (
@@ -50,11 +63,15 @@ function SceneryCard({ airportId }) {
                 ) : (
 
                     <u-tabs>
-                        <u-tablist>
-                            {Object.keys(data).map((key) => (
-                                <u-tab key={key}>{key}</u-tab>
-                            ))}
-                        </u-tablist>
+                        <div className="d-flex flex-row justify-content-between">
+                            <u-tablist>
+                                {Object.keys(data).map((key) => (
+                                    <u-tab key={key}>{key}</u-tab>
+                                ))}
+                            </u-tablist>
+
+                            <CurrencyDropdown currencies={currencies} currency={currency} setCurrency={setCurrency}/>
+                        </div>
                     
                         {Object.keys(data).map((key) => (
                             <u-tabpanel key={key}>
@@ -90,8 +107,8 @@ function SceneryCard({ airportId }) {
                                         )}
 
                                         {(item.fsac && item.cheapestPrice.EUR > 0) && (
-                                            <a href={item.cheapestLink} target="_blank" className="btn btn-outline-light btn-sm">
-                                                Cheapest: {item.cheapestStore} €{parseFloat(item.cheapestPrice.EUR).toFixed(2)} 
+                                            <a href={item.currencyLink?.[currency] || item.cheapestLink} target="_blank" className="btn btn-outline-light btn-sm">
+                                                Cheapest: {item.cheapestStore} {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}
                                                 <i className="fas fa-up-right-from-square ms-1"></i>
                                             </a>
                                         )}

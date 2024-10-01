@@ -243,6 +243,7 @@ class MapController extends Controller
                     'developer' => $scenery->developer,
                     'link' => $scenery->link,
                     'linkDomain' => null,
+                    'currencyLink' => isset($cheapestStore->currencyLink) ? $cheapestStore->currencyLink : null,
                     'cheapestLink' => $cheapestStore->link,
                     'cheapestStore' => $cheapestStore->store,
                     'cheapestPrice' => $cheapestStore->currencyPrice,
