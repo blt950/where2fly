@@ -126,7 +126,7 @@ function SceneryCard({ airportId }) {
                         <i className="fas fa-plus"></i> Add missing scenery
                     </a>
                     <span>
-                        Prices are ex. tax
+                        Prices are excl. tax
                     </span>
                 </div>
             </>
