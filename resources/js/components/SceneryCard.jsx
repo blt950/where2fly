@@ -27,20 +27,25 @@ function SceneryCard({ airportId }) {
                     dataCache.current[airportId] = data.data;
                     setData(data.data);
                 })
-                .catch(error => console.error(error.message));
+                .catch(error => {
+                    console.error(error.message)
+                    if(error.response.status === 404) {
+                        setData(undefined);
+                    }
+                });
         }
     }, [airportId]);
 
     return (
         <div className="popup-card">
-        {data ? (
+        {data !== null ? (
             <>
                 <div className="d-flex justify-content-between">
                     <h2>Scenery</h2>
                     <button className="btn-close" aria-label="Close scenery card" onClick={() => setShowSceneryIdCard(null)}></button>
                 </div>
 
-                {!Object.keys(data).length ? (
+                {!data ? (
                     <p>No scenery available</p>
                 ) : (
 
