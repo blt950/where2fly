@@ -118,11 +118,17 @@ function SceneryCard({ airportId }) {
                             </u-tabpanel>
                         ))}
                     </u-tabs>
+                    
                 )}
 
-                <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-2" target="_blank">
-                    <i className="fas fa-plus"></i> Add missing scenery
-                </a>
+                <div className="d-flex flex-row justify-content-between align-items-end">
+                    <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-2" target="_blank">
+                        <i className="fas fa-plus"></i> Add missing scenery
+                    </a>
+                    <span>
+                        Prices are ex. tax
+                    </span>
+                </div>
             </>
         ) : (
             <p className="mb-0"><i className="fas fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
