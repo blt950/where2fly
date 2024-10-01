@@ -177,6 +177,12 @@ class MapController extends Controller
 
             // Take the FSAddonCompare sceneries we don't have present in our database and save them
             foreach ($fsacSceneryDevelopers as $developer) {
+
+                // Skip microsoft included sceneries all together from FSAddonCompare
+                if(strtolower($developer) == 'microsoft'){
+                    continue;
+                }
+                
                 $fsacScenery = $fsacSceneries->where('developer', $developer)->first();
 
                 // Find the official store link, if not found backup to our whitelisted domains
@@ -217,6 +223,11 @@ class MapController extends Controller
 
             // Return data for each scenery
             foreach ($fsacSceneries as $scenery) {
+
+                // Skip microsoft included sceneries all together from FSAddonCompare
+                if(strtolower($scenery->developer) == 'microsoft'){
+                    continue;
+                }
 
                 // Find cheapest store
                 $stores = collect($scenery->prices);
