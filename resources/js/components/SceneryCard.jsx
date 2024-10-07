@@ -79,7 +79,7 @@ function SceneryCard({ airportId }) {
                                     <div key={index} className="scenery-row">
                                         
                                         <div className="title d-flex flex-row justify-content-between align-items-center">
-                                            <div className="d-flex align-items-center gap-2">
+                                            <div className="d-flex align-items-center">
                                                 <span className="developer">{item.developer}</span>
                                                 {(item.fsac && item.ratingAverage > 0) && (
                                                     <span className="star"><i className="far fa-star"></i>{parseFloat(item.ratingAverage).toFixed(1)}</span>
@@ -122,12 +122,12 @@ function SceneryCard({ airportId }) {
                 )}
 
                 <div className="d-flex flex-row justify-content-between align-items-end">
-                    <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-2" target="_blank">
-                        <i className="fas fa-plus"></i> Add missing scenery
-                    </a>
-                    <span>
+                    <span className="pb-1">
                         Prices are excl. tax
                     </span>
+                    <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-3" target="_blank">
+                        <i className="fas fa-plus"></i> Add missing scenery
+                    </a>
                 </div>
             </>
         ) : (
