@@ -105,7 +105,7 @@ function AirportCard({ airportId }) {
 
                             {data.airlines && data.airlines.length > 0 && (
                                 <>
-                                    <dt>Airlines</dt>
+                                    <dt>Flights</dt>
                                     <dd className="d-flex flex-wrap gap-1">
                                         {data.airlines.map(airline => (
                                             <button

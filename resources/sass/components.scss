@@ -163,3 +163,73 @@ img.flag{
     }
 }
 
+.btn-group{
+    .dropdown-menu{
+        li .dropdown-item:hover{
+            color: black;
+            background: $primary;
+        }
+    
+        &.show{
+            --bs-dropdown-min-width: 0rem;
+        }
+    }
+}
+
+.scenery-row{
+    margin: 0;
+    padding: 0.75rem 1rem 1rem 1rem;
+
+    background: $secondary;
+    
+    &:nth-child(odd){
+        background: #202538;
+    }
+
+    &:first-of-type{
+        margin-top: 0;
+    }
+
+    &:last-of-type{
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .title{
+        .developer{
+            font-family: $font-family-sans-serif;
+            font-size: 1.25rem;
+        }
+
+        .star{
+            color: $primary;
+            font-size: 1rem;
+            margin-left: 0.5rem;
+            
+            .far{
+                padding-right: 0.25rem;
+            }
+        }
+
+        .badge{
+            font-size: .75rem;
+        }
+    }
+
+    .btn{
+        margin-top: 0.5rem;
+    }
+}
+
+u-tab {
+    color: $primary;
+    background: $secondary;
+
+    border: 1px solid $primary;
+    padding: .5em;
+}
+
+u-tab[aria-selected="true"] {
+    color: black;
+    background: $primary;
+}

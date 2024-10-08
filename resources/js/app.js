@@ -7,6 +7,9 @@ import './components/PopupContainer';
 import './components/AirportCard';
 import './components/ui/TAF';
 
+// Other
+import '@u-elements/u-tabs';
+
 // Metrics
 document.querySelectorAll('a[href^="http"]').forEach(link => {
     // Check if the link is not pointing to your own domain

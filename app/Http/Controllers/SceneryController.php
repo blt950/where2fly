@@ -45,7 +45,7 @@ class SceneryController extends Controller
         $scenery->save();
 
         // Attach the simulator to the scenery
-        if($request->simulators){
+        if ($request->simulators) {
             $scenery->simulators()->attach($request->simulators);
         }
 
@@ -94,7 +94,7 @@ class SceneryController extends Controller
         $scenery->save();
 
         // Attach the simulator to the scenery
-        if($request->simulators){
+        if ($request->simulators) {
             $scenery->simulators()->sync($request->simulators);
         }
 

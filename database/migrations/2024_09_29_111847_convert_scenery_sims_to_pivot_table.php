@@ -1,9 +1,9 @@
 <?php
 
+use App\Models\Scenery;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Scenery;
 
 return new class extends Migration
 {
@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         $sceneries = Scenery::all();
-        foreach($sceneries as $scenery){
+        foreach ($sceneries as $scenery) {
             $scenery->simulators()->attach($scenery->simulator_id);
         }
 
