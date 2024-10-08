@@ -209,7 +209,7 @@ class MapController extends Controller
                     'cheapestStore' => $store->store ?? $scenery->author,
                     'cheapestPrice' => $store->currencyPrice ?? null,
                     'ratingAverage' => $scenery->ratingAverage ?? null,
-                    'payware' => (int)($store ? $store->currencyPrice->EUR > 0 : $scenery->payware),
+                    'payware' => (int) ($store ? $store->currencyPrice->EUR > 0 : $scenery->payware),
                     'fsac' => (bool) $store,
                 ];
             };
@@ -245,7 +245,7 @@ class MapController extends Controller
                         'cheapestStore' => $scenery->author,
                         'cheapestPrice' => null,
                         'ratingAverage' => null,
-                        'payware' => (int)$scenery->payware,
+                        'payware' => (int) $scenery->payware,
                         'fsac' => false,
                     ];
                 }
@@ -254,8 +254,8 @@ class MapController extends Controller
 
         // Sort the sceneries within each simulator. First by alphabetical order, then by payware/free
         foreach ($returnData as $simulator => $sceneries) {
-            usort($sceneries, fn($a, $b) => $a['developer'] <=> $b['developer']);
-            usort($sceneries, fn($a, $b) => $a['payware'] <=> $b['payware']);
+            usort($sceneries, fn ($a, $b) => $a['developer'] <=> $b['developer']);
+            usort($sceneries, fn ($a, $b) => $a['payware'] <=> $b['payware']);
             $returnData[$simulator] = $sceneries;
         }
 
