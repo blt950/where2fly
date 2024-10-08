@@ -1,10 +1,19 @@
 import { useEffect, useState, useRef, useContext } from 'react';
 import { CardContext } from './context/CardContext';
+import CurrencyDropdown from './ui/CurrencyDropdown';
 
 function SceneryCard({ airportId }) {
     const dataCache = useRef({});
     const [data, setData] = useState(null);
+    const [currency, setCurrency] = useState(localStorage.getItem('currency') || 'EUR');
     const { setShowSceneryIdCard } = useContext(CardContext);
+
+    const currencies = [
+        { code: 'EUR', symbol: '€' },
+        { code: 'USD', symbol: '$' },
+        { code: 'GBP', symbol: '£' },
+        { code: 'AUD', symbol: 'A$' }
+    ]
 
     // Fetch airport data if it's not in the cache
     useEffect(() => {
@@ -27,46 +36,99 @@ function SceneryCard({ airportId }) {
                     dataCache.current[airportId] = data.data;
                     setData(data.data);
                 })
-                .catch(error => console.error(error.message));
+                .catch(error => {
+                    console.error(error.message)
+                    if(error.response.status === 404) {
+                        setData(undefined);
+                    }
+                });
         }
     }, [airportId]);
 
+    useEffect(() => {
+        localStorage.setItem('currency', currency);
+    }, [currency]);
+
     return (
         <div className="popup-card">
-        {data ? (
+        {data !== null ? (
             <>
                 <div className="d-flex justify-content-between">
                     <h2>Scenery</h2>
                     <button className="btn-close" aria-label="Close scenery card" onClick={() => setShowSceneryIdCard(null)}></button>
                 </div>
 
-                {!data.sceneries.length ? (
+                {!data ? (
                     <p>No scenery available</p>
                 ) : (
-                    data.sceneries.map((scenery) => (
-                        <a key={scenery.id} href={scenery.link} className="d-block btn btn-outline-light font-work-sans text-start mt-2" target="_blank">
 
-                            {scenery.simulators.map((simulator) => (
-                                <span key={simulator.id} className="badge bg-blue me-1">
-                                    {simulator.shortened_name}
-                                </span>
-                            ))}
+                    <u-tabs>
+                        <div className="d-flex flex-row justify-content-between">
+                            <u-tablist>
+                                {Object.keys(data).map((key) => (
+                                    <u-tab key={key}>{key}</u-tab>
+                                ))}
+                            </u-tablist>
 
-                            {scenery.payware === -1 ? (
-                                <span className="badge bg-danger">Included</span>
-                            ) : scenery.payware === 0 ? (
-                                <span className="badge bg-success">Freeware</span>
-                            ) : (
-                                <span className="badge bg-info">Payware</span>
-                            )}
-                            &nbsp;{scenery.author} <i className="fas fa-up-right-from-square float-end pt-1"></i>
-                        </a>
-                    ))
+                            <CurrencyDropdown currencies={currencies} currency={currency} setCurrency={setCurrency}/>
+                        </div>
+                    
+                        {Object.keys(data).map((key) => (
+                            <u-tabpanel key={key}>
+                                {data[key].map((item, index) => (
+                                    <div key={index} className="scenery-row">
+                                        
+                                        <div className="title d-flex flex-row justify-content-between align-items-center">
+                                            <div className="d-flex align-items-center">
+                                                <span className="developer">{item.developer}</span>
+                                                {(item.fsac && item.ratingAverage > 0) && (
+                                                    <span className="star"><i className="far fa-star"></i>{parseFloat(item.ratingAverage).toFixed(1)}</span>
+                                                )}
+                                            </div>
+                                            {item.payware > 0 ? (
+                                                <span className="badge bg-info">Payware</span>
+                                            ) : (
+                                                (item.payware == -1 ? (
+                                                    <span className="badge bg-danger">Included</span>
+                                                ) : (
+                                                    <span className="badge bg-success">Freeware</span>
+                                                ))
+                                            )}
+                                        </div>
+
+                                        {(item.fsac && item.cheapestPrice.EUR > 0) ? (
+                                            <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">See all prices <i className="fas fa-up-right-from-square"></i></a>
+                                        ) : (
+                                            (item.link == 'https://www.flightsimulator.com/') ? (
+                                                <i>Included in the simulator</i>
+                                            ) : (
+                                                <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">{item.linkDomain ? item.linkDomain : 'FS Addon Compare'} <i className="fas fa-up-right-from-square"></i></a>
+                                            )
+                                        )}
+
+                                        {(item.fsac && item.cheapestPrice.EUR > 0) && (
+                                            <a href={item.currencyLink?.[currency] || item.cheapestLink} target="_blank" className="btn btn-outline-light btn-sm">
+                                                Cheapest: {item.cheapestStore} {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}
+                                                <i className="fas fa-up-right-from-square ms-1"></i>
+                                            </a>
+                                        )}
+                                        
+                                    </div>
+                                ))}
+                            </u-tabpanel>
+                        ))}
+                    </u-tabs>
+                    
                 )}
 
-                <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-primary btn-sm font-work-sans mt-2" target="_blank">
-                    <i className="fas fa-plus"></i> Add missing scenery
-                </a>
+                <div className="d-flex flex-row justify-content-between align-items-end">
+                    <span className="pb-1">
+                        Prices are excl. tax
+                    </span>
+                    <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-3" target="_blank">
+                        <i className="fas fa-plus"></i> Add missing scenery
+                    </a>
+                </div>
             </>
         ) : (
             <p className="mb-0"><i className="fas fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
