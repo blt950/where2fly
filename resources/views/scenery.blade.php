@@ -42,6 +42,12 @@
         window.addEventListener('mapReady', function() {
             setAirportsData(airportMapData);
         });
-        
+
+        // Listen for the custom event indicating the airport card is ready
+        window.addEventListener('airportReady', function(event) {
+            console.log(event.detail.icao);
+            setShowSceneryIdCard(event.detail.icao);
+        });
+
     </script>
 @endsection

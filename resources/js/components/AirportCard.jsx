@@ -16,6 +16,10 @@ function AirportCard({ airportId }) {
     const [arrivalAirportId, setArrivalAirportId] = useState(null);
     const { airports, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts } = useContext(MapContext);
 
+    useEffect(() => {
+        window.setShowSceneryIdCard = (data) => { setShowSceneryIdCard(data) }
+    }), [];
+
     // Fetch airport data if it's not in the cache
     useEffect(() => {
         if (dataCache.current[airportId]) {
@@ -55,6 +59,10 @@ function AirportCard({ airportId }) {
             setDepartureAirportId(airports[focusAirport].id);
             setArrivalAirportId(airports[primaryAirport].id);
         }
+
+        // Dispatch a custom event when the map focuses on an airport
+        window.dispatchEvent(new CustomEvent('airportReady', { detail: { icao: airports[focusAirport].icao } }));
+
     }, [airportId]);
 
     useEffect(() => { if(showFlightsIdCard !== null) plausible('Interactions', {props: {interaction: `Open flights card`}}) }, [showFlightsIdCard]);
