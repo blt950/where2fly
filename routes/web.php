@@ -35,6 +35,13 @@ Route::controller(TopController::class)->group(function () {
     Route::get('/top/{continent}', 'index')->name('top.filtered');
 });
 
+// Scenery
+Route::controller(SceneryController::class)->group(function () {
+    Route::get('/scenery', 'indexAirports')->name('scenery');
+    Route::get('/scenery/{simulator}', 'indexAirports')->name('scenery.filtered');
+});
+
+
 // User account related routes
 Route::controller(LoginController::class)->group(function () {
     Route::get('/register', 'showRegister')->name('register');

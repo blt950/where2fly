@@ -51,6 +51,10 @@ class Airport extends Model
         return $this->hasMany(Controller::class);
     }
 
+    public function sceneries(){
+        return $this->hasMany(Scenery::class);
+    }
+
     public function arrivalFlights()
     {
         return $this->hasMany(Flight::class, 'airport_arr_id');

@@ -20,6 +20,8 @@ const isDefaultView = () => {
     if (!route().current('top') 
         && !route().current('top.filtered')
         && !route().current('search')
+        && !route().current('scenery')
+        && !route().current('scenery.filtered')
         && route().current() !== undefined) {
         return true;
     }
@@ -197,7 +199,7 @@ function Map() {
                 )}
 
                 {isDefaultView() && <MapSaveView />}
-                {(mapBounds && !route().current('top*')) && <MapBound mapBounds={mapBounds} />}
+                {(mapBounds && !route().current('top*')) && !route().current('scenery*') && <MapBound mapBounds={mapBounds} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
             </MapContainer>
