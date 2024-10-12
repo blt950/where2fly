@@ -2,6 +2,8 @@ import { useEffect, useState, useRef, useContext } from 'react';
 import { CardContext } from './context/CardContext';
 import CurrencyDropdown from './ui/CurrencyDropdown';
 
+import ExternalLinkTracker from './utils/ExternalLinkTracker';
+
 function SceneryCard({ airportId }) {
     const dataCache = useRef({});
     const [data, setData] = useState(null);
@@ -44,6 +46,10 @@ function SceneryCard({ airportId }) {
                 });
         }
     }, [airportId]);
+
+    useEffect(() => {
+        ExternalLinkTracker();
+    }, [data]);
 
     useEffect(() => {
         localStorage.setItem('currency', currency);
