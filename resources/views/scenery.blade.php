@@ -22,11 +22,11 @@
         <div class="d-none d-md-block">
             <div class="mb-3 pb-3 border-bottom">
                 <form action="#" method="POST">
-                    <div class="form-group">
-                        <label for="airport">Search for airport (ICAO)</label>
+                    <label for="airport">Search for airport (ICAO)</label>
+                    <div class="input-group">
                         <input type="text" class="form-control" id="airport" name="airport" required oninput="this.value = this.value.toUpperCase()" maxlength="4">
+                        <button class="btn btn-primary ms-2" type="submit">Search</button>
                     </div>
-                    <button class="btn btn-primary mt-2" type="submit">Search</button>
                 </form>
             </div>
     
