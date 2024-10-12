@@ -111,11 +111,17 @@ class MapController extends Controller
         }])->where('id', $secondaryAirport)->first();
         $metar = isset($airport->metar) ? $airport->metar->metar : null;
 
+        // Get lists which this airport is present
+        $lists = UserList::where('user_id', Auth::id())->where('public', false)->whereHas('airports', function ($query) use ($secondaryAirport) {
+            $query->where('airport_id', $secondaryAirport);
+        })->get();
+
         if (isset($airport)) {
             return response()->json(['message' => 'Success', 'data' => [
                 'airport' => $airport->toArray(),
                 'metar' => $metar,
                 'airlines' => $airlines,
+                'lists' => $lists,
             ]], 200);
         } else {
             return response()->json(['message' => 'Airport not found'], 404);
