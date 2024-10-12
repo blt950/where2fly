@@ -20,6 +20,8 @@ const isDefaultView = () => {
     if (!route().current('top') 
         && !route().current('top.filtered')
         && !route().current('search')
+        && !route().current('scenery')
+        && !route().current('scenery.filtered')
         && route().current() !== undefined) {
         return true;
     }
@@ -120,16 +122,46 @@ function Map() {
     // When focusAirport changes, pan to the airport and show the card.
     useEffect(() => {
         if (focusAirport !== null && focusAirport !== undefined) {
-            setCoordinates([airports[focusAirport].lat, airports[focusAirport].lon]);
-            setShowAirportIdCard(airports[focusAirport].id);
 
-            // For routes which define a primary airport, we want to draw the route as well
-            if(primaryAirport){
-                setDrawRoute([primaryAirport, airports[focusAirport].icao]);
+            // Load the selected airport to map if it's not already loaded (e.g. searching up scenery)
+            if (airports[focusAirport] === undefined) {
+                
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                fetch(route('api.mapdata.icao'), {
+                    method: "POST",
+                    credentials: 'include',
+                    headers: { 
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({ icao: focusAirport })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    setAirports({ ...airports, [focusAirport]: data.data[focusAirport] });
+                    // Use the temporary data as setAirports is async
+                    setCoordinates([data.data[focusAirport].lat, data.data[focusAirport].lon]);
+                    setShowAirportIdCard(data.data[focusAirport].id);
+                })
+                .catch(error => console.error(error.message));
+
+            } else {
+
+                // Set the coordinates and show the card
+                setCoordinates([airports[focusAirport].lat, airports[focusAirport].lon]);
+                setShowAirportIdCard(airports[focusAirport].id);
+
+                // For routes which define a primary airport, we want to draw the route as well
+                if(primaryAirport){
+                    setDrawRoute([primaryAirport, airports[focusAirport].icao]);
+                }
+
+                // Dispatch a custom event when the map focuses on an airport
+                window.dispatchEvent(new CustomEvent('mapFocusAirport', { detail: { focusAirport } }));
+
             }
-
-            // Dispatch a custom event when the map focuses on an airport
-            window.dispatchEvent(new CustomEvent('mapFocusAirport', { detail: { focusAirport } }));
+            
         }
     }, [focusAirport]);
 
@@ -197,7 +229,7 @@ function Map() {
                 )}
 
                 {isDefaultView() && <MapSaveView />}
-                {(mapBounds && !route().current('top*')) && <MapBound mapBounds={mapBounds} />}
+                {(mapBounds && !route().current('top*')) && !route().current('scenery*') && <MapBound mapBounds={mapBounds} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
             </MapContainer>

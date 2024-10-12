@@ -21,6 +21,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ Route::is('scenery*') ? 'active' : '' }}" href="{{ route('scenery') }}">
+                        <i class="fas fa-map"></i>&nbsp;
+                        Scenery
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="https://discord.gg/UkFg9Yy4gP" target="_blank">
                         <i class="fab fa-discord"></i>&nbsp;
                         Discord
