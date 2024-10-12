@@ -136,9 +136,9 @@ class UserListController extends Controller
         $airportsInput = explode("\r\n", $input);
         $airportsInput = array_map('strtoupper', $airportsInput);
         $airportsInput = array_filter($airportsInput, function ($value) {
-            return !empty($value);
+            return ! empty($value);
         });
-        
+
         $airportModels = Airport::whereIn('icao', $airportsInput)
             ->orWhereIn('local_code', $airportsInput)
             ->get();
