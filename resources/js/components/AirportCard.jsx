@@ -94,6 +94,10 @@ function AirportCard({ airportId }) {
                         </div>
                         <h2>{data.airport.name}</h2>
 
+                        {data.lists.map(list => (
+                            <span className="badge me-1" style={{ border: '1px solid ' + list.color, color: list.color }} key={list.id}><i className="fas fa-list"></i>&nbsp;{list.name}</span>
+                        ))}
+
                         <dl className="font-kanit">
                             <dt>Runways</dt>
                             {data.airport.runways.map(runway => (
