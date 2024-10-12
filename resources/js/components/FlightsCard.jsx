@@ -51,9 +51,9 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                     <table className="table card-table no-padding sortable asc">
                         <thead>
                             <tr>
-                                <th scope="col" style={{'max-width': '25%'}}>Flight</th>
+                                <th scope="col" style={{'maxWidth': '25%'}}>Flight</th>
                                 <th scope="col" style={{'width': '50%'}}>Aircraft</th>
-                                <th scope="col" style={{'max-width': '25%'}}>Last seen</th>
+                                <th scope="col" style={{'maxWidth': '25%'}}>Last seen</th>
                             </tr>
                         </thead>
                         <tbody>
