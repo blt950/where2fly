@@ -126,7 +126,7 @@ class SceneryController extends Controller
             $airports = $filteredSimulator->sceneries->where('published', true)->pluck('airport_id');
             $airports = Airport::whereIn('id', $airports)->get();
         } else {
-            $airports = Airport::whereHas('sceneries', function($query) {
+            $airports = Airport::whereHas('sceneries', function ($query) {
                 $query->where('published', true);
             })->get();
         }
