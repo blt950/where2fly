@@ -71,8 +71,8 @@ function SceneryCard({ airportId }) {
                     <u-tabs>
                         <div className="d-flex flex-row justify-content-between">
                             <u-tablist>
-                                {Object.keys(data).map((key) => (
-                                    <u-tab key={key}>{key}</u-tab>
+                                {Object.keys(data).map((key, index) => (
+                                    <u-tab key={key} aria-selected={index === 0 ? "true" : "false"} aria-controls={key}>{key}</u-tab>
                                 ))}
                             </u-tablist>
 
@@ -80,7 +80,7 @@ function SceneryCard({ airportId }) {
                         </div>
                     
                         {Object.keys(data).map((key) => (
-                            <u-tabpanel key={key}>
+                            <u-tabpanel id={key} key={key}>
                                 {data[key].map((item, index) => (
                                     <div key={index} className="scenery-row">
                                         
