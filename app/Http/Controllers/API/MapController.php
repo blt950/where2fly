@@ -197,9 +197,10 @@ class MapController extends Controller
                     continue;
                 }
 
+                // Find the official store link, if not found backup to our whitelisted domains
                 $fsacScenery = $fsacSceneries->firstWhere('developer', $developer);
                 $store = collect($fsacScenery->prices)->firstWhere('isDeveloper', true) ??
-                         collect($fsacScenery->prices)->first(fn ($price) => in_array(parse_url($price->link, PHP_URL_HOST), ['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to']));
+                         collect($fsacScenery->prices)->first(fn ($price) => collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])->contains(fn ($domain) => strpos($price->link, $domain) !== false));
 
                 if (! $store) {
                     continue;
