@@ -16,6 +16,7 @@ class MapHelper
     {
         $airportData = [];
         foreach ($airports as $airport) {
+
             $airportData[$airport->icao] = [
                 'id' => $airport->id,
                 'icao' => $airport->icao,

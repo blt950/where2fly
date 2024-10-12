@@ -9,6 +9,8 @@ class Scenery extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     public function airport()
     {
         return $this->belongsTo(Airport::class);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\MapHelper;
 use App\Models\Airport;
 use App\Models\Scenery;
 use App\Models\Simulator;
@@ -111,5 +112,29 @@ class SceneryController extends Controller
         $scenery->delete();
 
         return redirect()->route('admin')->with('success', 'Scenery deleted successfully.');
+    }
+
+    /**
+     * Index of all airports with scenery
+     */
+    public function indexAirports(Request $request, ?string $filteredSim = null)
+    {
+        $simulators = Simulator::whereHas('sceneries')->get();
+        $filteredSimulator = Simulator::where('shortened_name', $filteredSim)->first();
+
+        if ($filteredSimulator) {
+            $airports = Airport::whereHas('sceneries', function ($query) use ($filteredSimulator) {
+                $query->whereHas('simulators', function ($query) use ($filteredSimulator) {
+                    $query->where('simulator_id', $filteredSimulator->id);
+                });
+            })->get();
+        } else {
+            $airports = Airport::whereHas('sceneries')->get();
+        }
+
+        $airportMapData = json_encode(MapHelper::generateAirportMapDataFromAirports($airports));
+        $airportsCount = $airports->count();
+
+        return view('scenery', compact('airportsCount', 'airportMapData', 'simulators', 'filteredSimulator'));
     }
 }
