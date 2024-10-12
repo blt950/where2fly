@@ -123,7 +123,11 @@ class SceneryController extends Controller
         $filteredSimulator = Simulator::where('shortened_name', $filteredSim)->first();
 
         if ($filteredSimulator) {
-            $airports = $filteredSimulator->sceneries;
+            $airports = Airport::whereHas('sceneries', function ($query) use ($filteredSimulator) {
+                $query->whereHas('simulators', function ($query) use ($filteredSimulator) {
+                    $query->where('simulator_id', $filteredSimulator->id);
+                });
+            })->get();
         } else {
             $airports = Airport::whereHas('sceneries')->get();
         }
