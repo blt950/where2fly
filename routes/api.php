@@ -23,6 +23,7 @@ Route::group(['middleware' => ['api-token']], function () {
 Route::get('/user/authenticated', [App\Http\Controllers\API\MapController::class, 'isAuthenticated'])->name('api.user.authenticated');
 
 Route::post('/airport', [MapController::class, 'getAirport'])->name('api.airport.show');
+Route::post('/airport/icao', [MapController::class, 'getAirportFromIcao'])->name('api.airport.icao');
 Route::post('/flights', [MapController::class, 'getFlights'])->name('api.airport.flights');
 Route::post('/scenery', [MapController::class, 'getScenery'])->name('api.airport.scenery');
 

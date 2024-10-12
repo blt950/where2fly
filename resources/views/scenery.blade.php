@@ -20,17 +20,28 @@
         </div>
 
         <div class="d-none d-md-block">
-            <div class="filterbox">
-                <span class="m-0"><strong class="d-block">Filter</strong>
-                    <a class="btn btn-sm {{ Route::is('scenery') ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('scenery') }}">All</a>
-                    @foreach($simulators as $simulator)
-                        <a class="btn btn-sm {{ optional($filteredSimulator)->id == $simulator->id ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('scenery.filtered', $simulator->shortened_name) }}">{{ $simulator->shortened_name }}</a>
-                    @endforeach
-                </span>
+            <div class="mb-3 pb-3 border-bottom">
+                <form action="#" method="POST">
+                    <div class="form-group">
+                        <label for="airport">Search for airport (ICAO)</label>
+                        <input type="text" class="form-control" id="airport" name="airport" required oninput="this.value = this.value.toUpperCase()" maxlength="4">
+                    </div>
+                    <button class="btn btn-primary mt-2" type="submit">Search</button>
+                </form>
             </div>
     
-            <p>{{ $airportsCount }} airports with scenery found. Click on the map to see details.</p>
-        </div>        
+            <div class="d-none d-md-block">
+                <div class="filterbox">
+                    <span class="m-0"><strong class="d-block">Map Filter</strong>
+                        <a class="btn btn-sm {{ Route::is('scenery') ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('scenery') }}">All</a>
+                        @foreach($simulators as $simulator)
+                            <a class="btn btn-sm {{ optional($filteredSimulator)->id == $simulator->id ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('scenery.filtered', $simulator->shortened_name) }}">{{ $simulator->shortened_name }}</a>
+                        @endforeach
+                    </span>
+                </div>
+            </div>  
+        </div>
+
     </div>
 @endsection
 
@@ -47,6 +58,14 @@
         window.addEventListener('airportReady', function(event) {
             console.log(event.detail.icao);
             setShowSceneryIdCard(event.detail.icao);
+        });
+
+        // When form is submitted, ask `api/airport/icao` for id and set the airport
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            var icao = document.querySelector('#airport').value;
+            setFocusAirport(icao);
         });
 
     </script>

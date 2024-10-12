@@ -40,6 +40,25 @@ class MapController extends Controller
     }
 
     /**
+     * Get airport data by ICAO
+     */
+    public function getAirportFromIcao(Request $request)
+    {
+        $data = request()->validate([
+            'icao' => ['required', 'exists:airports,icao'],
+        ]);
+
+        $airport = Airport::where('icao', $data['icao'])->first();
+        $airportMapData = MapHelper::generateAirportMapDataFromAirports(collect([$airport]));
+
+        if (isset($airport)) {
+            return response()->json(['message' => 'Success', 'data' => $airportMapData], 200);
+        } else {
+            return response()->json(['message' => 'Airport not found'], 404);
+        }
+    }
+
+    /**
      * Get the airport list for airport card
      */
     public function getAirport(Request $request)
