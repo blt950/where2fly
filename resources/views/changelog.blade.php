@@ -13,17 +13,18 @@
         <div class="text-start">
 
             <h2 class="mb-0">v2.1.0</h2>
-            <span class="badge ps-0 pb-2">2024-xx-xx</span>
+            <span class="badge ps-0 pb-2">2024-10-13</span>
             <ul>
                 <li>Added integration with FS Addon Compare for scenery prices for MSFS</li>
                 <li>Added a dedicated page to look for scenery</li>
-                <li>Added a tag to show if selected airport is in your lists</li>
+                <li>Added a tags for airports you have in your lists</li>
                 <li>Added question mark to explain the aircraft code letter in search</li>
                 <li>Added support for multiple simulators for scenery</li>
+                <li>Added FR24 link to flight search results</li>
+                <li>Added and redesigned the flights card with a sortable table</li>
                 <li>Fixed an error where lists would fail to save if they had empty lines in them</li>
-                <li>Redesigned the flights card on the map to use a sortable table</li>
-                <li>Tweaked the awaiting email verification message to show your email to detect mistakes</li>
-                <li>Tweaked login page</li>
+                <li>Fixed the awaiting email verification message to show your email to detect mistakes</li>
+                <li>Fixed tab sequence on login page</li>
             </ul>
 
             <h2 class="mb-0">v2.0.8</h2>
