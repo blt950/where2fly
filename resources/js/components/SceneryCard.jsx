@@ -85,7 +85,7 @@ function SceneryCard({ airportId }) {
                                     <div key={index} className="scenery-row">
                                         
                                         <div className="title d-flex flex-row justify-content-between align-items-center">
-                                            <div className="d-flex align-items-center">
+                                            <div className="d-flex align-items-center flex-wrap">
                                                 <span className="developer">{item.developer}</span>
                                                 {(item.fsac && item.ratingAverage > 0) && (
                                                     <span className="star"><i className="far fa-star"></i>{parseFloat(item.ratingAverage).toFixed(1)}</span>
