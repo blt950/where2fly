@@ -7,14 +7,11 @@ const ExternalLinkTracker = () => {
         links.forEach(link => {
             // Check if the link is not pointing to your own domain
             if (link.hostname !== window.location.hostname && !link.hasAttribute('data-click-event-added')) {
-                console.log('<Added Airport>:', link);
                 link.setAttribute('data-click-event-added', 'true');
                 link.addEventListener('click', function (e) {
                     // Only get the domain of the link to avoid sending the full URL
                     let url = new URL(link.href);
                     let domain = url.hostname;
-
-                    console.log('Plausible:', url);
 
                     plausible('External Link Click', {
                         props: {
