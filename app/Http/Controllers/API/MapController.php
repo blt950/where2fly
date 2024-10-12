@@ -40,9 +40,9 @@ class MapController extends Controller
     }
 
     /**
-     * Get airport data by ICAO
+     * Get airport map data from ICAO
      */
-    public function getAirportFromIcao(Request $request)
+    public function getMapdataFromIcao(Request $request)
     {
         $data = request()->validate([
             'icao' => ['required', 'exists:airports,icao'],

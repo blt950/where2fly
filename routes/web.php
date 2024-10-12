@@ -41,7 +41,6 @@ Route::controller(SceneryController::class)->group(function () {
     Route::get('/scenery/{simulator}', 'indexAirports')->name('scenery.filtered');
 });
 
-
 // User account related routes
 Route::controller(LoginController::class)->group(function () {
     Route::get('/register', 'showRegister')->name('register');

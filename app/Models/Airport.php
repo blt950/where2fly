@@ -51,7 +51,8 @@ class Airport extends Model
         return $this->hasMany(Controller::class);
     }
 
-    public function sceneries(){
+    public function sceneries()
+    {
         return $this->hasMany(Scenery::class);
     }
 

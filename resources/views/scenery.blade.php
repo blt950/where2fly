@@ -30,6 +30,7 @@
                 </form>
             </div>
     
+            <!--
             <div class="d-none d-md-block">
                 <div class="filterbox">
                     <span class="m-0"><strong class="d-block">Map Filter</strong>
@@ -40,6 +41,7 @@
                     </span>
                 </div>
             </div>  
+        -->
         </div>
 
     </div>
@@ -56,7 +58,6 @@
 
         // Listen for the custom event indicating the airport card is ready
         window.addEventListener('airportReady', function(event) {
-            console.log(event.detail.icao);
             setShowSceneryIdCard(event.detail.icao);
         });
 

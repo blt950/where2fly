@@ -123,12 +123,11 @@ function Map() {
     useEffect(() => {
         if (focusAirport !== null && focusAirport !== undefined) {
 
-            // Check if airport exists, if not, fetch the data for specific airport and add it to data
-            // This is used in scenery map to lazy load airports that's searched for
-            console.log(airports)
+            // Load the selected airport to map if it's not already loaded (e.g. searching up scenery)
             if (airports[focusAirport] === undefined) {
+                
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                fetch(route('api.airport.icao'), {
+                fetch(route('api.mapdata.icao'), {
                     method: "POST",
                     credentials: 'include',
                     headers: { 
@@ -140,18 +139,15 @@ function Map() {
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log("hello");
-                    // Add new airport returned from fetch to the already existing airports
                     setAirports({ ...airports, [focusAirport]: data.data[focusAirport] });
-                    console.log(data.data[focusAirport]);
-                    console.log(airports)
-
-                    // Resume by setting the coordinates and showing the card
+                    // Use the temporary data as setAirports is async
                     setCoordinates([data.data[focusAirport].lat, data.data[focusAirport].lon]);
                     setShowAirportIdCard(data.data[focusAirport].id);
                 })
                 .catch(error => console.error(error.message));
+
             } else {
+
                 // Set the coordinates and show the card
                 setCoordinates([airports[focusAirport].lat, airports[focusAirport].lon]);
                 setShowAirportIdCard(airports[focusAirport].id);
@@ -163,6 +159,7 @@ function Map() {
 
                 // Dispatch a custom event when the map focuses on an airport
                 window.dispatchEvent(new CustomEvent('mapFocusAirport', { detail: { focusAirport } }));
+
             }
             
         }
