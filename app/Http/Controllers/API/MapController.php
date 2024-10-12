@@ -251,8 +251,11 @@ class MapController extends Controller
             }
 
             // Add our own sceneries
-            foreach ($w2fSceneries->whereNotIn('author', $fsacSceneries->pluck('developer')) as $scenery) {
+            foreach ($w2fSceneries as $scenery) {
                 foreach ($scenery->simulators as $simulator) {
+                    if ($simulator->shortened_name === $msfs->shortened_name && $fsacSceneries->pluck('developer')->contains($scenery->author)) {
+                        continue;
+                    }
                     $returnData[$simulator->shortened_name][] = $prepareSceneryData($scenery);
                 }
             }
