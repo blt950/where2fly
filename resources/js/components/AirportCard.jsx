@@ -7,6 +7,8 @@ import SceneryCard from './SceneryCard';
 import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
+import ExternalLinkTracker from './utils/ExternalLinkTracker';
+
 function AirportCard({ airportId }) {
     const dataCache = useRef({});
     const [data, setData] = useState(null);
@@ -74,6 +76,9 @@ function AirportCard({ airportId }) {
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
             container: 'body'
         }));
+
+        ExternalLinkTracker();
+
     }, [data]);
 
     return (
