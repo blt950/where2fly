@@ -19,6 +19,25 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::controller(UserListController::class)->group(function () {
+        Route::get('/lists', 'index')->name('list.index');
+        Route::get('/lists/create', 'create')->name('list.create');
+        Route::post('/lists/create', 'store')->name('list.store');
+        Route::get('/lists/{list}/edit', 'edit')->name('list.edit');
+        Route::post('/lists/{list}/edit', 'update')->name('list.update');
+        Route::get('/lists/{list}/delete', 'destroy')->name('list.delete');
+    });
+
+    Route::controller(SceneryController::class)->group(function () {
+        Route::get('/scenery/create', 'create')->name('scenery.create');
+        Route::post('/scenery/create', 'store')->name('scenery.store');
+        Route::get('/scenery/{scenery}/edit', 'edit')->name('scenery.edit');
+        Route::post('/scenery/{scenery}/edit', 'update')->name('scenery.update');
+        Route::get('/scenery/{scenery}/delete', 'destroy')->name('scenery.delete');
+    });
+});
+
 // SearchController
 Route::controller(SearchController::class)->group(function () {
     Route::get('/', 'indexArrivalSearch')->name('front'); // If you change this path, remember correcting it in searchForm.js for metrics as well
@@ -72,25 +91,6 @@ Route::controller(UserController::class)->group(function () {
 
     // Admin
     Route::get('/admin', 'showAdmin')->middleware(['auth', 'verified'])->name('admin');
-});
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::controller(UserListController::class)->group(function () {
-        Route::get('/lists', 'index')->name('list.index');
-        Route::get('/lists/create', 'create')->name('list.create');
-        Route::post('/lists/create', 'store')->name('list.store');
-        Route::get('/lists/{list}/edit', 'edit')->name('list.edit');
-        Route::post('/lists/{list}/edit', 'update')->name('list.update');
-        Route::get('/lists/{list}/delete', 'destroy')->name('list.delete');
-    });
-
-    Route::controller(SceneryController::class)->group(function () {
-        Route::get('/scenery/create', 'create')->name('scenery.create');
-        Route::post('/scenery/create', 'store')->name('scenery.store');
-        Route::get('/scenery/{scenery}/edit', 'edit')->name('scenery.edit');
-        Route::post('/scenery/{scenery}/edit', 'update')->name('scenery.update');
-        Route::get('/scenery/{scenery}/delete', 'destroy')->name('scenery.delete');
-    });
 });
 
 // Pure views
