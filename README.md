@@ -63,7 +63,8 @@ Last update: 2024-10-19
     ALTER TABLE `where2fly`.`airports`
     ADD SPATIAL INDEX `airports_coordinates_spatialindex` (`coordinates`);
     ```
-- Update the runways as well
+- Make the `coordinates` column not nullable again
+- Update the `runways` as well
 
 ## API
 Read more about the [API](API.md)
