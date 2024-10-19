@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2024-10-13</span>
             <ul>
                 <li>Fixed throttle and sending issues with email confirmations</li>
+                <li>Fixed content for user using font scaling</li>
             </ul>
 
             <h2 class="mb-0">v2.1.1</h2>
