@@ -17,6 +17,7 @@
             <ul>
                 <li>Fixed throttle and sending issues with email confirmations</li>
                 <li>Fixed content for user using font scaling</li>
+                <li>Updated airport database to October 2024</li>
             </ul>
 
             <h2 class="mb-0">v2.1.1</h2>

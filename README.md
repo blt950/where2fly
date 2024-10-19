@@ -40,5 +40,30 @@ TAF: https://api.met.no/weatherapi/tafmetar/1.0/taf.txt?icao=ICAO
 
 Flags: https://flagicons.lipis.dev/
 
+## Updating Airport Database
+Last update: 2024-10-19
+
+- Temporary drop the spatial index
+- Make the `coordinates` column nullable
+- Truncate and then import the new CSV. Remember using the id provided in the CSV
+- Run the `php artisan enrich:airports` command
+- Run this SQL command to add coordinates to the airports
+    ```sql
+    UPDATE airports
+    SET coordinates = ST_SRID(
+        ST_GeomFromText(
+            CONCAT('POINT(', longitude_deg, ' ', latitude_deg, ')')
+        ), 4326
+    );
+    ```
+- Re-add the spatial index
+    ```sql
+    ALTER TABLE `where2fly`.`airports`
+    MODIFY `coordinates` POINT NOT NULL;
+    ALTER TABLE `where2fly`.`airports`
+    ADD SPATIAL INDEX `airports_coordinates_spatialindex` (`coordinates`);
+    ```
+- Update the runways as well
+
 ## API
 Read more about the [API](API.md)
