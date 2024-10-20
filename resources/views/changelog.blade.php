@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.2.0</h2>
+            <span class="badge ps-0 pb-2">2024-10-xx</span>
+            <ul>
+                <li>Added day/night map overlay</li>
+            </ul>
+
             <h2 class="mb-0">v2.1.2</h2>
             <span class="badge ps-0 pb-2">2024-10-13</span>
             <ul>

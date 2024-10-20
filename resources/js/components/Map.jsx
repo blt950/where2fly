@@ -14,6 +14,7 @@ import MapDrawRoute from './map/MapDrawRoute';
 import MapMarkerGroup from './map/MapMarkerGroup';
 import MapPan from './map/MapPan';
 import MapSaveView from './map/MapSaveView';
+import MapTerminator from './map/MapTerminator';
 
 // Check if the current route is the default view
 const isDefaultView = () => {
@@ -232,6 +233,7 @@ function Map() {
                 {(mapBounds && !route().current('top*')) && !route().current('scenery*') && <MapBound mapBounds={mapBounds} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
+                <MapTerminator />
             </MapContainer>
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
