@@ -1,5 +1,5 @@
 # Intermediate build container for front-end resources
-FROM docker.io/library/node:22.5.1-alpine as frontend
+FROM docker.io/library/node:22.5.1-alpine AS frontend
 # Easy to prune intermediary containers
 LABEL stage=build
 
@@ -37,7 +37,7 @@ COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install PHP extension(s)
 COPY --from=mlocati/php-extension-installer:2.6.1 /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions pdo_mysql zip intl
+RUN install-php-extensions pdo_mysql zip
 
 # Install composer
 COPY --from=docker.io/library/composer:latest /usr/bin/composer /usr/bin/composer
