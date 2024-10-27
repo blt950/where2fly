@@ -36,7 +36,7 @@ COPY ./container/configs/apache.conf /etc/apache2/apache2.conf
 COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install PHP extension(s)
-COPY --from=mlocati/php-extension-installer:2.2.19 /usr/bin/install-php-extensions /usr/local/bin/
+COPY --from=mlocati/php-extension-installer:2.6.1 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_mysql zip intl
 
 # Install composer
