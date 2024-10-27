@@ -70,8 +70,8 @@
 
             <dl>
                 <dt>Runway<dt>
-                <dd class="rwy-feet">{{ number_format($runway->length_ft, 0, ',', '.') }} ft</dd>
-                <dd class="rwy-meters text-opacity-50">{{ number_format(round($runway->length_ft * 0.3048), 0, ',', '.') }} m</dd>
+                <dd class="rwy-feet">{{ number_format((int)$primaryAirport->longestRunway(), 0, '.', ',') }} ft</dd>
+                <dd class="rwy-meters text-opacity-50">{{ number_format(round((int)$primaryAirport->longestRunway()* .3048), 0, '.', ',') }} m</dd>
             </dl>
 
             @if($primaryAirport->scores->count() > 0)
