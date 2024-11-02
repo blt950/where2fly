@@ -40,6 +40,12 @@ TAF: https://api.met.no/weatherapi/tafmetar/1.0/taf.txt?icao=ICAO
 
 Flags: https://flagicons.lipis.dev/
 
+## Caching
+
+This application uses the OPCache to cache the compiled PHP code. Default setting is for production which means that the cache is not cleared automatically. To clear the cache, you need to restart the container or run `php -r 'opcache_reset();` if you change a file.
+
+For development, consider turning `validate_timestamps` to `1` in the `php.ini` file to make sure that the cache is cleared automatically when a file is changed.
+
 ## Updating Airport Database
 Last update: 2024-10-19
 
