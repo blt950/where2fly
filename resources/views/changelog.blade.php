@@ -17,6 +17,7 @@
             <span class="badge ps-0 pb-2">2024-10-xx</span>
             <ul>
                 <li>Added day/night map overlay</li>
+                <li>Optimized loading times</li>
             </ul>
             -->
 
