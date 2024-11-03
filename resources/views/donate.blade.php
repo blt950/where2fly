@@ -13,8 +13,7 @@
                 <li>Server infrastructure</li>
                 <li>Domain renewal</li>
                 <li>Email hosting</li>
-                <li>Occasional coffee to keep myself going</li>
-                <li><b>Total upkeep cost today is approx. EUR 115/yearly</b></li>
+                <li><b>Total upkeep cost €22 per month</b></li>
             </ul>
 
             <p class="font-work-sans mt-4"><i>Donations are solely for helping upkeep and don't grant you any extra access or rights.</i></p>
