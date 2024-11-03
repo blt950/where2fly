@@ -27,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/lists/{list}/edit', 'edit')->name('list.edit');
         Route::post('/lists/{list}/edit', 'update')->name('list.update');
         Route::get('/lists/{list}/delete', 'destroy')->name('list.delete');
+        Route::get('/lists/{list}/toggle', 'toggle')->name('list.toggle');
     });
 
     Route::controller(SceneryController::class)->group(function () {
