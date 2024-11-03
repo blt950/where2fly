@@ -89,7 +89,7 @@ function Map() {
 
         // Fetch from local storage cache
         const cachedAirports = localStorage.getItem('userListAirportsCache');
-        if (isDefaultView() && cachedAirports && cachedAirports != undefined) {
+        if (isDefaultView() && cachedAirports && cachedAirports != undefined && cachedAirports != 'undefined') {
             setAirports(JSON.parse(cachedAirports));
         }
 
