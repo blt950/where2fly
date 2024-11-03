@@ -58,10 +58,10 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                         </thead>
                         <tbody>
                             {data.flights.map(flight => (
-                                <tr key={flight.id} className={flight.highlighted ? 'text-success' : ''}>
-                                    <td data-sort={flight.flight_icao}>{flight.flight_icao}</td>
-                                    <td>{flight.aircrafts.map(aircraft => aircraft.icao).join(', ')}</td>
-                                    <td data-sort={flight.last_seen_at}>{moment(flight.last_seen_at).fromNow()}</td>
+                                <tr key={flight.id}>
+                                    <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.flight_icao}>{flight.flight_icao}</td>
+                                    <td className={flight.highlighted ? 'text-flight-success' : ''}>{flight.aircrafts.map(aircraft => aircraft.icao).join(', ')}</td>
+                                    <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.last_seen_at}>{moment(flight.last_seen_at).fromNow()}</td>
                                 </tr>
                             ))}
                         </tbody>
