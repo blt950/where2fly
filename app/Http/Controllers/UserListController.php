@@ -184,4 +184,18 @@ class UserListController extends Controller
 
         return redirect()->route('list.index')->with('success', 'List deleted successfully');
     }
+
+    /**
+     * Toggle the list visibility
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function toggle(UserList $list)
+    {
+        $this->authorize('update', $list);
+        $list->hidden = ! $list->hidden;
+        $list->save();
+
+        return redirect()->route('list.index');
+    }
 }

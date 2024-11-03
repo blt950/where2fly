@@ -66,11 +66,18 @@
 
     strong{
         margin-left: 1rem;
-        width: 150px;
+    }
 
-        @include media-breakpoint-down(md) {
-            width: 100px;
-        }
+    &.hidden{
+        color: $gray-500;
+    }
+}
+
+.list-airports{
+    margin-left: calc(1.5rem + 1rem);
+
+    &.hidden{
+        color: $gray-500;
     }
 }
 

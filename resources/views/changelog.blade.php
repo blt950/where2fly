@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2024-11-03</span>
             <ul>
                 <li>Added day/night map overlay</li>
+                <li>Added option to hide/show lists on the map</li>
                 <li>Fixed highlighting of aircraft in search results</li>
                 <li>Fixed an issue with the map not loading</li>
                 <li>Optimized loading times</li>
