@@ -6,7 +6,7 @@
 
 @section('resources')
     @vite('resources/js/nouislider.js')
-    @vite('resources/js/multiselect.js')
+    @vite('resources/js/functions/tags.js')
 @endsection
 
 @section('content')
@@ -21,6 +21,5 @@
 @section('js')
     @vite('resources/js/functions/tooltip.js')
     @vite('resources/js/functions/searchForm.js')
-    @vite('resources/js/functions/tags.js')
     @include('front.parts.sliders')
 @endsection

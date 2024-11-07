@@ -6,7 +6,6 @@
 
 @section('resources')
     @vite('resources/js/nouislider.js')
-    @vite('resources/js/multiselect.js')
 @endsection
 
 @section('content')
