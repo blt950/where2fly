@@ -11,7 +11,6 @@ export default defineConfig({
             input: [
                 'resources/js/app.js',
                 'resources/js/nouislider.js',
-                'resources/js/multiselect.js',
                 'resources/js/sortable.js',
                 'resources/js/functions/searchResults.js',
                 'resources/js/functions/searchForm.js',
