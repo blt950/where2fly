@@ -17,6 +17,7 @@ export default defineConfig({
                 'resources/js/functions/searchForm.js',
                 'resources/js/functions/tooltip.js',
                 'resources/js/functions/taf.js',
+                'resources/js/functions/tags.js',
             ],
             refresh: true,
         }),
