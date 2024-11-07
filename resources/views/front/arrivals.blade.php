@@ -21,6 +21,7 @@
 @section('js')
     @vite('resources/js/functions/tooltip.js')
     @vite('resources/js/functions/searchForm.js')
+    @vite('resources/js/functions/tags.js')
     @include('front.parts.sliders')
     <script>
         // Focus input when clicking on u-tags whitespace
