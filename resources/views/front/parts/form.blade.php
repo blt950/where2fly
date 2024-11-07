@@ -361,32 +361,30 @@
                     <div id="slider-rwy" class="mt-1 mb-1"></div>
                     <span id="slider-rwy-text">0-1000'</span>
                 </div>
+
+                <label for="airlines" class="pt-4">
+                    Airlines
+                </label>
+                <u-tags id="airlines" data-input-name="airlines[]">
+                    <input list="airlines-list" placeholder="All airlines">
+                    <u-datalist id="airlines-list">
+                        @foreach($airlines as $airline)
+                            <u-option value="{{ $airline->icao_code }}">{{ $airline->name }} ({{ $airline->icao_code }})</u-option>
+                        @endforeach
+                    </u-datalist>
+                </u-tags>
                 
-                <label class="pt-4">Airlines</label>
-                <select multiple 
-                    multiselect-search="true" 
-                    multiselect-select-all="true"
-                    multiselect-max-items="1"
-                    multiselect-hide-x="false"
-                    name="airlines[]"
-                    placeholder="All airlines">
-                    @foreach($airlines as $airline)
-                    <option value="{{ $airline->icao_code }}">{{ $airline->name }} ({{ $airline->icao_code }})</option>
-                    @endforeach
-                </select>
-            
-                <label class="pt-4">Aircraft</label>
-                    <select multiple 
-                    multiselect-search="true" 
-                    multiselect-select-all="true"
-                    multiselect-max-items="1"
-                    multiselect-hide-x="false"
-                    name="aircrafts[]"
-                    placeholder="All aircrafts">
-                    @foreach($aircrafts as $aircraft)
-                    <option value="{{ $aircraft }}">{{ $aircraft }}</option>
-                    @endforeach
-                </select>
+                <label for="aircraft" class="pt-4">
+                    Aircraft
+                </label>
+                <u-tags id="aircraft" data-input-name="aircrafts[]">
+                    <input list="aircraft-list" placeholder="All airlines">
+                    <u-datalist id="aircraft-list">
+                        @foreach($aircrafts as $aircraft)
+                            <u-option value="{{ $aircraft }}">{{ $aircraft }}</u-option>
+                        @endforeach
+                    </u-datalist>
+                </u-tags>
         
             </div>
 

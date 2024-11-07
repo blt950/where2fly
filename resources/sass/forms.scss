@@ -152,6 +152,8 @@ u-datalist {
     color: black;
     background: white;
 
+    z-index: 100;
+
     max-height: 200px;
     overflow: auto;
 }
