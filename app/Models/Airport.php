@@ -177,7 +177,7 @@ class Airport extends Model
      */
     public function scopeInContinent(Builder $query, array $destinations)
     {
-        if(isset($destinations['continents'])){
+        if (isset($destinations['continents'])) {
             if (isset($destinations['continents'])) {
                 $continents = $destinations['continents'];
 
@@ -207,26 +207,28 @@ class Airport extends Model
     /**
      * Scope a query to only include airports in the given country
      */
-    public function scopeInCountry(Builder $query, array $destinations, ?string $country = null){
+    public function scopeInCountry(Builder $query, array $destinations, ?string $country = null)
+    {
 
         // If filter is domestic, that should override all other country filters
-        if(isset($destinations['countries']) && $destinations['countries'] == 'Domestic'){
+        if (isset($destinations['countries']) && $destinations['countries'] == 'Domestic') {
             $query->where('iso_country', $country);
+
             return;
         }
 
         // Filter on countries
-        if(isset($destinations['countries'])){
+        if (isset($destinations['countries'])) {
             $query->whereIn('iso_country', $destinations['countries']);
         }
     }
 
-    /** 
+    /**
      * Scope a query to only include airports in the US state
      */
     public function scopeInState(Builder $query, array $destinations)
     {
-        if(isset($destinations['states'])){
+        if (isset($destinations['states'])) {
             $query->whereIn('iso_region', $destinations['states']);
         }
     }
