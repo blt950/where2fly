@@ -12,19 +12,37 @@
         </div>
         
         <div class="col-xs-12 text-start">
-            <label for="continent">{{ ucfirst($area) }} Area</label>
-            <select class="form-control" id="continent" name="continent">
-                <option disabled selected>Choose</option>
-                <option value="DO" {{ old('continent') == "DO" ? "selected" : "" }}>Domestic Only</option>
-                <option value="AY" {{ old('continent') == "AY" ? "selected" : "" }}>Anywhere</option>
-                <option value="AF" {{ old('continent') == "AF" ? "selected" : "" }}>Africa</option>
-                <option value="AS" {{ old('continent') == "AS" ? "selected" : "" }}>Asia</option>
-                <option value="EU" {{ old('continent') == "EU" ? "selected" : "" }}>Europe</option>
-                <option value="NA" {{ old('continent') == "NA" ? "selected" : "" }}>North America</option>
-                <option value="OC" {{ old('continent') == "OC" ? "selected" : "" }}>Oceania</option>
-                <option value="SA" {{ old('continent') == "SA" ? "selected" : "" }}>South America</option>
-            </select>
-            @error('continent')
+
+            <label for="destination">
+                {{ ucfirst($area) }} Area
+            </label>
+            <u-tags id="destination" data-input-name="destinations[]">
+                <input list="destination-list" placeholder="Anywhere">
+                <u-datalist id="destination-list" class="taller">
+                    <u-option value="Anywhere">Anywhere</u-option>
+                    <u-option value="Domestic">Domestic Only</u-option>
+                    
+                    <div class="divider">Continents</div>
+                    <u-option value="C-AF">Africa</u-option>
+                    <u-option value="C-AS">Asia</u-option>
+                    <u-option value="C-EU">Europe</u-option>
+                    <u-option value="C-NA">North America</u-option>
+                    <u-option value="C-OC">Oceania</u-option>
+                    <u-option value="C-SA">South America</u-option>
+                    
+                    <div class="divider">Countries</div>
+                    @foreach($countries as $country_iso => $country)
+                        <u-option value="{{ $country_iso }}">{{ $country }}</u-option>
+                    @endforeach
+
+                    <div class="divider">US States</div>
+                    @foreach($usStates as $stateCode => $state)
+                        <u-option value="US-{{ $stateCode }}">{{ $state }}</u-option>
+                    @endforeach
+
+                </u-datalist>
+            </u-tags>
+            @error('destinations')
             <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
             @enderror
         </div>

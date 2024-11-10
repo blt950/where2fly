@@ -12,6 +12,13 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.3.0</h2>
+            <span class="badge ps-0 pb-2">2024-11-xx</span>
+            <ul>
+                <li>Added filters for continent, country and US states</li>
+                <li>Improved the multi select input field</li>
+            </ul>
+
             <h2 class="mb-0">v2.2.0</h2>
             <span class="badge ps-0 pb-2">2024-11-03</span>
             <ul>
