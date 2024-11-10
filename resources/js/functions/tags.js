@@ -41,3 +41,23 @@ document.querySelectorAll('u-tags').forEach(element => {
         }
     });
 })
+
+// Dynamically adjust placeholder for destinations
+document.querySelectorAll('u-tags').forEach(element => {
+    const input = element.querySelector('input[placeholder="Anywhere"]');
+
+    element.addEventListener('tags', (event) => {
+        setTimeout(() => {
+            const element = event.target;
+            let count = element.querySelectorAll('data').length;
+
+            if(count == 0){
+                input.placeholder = "Anywhere";
+            } else {
+                input.placeholder = "Choose";
+            }
+
+        });
+    });
+    
+})
