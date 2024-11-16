@@ -19,6 +19,14 @@
 
     <div class="container">   
 
+        @if($searchVersionWarning)
+            <div class="alert alert-warning mb-4">
+                <p class="mb-0">
+                    <i class="fas fa-warning"></i> {{ $searchVersionWarning }}</a>
+                </p>
+            </div>
+        @endif
+
         @if($bearingWarning)
             <div class="alert alert-warning">
                 <p class="mb-0">
@@ -32,10 +40,8 @@
                 <h2>{{ ucfirst($direction) }} suggestion</h2>
 
                 {{-- Add possibility to re-post the search query for a new random departure --}}
-                <form id="form" method="POST" action="{{ route('search') }}">
-                    @csrf
-
-                    @foreach($_POST as $key => $value)
+                <form id="form" method="GET" action="{{ route('search') }}">
+                    @foreach($_GET as $key => $value)
                         @if($key != '_token')
                             @if(is_array($value))
                                 @foreach($value as $subkey => $subvalue)

@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2024-11-xx</span>
             <ul>
                 <li>Added filters for continent, country and US states</li>
+                <li>Added possibility to bookmark search results in the browser</li>
                 <li>Improved the multi select input field</li>
             </ul>
 

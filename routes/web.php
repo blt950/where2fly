@@ -45,8 +45,8 @@ Route::controller(SearchController::class)->group(function () {
     Route::get('/departures/', 'indexDepartureSearch')->name('front.departures'); // If you change this path, remember correcting it in searchForm.js for metrics as well
     Route::get('/routes/', 'indexRouteSearch')->name('front.routes');
 
-    Route::post('/search', 'search')->name('search');
-    Route::post('/search/routes', 'searchRoutes')->name('search.routes');
+    Route::get('/search', 'search')->name('search');
+    Route::get('/search/routes', 'searchRoutes')->name('search.routes');
 });
 
 // TopController
@@ -99,11 +99,6 @@ Route::view('/changelog', 'changelog')->name('changelog');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/api', 'api')->name('api');
 Route::view('/donate', 'donate')->name('donate');
-
-// Redirects
-Route::get('/search', function () {
-    return redirect(route('front'));
-});
 
 // Old routes
 Route::permanentRedirect('/advanced', '/');
