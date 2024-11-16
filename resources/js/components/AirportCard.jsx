@@ -67,8 +67,14 @@ function AirportCard({ airportId }) {
 
     }, [airportId]);
 
-    useEffect(() => { if(showFlightsIdCard !== null) plausible('Interactions', {props: {interaction: `Open flights card`}}) }, [showFlightsIdCard]);
-    useEffect(() => { if(showSceneryIdCard !== null) plausible('Interactions', {props: {interaction: `Open scenery card`}}) }, [showSceneryIdCard]);
+    useEffect(() => { if(showFlightsIdCard !== null) {
+        plausible('Interactions', {props: {interaction: `Open flights card`}})
+        umami.track('Interactions', {interaction: `Open flights card`})
+    }}, [showFlightsIdCard]);
+    useEffect(() => {if(showSceneryIdCard !== null) {
+        plausible('Interactions', {props: {interaction: `Open scenery card`}})
+        umami.track('Interactions', {interaction: `Open scenery card`})
+    }}, [showSceneryIdCard]);
 
     // When data changes, initialize tooltips
     useEffect(() => {
