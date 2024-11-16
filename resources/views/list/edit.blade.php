@@ -69,5 +69,11 @@
 @section('js')
     <script>
         plausible('pageview', { u: "{{ route('list.edit', 'x') }}" + window.location.search });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var route = "{{ route('list.edit', 'x') }}";
+            route = route.replace(/^https?:\/\/[^\/]+/, '');
+            umami.track(props => ({ ...props, url: route }));
+        });
     </script>
 @endsection
