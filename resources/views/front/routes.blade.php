@@ -15,8 +15,7 @@
     <div class="container">
         @include('front.parts.tabs')
 
-        <form id="form" action="{{ route('search.routes') }}" method="POST">
-            @csrf
+        <form id="form" action="{{ route('search.routes') }}" method="GET">
             
             <div class="row g-3 justify-content-center">
                 <div class="col-xs-12 text-start">
