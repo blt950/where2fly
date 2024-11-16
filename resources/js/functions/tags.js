@@ -38,6 +38,12 @@ document.querySelectorAll('u-tags').forEach(element => {
                     inputToRemove.remove();
                 }
             }
+
+            // Close the datalist on selection
+            const datalist = element.querySelector('u-datalist');
+            const input = element.querySelector('input');
+            input.focus();
+            datalist.hidden = true;
         }
     });
 })
