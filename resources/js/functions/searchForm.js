@@ -36,10 +36,8 @@ function submitFormMetrics(){
             props.icao = element.value || 'Random';
         }
 
-        if(element.name == 'continent'){
-            var selected = element.options[element.selectedIndex];
-            props.continent = selected.value;
-        }
+        // We don't have an easy way to track multi select inputs such as destinations, aircrafts and airlines.
+        // Hence it's skipped for now.
 
         if(element.name == 'codeletter'){
             var selected = element.options[element.selectedIndex];
