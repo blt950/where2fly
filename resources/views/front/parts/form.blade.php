@@ -17,7 +17,7 @@
             </label>
             <u-tags id="destination" data-input-name="destinations[]">
                 <input list="destination-list" placeholder="Anywhere">
-                <u-datalist id="destination-list" class="taller">
+                <u-datalist id="destination-list" class="taller" tabindex="-1">
                     <u-option value="Anywhere">Anywhere</u-option>
                     <u-option value="Domestic">Domestic Only</u-option>
                     

@@ -155,10 +155,10 @@ u-datalist {
     z-index: 100;
 
     max-height: 200px;
-    overflow: auto;
+    overflow-y: auto;
 
     &.taller{
-        max-height: 450px;
+       max-height: 450px;
     }
 
     .divider{
