@@ -1,3 +1,5 @@
+import { UHTMLTabListElement } from "@u-elements/u-tabs";
+
 const ExternalLinkTracker = () => {
 
     // Add metrics to card
@@ -17,6 +19,10 @@ const ExternalLinkTracker = () => {
                         props: {
                             url: domain
                         }
+                    });
+
+                    umami.track('External Link Click', {
+                        url: domain
                     });
                 });
             }

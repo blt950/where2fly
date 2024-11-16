@@ -26,6 +26,11 @@ document.querySelectorAll('a[href^="http"]').forEach(link => {
                     url: domain
                 }
             });
+
+            umami.track('External Link Click', {
+                url: domain
+            });
+
         });
     }
 });
