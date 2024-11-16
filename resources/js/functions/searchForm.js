@@ -67,6 +67,7 @@ function submitFormMetrics(){
     });
 
     plausible('Search', {props: props});
+    umami.track('Search', { props: props });
 }
 
 var submitButtons = Array.from(document.getElementsByClassName('submitBtn'));
@@ -110,6 +111,7 @@ function toggleFilters(goingBack = false){
 
         if(!goingBack){
             plausible('Interactions', {props: {interaction: 'Expand Filters'}});
+            umami.track('Interactions', {interaction: 'Expand Filters'});
         }
 
         expandFilters();
