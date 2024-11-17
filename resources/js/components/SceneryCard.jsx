@@ -82,7 +82,7 @@ function SceneryCard({ airportId }) {
                         {Object.keys(data).map((key) => (
                             <u-tabpanel id={key} key={key}>
                                 {data[key].map((item, index) => (
-                                    <div key={index} className="scenery-row">
+                                    <div key={index} className="scenery-row" data-scenery-id={item.id}>
                                         
                                         <div className="title d-flex flex-row justify-content-between align-items-center">
                                             <div className="d-flex align-items-center flex-wrap">
