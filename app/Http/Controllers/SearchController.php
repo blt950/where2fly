@@ -173,7 +173,6 @@ class SearchController extends Controller
                     ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                     ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                     ->returnOnlyWhitelistedIcao($whitelist)
-                    ->sortByScores($sortByScores)
                     ->has('metar')->with('runways', 'scores', 'metar')
                     ->shuffleAndSort()
                     ->limit(10)

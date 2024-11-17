@@ -62,11 +62,7 @@
         @endif
         <div class="results-container">
             <dl>
-                <dt>Airport
-                    @if($suggestedAirport)
-                        <span class="badge rounded-pill text-bg-info fs-7">Based on filter</span>
-                    @endif
-                <dt>
+                <dt>Airport<dt>
                 <dd>
                     <img class="flag" src="/img/flags/{{ strtolower($primaryAirport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($primaryAirport->iso_country) }}" alt="Flag of {{ getCountryName($primaryAirport->iso_country) }}"></img>
                     {{ $primaryAirport->icao }}
