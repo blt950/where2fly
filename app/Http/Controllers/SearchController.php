@@ -34,8 +34,7 @@ class SearchController extends Controller
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
-        $countries = $this::$countries;
-        $usStates = $this::$usStates;
+        $destinationInputs = $this->getDestinationInputs();
 
         if (Auth::check()) {
             $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
@@ -43,7 +42,7 @@ class SearchController extends Controller
             $lists = UserList::where('public', true)->get();
         }
 
-        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'countries', 'usStates'));
+        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs'));
     }
 
     /**
@@ -54,8 +53,7 @@ class SearchController extends Controller
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
-        $countries = $this::$countries;
-        $usStates = $this::$usStates;
+        $destinationInputs = $this->getDestinationInputs();
 
         if (Auth::check()) {
             $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
@@ -63,7 +61,7 @@ class SearchController extends Controller
             $lists = UserList::where('public', true)->get();
         }
 
-        return view('front.departures', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'countries', 'usStates'));
+        return view('front.departures', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs'));
     }
 
     /**
@@ -310,6 +308,29 @@ class SearchController extends Controller
             return back()->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
         }
 
+    }
+
+    /** 
+     * Get destination outputs array
+     */
+    private function getDestinationInputs(){
+        return [
+            'Anywhere' => 'Anywhere',
+            'Domestic' => 'Domestic Only',
+            'Continents' => [
+                'C-AF' => 'Africa',
+                'C-AS' => 'Asia',
+                'C-EU' => 'Europe',
+                'C-NA' => 'North America',
+                'C-SA' => 'South America',
+            ],
+            'Countries' => [
+                ...$this::$countries,
+            ],
+            'US States' => [
+                ...array_combine(array_map(fn($key) => 'US-' . $key, array_keys($this::$usStates)), $this::$usStates),
+            ],
+        ];
     }
 
     /**

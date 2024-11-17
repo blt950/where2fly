@@ -16,27 +16,35 @@
                 {{ ucfirst($area) }} Area
             </label>
             <u-tags id="destination" data-input-name="destinations[]">
+
+                @if(old('destinations') !== null)
+                    @foreach(old('destinations') as $key)
+                        @foreach($destinationInputs as $destinationKey => $destinationValue)
+                            @if(is_array($destinationValue))
+                                @if(array_key_exists($key, $destinationValue))
+                                    <data value="{{ $key }}">{{ $destinationValue[$key] }}</data>
+                                @endif
+                            @else
+                                @if($key == $destinationKey)
+                                    <data value="{{ $key }}">{{ $destinationValue }}</data>
+                                @endif
+                            @endif
+                        @endforeach
+                    @endforeach
+                @endisset
+
                 <input list="destination-list" placeholder="Anywhere">
                 <u-datalist id="destination-list" class="taller" tabindex="-1">
-                    <u-option value="Anywhere">Anywhere</u-option>
-                    <u-option value="Domestic">Domestic Only</u-option>
-                    
-                    <div class="divider">Continents</div>
-                    <u-option value="C-AF">Africa</u-option>
-                    <u-option value="C-AS">Asia</u-option>
-                    <u-option value="C-EU">Europe</u-option>
-                    <u-option value="C-NA">North America</u-option>
-                    <u-option value="C-OC">Oceania</u-option>
-                    <u-option value="C-SA">South America</u-option>
-                    
-                    <div class="divider">Countries</div>
-                    @foreach($countries as $country_iso => $country)
-                        <u-option value="{{ $country_iso }}">{{ $country }}</u-option>
-                    @endforeach
 
-                    <div class="divider">US States</div>
-                    @foreach($usStates as $stateCode => $state)
-                        <u-option value="US-{{ $stateCode }}">{{ $state }}</u-option>
+                    @foreach($destinationInputs as $key => $value)
+                        @if(is_array($value))
+                            <div class="divider">{{ $key }}</div>
+                            @foreach($value as $subKey => $subValue)
+                                <u-option value="{{ $subKey }}">{{ $subValue }}</u-option>
+                            @endforeach
+                        @else
+                            <u-option value="{{ $key }}">{{ $value }}</u-option>
+                        @endif
                     @endforeach
 
                 </u-datalist>
@@ -383,6 +391,15 @@
                     Airlines
                 </label>
                 <u-tags id="airlines" data-input-name="airlines[]">
+                    @if(old('airlines') !== null)
+                        @foreach(old('airlines') as $key)
+                            @foreach($airlines as $airline)
+                                @if($key == $airline->icao_code)
+                                    <data value="{{ $key }}">{{ $airline->name }} ({{ $key }})</data>
+                                @endif
+                            @endforeach
+                        @endforeach
+                    @endisset
                     <input list="airlines-list" placeholder="All airlines">
                     <u-datalist id="airlines-list">
                         @foreach($airlines as $airline)
@@ -398,6 +415,15 @@
                     Aircraft
                 </label>
                 <u-tags id="aircraft" data-input-name="aircrafts[]">
+                    @if(old('aircrafts') !== null)
+                        @foreach(old('aircrafts') as $key)
+                            @foreach($aircrafts as $aircraft)
+                                @if($key == $aircraft)
+                                    <data value="{{ $key }}">{{ $key }}</data>
+                                @endif
+                            @endforeach
+                        @endforeach
+                    @endisset
                     <input list="aircraft-list" placeholder="All airlines">
                     <u-datalist id="aircraft-list">
                         @foreach($aircrafts as $aircraft)
