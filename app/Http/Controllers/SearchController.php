@@ -309,10 +309,11 @@ class SearchController extends Controller
 
     }
 
-    /** 
+    /**
      * Get destination outputs array
      */
-    private function getDestinationInputs(){
+    private function getDestinationInputs()
+    {
         return [
             'Anywhere' => 'Anywhere',
             'Domestic' => 'Domestic Only',
@@ -327,7 +328,7 @@ class SearchController extends Controller
                 ...$this::$countries,
             ],
             'US States' => [
-                ...array_combine(array_map(fn($key) => 'US-' . $key, array_keys($this::$usStates)), $this::$usStates),
+                ...array_combine(array_map(fn ($key) => 'US-' . $key, array_keys($this::$usStates)), $this::$usStates),
             ],
         ];
     }
