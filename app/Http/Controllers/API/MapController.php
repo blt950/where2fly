@@ -227,6 +227,7 @@ class MapController extends Controller
             // Prepare return data
             $prepareSceneryData = function ($scenery, $store = null) {
                 return [
+                    'id' => $scenery->id ?? null,
                     'developer' => $scenery->developer ?? $scenery->author,
                     'link' => $scenery->link,
                     'linkDomain' => $store ? null : parse_url($scenery->link, PHP_URL_HOST),
