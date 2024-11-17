@@ -310,9 +310,10 @@ class MapController extends Controller
         // Retrieve the 'url' parameter value
         $embeddedUrl = isset($queryParams['url']) ? $queryParams['url'] : null;
 
-        // Strip 'www.' and 'secure.' from the URL
+        // Strip 'www.' and 'secure.' and addoncompare from the URL
         if ($embeddedUrl) {
             $embeddedUrl = str_replace(['www.', 'secure.'], '', $embeddedUrl);
+            $embeddedUrl = str_replace('?ref=fsaddoncompare', '', $embeddedUrl);
         }
 
         return $embeddedUrl;
