@@ -13,7 +13,7 @@ RUN npm ci --omit dev && \
 # Primary container
 
 # Primary container
-FROM docker.io/library/php:8.3.9-apache-bookworm
+FROM docker.io/library/php:8.3.13-apache-bookworm
 
 # Default container port for the apache configuration
 EXPOSE 80 443
@@ -36,7 +36,7 @@ COPY ./container/configs/apache.conf /etc/apache2/apache2.conf
 COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install PHP extension(s)
-COPY --from=mlocati/php-extension-installer:2.6.1 /usr/bin/install-php-extensions /usr/local/bin/
+COPY --from=mlocati/php-extension-installer:2.6.4 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_mysql zip opcache
 
 # Install composer
