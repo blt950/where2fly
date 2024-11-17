@@ -17,6 +17,7 @@
             <ul>
                 <li>Added filters for continent, country and US states</li>
                 <li>Added possibility to bookmark search results in the browser</li>
+                <li>Improved search speed on airline and aircraft search</li>
                 <li>Improved the multi select input field</li>
             </ul>
 
