@@ -190,7 +190,7 @@ class SearchController extends Controller
             // Get airports according to filter
             $airports = collect();
             $airports = Airport::airportOpen()->notIcao($primaryAirport->icao)->isAirportSize($destinationAirportSize)
-                ->inContinent($destinations)->inCountry($destinations)->inState($destinations)
+                ->inContinent($destinations)->inCountry($destinations, $primaryAirport->iso_country)->inState($destinations)
                 ->withinDistance($primaryAirport, $minDistance, $maxDistance, $primaryAirport->icao)->withinBearing($primaryAirport, $flightDirection, $minDistance, $maxDistance)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                 ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
