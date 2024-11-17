@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('flights', function (Blueprint $table) {
             $table->index(['airport_arr_id', 'airline_icao', 'seen_counter']);
-            $table->index(['airport_arr_id','seen_counter']);
+            $table->index(['airport_arr_id', 'seen_counter']);
         });
 
         Schema::table('flight_aircraft', function (Blueprint $table) {
@@ -28,7 +28,7 @@ return new class extends Migration
     {
         Schema::table('flights', function (Blueprint $table) {
             $table->dropIndex(['airport_arr_id', 'airline_icao', 'seen_counter']);
-            $table->dropIndex(['airport_arr_id','seen_counter']);
+            $table->dropIndex(['airport_arr_id', 'seen_counter']);
         });
 
         Schema::table('flight_aircraft', function (Blueprint $table) {
