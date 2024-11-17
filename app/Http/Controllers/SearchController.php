@@ -110,6 +110,10 @@ class SearchController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if (isset($validator->getData()['direction']) && $validator->getData()['direction'] == 'arrival') {
+                return redirect(route('front.departures'))->withErrors($validator)->withInput();
+            }
+
             return redirect(route('front'))->withErrors($validator)->withInput();
         }
 
