@@ -160,7 +160,7 @@ class SearchController extends Controller
          */
 
         // Lets find an result with the given criteria. Give it a few attempts before we give up.
-        $maxAttempts = 10;
+        $maxAttempts = 20;
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
 
             // Use the supplied departure or select a random airport
