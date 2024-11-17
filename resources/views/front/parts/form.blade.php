@@ -34,7 +34,7 @@
                 @endisset
 
                 <input list="destination-list" placeholder="Anywhere">
-                <u-datalist id="destination-list" class="taller" tabindex="-1">
+                <u-datalist id="destination-list" class="taller" tabindex="-1" hidden>
 
                     @foreach($destinationInputs as $key => $value)
                         @if(is_array($value))
@@ -84,7 +84,7 @@
             </label>
             <u-tags id="whitelist" data-input-name="whitelists[]">
                 <input list="whitelist-list" placeholder="Restrict your search">
-                <u-datalist id="whitelist-list">
+                <u-datalist id="whitelist-list" hidden>
                     @foreach($lists as $list)
                         <u-option value="{{ $list->id }}">{{ $list->name }}</u-option>
                     @endforeach
@@ -401,7 +401,7 @@
                         @endforeach
                     @endisset
                     <input list="airlines-list" placeholder="All airlines">
-                    <u-datalist id="airlines-list">
+                    <u-datalist id="airlines-list" hidden>
                         @foreach($airlines as $airline)
                             <u-option value="{{ $airline->icao_code }}">{{ $airline->name }} ({{ $airline->icao_code }})</u-option>
                         @endforeach
@@ -425,7 +425,7 @@
                         @endforeach
                     @endisset
                     <input list="aircraft-list" placeholder="All airlines">
-                    <u-datalist id="aircraft-list">
+                    <u-datalist id="aircraft-list" hidden>
                         @foreach($aircrafts as $aircraft)
                             <u-option value="{{ $aircraft }}">{{ $aircraft }}</u-option>
                         @endforeach
