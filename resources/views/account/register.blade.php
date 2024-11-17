@@ -20,15 +20,15 @@
             <div>
                 <div>
                     <i class="fas fa-check-circle text-success"></i>
-                    <span>Create personal lists of preferred airports</span>
+                    <span>Create personal airports lists visible on the map</span>
+                </div>
+                <div>
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>Use your own lists as search whitelists</span>
                 </div>
                 <div>
                     <i class="fas fa-check-circle text-success"></i>
                     <span>Contribute with scenery links for airports</span>
-                </div>
-                <div>
-                    <i class="fas fa-circle-dashed text-success"></i>
-                    <span>Save searches (Coming soon)</span>
                 </div>
             </div>
         </div>
