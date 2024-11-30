@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.3.1</h2>
+            <span class="badge ps-0 pb-2">2024-11-30</span>
+            <ul>
+                <li>Fixed map going black in some flight search results</li>
+            </ul>
+
             <h2 class="mb-0">v2.3.0</h2>
             <span class="badge ps-0 pb-2">2024-11-17</span>
             <ul>

@@ -21,6 +21,7 @@ const isDefaultView = () => {
     if (!route().current('top') 
         && !route().current('top.filtered')
         && !route().current('search')
+        && !route().current('search.routes')
         && !route().current('scenery')
         && !route().current('scenery.filtered')
         && route().current() !== undefined) {
