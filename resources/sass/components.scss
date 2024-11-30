@@ -192,6 +192,7 @@ img.flag{
     margin: 0;
     padding: 0.75rem 1rem 1rem 1rem;
 
+    border-bottom: 1px solid $primary;
     background: $secondary;
     
     &:nth-child(odd){
@@ -200,6 +201,7 @@ img.flag{
 
     &:first-of-type{
         margin-top: 0;
+        border-top: 2px solid $primary;
     }
 
     &:last-of-type{
