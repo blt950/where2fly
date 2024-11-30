@@ -16,7 +16,7 @@
             <span class="badge ps-0 pb-2">2024-12-xx</span>
             <ul>
                 <li>Fixed a better contrast for scenery results</li>
-                <li>Changed MSFS to MSFS2020 naming and added MSFS2024 support for future update</li>
+                <li>Changed MSFS naming to MSFS2020 and added MSFS2024 for future a update</li>
             </ul>
 
             <h2 class="mb-0">v2.3.1</h2>
