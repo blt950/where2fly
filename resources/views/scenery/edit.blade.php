@@ -90,8 +90,6 @@
 
 @section('js')
     <script>
-        plausible('pageview', { u: "{{ route('scenery.edit', 'x') }}" + window.location.search });
-
         document.addEventListener('DOMContentLoaded', function() {
             var route = "{{ route('scenery.edit', 'x') }}";
             route = route.replace(/^https?:\/\/[^\/]+/, '');

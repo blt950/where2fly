@@ -63,7 +63,7 @@ class SceneryController extends Controller
         $simulators = Simulator::all()->sortBy('order');
         $suggestedByUser = $scenery->suggestedByUser;
 
-        // Use the manual plausible tracking script on this page
+        // Use the manual umami tracking script on this page
         View::share('manualTracking', true);
 
         return view('scenery.edit', compact('scenery', 'simulators', 'suggestedByUser'));

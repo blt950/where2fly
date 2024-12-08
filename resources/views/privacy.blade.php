@@ -31,7 +31,7 @@
             <p class="font-work-sans">
             <ul>
                 <li><u>Scaleway:</u> EU-based service for sending out emails, ensuring that your email address is handled securely.</li>
-                <li><u>Self-hosted Plausible Analytics:</u> Used for website analytics with privacy in mind, without tracking your personal data.</li>
+                <li><u>Self-hosted Umami Analytics:</u> Used for website analytics with privacy in mind, without tracking your personal data.</li>
             </ul>
         
             <h2 class="mt-4 pt-4 border-top">For Where2Fly account holders</h2>
