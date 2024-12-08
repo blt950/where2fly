@@ -17,7 +17,7 @@ class SceneryController extends Controller
      */
     public function create()
     {
-        $simulators = Simulator::all();
+        $simulators = Simulator::all()->sortBy('order');
 
         return view('scenery.create', compact('simulators'));
     }
@@ -60,7 +60,7 @@ class SceneryController extends Controller
     {
         $this->authorize('update', $scenery);
 
-        $simulators = Simulator::all();
+        $simulators = Simulator::all()->sortBy('order');
         $suggestedByUser = $scenery->suggestedByUser;
 
         // Use the manual plausible tracking script on this page

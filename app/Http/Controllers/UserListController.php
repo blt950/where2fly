@@ -33,7 +33,7 @@ class UserListController extends Controller
      */
     public function create(Request $request)
     {
-        $simulators = Simulator::all();
+        $simulators = Simulator::all()->sortBy('order');
 
         return view('list.create', compact('simulators'));
     }
@@ -83,7 +83,7 @@ class UserListController extends Controller
     public function edit(UserList $list)
     {
         $this->authorize('update', $list);
-        $simulators = Simulator::all();
+        $simulators = Simulator::all()->sortBy('order');
 
         // Use the manual plausible tracking script on this page
         View::share('manualTracking', true);
