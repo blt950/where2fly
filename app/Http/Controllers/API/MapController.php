@@ -183,7 +183,7 @@ class MapController extends Controller
         $returnData = [];
         $fsacResponse = Http::withHeaders([
             'Authorization' => config('app.fsaddoncompare_key'),
-        ])->timeout(5)->get('https://api.fsaddoncompare.com/partner/search/icao/' . strtoupper($airportIcao));
+        ])->timeout(5)->get('https://api.fsaddoncompare.com/partner/search/icao/' . strtoupper($airportIcao) . '?simulatorVersions=MSFS2020');
 
         if ($fsacResponse->successful()) {
             $msfs = Simulator::find(1);
