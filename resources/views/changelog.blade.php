@@ -12,8 +12,14 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.3.3</h2>
+            <span class="badge ps-0 pb-2">2024-12-08</span>
+            <ul>
+                <li>Fixed a console error that could stop searches working</li>
+            </ul>
+
             <h2 class="mb-0">v2.3.2</h2>
-            <span class="badge ps-0 pb-2">2024-12-xx</span>
+            <span class="badge ps-0 pb-2">2024-12-08</span>
             <ul>
                 <li>Fixed a better contrast for scenery results</li>
                 <li>Changed MSFS naming to MSFS2020 and added MSFS2024 for future a update</li>
