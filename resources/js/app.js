@@ -21,12 +21,6 @@ document.querySelectorAll('a[href^="http"]').forEach(link => {
             let url = new URL(link.href);
             let domain = url.hostname;
 
-            plausible('External Link Click', {
-                props: {
-                    url: domain
-                }
-            });
-
             umami.track('External Link Click', {
                 url: domain
             });

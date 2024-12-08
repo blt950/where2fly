@@ -85,7 +85,7 @@ class UserListController extends Controller
         $this->authorize('update', $list);
         $simulators = Simulator::all()->sortBy('order');
 
-        // Use the manual plausible tracking script on this page
+        // Use the manual umami tracking script on this page
         View::share('manualTracking', true);
 
         return view('list.edit', compact('list', 'simulators'));

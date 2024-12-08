@@ -44,9 +44,7 @@
 @endsection
 
 @section('js')
-    <script>
-        plausible('pageview', { u: "{{ route('password.reset', 'x') }}" + window.location.search });
-        
+    <script>        
         document.addEventListener('DOMContentLoaded', function() {
             var route = "{{ route('password.reset', 'x') }}";
             route = route.replace(/^https?:\/\/[^\/]+/, '');

@@ -64,7 +64,6 @@ function submitFormMetrics(){
         });
     });
 
-    plausible('Search', {props: props});
     umami.track('Search', { props: props });
 }
 
@@ -108,7 +107,6 @@ function toggleFilters(goingBack = false){
     if (!filterExpanded) {
 
         if(!goingBack){
-            plausible('Interactions', {props: {interaction: 'Expand Filters'}});
             umami.track('Interactions', {interaction: 'Expand Filters'});
         }
 
