@@ -28,4 +28,17 @@ class AirportFilterHelper
 
         return true;
     }
+
+    public static function hasRequiredTemperature($temperatureMin, $temperatureMax, $airport)
+    {
+        if ($temperatureMin === null || $temperatureMax === null) {
+            return true;
+        }
+
+        if ($airport->metar->temperature < $temperatureMin || $airport->metar->temperature > $temperatureMax) {
+            return false;
+        }
+
+        return true;
+    }
 }

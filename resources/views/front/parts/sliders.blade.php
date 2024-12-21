@@ -5,6 +5,31 @@
         const userLocale = 'de-DE';
 
         // Sliders
+        var temperatureSlider = document.getElementById('slider-temperature');
+        noUiSlider.create(temperatureSlider, {
+            start: [{{ old('temperatureMin') ? old('temperatureMin') : -60 }}, {{ old('temperatureMax') ? old('temperatureMax') : 60 }}],
+            step: 2,
+            connect: true,
+            behaviour: 'drag',
+            range: {
+                'min': [-60],
+                'max': [60]
+            },
+            handleAttributes: [
+                { 'aria-label': 'lower' },
+                { 'aria-label': 'upper' },
+            ],
+        });
+        
+        var temperatureSliderText = document.getElementById('slider-temperature-text');
+        var temperatureMinInput = document.getElementById('temperatureMin');
+        var temperatureMaxInput = document.getElementById('temperatureMax');
+        temperatureSlider.noUiSlider.on('update', function (values) {
+            temperatureSliderText.innerHTML = Math.round(values[0]) + ' to ' + Math.round(values[1]) + 'C';
+            temperatureMinInput.value = Math.round(values[0])
+            temperatureMaxInput.value = Math.round(values[1])
+        });
+
         var elevationSlider = document.getElementById('slider-elevation');
         noUiSlider.create(elevationSlider, {
             start: [{{ old('elevationMin') ? old('elevationMin') : -2000 }}, {{ old('elevationMax') ? old('elevationMax') : 18000 }}],

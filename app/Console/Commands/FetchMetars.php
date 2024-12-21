@@ -79,6 +79,14 @@ class FetchMetars extends Command
                     }
                 }
 
+                if (preg_match('/(M?\d\d)\/(M?\d\d)/', $metar, $temperatureResult)) {
+                    if (substr($temperatureResult[1], 0, 1) == 'M') {
+                        $temperature = (int) substr($temperatureResult[1], 1) * -1;
+                    } else {
+                        $temperature = (int) $temperatureResult[1];
+                    }
+                }
+
                 $upsertData[] = [
                     'airport_id' => (int) $airport->id,
                     'last_update' => $time,
@@ -86,6 +94,7 @@ class FetchMetars extends Command
                     'wind_direction' => (int) $windData['direction'],
                     'wind_speed' => (int) $windData['speed'],
                     'wind_gusts' => (int) $windData['gusting'],
+                    'temperature' => (int) $temperature,
                 ];
             }
 
@@ -93,7 +102,7 @@ class FetchMetars extends Command
             Metar::upsert(
                 $upsertData,
                 ['airport_id'],
-                ['last_update', 'metar', 'wind_direction', 'wind_speed', 'wind_gusts']
+                ['last_update', 'metar', 'wind_direction', 'wind_speed', 'wind_gusts', 'temperature']
             );
 
         }

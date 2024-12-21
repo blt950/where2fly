@@ -100,6 +100,8 @@ class SearchController extends Controller
             'destinationAirbases' => ['required', 'numeric', 'between:-1,1'],
             'flightDirection' => ['required', new FlightDirection],
             'destinationAirportSize' => ['sometimes', 'array', 'in:small_airport,medium_airport,large_airport'],
+            'temperatureMin' => ['required', 'numeric', 'between:-60,60'],
+            'temperatureMax' => ['required', 'numeric', 'between:-60,60'],
             'elevationMin' => ['required', 'numeric', 'between:-2000,18000'],
             'elevationMax' => ['required', 'numeric', 'between:-2000,18000'],
             'rwyLengthMin' => ['required', 'numeric', 'between:0,17000'],
@@ -149,6 +151,8 @@ class SearchController extends Controller
 
         (isset($data['destinationAirportSize']) && ! empty($data['destinationAirportSize'])) ? $destinationAirportSize = $data['destinationAirportSize'] : $destinationAirportSize = ['small_airport', 'medium_airport', 'large_airport'];
 
+        $temperatureMin = (int) $data['temperatureMin'];
+        $temperatureMax = (int) $data['temperatureMax'];
         $elevationMin = (int) $data['elevationMin'];
         $elevationMax = (int) $data['elevationMax'];
         $rwyLengthMin = (int) $data['rwyLengthMin'];
@@ -205,7 +209,7 @@ class SearchController extends Controller
                 ->get();
 
             // Filter the eligible airports
-            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $temperatureMin, $temperatureMax, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
             // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy
             $bearingWarning = false;
