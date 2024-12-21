@@ -372,7 +372,7 @@
                 </div>
                 
                 <div>
-                    <label class="pt-4">Arrival Elevation</label>
+                    <label class="pt-4">{{ ucfirst($icao) }} Elevation</label>
                     <input type="hidden" id="elevationMin" name="elevationMin" value="0">
                     <input type="hidden" id="elevationMax" name="elevationMax" value="18000">
                     <div id="slider-elevation" class="mt-1 mb-1"></div>
@@ -380,7 +380,7 @@
                 </div>
                 
                 <div>
-                    <label class="pt-4">Arrival Runway Length</label>
+                    <label class="pt-4">{{ ucfirst($icao) }} Runway Length</label>
                     <input type="hidden" id="rwyLengthMin" name="rwyLengthMin" value="0">
                     <input type="hidden" id="rwyLengthMax" name="rwyLengthMax" value="17000">
                     <div id="slider-rwy" class="mt-1 mb-1"></div>
