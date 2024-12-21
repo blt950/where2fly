@@ -9,7 +9,7 @@ class CollectionAirportFilter
 {
     public function filterWithCriteria()
     {
-        return function ($departureAirport, $codeletter, $airtimeMin, $airtimeMax, $requiredMetcon = null, $runwayLengthMin = null, $runwayLengthMax = null, $airportElevationMin = null, $airportElevationMax = null) {
+        return function ($departureAirport, $codeletter, $airtimeMin, $airtimeMax, $requiredMetcon = null, $temperatureMin = null, $temperatureMax = null, $runwayLengthMin = null, $runwayLengthMax = null, $airportElevationMin = null, $airportElevationMax = null) {
 
             $returnCollection = $this
                 ->transform(function ($arrivalAirport) use ($departureAirport, $codeletter) {
@@ -23,6 +23,7 @@ class CollectionAirportFilter
                     return $arrivalAirport;
                 })
                 ->filter(fn ($a) => AirportFilterHelper::hasCorrectMetcon($requiredMetcon, $a))
+                ->filter(fn ($a) => AirportFilterHelper::hasRequiredTemperature($temperatureMin, $temperatureMax, $a))
                 ->filter(fn ($a) => AirportFilterHelper::hasRequiredAirportElevation($airportElevationMin, $airportElevationMax, $a));
 
             return $returnCollection;

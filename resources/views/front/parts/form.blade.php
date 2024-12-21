@@ -372,6 +372,14 @@
                 </div>
                 
                 <div>
+                    <label class="pt-4">{{ ucfirst($icao) }} Temperature</label>
+                    <input type="hidden" id="temperatureMin" name="temperatureMin" value="-60">
+                    <input type="hidden" id="temperatureMax" name="temperatureMax" value="60">
+                    <div id="slider-temperature" class="mt-1 mb-1"></div>
+                    <span id="slider-temperature-text">-60.00 to 60.00C</span>
+                </div>
+
+                <div>
                     <label class="pt-4">{{ ucfirst($icao) }} Elevation</label>
                     <input type="hidden" id="elevationMin" name="elevationMin" value="0">
                     <input type="hidden" id="elevationMax" name="elevationMax" value="18000">
