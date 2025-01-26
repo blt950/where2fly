@@ -120,7 +120,7 @@ return [
     |
     */
 
-    'flights_key' => env('APP_FLIGHTS_KEY'),
+    'flights_key' => env('APP_AIRLABS_KEY'),
 
     /*
     |--------------------------------------------------------------------------
