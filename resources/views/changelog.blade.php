@@ -12,6 +12,14 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.5.0</h2>
+            <span class="badge ps-0 pb-2">2025-01-27</span>
+            <ul>
+                <li><a href="https://github.com/blt950/where2fly" target="_blank">The project is now open source!</a></li>
+                <li>Added MSFS2024 scenery support</li>
+                <li>Added simulator name to lists</li>
+            </ul>
+
             <h2 class="mb-0">v2.4.0</h2>
             <span class="badge ps-0 pb-2">2024-12-30</span>
             <ul>
