@@ -27,12 +27,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="https://discord.gg/UkFg9Yy4gP" target="_blank">
-                        <i class="fab fa-discord"></i>&nbsp;
-                        Discord
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link {{ Route::is('donate') ? 'active' : '' }}" href="{{ route('donate') }}">
                         <i class="fas fa-donate"></i>&nbsp;
                         Donate
@@ -65,6 +59,18 @@
                         </li>
                     @endauth
                 @endif
+                <li class="nav-item">
+                    <a class="nav-link" href="https://discord.gg/UkFg9Yy4gP" target="_blank">
+                        <i class="fab fa-discord"></i>
+                        <span class="d-lg-none">&nbsp;Discord</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://github.com/blt950/where2fly" target="_blank">
+                        <i class="fab fa-github"></i>
+                        <span class="d-lg-none">&nbsp;GitHub</span>
+                    </a>
+                </li>
             </ul>
         </div>
         <div id="menu-overlay" class="menu-overlay d-md-none"></div>
