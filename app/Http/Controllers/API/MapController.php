@@ -183,10 +183,11 @@ class MapController extends Controller
         $returnData = [];
         $fsacResponse = Http::withHeaders([
             'Authorization' => config('app.fsaddoncompare_key'),
-        ])->timeout(5)->get('https://api.fsaddoncompare.com/partner/search/icao/' . strtoupper($airportIcao) . '?simulatorVersions=MSFS2020');
+        ])->timeout(5)->get('https://api.fsaddoncompare.com/partner/search/icao/' . strtoupper($airportIcao));
 
         if ($fsacResponse->successful()) {
-            $msfs = Simulator::find(1);
+            $msfs2020 = Simulator::find(1);
+            $msfs2024 = Simulator::find(11);
             $fsacSceneries = collect(json_decode($fsacResponse->body(), false)->results);
             $fsacSceneryDevelopers = $fsacSceneries->pluck('developer');
 
@@ -221,7 +222,28 @@ class MapController extends Controller
                     'published' => true,
                 ]);
 
-                $sceneryModel->simulators()->attach($msfs);
+                // Attach the scenery to the related simulator(s)
+                if (in_array($msfs2020->shortened_name, $fsacScenery->simulatorVersions)) {
+                    $sceneryModel->simulators()->attach($msfs2020);
+                }
+
+                if (in_array($msfs2024->shortened_name, $fsacScenery->simulatorVersions)) {
+                    $sceneryModel->simulators()->attach($msfs2024);
+                }
+            }
+
+            // Update FSAddonCompare sceneries if new simulatorVersions is available
+            foreach ($fsacSceneries as $scenery) {
+                $sceneryModel = Scenery::where('author', $scenery->developer)->where('icao', $airportIcao)->first();
+                if ($sceneryModel) {
+                    $storedSimulators = $sceneryModel->simulators->pluck('shortened_name')->toArray();
+                    $newSimulators = $scenery->simulatorVersions;
+
+                    if (array_diff($newSimulators, $storedSimulators) || array_diff($storedSimulators, $newSimulators)) {
+                        $sceneryModel->simulators()->detach();
+                        $sceneryModel->simulators()->attach(Simulator::whereIn('shortened_name', $newSimulators)->get());
+                    }
+                }
             }
 
             // Prepare return data
@@ -248,13 +270,20 @@ class MapController extends Controller
                 }
 
                 $cheapestStore = collect($scenery->prices)->sortBy('currencyPrice.EUR')->first();
-                $returnData[$msfs->shortened_name][] = $prepareSceneryData($scenery, $cheapestStore);
+
+                if (in_array($msfs2020->shortened_name, $scenery->simulatorVersions)) {
+                    $returnData[$msfs2020->shortened_name][] = $prepareSceneryData($scenery, $cheapestStore);
+                }
+
+                if (in_array($msfs2024->shortened_name, $scenery->simulatorVersions)) {
+                    $returnData[$msfs2024->shortened_name][] = $prepareSceneryData($scenery, $cheapestStore);
+                }
             }
 
             // Add our own sceneries
             foreach ($w2fSceneries as $scenery) {
                 foreach ($scenery->simulators as $simulator) {
-                    if ($simulator->shortened_name === $msfs->shortened_name && $fsacSceneries->pluck('developer')->contains($scenery->author)) {
+                    if (($simulator->shortened_name === $msfs2020->shortened_name || $simulator->shortened_name === $msfs2024->shortened_name) && $fsacSceneries->pluck('developer')->contains($scenery->author)) {
                         continue;
                     }
                     $returnData[$simulator->shortened_name][] = $prepareSceneryData($scenery);

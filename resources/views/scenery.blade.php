@@ -24,7 +24,7 @@
                 <div class="filterbox">
                     <span class="m-0"><strong class="d-block">Map Filter</strong>
                         <a class="btn btn-sm {{ Route::is('scenery') ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('scenery') }}">All</a>
-                        @foreach($simulators as $simulator)
+                        @foreach($simulators->sortBy('shortened_name') as $simulator)
                             <a class="btn btn-sm {{ optional($filteredSimulator)->id == $simulator->id ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('scenery.filtered', $simulator->shortened_name) }}">{{ $simulator->shortened_name }}</a>
                         @endforeach
                     </span>
