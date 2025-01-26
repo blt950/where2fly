@@ -15,3 +15,16 @@ yarn-error.log
 /.idea
 /.vscode
 apache/*
+
+/resources/fonts/fa-brands-400.ttf
+/resources/fonts/fa-brands-400.woff2
+/resources/fonts/fa-duotone-900.ttf
+/resources/fonts/fa-duotone-900.woff2
+/resources/fonts/fa-light-300.ttf
+/resources/fonts/fa-light-300.woff2
+/resources/fonts/fa-regular-400.ttf
+/resources/fonts/fa-regular-400.woff2
+/resources/fonts/fa-solid-900.ttf
+/resources/fonts/fa-solid-900.woff2
+/resources/fonts/fa-thin-100.ttf
+/resources/fonts/fa-thin-100.woff2
