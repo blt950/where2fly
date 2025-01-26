@@ -1,6 +1,8 @@
 # Where2Fly
 Always struggling to decide where to fly? Find some suggested destinations with fun weather and coverage!
 
+![w2f](https://github.com/user-attachments/assets/80281d26-c74c-4712-be12-f394ff303f15)
+
 ## License
 
 **Where2Fly** is licensed under the 
