@@ -3,17 +3,14 @@ version: '3'
 services:
   web:
     container_name: where2fly
-    build: .
-    #image: ghcr.io/blt950/where2fly:latest
+    image: ghcr.io/blt950/where2fly:latest
     ports:
         - 8080:80
         - 8443:443
     extra_hosts:
         - "host.docker.internal:host-gateway"
-    #environment:
-    #  - APP_URL=https://localhost:8080
-    #  - DB_HOST=host.docker.internal
-    #  - APP_ENV=local
-    #  - APP_DEBUG=true
-    volumes:
-      - ./:/app
+    environment:
+      - APP_URL=https://localhost:8080
+      - DB_HOST=host.docker.internal
+      - APP_ENV=production
+      - APP_DEBUG=false

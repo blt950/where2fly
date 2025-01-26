@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  web:
+    container_name: where2fly
+    build: .
+    ports:
+        - 8080:80
+        - 8443:443
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
+    volumes:
+      - ./:/app
