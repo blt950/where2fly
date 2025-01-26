@@ -43,6 +43,23 @@ For the full legal text, see the [LICENSE](LICENSE) file or visit
 | `SENTRY_LARAVEL_DSN`       | Sentry DSN URL                                           | No       |
 | `SENTRY_TRACES_SAMPLE_RATE`| Sentry traces sample rate                                | No       |
 
+### Fonts
+All required text fonts are included in this project. Icons are provided by Font Awesome Pro and need to be manually added by you to the project.
+
+Add the following fonts to your local project `resources/fonts` folder:
+- fa-brands-400.ttf
+- fa-brands-400.woff2
+- fa-duotone-900.ttf
+- fa-duotone-900.woff2
+- fa-light-300.ttf
+- fa-light-300.woff2
+- fa-regular-400.ttf
+- fa-regular-400.woff2
+- fa-solid-900.ttf
+- fa-solid-900.woff2
+- fa-thin-100.ttf
+- fa-thin-100.woff2
+
 ### Caching
 
 This application uses the OPCache to cache the compiled PHP code. Default setting is for production which means that the cache is not cleared automatically. To clear the cache, you need to restart the container if you change a file.
