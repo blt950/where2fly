@@ -15,7 +15,8 @@
                     <div style="background: {{ $list->color }}"></div>
                     <strong>{{ $list->name }}</strong>
                 </div>
-                <span class="list-airports {{ $list->hidden ? 'hidden' : '' }}">{{ $list->airports_count }} airports {{ $list->hidden ? '(Hidden)' : '' }}</span>
+                <span class="list-airports {{ $list->hidden ? 'hidden' : '' }}"><i class="fas fa-joystick"></i>&nbsp;{{ $list->simulator->shortened_name }}</span>
+                <span class="list-airports {{ $list->hidden ? 'hidden' : '' }}"><i class="fas fa-tower-control"></i>&nbsp;{{ $list->airports_count }} airports {{ $list->hidden ? '(Hidden)' : '' }}</span>
             </div>
             <div>
                 @if($list->hidden)
