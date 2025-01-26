@@ -262,7 +262,7 @@ class MapController extends Controller
             }
 
         } else {
-            // If FSAddonCompare API doesn't work, just return our own database
+            // If FSAddonCompare API doesn't work, just return our cached sceneries
             $sceneries = Scenery::where('icao', $airportIcao)->where('published', true)->with('simulators')->get();
 
             foreach ($sceneries as $scenery) {
