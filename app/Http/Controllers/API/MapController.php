@@ -238,7 +238,7 @@ class MapController extends Controller
         // Define a blacklist of developers
         $developerBlacklist = collect(['microsoft', 'va systems']);
 
-        // Save new FSAddonCompare sceneries
+        // Save new FSAddonCompare sceneries to cache
         foreach ($fsacSceneryDevelopers as $developer) {
             if ($developerBlacklist->contains(strtolower($developer))) {
                 continue;
@@ -295,12 +295,12 @@ class MapController extends Controller
         // Add our own sceneries which were not covered by FSAddonCompare
         $w2fSceneries = Scenery::withPublished(true)->where('icao', $airportIcao)->get();
         foreach ($w2fSceneries as $scenery) {
-            foreach ($scenery->simulators as $simulator) {
+            foreach ($scenery->simulators as $scenerySimulator) {
 
-                if (isset($supportedSimulators[$simulator->shortened_name]) && $fsacSceneries->pluck('developer')->contains($scenery->developer)) {
+                if (isset($supportedSimulators[$scenerySimulator->shortened_name]) && $fsacSceneries->pluck('developer')->contains($scenery->developer)) {
                     continue;
                 }
-                $returnData[$simulator->shortened_name][] = SceneryHelper::prepareSceneryData($scenery, null, $simulator);
+                $returnData[$scenerySimulator->shortened_name][] = SceneryHelper::prepareSceneryData($scenery, null, $scenerySimulator);
             }
         }
 

@@ -39,19 +39,19 @@ class SceneryHelper
     /**
      * Function to prepare scenery data
      */
-    public static function prepareSceneryData($scenery, $store = null, $simulator = null)
+    public static function prepareSceneryData($scenery, $store = null, $scenerySimulator = null)
     {
         return [
             'id' => $scenery->id ?? null,
             'developer' => $scenery->developer,
-            'link' => isset($simulator->pivot) ? $simulator->pivot->link : null,
-            'linkDomain' => $store ? null : parse_url($simulator->pivot->link, PHP_URL_HOST),
+            'link' => isset($scenerySimulator->pivot) ? $scenerySimulator->pivot->link : null,
+            'linkDomain' => $store ? null : parse_url($scenerySimulator->pivot->link, PHP_URL_HOST),
             'currencyLink' => $store->currencyLink ?? null,
-            'cheapestLink' => $store->link ?? $simulator->pivot->link,
-            'cheapestStore' => $store->store ?? $simulator->pivot->developer,
+            'cheapestLink' => $store->link ?? $scenerySimulator->pivot->link,
+            'cheapestStore' => $store->store ?? $scenerySimulator->pivot->developer,
             'cheapestPrice' => $store->currencyPrice ?? null,
             'ratingAverage' => $scenery->ratingAverage ?? null,
-            'payware' => (int) ($store ? $store->currencyPrice->EUR > 0 : $simulator->pivot->payware),
+            'payware' => (int) ($store ? $store->currencyPrice->EUR > 0 : $scenerySimulator->pivot->payware),
             'fsac' => (bool) $store,
         ];
     }
