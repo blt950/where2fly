@@ -51,7 +51,7 @@ class SceneryHelper
             'cheapestStore' => $store->store ?? $simulator->pivot->developer,
             'cheapestPrice' => $store->currencyPrice ?? null,
             'ratingAverage' => $scenery->ratingAverage ?? null,
-            'payware' => (int) ($store ? $store->currencyPrice->EUR > 0 : $scenery->payware),
+            'payware' => (int) ($store ? $store->currencyPrice->EUR > 0 : $simulator->pivot->payware),
             'fsac' => (bool) $store,
         ];
     }
