@@ -222,8 +222,8 @@ class MapController extends Controller
 
         // Prepare references
         $supportedSimulators = [
-            'msfs2020' => Simulator::find(1),
-            'msfs2024' => Simulator::find(11),
+            'MSFS2020' => Simulator::find(1),
+            'MSFS2024' => Simulator::find(11),
         ];
 
         // Decode FSAddonCompare sceneries
@@ -243,14 +243,6 @@ class MapController extends Controller
                 continue;
             }
 
-            $fsacDeveloperScenery = $fsacSceneries->firstWhere('developer', $developer);
-            $stores = collect($fsacDeveloperScenery->prices)->where('isDeveloper', true)
-                ?? collect($fsacDeveloperScenery->prices)->where(fn ($price) => collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])->contains(fn ($domain) => strpos($price->link, $domain) !== false));
-
-            if (! $stores || $stores->count() === 0) {
-                continue;
-            }
-
             $sceneryModel = Scenery::create([
                 'icao' => strtoupper($airportIcao),
                 'developer' => $developer,
@@ -262,19 +254,14 @@ class MapController extends Controller
             ]);
  
             // Attach simulators to correct store link(s)
-            foreach($stores as $store){
-                foreach($supportedSimulators as $supportedSim){
-                    if(in_array($supportedSim->shortened_name, $store->simulatorVersions)){
-                        $sceneryModel->simulators()->attach($supportedSim, [
-                            'link' => $this->getEmbeddedUrl($store->link),
-                            'payware' => $store->currencyPrice->EUR > 0,
-                        ]);
-                    }
-                }
+            $stores = $this->findOfficialOrMarketStore($fsacSceneries, $developer);
+            if ($stores) {
+                $this->attachSimulators($stores, $supportedSimulators, $sceneryModel);
             }
+
         }
 
-        // Update FSAddonCompare sceneries if new simulatorVersions are available
+        // Update FSAddonCompare sceneries if new simulatorVersions are available and add link and payware to the pivot table
         foreach ($fsacSceneries as $scenery) {
             $sceneryModel = Scenery::where('developer', $scenery->developer)->where('icao', $airportIcao)->first();
             if ($sceneryModel) {
@@ -282,8 +269,11 @@ class MapController extends Controller
                 $newSimulators = $scenery->simulatorVersions;
 
                 if (array_diff($newSimulators, $storedSimulators) || array_diff($storedSimulators, $newSimulators)) {
-                    $sceneryModel->simulators()->detach();
-                    $sceneryModel->simulators()->attach(Simulator::whereIn('shortened_name', $newSimulators)->get());
+                    $stores = $this->findOfficialOrMarketStore($fsacSceneries, $scenery->developer);
+                    if ($stores) {
+                        $sceneryModel->simulators()->detach();
+                        $this->attachSimulators($stores, $supportedSimulators, $sceneryModel);
+                    }
                 }
             }
         }
@@ -318,6 +308,34 @@ class MapController extends Controller
         }
 
         return $returnData;
+    }
+
+    private function findOfficialOrMarketStore($fsacSceneries, $developer){
+        $fsacDeveloperScenery = $fsacSceneries->firstWhere('developer', $developer);
+        $stores = collect($fsacDeveloperScenery->prices)->where('isDeveloper', true)
+            ?? collect($fsacDeveloperScenery->prices)->where(fn ($price) => collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])->contains(fn ($domain) => strpos($price->link, $domain) !== false));
+
+        if (! $stores || $stores->count() === 0) {
+            return false;
+        }
+
+        return $stores;
+    }
+
+    /**
+     * Attach the correct stores to correct simulator versions
+     */
+    private function attachSimulators($stores, $supportedSimulators, $sceneryModel){
+        foreach($stores as $store){
+            foreach($supportedSimulators as $supportedSim){
+                if(in_array($supportedSim->shortened_name, $store->simulatorVersions)){
+                    $sceneryModel->simulators()->attach($supportedSim, [
+                        'link' => $this->getEmbeddedUrl($store->link),
+                        'payware' => $store->currencyPrice->EUR > 0,
+                    ]);
+                }
+            }
+        }
     }
 
     /**
