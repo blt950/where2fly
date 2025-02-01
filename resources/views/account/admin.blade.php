@@ -18,6 +18,9 @@
             <ul>
                 @foreach($sceneries as $scenery)
                     @foreach($scenery->simulators as $simulator)
+                        @if($simulator->pivot->published == 1)
+                            @continue
+                        @endif
                         <li>
                             <span class="badge bg-dark">{{ $simulator->shortened_name }}</span>
                             <a href="{{ route('scenery.edit', [$scenery, $simulator]) }}">{{ $scenery->icao }}</a>

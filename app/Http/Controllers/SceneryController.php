@@ -41,11 +41,15 @@ class SceneryController extends Controller
             'simulators' => 'required|array',
         ]);
 
-        $scenery = new Scenery();
-        $scenery->icao = strtoupper($request->icao);
-        $scenery->developer = $request->developer;
-        $scenery->airport_id = Airport::where('icao', $request->icao)->get()->first()->id;
-        $scenery->save();
+        // Use existing scenery or create a new one
+        $scenery = Scenery::where('developer', $request->developer)->where('icao', strtoupper($request->icao))->first();
+        if(!$scenery) {
+            $scenery = new Scenery();
+            $scenery->icao = strtoupper($request->icao);
+            $scenery->developer = $request->developer;
+            $scenery->airport_id = Airport::where('icao', $request->icao)->get()->first()->id;
+            $scenery->save();
+        }
 
         // Attach the simulator to the scenery
         if ($request->simulators) {
@@ -53,7 +57,7 @@ class SceneryController extends Controller
                 'link' => $request->link,
                 'payware' => $request->payware ? true : false,
                 'published' => false,
-                'source' => 'user',
+                'source' => 'user_contribution',
                 'suggested_by_user_id' => Auth::id(),
             ]);
         }
@@ -78,7 +82,7 @@ class SceneryController extends Controller
         // Use the manual umami tracking script on this page
         View::share('manualTracking', true);
 
-        return view('scenery.edit', compact('scenery', 'simulator', 'availableSimulators', 'existingSceneries', 'suggestedByUser'));
+        return view('scenery.edit', compact('scenery', 'sceneryEntry', 'availableSimulators', 'existingSceneries', 'suggestedByUser'));
     }
 
     /**
@@ -105,7 +109,7 @@ class SceneryController extends Controller
             'link' => $request->link,
             'payware' => $request->payware ? true : false,
             'published' => $request->published ? true : false,
-            'source' => 'user',
+            'source' => 'user_contribution',
             'suggested_by_user_id' => Auth::id(),
         ]);
 
