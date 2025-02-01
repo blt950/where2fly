@@ -197,7 +197,7 @@ class MapController extends Controller
         SceneryHelper::sortSceneries($returnData);
 
         // 5. Return response
-        if (!empty($returnData)) {
+        if (! empty($returnData)) {
             return response()->json(['message' => 'Success', 'data' => $returnData], 200);
         } else {
             return response()->json(['message' => 'Scenery not found'], 404);
@@ -249,7 +249,7 @@ class MapController extends Controller
                 'developer' => $developer,
                 'airport_id' => Airport::where('icao', $airportIcao)->first()->id,
             ]);
- 
+
             // Attach simulators to correct store link(s)
             $stores = SceneryHelper::findOfficialOrMarketStore($fsacSceneries, $developer);
             if ($stores) {
@@ -281,10 +281,10 @@ class MapController extends Controller
                 continue;
             }
 
-            foreach($supportedSimulators as $supportedSim){
-                if(in_array($supportedSim->shortened_name, $scenery->simulatorVersions)){
+            foreach ($supportedSimulators as $supportedSim) {
+                if (in_array($supportedSim->shortened_name, $scenery->simulatorVersions)) {
                     $cheapestStore = collect($scenery->prices)
-                        ->filter(fn($store) => $store->simulatorVersions && collect($store->simulatorVersions)->contains($supportedSim->shortened_name))
+                        ->filter(fn ($store) => $store->simulatorVersions && collect($store->simulatorVersions)->contains($supportedSim->shortened_name))
                         ->sortBy('currencyPrice.EUR')
                         ->first();
                     $returnData[$supportedSim->shortened_name][] = SceneryHelper::prepareSceneryData($scenery, $cheapestStore);
@@ -297,7 +297,7 @@ class MapController extends Controller
         foreach ($w2fSceneries as $scenery) {
             foreach ($scenery->simulators as $simulator) {
 
-                if(isset($supportedSimulators[$simulator->shortened_name]) && $fsacSceneries->pluck('developer')->contains($scenery->developer)){
+                if (isset($supportedSimulators[$simulator->shortened_name]) && $fsacSceneries->pluck('developer')->contains($scenery->developer)) {
                     continue;
                 }
                 $returnData[$simulator->shortened_name][] = SceneryHelper::prepareSceneryData($scenery);

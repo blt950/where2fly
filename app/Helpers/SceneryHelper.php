@@ -4,7 +4,8 @@ namespace App\Helpers;
 
 class SceneryHelper
 {
-    public static function findOfficialOrMarketStore($fsacSceneries, $developer){
+    public static function findOfficialOrMarketStore($fsacSceneries, $developer)
+    {
         $fsacDeveloperScenery = $fsacSceneries->firstWhere('developer', $developer);
         $stores = collect($fsacDeveloperScenery->prices)->where('isDeveloper', true)
             ?? collect($fsacDeveloperScenery->prices)->where(fn ($price) => collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])->contains(fn ($domain) => strpos($price->link, $domain) !== false));
@@ -19,10 +20,11 @@ class SceneryHelper
     /**
      * Attach the correct stores to correct simulator versions
      */
-    public static function attachSimulators($stores, $supportedSimulators, $sceneryModel, $published = true){
-        foreach($stores as $store){
-            foreach($supportedSimulators as $supportedSim){
-                if(in_array($supportedSim->shortened_name, $store->simulatorVersions)){
+    public static function attachSimulators($stores, $supportedSimulators, $sceneryModel, $published = true)
+    {
+        foreach ($stores as $store) {
+            foreach ($supportedSimulators as $supportedSim) {
+                if (in_array($supportedSim->shortened_name, $store->simulatorVersions)) {
                     $sceneryModel->simulators()->attach($supportedSim, [
                         'link' => SceneryHelper::getEmbeddedUrl($store->link),
                         'payware' => $store->currencyPrice->EUR > 0,
@@ -37,7 +39,8 @@ class SceneryHelper
     /**
      * Function to prepare scenery data
      */
-    public static function prepareSceneryData($scenery, $store = null){
+    public static function prepareSceneryData($scenery, $store = null)
+    {
         return [
             'id' => $scenery->id ?? null,
             'developer' => $scenery->developer,
@@ -66,7 +69,6 @@ class SceneryHelper
             $returnData[$simulator] = $sceneries;
         }
     }
-
 
     public static function getEmbeddedUrl($fullUrl)
     {
