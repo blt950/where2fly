@@ -43,7 +43,7 @@ class SceneryController extends Controller
 
         // Use existing scenery or create a new one
         $scenery = Scenery::where('developer', $request->developer)->where('icao', strtoupper($request->icao))->first();
-        if(!$scenery) {
+        if (! $scenery) {
             $scenery = new Scenery();
             $scenery->icao = strtoupper($request->icao);
             $scenery->developer = $request->developer;
