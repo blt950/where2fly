@@ -26,7 +26,9 @@
                                 <span class="badge bg-danger">Included</span>
                             @endif
                             {{ $scenery->developer }}
-                            @if($simulator->pivot->published == 0)
+                            @if($simulator->pivot->published == 0 && $simulator->id == $scenerySimulator->id)
+                                <b>(This review)</b>
+                            @elseif($simulator->pivot->published == 0)
                                 (Awaiting review)
                             @endif
                         </div>
