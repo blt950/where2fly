@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Helpers\MapHelper;
+use App\Helpers\SceneryHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Airline;
 use App\Models\Airport;
@@ -193,7 +194,7 @@ class MapController extends Controller
         }
 
         // 4. Sort sceneries
-        $this->sortSceneries($returnData);
+        SceneryHelper::sortSceneries($returnData);
 
         // 5. Return response
         if (!empty($returnData)) {
@@ -254,9 +255,9 @@ class MapController extends Controller
             ]);
  
             // Attach simulators to correct store link(s)
-            $stores = $this->findOfficialOrMarketStore($fsacSceneries, $developer);
+            $stores = SceneryHelper::findOfficialOrMarketStore($fsacSceneries, $developer);
             if ($stores) {
-                $this->attachSimulators($stores, $supportedSimulators, $sceneryModel);
+                SceneryHelper::attachSimulators($stores, $supportedSimulators, $sceneryModel);
             }
 
         }
@@ -269,10 +270,10 @@ class MapController extends Controller
                 $newSimulators = $scenery->simulatorVersions;
 
                 if (array_diff($newSimulators, $storedSimulators) || array_diff($storedSimulators, $newSimulators)) {
-                    $stores = $this->findOfficialOrMarketStore($fsacSceneries, $scenery->developer);
+                    $stores = SceneryHelper::findOfficialOrMarketStore($fsacSceneries, $scenery->developer);
                     if ($stores) {
                         $sceneryModel->simulators()->detach();
-                        $this->attachSimulators($stores, $supportedSimulators, $sceneryModel);
+                        SceneryHelper::attachSimulators($stores, $supportedSimulators, $sceneryModel);
                     }
                 }
             }
@@ -290,7 +291,7 @@ class MapController extends Controller
                         ->filter(fn($store) => $store->simulatorVersions && collect($store->simulatorVersions)->contains($supportedSim->shortened_name))
                         ->sortBy('currencyPrice.EUR')
                         ->first();
-                    $returnData[$supportedSim->shortened_name][] = $this->prepareSceneryData($scenery, $cheapestStore);
+                    $returnData[$supportedSim->shortened_name][] = SceneryHelper::prepareSceneryData($scenery, $cheapestStore);
                 }
             }
         }
@@ -303,58 +304,11 @@ class MapController extends Controller
                 if(isset($supportedSimulators[$simulator->shortened_name]) && $fsacSceneries->pluck('developer')->contains($scenery->developer)){
                     continue;
                 }
-                $returnData[$simulator->shortened_name][] = $this->prepareSceneryData($scenery);
+                $returnData[$simulator->shortened_name][] = SceneryHelper::prepareSceneryData($scenery);
             }
         }
 
         return $returnData;
-    }
-
-    private function findOfficialOrMarketStore($fsacSceneries, $developer){
-        $fsacDeveloperScenery = $fsacSceneries->firstWhere('developer', $developer);
-        $stores = collect($fsacDeveloperScenery->prices)->where('isDeveloper', true)
-            ?? collect($fsacDeveloperScenery->prices)->where(fn ($price) => collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])->contains(fn ($domain) => strpos($price->link, $domain) !== false));
-
-        if (! $stores || $stores->count() === 0) {
-            return false;
-        }
-
-        return $stores;
-    }
-
-    /**
-     * Attach the correct stores to correct simulator versions
-     */
-    private function attachSimulators($stores, $supportedSimulators, $sceneryModel){
-        foreach($stores as $store){
-            foreach($supportedSimulators as $supportedSim){
-                if(in_array($supportedSim->shortened_name, $store->simulatorVersions)){
-                    $sceneryModel->simulators()->attach($supportedSim, [
-                        'link' => $this->getEmbeddedUrl($store->link),
-                        'payware' => $store->currencyPrice->EUR > 0,
-                    ]);
-                }
-            }
-        }
-    }
-
-    /**
-     * Function to prepare scenery data
-     */
-    private function prepareSceneryData($scenery, $store = null){
-        return [
-            'id' => $scenery->id ?? null,
-            'developer' => $scenery->developer,
-            'link' => $scenery->link,
-            'linkDomain' => $store ? null : parse_url($scenery->link, PHP_URL_HOST),
-            'currencyLink' => $store->currencyLink ?? null,
-            'cheapestLink' => $store->link ?? $scenery->link,
-            'cheapestStore' => $store->store ?? $scenery->developer,
-            'cheapestPrice' => $store->currencyPrice ?? null,
-            'ratingAverage' => $scenery->ratingAverage ?? null,
-            'payware' => (int) ($store ? $store->currencyPrice->EUR > 0 : $scenery->payware),
-            'fsac' => (bool) $store,
-        ];
     }
 
     /**
@@ -386,43 +340,5 @@ class MapController extends Controller
         }
 
         return $returnData;
-    }
-
-    /**
-     * Sort the sceneries within each simulator.
-     */
-    private function sortSceneries(array &$returnData)
-    {
-        foreach ($returnData as $simulator => $sceneries) {
-            // First sort by developer name
-            usort($sceneries, fn ($a, $b) => $a['developer'] <=> $b['developer']);
-            // Then sort by payware/free
-            usort($sceneries, fn ($a, $b) => $a['payware'] <=> $b['payware']);
-            $returnData[$simulator] = $sceneries;
-        }
-    }
-
-
-    private function getEmbeddedUrl($fullUrl)
-    {
-        // First, decode the URL (if necessary)
-        $decodedUrl = urldecode($fullUrl);
-
-        // Parse the query part of the URL
-        $urlComponents = parse_url($decodedUrl);
-
-        // Parse the query string into an associative array
-        parse_str($urlComponents['query'], $queryParams);
-
-        // Retrieve the 'url' parameter value
-        $embeddedUrl = isset($queryParams['url']) ? $queryParams['url'] : null;
-
-        // Strip 'www.' and 'secure.' and addoncompare from the URL
-        if ($embeddedUrl) {
-            $embeddedUrl = str_replace(['www.', 'secure.'], '', $embeddedUrl);
-            $embeddedUrl = str_replace('?ref=fsaddoncompare', '', $embeddedUrl);
-        }
-
-        return $embeddedUrl;
     }
 }
