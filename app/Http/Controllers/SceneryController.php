@@ -6,6 +6,7 @@ use App\Helpers\MapHelper;
 use App\Models\Airport;
 use App\Models\Scenery;
 use App\Models\Simulator;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
@@ -75,7 +76,7 @@ class SceneryController extends Controller
         $scenerySimulator = $scenery->simulators->where('id', $simulator->id)->first();
         $availableSimulators = Simulator::all()->sortBy('order');
         $existingSceneries = $scenery->airport->sceneries;
-        $suggestedByUser = $scenerySimulator->pivot->suggestedByUser;
+        $suggestedByUser = User::find($scenerySimulator->pivot->suggested_by_user_id);
 
         // Use the manual umami tracking script on this page
         View::share('manualTracking', true);

@@ -14,8 +14,8 @@
         @isset($existingSceneries)
             <div class="alert alert-warning mb-3">
                 <b><i class="fas fa-info-circle"></i> These sceneries are already in the database</b>
-                @foreach($existingSceneries as $scenery)
-                    @foreach($scenery->simulators as $simulator)
+                @foreach($existingSceneries as $existingScenery)
+                    @foreach($existingScenery->simulators as $simulator)
                         <div>
                             <span class="badge bg-dark">{{ $simulator->shortened_name }}</span>
                             @if($simulator->pivot->payware == 1)
@@ -25,7 +25,7 @@
                             @else
                                 <span class="badge bg-danger">Included</span>
                             @endif
-                            {{ $scenery->developer }}
+                            {{ $existingScenery->developer }}
                             @if($simulator->pivot->published == 0 && $simulator->id == $scenerySimulator->id)
                                 <b>(This review)</b>
                             @elseif($simulator->pivot->published == 0)
@@ -39,11 +39,12 @@
 
         <form action="{{ route('scenery.update', [$scenery, $scenerySimulator]) }}" method="post">
             @csrf
-            <h2>Scenery</h2>
+            <h2 class="mb-0">Scenery</h2>
+            <small class="form-text text-white-50">Changing this will change the whole scenery and connected sims ({{ $scenery->simulators->count() }}x)</small>
 
             <input type="hidden" name="suggested_by_user_id" value="{{ $scenerySimulator->pivot->suggested_by_user_id }}">
 
-            <div class="mb-3">
+            <div class="mt-3 mb-3">
                 <label for="icao" class="form-label">ICAO</label>
                 <input type="text" class="form-control" id="icao" name="icao" maxlength="4" value="{{ $scenery->icao }}" required>
                 @error('icao')
@@ -59,7 +60,7 @@
                 @enderror
             </div>
 
-            <h2>Simulator</h2>
+            <h2>Simulator: {{ $scenerySimulator->shortened_name }}</h2>
         
             <div class="mb-3">
                 <label for="link" class="form-label">Link</label>
@@ -79,11 +80,6 @@
                 @error('payware')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Simulator</label>
-                {{ $scenerySimulator->shortened_name }}
             </div>
 
             <div class="mb-3">

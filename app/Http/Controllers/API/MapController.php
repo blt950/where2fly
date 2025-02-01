@@ -232,7 +232,7 @@ class MapController extends Controller
         $fsacSceneryDevelopers = $fsacSceneries->pluck('developer');
 
         // Remove sceneries already in our DB
-        $w2fSceneries = Scenery::withPublished(true)->where('icao', $airportIcao)->with('simulators')->get();
+        $w2fSceneries = Scenery::where('icao', $airportIcao)->get();
         $fsacSceneryDevelopers = $fsacSceneryDevelopers->diff($w2fSceneries->pluck('developer'));
 
         // Define a blacklist of developers
