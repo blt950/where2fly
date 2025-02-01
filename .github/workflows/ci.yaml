@@ -11,7 +11,7 @@ env:
 
 jobs:
   build-container:
-    name: Build Stands Container
+    name: Build Container
     runs-on: ubuntu-latest
     steps:
       - name: configure docker buildx
@@ -46,9 +46,9 @@ jobs:
 
       - name: Copy fonts
         run: |
-          mkdir -p app/resources/fonts
-          cp -r fonts-repo/* app/resources/fonts/
-          ls -la app/resources/fonts
+          mkdir -p resources/fonts
+          cp -r fonts-repo/* resources/fonts/
+          ls -la resources/fonts
 
       - name: build & push container image
         uses: docker/build-push-action@v6
