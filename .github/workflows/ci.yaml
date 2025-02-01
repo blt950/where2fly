@@ -37,6 +37,18 @@ jobs:
             type=semver,event=tag,pattern=v{{major}}
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
 
+      - name: Checkout private fonts repo
+        uses: actions/checkout@v3
+        with:
+          repository: blt950/where2fly-fonts
+          token: ${{ secrets.FONTS_REPO_TOKEN }}
+          path: fonts-repo
+
+      - name: Copy fonts
+        run: |
+          mkdir -p app/resources/fonts
+          cp -r fonts-repo/* app/resources/fonts/
+
       - name: build & push container image
         uses: docker/build-push-action@v6
         with:
