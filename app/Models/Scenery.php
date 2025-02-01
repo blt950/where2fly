@@ -25,9 +25,7 @@ class Scenery extends Model
     {
         return Scenery::whereHas('simulators', function ($query) use ($published) {
             $query->where('published', $published);
-        })
-            ->with('simulators')
-            ->get();
+        })->with('simulators');
     }
 
     public function suggestedByUser()

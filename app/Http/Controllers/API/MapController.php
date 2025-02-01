@@ -232,7 +232,7 @@ class MapController extends Controller
         $fsacSceneryDevelopers = $fsacSceneries->pluck('developer');
 
         // Remove sceneries already in our DB
-        $w2fSceneries = Scenery::where('icao', $airportIcao)->where('published', true)->with('simulators')->get();
+        $w2fSceneries = Scenery::withPublished(true)->where('icao', $airportIcao)->with('simulators')->get();
         $fsacSceneryDevelopers = $fsacSceneryDevelopers->diff($w2fSceneries->pluck('developer'));
 
         // Define a blacklist of developers
@@ -293,14 +293,14 @@ class MapController extends Controller
         }
 
         // Add our own sceneries which were not covered by FSAddonCompare
-        $w2fSceneries = Scenery::where('icao', $airportIcao)->where('published', true)->with('simulators')->get();
+        $w2fSceneries = Scenery::withPublished(true)->where('icao', $airportIcao)->get();
         foreach ($w2fSceneries as $scenery) {
             foreach ($scenery->simulators as $simulator) {
 
                 if (isset($supportedSimulators[$simulator->shortened_name]) && $fsacSceneries->pluck('developer')->contains($scenery->developer)) {
                     continue;
                 }
-                $returnData[$simulator->shortened_name][] = SceneryHelper::prepareSceneryData($scenery);
+                $returnData[$simulator->shortened_name][] = SceneryHelper::prepareSceneryData($scenery, null, $simulator);
             }
         }
 
@@ -314,7 +314,7 @@ class MapController extends Controller
     {
         $returnData = [];
 
-        $sceneries = Scenery::where('icao', $airportIcao)->where('published', true)->with('simulators')->get();
+        $sceneries = Scenery::withPublished(true)->where('icao', $airportIcao)->get();
         foreach ($sceneries as $scenery) {
             foreach ($scenery->simulators as $simulator) {
                 $returnData[$simulator->shortened_name][] = [
