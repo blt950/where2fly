@@ -286,6 +286,7 @@ class MapController extends Controller
                     $cheapestStore = collect($scenery->prices)
                         ->filter(function ($store) use ($scenery, $supportedSim) {
                             $storeVersions = $store->simulatorVersions ?? $scenery->simulatorVersions;
+
                             return $storeVersions && collect($storeVersions)->contains($supportedSim->shortened_name);
                         })
                         ->sortBy('currencyPrice.EUR')
