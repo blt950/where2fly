@@ -316,20 +316,16 @@ class MapController extends Controller
 
         $sceneries = Scenery::withPublished(true)->where('icao', $airportIcao)->get();
         foreach ($sceneries as $scenery) {
-            foreach ($scenery->simulators as $simulator) {
-                $returnData[$simulator->shortened_name][] = [
+            foreach ($scenery->simulators as $scenerySimulator) {
+                $returnData[$scenerySimulator->shortened_name][] = [
                     'developer' => $scenery->developer,
-                    'link' => ($scenery->source == 'fsaddoncompare')
-                        ? "https://www.fsaddoncompare.com/search/{$scenery->icao}?utm_campaign=WhereToFly"
-                        : $scenery->link,
-                    'linkDomain' => ($scenery->source == 'fsaddoncompare')
-                        ? 'FSAddonCompare'
-                        : parse_url($scenery->link, PHP_URL_HOST),
-                    'cheapestLink' => $scenery->link,
-                    'cheapestStore' => $scenery->developer,
+                    'link' => $scenerySimulator->pivot->link,
+                    'linkDomain' => parse_url($scenerySimulator->pivot->link, PHP_URL_HOST),
+                    'cheapestLink' => $scenerySimulator->pivot->link,
+                    'cheapestStore' => $scenerySimulator->pivot->developer,
                     'cheapestPrice' => null,
                     'ratingAverage' => null,
-                    'payware' => (int) $scenery->payware,
+                    'payware' => (int) $scenerySimulator->pivot->payware,
                     'fsac' => false,
                 ];
             }
