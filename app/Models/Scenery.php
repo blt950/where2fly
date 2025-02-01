@@ -18,7 +18,7 @@ class Scenery extends Model
 
     public function simulators()
     {
-        return $this->belongsToMany(Simulator::class, 'scenery_simulators');
+        return $this->belongsToMany(Simulator::class, 'scenery_simulators')->withTimestamps();
     }
 
     public function suggestedByUser()

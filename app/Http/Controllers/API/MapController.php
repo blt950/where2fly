@@ -247,11 +247,7 @@ class MapController extends Controller
             $sceneryModel = Scenery::create([
                 'icao' => strtoupper($airportIcao),
                 'developer' => $developer,
-                'link' => 'N/A', // to be removed
                 'airport_id' => Airport::where('icao', $airportIcao)->first()->id,
-                'payware' => true, // to be removed
-                'published' => true,
-                // should we add created/updated timestamp here as well?
             ]);
  
             // Attach simulators to correct store link(s)

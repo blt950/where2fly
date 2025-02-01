@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Scenery;
 
 return new class extends Migration
 {
@@ -11,8 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('sceneries', function (Blueprint $table) {
-            $table->string('source')->nullable()->after('published');
+        Schema::table('scenery_simulators', function (Blueprint $table) {
+            $table->unique(['scenery_id', 'simulator_id']);
         });
     }
 
@@ -21,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('sceneries', function (Blueprint $table) {
-            $table->dropColumn('source');
+        Schema::table('scenery_simulators', function (Blueprint $table) {
+            $table->dropUnique(['scenery_id', 'simulator_id']);
         });
     }
 };

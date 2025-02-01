@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::table('scenery_simulators', function (Blueprint $table) {
             $table->string('link')->nullable()->after('simulator_id');
-            $table->boolean('payware')->default(false)->after('link');
+            $table->boolean('payware')->after('link');
+            $table->boolean('published')->after('payware');
+            $table->string('source')->nullable()->after('published');
+            $table->foreignId('suggested_by_user_id')->nullable()->constrained('users', 'id')->onDelete('SET NULL')->after('source');
+            $table->timestamps();
         });
     }
 
@@ -25,6 +29,11 @@ return new class extends Migration
         Schema::table('scenery_simulators', function (Blueprint $table) {
             $table->dropColumn('link');
             $table->dropColumn('payware');
+            $table->dropColumn('published');
+            $table->dropColumn('source');
+            $table->dropForeign(['suggested_by_user_id']);
+            $table->dropColumn('suggested_by_user_id');
+            $table->dropTimestamps();
         });
     }
 };
