@@ -35,9 +35,11 @@
             </div>
         @endisset
 
-        <form action="{{ route('scenery.update', [$scenery, $sceneryEntry]) }}" method="post">
+        <form action="{{ route('scenery.update', [$scenery, $scenerySimulator]) }}" method="post">
             @csrf
             <h2>Scenery</h2>
+
+            <input type="hidden" name="suggested_by_user_id" value="{{ $scenerySimulator->pivot->suggested_by_user_id }}">
 
             <div class="mb-3">
                 <label for="icao" class="form-label">ICAO</label>
@@ -59,7 +61,7 @@
         
             <div class="mb-3">
                 <label for="link" class="form-label">Link</label>
-                <input type="url" class="form-control" id="link" name="link" maxlength="256" value="{{ $sceneryEntry->pivot->link }}" required>
+                <input type="url" class="form-control" id="link" name="link" maxlength="256" value="{{ $scenerySimulator->pivot->link }}" required>
                 @error('link')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
@@ -69,8 +71,8 @@
                 <label class="form-label" for="payware">Payware</label>
                 <select class="form-select" id="payware" name="payware" required>
                     <option disabled selected>Select</option>
-                    <option value="1" @if($sceneryEntry->pivot->payware == 1) selected @endif>Payware</option>
-                    <option value="0" @if($sceneryEntry->pivot->payware == 0) selected @endif>Freeware</option>
+                    <option value="1" @if($scenerySimulator->pivot->payware == 1) selected @endif>Payware</option>
+                    <option value="0" @if($scenerySimulator->pivot->payware == 0) selected @endif>Freeware</option>
                 </select>
                 @error('payware')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -79,11 +81,11 @@
 
             <div class="mb-3">
                 <label class="form-label">Simulator</label>
-                {{ $sceneryEntry->shortened_name }}
+                {{ $scenerySimulator->shortened_name }}
             </div>
 
             <div class="mb-3">
-                <input class="form-check-input" type="checkbox" id="published" value="1" name="published" {{ ($sceneryEntry->pivot->published) ? 'checked' : null }}>
+                <input class="form-check-input" type="checkbox" id="published" value="1" name="published" {{ ($scenerySimulator->pivot->published) ? 'checked' : null }}>
                 <label class="form-check-label" for="published">
                     <b>Published</b>
                 </label>
@@ -93,7 +95,7 @@
             </div>
 
             <div class="d-flex justify-content-between">
-                <a href="{{ route('scenery.delete', [$scenery, $sceneryEntry]) }}" class="btn btn-danger mt-3" onclick="return confirm('Are you sure you want to delete this scenery?')">
+                <a href="{{ route('scenery.delete', [$scenery, $scenerySimulator]) }}" class="btn btn-danger mt-3" onclick="return confirm('Are you sure you want to delete this scenery?')">
                     <i class="fas fa-trash"></i>
                     Delete
                 </a>

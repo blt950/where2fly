@@ -20,18 +20,18 @@
                 <div class="alert alert-warning mb-3">
                     <b><i class="fas fa-info-circle"></i> These sceneries are already in the database</b>
                     @foreach($sceneries as $scenery)
-                        @foreach($scenery->simulators as $simulator)
+                        @foreach($scenery->simulators as $scenerySimulator)
                             <div>
-                                <span class="badge bg-dark">{{ $simulator->shortened_name }}</span>
-                                @if($simulator->pivot->payware == 1)
+                                <span class="badge bg-dark">{{ $scenerySimulator->shortened_name }}</span>
+                                @if($scenerySimulator->pivot->payware == 1)
                                     <span class="badge bg-info">Payware</span>
-                                @elseif($simulator->pivot->payware == 0)
+                                @elseif($scenerySimulator->pivot->payware == 0)
                                     <span class="badge bg-success">Freeware</span>
                                 @else
                                     <span class="badge bg-danger">Included</span>
                                 @endif
                                 {{ $scenery->developer }}
-                                @if($simulator->pivot->published == 0)
+                                @if($scenerySimulator->pivot->published == 0)
                                     (Awaiting review)
                                 @endif
                             </div>
@@ -72,7 +72,7 @@
             <div class="mb-3">
                 <label class="form-label">Simulator</label>
                 <small class="form-text text-white-50">Choose only simulator(s) the linked scenery officially supports.</small>
-                @foreach($simulators as $simulator)
+                @foreach($availableSimulators as $simulator)
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="simulator_{{ $simulator->id }}" name="simulators[]" value="{{ $simulator->id }}">
                         <label class="form-check-label" for="simulator_{{ $simulator->id }}">

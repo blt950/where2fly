@@ -17,15 +17,15 @@ class SceneryController extends Controller
      */
     public function create(Request $request)
     {
-        $simulators = Simulator::all()->sortBy('order');
+        $availableSimulators = Simulator::all()->sortBy('order');
+        
         $airport = Airport::where('icao', $request->get('airport'))->first();
         $sceneries = null;
-
         if ($airport) {
             $sceneries = $airport->sceneries;
         }
 
-        return view('scenery.create', compact('simulators', 'sceneries'));
+        return view('scenery.create', compact('availableSimulators', 'sceneries'));
     }
 
     /**
@@ -72,17 +72,15 @@ class SceneryController extends Controller
     {
         $this->authorize('update', $scenery);
 
+        $scenerySimulator = $scenery->simulators->where('id', $simulator->id)->first();
         $availableSimulators = Simulator::all()->sortBy('order');
-
-        $sceneryEntry = $scenery->simulators->where('id', $simulator->id)->first();
-        $suggestedByUser = $sceneryEntry->pivot->suggestedByUser;
-
         $existingSceneries = $scenery->airport->sceneries;
+        $suggestedByUser = $scenerySimulator->pivot->suggestedByUser;
 
         // Use the manual umami tracking script on this page
         View::share('manualTracking', true);
 
-        return view('scenery.edit', compact('scenery', 'sceneryEntry', 'availableSimulators', 'existingSceneries', 'suggestedByUser'));
+        return view('scenery.edit', compact('scenery', 'scenerySimulator', 'availableSimulators', 'existingSceneries', 'suggestedByUser'));
     }
 
     /**
@@ -98,6 +96,7 @@ class SceneryController extends Controller
             'link' => 'required|url',
             'payware' => 'required|boolean',
             'published' => 'boolean',
+            'suggested_by_user_id' => 'integer',
         ]);
 
         $scenery->icao = strtoupper($request->icao);
@@ -110,7 +109,7 @@ class SceneryController extends Controller
             'payware' => $request->payware ? true : false,
             'published' => $request->published ? true : false,
             'source' => 'user_contribution',
-            'suggested_by_user_id' => Auth::id(),
+            'suggested_by_user_id' => ($request->suggested_by_user_id) ? $request->suggested_by_user_id : Auth::id()
         ]);
 
         return redirect()->route('admin')->with('success', 'Scenery updated successfully.');
@@ -132,8 +131,8 @@ class SceneryController extends Controller
      */
     public function indexAirports(Request $request, ?string $filteredSim = null)
     {
-        $simulators = Simulator::whereHas('sceneries')->get();
-        $filteredSimulator = $simulators->where('shortened_name', $filteredSim)->first();
+        $availableSimulators = Simulator::whereHas('sceneries')->get();
+        $filteredSimulator = $availableSimulators->where('shortened_name', $filteredSim)->first();
 
         if ($filteredSimulator) {
             $airports = Airport::whereHasPublishedSceneries(true, $filteredSimulator->id)->get();
@@ -144,6 +143,6 @@ class SceneryController extends Controller
         $airportMapData = json_encode(MapHelper::generateAirportMapDataFromAirports($airports));
         $airportsCount = $airports->count();
 
-        return view('scenery', compact('airportsCount', 'airportMapData', 'simulators', 'filteredSimulator'));
+        return view('scenery', compact('airportsCount', 'airportMapData', 'availableSimulators', 'filteredSimulator'));
     }
 }
