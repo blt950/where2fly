@@ -18,7 +18,16 @@ class Scenery extends Model
 
     public function simulators()
     {
-        return $this->belongsToMany(Simulator::class, 'scenery_simulators')->withTimestamps();
+        return $this->belongsToMany(Simulator::class, 'scenery_simulators')->withPivot('link', 'payware', 'published', 'source', 'suggested_by_user_id')->withTimestamps();
+    }
+
+    public static function withPublished($published)
+    {
+        return Scenery::whereHas('simulators', function ($query) use ($published) {
+            $query->where('published', $published);
+        })
+            ->with('simulators')
+            ->get();
     }
 
     public function suggestedByUser()

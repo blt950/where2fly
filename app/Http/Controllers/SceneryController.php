@@ -15,11 +15,17 @@ class SceneryController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         $simulators = Simulator::all()->sortBy('order');
+        $airport = Airport::where('icao', $request->get('airport'))->first();
+        $sceneries = null;
 
-        return view('scenery.create', compact('simulators'));
+        if ($airport) {
+            $sceneries = $airport->sceneries;
+        }
+
+        return view('scenery.create', compact('simulators', 'sceneries'));
     }
 
     /**
@@ -38,16 +44,18 @@ class SceneryController extends Controller
         $scenery = new Scenery();
         $scenery->icao = strtoupper($request->icao);
         $scenery->developer = $request->developer;
-        $scenery->link = $request->link;
         $scenery->airport_id = Airport::where('icao', $request->icao)->get()->first()->id;
-        $scenery->payware = $request->payware ? true : false;
-        $scenery->published = false;
-        $scenery->suggested_by_user_id = Auth::id();
         $scenery->save();
 
         // Attach the simulator to the scenery
         if ($request->simulators) {
-            $scenery->simulators()->attach($request->simulators);
+            $scenery->simulators()->attach($request->simulators, [
+                'link' => $request->link,
+                'payware' => $request->payware ? true : false,
+                'published' => false,
+                'source' => 'user',
+                'suggested_by_user_id' => Auth::id(),
+            ]);
         }
 
         return redirect()->route('scenery.create')->with('success', 'Thank you for your contribution. We will review it and add it to the database if it meets our criteria.');
@@ -56,23 +64,27 @@ class SceneryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Scenery $scenery)
+    public function edit(Request $request, Scenery $scenery, Simulator $simulator)
     {
         $this->authorize('update', $scenery);
 
-        $simulators = Simulator::all()->sortBy('order');
-        $suggestedByUser = $scenery->suggestedByUser;
+        $availableSimulators = Simulator::all()->sortBy('order');
+
+        $sceneryEntry = $scenery->simulators->where('id', $simulator->id)->first();
+        $suggestedByUser = $sceneryEntry->pivot->suggestedByUser;
+
+        $existingSceneries = $scenery->airport->sceneries;
 
         // Use the manual umami tracking script on this page
         View::share('manualTracking', true);
 
-        return view('scenery.edit', compact('scenery', 'simulators', 'suggestedByUser'));
+        return view('scenery.edit', compact('scenery', 'simulator', 'availableSimulators', 'existingSceneries', 'suggestedByUser'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Scenery $scenery)
+    public function update(Request $request, Scenery $scenery, Simulator $simulator)
     {
         $this->authorize('update', $scenery);
 
@@ -81,23 +93,21 @@ class SceneryController extends Controller
             'developer' => 'required|string',
             'link' => 'required|url',
             'payware' => 'required|boolean',
-            'simulators' => 'required|array',
             'published' => 'boolean',
         ]);
 
         $scenery->icao = strtoupper($request->icao);
         $scenery->developer = $request->developer;
-        $scenery->link = $request->link;
-        $scenery->airport_id = Airport::where('icao', $request->icao)->get()->first()->id;
-        $scenery->payware = $request->payware ? true : false;
-        $scenery->published = $request->published ? true : false;
-        $scenery->suggested_by_user_id = ($scenery->suggested_by_user_id) ? $scenery->suggested_by_user_id : Auth::id();
         $scenery->save();
 
-        // Attach the simulator to the scenery
-        if ($request->simulators) {
-            $scenery->simulators()->sync($request->simulators);
-        }
+        // Update the pivot table simulators with the new data
+        $scenery->simulators()->updateExistingPivot($simulator->id, [
+            'link' => $request->link,
+            'payware' => $request->payware ? true : false,
+            'published' => $request->published ? true : false,
+            'source' => 'user',
+            'suggested_by_user_id' => Auth::id(),
+        ]);
 
         return redirect()->route('admin')->with('success', 'Scenery updated successfully.');
     }
@@ -105,11 +115,10 @@ class SceneryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Scenery $scenery)
+    public function destroy(Request $request, Scenery $scenery, Simulator $simulator)
     {
         $this->authorize('delete', $scenery);
-
-        $scenery->delete();
+        $scenery->simulators()->detach($simulator->id);
 
         return redirect()->route('admin')->with('success', 'Scenery deleted successfully.');
     }

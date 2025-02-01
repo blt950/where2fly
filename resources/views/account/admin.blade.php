@@ -17,10 +17,13 @@
         @isset($sceneries)
             <ul>
                 @foreach($sceneries as $scenery)
-                    <li>
-                        <a href="{{ route('scenery.edit', $scenery) }}">{{ $scenery->icao }}</a>
-                        <span class="text-white-50">by {{ isset($scenery->suggested_by_user_id) ? App\Models\User::find($scenery->suggested_by_user_id)->username : 'System' }}</span>
-                    </li>
+                    @foreach($scenery->simulators as $simulator)
+                        <li>
+                            <span class="badge bg-dark">{{ $simulator->shortened_name }}</span>
+                            <a href="{{ route('scenery.edit', [$scenery, $simulator]) }}">{{ $scenery->icao }}</a>
+                            <span class="text-white-50">by {{ isset($simulator->pivot->suggested_by_user_id) ? App\Models\User::find($simulator->pivot->suggested_by_user_id)->username : 'System' }}</span>
+                        </li>
+                    @endforeach
                 @endforeach
             </ul>
         @else
