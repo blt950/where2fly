@@ -95,7 +95,7 @@ class SceneryHelper
 
         // Strip 'www.' and 'secure.' and addoncompare from the URL
         if ($embeddedUrl) {
-            $embeddedUrl = str_replace(['www.', 'secure.'], '', $embeddedUrl);
+            $embeddedUrl = str_replace(['www.'], '', $embeddedUrl);
             $embeddedUrl = str_replace('?ref=fsaddoncompare', '', $embeddedUrl);
         }
 
