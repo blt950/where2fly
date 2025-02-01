@@ -232,7 +232,7 @@ class MapController extends Controller
 
         // Remove sceneries already in our DB
         $w2fSceneries = Scenery::where('icao', $airportIcao)->where('published', true)->with('simulators')->get();
-        $fsacSceneryDevelopers = $fsacSceneryDevelopers->diff($w2fSceneries->pluck('author'));
+        $fsacSceneryDevelopers = $fsacSceneryDevelopers->diff($w2fSceneries->pluck('developer'));
 
         // Define a blacklist of developers
         $developerBlacklist = collect(['microsoft', 'va systems']);
@@ -253,7 +253,7 @@ class MapController extends Controller
 
             $sceneryModel = Scenery::create([
                 'icao' => strtoupper($airportIcao),
-                'author' => $developer,
+                'developer' => $developer,
                 'link' => 'N/A', // to be removed
                 'airport_id' => Airport::where('icao', $airportIcao)->first()->id,
                 'payware' => true, // to be removed
@@ -276,7 +276,7 @@ class MapController extends Controller
 
         // Update FSAddonCompare sceneries if new simulatorVersions are available
         foreach ($fsacSceneries as $scenery) {
-            $sceneryModel = Scenery::where('author', $scenery->developer)->where('icao', $airportIcao)->first();
+            $sceneryModel = Scenery::where('developer', $scenery->developer)->where('icao', $airportIcao)->first();
             if ($sceneryModel) {
                 $storedSimulators = $sceneryModel->simulators->pluck('shortened_name')->toArray();
                 $newSimulators = $scenery->simulatorVersions;
@@ -310,7 +310,7 @@ class MapController extends Controller
         foreach ($w2fSceneries as $scenery) {
             foreach ($scenery->simulators as $simulator) {
 
-                if(isset($supportedSimulators[$simulator->shortened_name]) && $fsacSceneries->pluck('developer')->contains($scenery->author)){
+                if(isset($supportedSimulators[$simulator->shortened_name]) && $fsacSceneries->pluck('developer')->contains($scenery->developer)){
                     continue;
                 }
                 $returnData[$simulator->shortened_name][] = $this->prepareSceneryData($scenery);
@@ -326,12 +326,12 @@ class MapController extends Controller
     private function prepareSceneryData($scenery, $store = null){
         return [
             'id' => $scenery->id ?? null,
-            'developer' => $scenery->developer ?? $scenery->author,
+            'developer' => $scenery->developer,
             'link' => $scenery->link,
             'linkDomain' => $store ? null : parse_url($scenery->link, PHP_URL_HOST),
             'currencyLink' => $store->currencyLink ?? null,
             'cheapestLink' => $store->link ?? $scenery->link,
-            'cheapestStore' => $store->store ?? $scenery->author,
+            'cheapestStore' => $store->store ?? $scenery->developer,
             'cheapestPrice' => $store->currencyPrice ?? null,
             'ratingAverage' => $scenery->ratingAverage ?? null,
             'payware' => (int) ($store ? $store->currencyPrice->EUR > 0 : $scenery->payware),
@@ -350,7 +350,7 @@ class MapController extends Controller
         foreach ($sceneries as $scenery) {
             foreach ($scenery->simulators as $simulator) {
                 $returnData[$simulator->shortened_name][] = [
-                    'developer' => $scenery->author,
+                    'developer' => $scenery->developer,
                     'link' => ($scenery->source == 'fsaddoncompare')
                         ? "https://www.fsaddoncompare.com/search/{$scenery->icao}?utm_campaign=WhereToFly"
                         : $scenery->link,
@@ -358,7 +358,7 @@ class MapController extends Controller
                         ? 'FSAddonCompare'
                         : parse_url($scenery->link, PHP_URL_HOST),
                     'cheapestLink' => $scenery->link,
-                    'cheapestStore' => $scenery->author,
+                    'cheapestStore' => $scenery->developer,
                     'cheapestPrice' => null,
                     'ratingAverage' => null,
                     'payware' => (int) $scenery->payware,

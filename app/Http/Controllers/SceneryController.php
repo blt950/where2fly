@@ -29,7 +29,7 @@ class SceneryController extends Controller
     {
         $request->validate([
             'icao' => 'required|max:4|min:4|exists:airports,icao',
-            'author' => 'required|string',
+            'developer' => 'required|string',
             'link' => 'required|url',
             'payware' => 'required|boolean',
             'simulators' => 'required|array',
@@ -37,7 +37,7 @@ class SceneryController extends Controller
 
         $scenery = new Scenery();
         $scenery->icao = strtoupper($request->icao);
-        $scenery->author = $request->author;
+        $scenery->developer = $request->developer;
         $scenery->link = $request->link;
         $scenery->airport_id = Airport::where('icao', $request->icao)->get()->first()->id;
         $scenery->payware = $request->payware ? true : false;
@@ -78,7 +78,7 @@ class SceneryController extends Controller
 
         $request->validate([
             'icao' => 'required|max:4|min:4|exists:airports,icao',
-            'author' => 'required|string',
+            'developer' => 'required|string',
             'link' => 'required|url',
             'payware' => 'required|boolean',
             'simulators' => 'required|array',
@@ -86,7 +86,7 @@ class SceneryController extends Controller
         ]);
 
         $scenery->icao = strtoupper($request->icao);
-        $scenery->author = $request->author;
+        $scenery->developer = $request->developer;
         $scenery->link = $request->link;
         $scenery->airport_id = Airport::where('icao', $request->icao)->get()->first()->id;
         $scenery->payware = $request->payware ? true : false;

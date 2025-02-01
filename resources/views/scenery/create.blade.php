@@ -17,9 +17,9 @@
             </div>
 
             <div class="mb-3">
-                <label for="author" class="form-label">Author</label>
-                <input type="text" class="form-control" id="author" name="author" value="{{ old('author') }}" maxlength="256" required>
-                @error('author')
+                <label for="developer" class="form-label">Developer</label>
+                <input type="text" class="form-control" id="developer" name="developer" value="{{ old('developer') }}" maxlength="256" required>
+                @error('developer')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
