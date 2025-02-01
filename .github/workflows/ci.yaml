@@ -48,6 +48,7 @@ jobs:
         run: |
           mkdir -p app/resources/fonts
           cp -r fonts-repo/* app/resources/fonts/
+          ls -la app/resources/fonts
 
       - name: build & push container image
         uses: docker/build-push-action@v6
