@@ -284,9 +284,13 @@ class MapController extends Controller
             foreach ($supportedSimulators as $supportedSim) {
                 if (in_array($supportedSim->shortened_name, $scenery->simulatorVersions)) {
                     $cheapestStore = collect($scenery->prices)
-                        ->filter(fn ($store) => $store->simulatorVersions && collect($store->simulatorVersions)->contains($supportedSim->shortened_name))
+                        ->filter(function ($store) use ($scenery, $supportedSim) {
+                            $storeVersions = $store->simulatorVersions ?? $scenery->simulatorVersions;
+                            return $storeVersions && collect($storeVersions)->contains($supportedSim->shortened_name);
+                        })
                         ->sortBy('currencyPrice.EUR')
                         ->first();
+
                     $returnData[$supportedSim->shortened_name][] = SceneryHelper::prepareSceneryData($scenery, $cheapestStore);
                 }
             }

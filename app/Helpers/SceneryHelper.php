@@ -44,7 +44,7 @@ class SceneryHelper
         return [
             'id' => $scenery->id ?? null,
             'developer' => $scenery->developer,
-            'link' => isset($scenerySimulator->pivot) ? $scenerySimulator->pivot->link : null,
+            'link' => isset($scenerySimulator->pivot) ? $scenerySimulator->pivot->link : $scenery->link,
             'linkDomain' => $store ? null : parse_url($scenerySimulator->pivot->link, PHP_URL_HOST),
             'currencyLink' => $store->currencyLink ?? null,
             'cheapestLink' => $store->link ?? $scenerySimulator->pivot->link,
