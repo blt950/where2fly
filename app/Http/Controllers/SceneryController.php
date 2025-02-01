@@ -18,7 +18,7 @@ class SceneryController extends Controller
     public function create(Request $request)
     {
         $availableSimulators = Simulator::all()->sortBy('order');
-        
+
         $airport = Airport::where('icao', $request->get('airport'))->first();
         $sceneries = null;
         if ($airport) {
@@ -109,7 +109,7 @@ class SceneryController extends Controller
             'payware' => $request->payware ? true : false,
             'published' => $request->published ? true : false,
             'source' => 'user_contribution',
-            'suggested_by_user_id' => ($request->suggested_by_user_id) ? $request->suggested_by_user_id : Auth::id()
+            'suggested_by_user_id' => ($request->suggested_by_user_id) ? $request->suggested_by_user_id : Auth::id(),
         ]);
 
         return redirect()->route('admin')->with('success', 'Scenery updated successfully.');

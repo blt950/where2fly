@@ -2,11 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class AdminVariables
 {
@@ -20,7 +19,7 @@ class AdminVariables
     {
         if (Auth::check()) {
             $user = Auth::user();
-            if($user->admin){
+            if ($user->admin) {
                 // Get the number of scenery->simulators who are not published
                 $unpublishedSceneries = \App\Models\Scenery::withPublished(false)->count();
                 View::share('hasNotifications', $unpublishedSceneries);

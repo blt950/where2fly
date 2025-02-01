@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Scenery;
+use Illuminate\Console\Command;
 
 class CleanupSceneries extends Command
 {
