@@ -12,24 +12,13 @@
     <div class="container">
         <div class="text-start">
 
-            <h2 class="mb-0">v2.5.2</h2>
-            <span class="badge ps-0 pb-2">2025-02-02</span>
-            <ul>
-                <li>Fixed SimMarket links</li>
-            </ul>
-
-            <h2 class="mb-0">v2.5.1</h2>
-            <span class="badge ps-0 pb-2">2025-02-02</span>
-            <ul>
-                <li>Fixed airport cache not working correctly</li>
-            </ul>
-
             <h2 class="mb-0">v2.5.0</h2>
             <span class="badge ps-0 pb-2">2025-02-01</span>
             <ul>
                 <li><a href="https://github.com/blt950/where2fly" target="_blank">The project is now open source!</a></li>
                 <li>Added MSFS2024 scenery support</li>
                 <li>Added simulator name to lists</li>
+                <li>Fixed SimMarket links</li>
             </ul>
 
             <h2 class="mb-0">v2.4.0</h2>
