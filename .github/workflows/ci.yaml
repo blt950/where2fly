@@ -37,6 +37,11 @@ jobs:
             type=semver,event=tag,pattern=v{{major}}
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
 
+      - name: Checkout open repo
+        uses: actions/checkout@v3
+        with:
+          repository: blt950/where2fly
+
       - name: Checkout private fonts repo
         uses: actions/checkout@v3
         with:
@@ -53,7 +58,7 @@ jobs:
       - name: build & push container image
         uses: docker/build-push-action@v6
         with:
-          context: "{{defaultContext}}:."
+          context: "."
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
