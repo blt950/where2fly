@@ -34,12 +34,14 @@ class SceneryHelper
         foreach ($stores as $store) {
             foreach ($supportedSimulators as $supportedSim) {
                 if (in_array($supportedSim->shortened_name, $store->simulatorVersions)) {
-                    $sceneryModel->simulators()->attach($supportedSim, [
-                        'link' => SceneryHelper::getEmbeddedUrl($store->link),
-                        'payware' => $store->currencyPrice->EUR > 0,
-                        'published' => $published,
-                        'source' => 'fsaddoncompare',
-                    ]);
+                    if (! $sceneryModel->simulators()->where('simulator_id', $supportedSim->id)->exists()) {
+                        $sceneryModel->simulators()->attach($supportedSim, [
+                            'link' => SceneryHelper::getEmbeddedUrl($store->link),
+                            'payware' => $store->currencyPrice->EUR > 0,
+                            'published' => $published,
+                            'source' => 'fsaddoncompare',
+                        ]);
+                    }
                 }
             }
         }
