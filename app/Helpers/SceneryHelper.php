@@ -7,10 +7,19 @@ class SceneryHelper
     public static function findOfficialOrMarketStore($fsacSceneries, $developer)
     {
         $fsacDeveloperScenery = $fsacSceneries->firstWhere('developer', $developer);
-        $stores = collect($fsacDeveloperScenery->prices)->where('isDeveloper', true)
-            ?? collect($fsacDeveloperScenery->prices)->where(fn ($price) => collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])->contains(fn ($domain) => strpos($price->link, $domain) !== false));
+        if (! $fsacDeveloperScenery) {
+            return false;
+        }
 
-        if (! $stores || $stores->count() === 0) {
+        $stores = collect($fsacDeveloperScenery->prices)->where('isDeveloper', true);
+
+        if ($stores->isEmpty()) {
+            $stores = collect($fsacDeveloperScenery->prices)
+                ->where(fn ($price) => collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])
+                    ->contains(fn ($domain) => strpos($price->link, $domain) !== false));
+        }
+
+        if ($stores->isEmpty()) {
             return false;
         }
 
