@@ -90,3 +90,16 @@
         </form>
     </div>
 @endsection
+
+@section('js')
+    <script>
+        document.getElementById('icao').addEventListener('blur', function() {
+            const icao = this.value.trim();
+            if (icao) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('airport', icao);
+                window.location.href = url.toString();
+            }
+        });
+    </script>
+@endsection
