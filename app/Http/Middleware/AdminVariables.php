@@ -24,7 +24,7 @@ class AdminVariables
                 // Get the number of scenery->simulators who are not published
                 $counter = Scenery::withPublished(false)->first();
                 if ($counter) {
-                    $unpublishedSceneries = $counter->simulators->count();
+                    $unpublishedSceneries = $counter->simulators->where('published', false)->count();
                 } else {
                     $unpublishedSceneries = 0;
                 }
