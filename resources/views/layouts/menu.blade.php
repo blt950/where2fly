@@ -44,14 +44,25 @@
                     @auth
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {{ Route::is('user.account') ? 'active' : '' }}" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user"></i>&nbsp;
+                                @if(isset($hasNotifications) && $hasNotifications)
+                                    <i class="fas fa-bell text-warning"></i>&nbsp;
+                                @else
+                                    <i class="fas fa-user"></i>&nbsp;
+                                @endif
                                 {{ Auth::user()->username }}
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="{{ route('user.account') }}">Settings</a></li>
                                 <li><a class="dropdown-item" href="{{ route('list.index') }}">My Lists</a></li>
                                 @can('showAdmin', App\Models\User::class)
-                                    <li><a class="dropdown-item" href="{{ route('admin') }}">Admin</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin') }}">
+                                            Admin
+                                            @if(isset($hasNotifications) && $hasNotifications)
+                                                <span class="badge bg-warning text-dark">{{ $hasNotifications }}</span>
+                                            @endif
+                                        </a>
+                                    </li>
                                 @endcan
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ route('user.logout') }}">Logout</a></li>

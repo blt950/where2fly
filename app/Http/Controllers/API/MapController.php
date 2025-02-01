@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Helpers\MapHelper;
+use App\Helpers\SceneryHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Airline;
 use App\Models\Airport;
@@ -176,175 +177,160 @@ class MapController extends Controller
      */
     public function getScenery(Request $request)
     {
+        // 1. Validate input
         $airportIcao = request()->validate([
             'airportIcao' => ['required', 'exists:airports,icao'],
         ])['airportIcao'];
 
-        $returnData = [];
-        $fsacResponse = Http::withHeaders([
-            'Authorization' => config('app.fsaddoncompare_key'),
-        ])->timeout(5)->get('https://api.fsaddoncompare.com/partner/search/icao/' . strtoupper($airportIcao));
+        // 2. Fetch FSAddonCompare sceneries
+        $fsacResponse = $this->fetchFsacSceneries($airportIcao);
 
+        // 3. Decide how to handle response
         if ($fsacResponse->successful()) {
-            $msfs2020 = Simulator::find(1);
-            $msfs2024 = Simulator::find(11);
-            $fsacSceneries = collect(json_decode($fsacResponse->body(), false)->results);
-            $fsacSceneryDevelopers = $fsacSceneries->pluck('developer');
-
-            // Remove sceneries already in our database
-            $w2fSceneries = Scenery::where('icao', $airportIcao)->where('published', true)->with('simulators')->get();
-            $fsacSceneryDevelopers = $fsacSceneryDevelopers->diff($w2fSceneries->pluck('author'));
-
-            // Define a blacklist of developers
-            $developerBlacklist = collect(['microsoft', 'va systems']);
-
-            // Save new FSAddonCompare sceneries
-            foreach ($fsacSceneryDevelopers as $developer) {
-                if ($developerBlacklist->contains(strtolower($developer))) {
-                    continue;
-                }
-
-                // Find the official store link, if not found backup to our whitelisted domains
-                $fsacScenery = $fsacSceneries->firstWhere('developer', $developer);
-                $store = collect($fsacScenery->prices)->firstWhere('isDeveloper', true) ??
-                         collect($fsacScenery->prices)->first(fn ($price) => collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])->contains(fn ($domain) => strpos($price->link, $domain) !== false));
-
-                if (! $store) {
-                    continue;
-                }
-
-                $sceneryModel = Scenery::create([
-                    'icao' => strtoupper($airportIcao),
-                    'author' => $developer,
-                    'link' => $this->getEmbeddedUrl($store->link),
-                    'airport_id' => Airport::where('icao', $airportIcao)->first()->id,
-                    'payware' => $store->currencyPrice->EUR > 0,
-                    'published' => true,
-                ]);
-
-                // Attach the scenery to the related simulator(s)
-                if (in_array($msfs2020->shortened_name, $fsacScenery->simulatorVersions)) {
-                    $sceneryModel->simulators()->attach($msfs2020);
-                }
-
-                if (in_array($msfs2024->shortened_name, $fsacScenery->simulatorVersions)) {
-                    $sceneryModel->simulators()->attach($msfs2024);
-                }
-            }
-
-            // Update FSAddonCompare sceneries if new simulatorVersions is available
-            foreach ($fsacSceneries as $scenery) {
-                $sceneryModel = Scenery::where('author', $scenery->developer)->where('icao', $airportIcao)->first();
-                if ($sceneryModel) {
-                    $storedSimulators = $sceneryModel->simulators->pluck('shortened_name')->toArray();
-                    $newSimulators = $scenery->simulatorVersions;
-
-                    if (array_diff($newSimulators, $storedSimulators) || array_diff($storedSimulators, $newSimulators)) {
-                        $sceneryModel->simulators()->detach();
-                        $sceneryModel->simulators()->attach(Simulator::whereIn('shortened_name', $newSimulators)->get());
-                    }
-                }
-            }
-
-            // Prepare return data
-            $prepareSceneryData = function ($scenery, $store = null) {
-                return [
-                    'id' => $scenery->id ?? null,
-                    'developer' => $scenery->developer ?? $scenery->author,
-                    'link' => $scenery->link,
-                    'linkDomain' => $store ? null : parse_url($scenery->link, PHP_URL_HOST),
-                    'currencyLink' => $store->currencyLink ?? null,
-                    'cheapestLink' => $store->link ?? $scenery->link,
-                    'cheapestStore' => $store->store ?? $scenery->author,
-                    'cheapestPrice' => $store->currencyPrice ?? null,
-                    'ratingAverage' => $scenery->ratingAverage ?? null,
-                    'payware' => (int) ($store ? $store->currencyPrice->EUR > 0 : $scenery->payware),
-                    'fsac' => (bool) $store,
-                ];
-            };
-
-            // Add FSAddonCompare sceneries
-            foreach ($fsacSceneries as $scenery) {
-                if ($developerBlacklist->contains(strtolower($scenery->developer))) {
-                    continue;
-                }
-
-                $cheapestStore = collect($scenery->prices)->sortBy('currencyPrice.EUR')->first();
-
-                if (in_array($msfs2020->shortened_name, $scenery->simulatorVersions)) {
-                    $returnData[$msfs2020->shortened_name][] = $prepareSceneryData($scenery, $cheapestStore);
-                }
-
-                if (in_array($msfs2024->shortened_name, $scenery->simulatorVersions)) {
-                    $returnData[$msfs2024->shortened_name][] = $prepareSceneryData($scenery, $cheapestStore);
-                }
-            }
-
-            // Add our own sceneries
-            foreach ($w2fSceneries as $scenery) {
-                foreach ($scenery->simulators as $simulator) {
-                    if (($simulator->shortened_name === $msfs2020->shortened_name || $simulator->shortened_name === $msfs2024->shortened_name) && $fsacSceneries->pluck('developer')->contains($scenery->author)) {
-                        continue;
-                    }
-                    $returnData[$simulator->shortened_name][] = $prepareSceneryData($scenery);
-                }
-            }
-
+            $returnData = $this->handleSuccessfulFsacResponse($fsacResponse, $airportIcao);
         } else {
-            // If FSAddonCompare API doesn't work, just return our cached sceneries
-            $sceneries = Scenery::where('icao', $airportIcao)->where('published', true)->with('simulators')->get();
-
-            foreach ($sceneries as $scenery) {
-                foreach ($scenery->simulators as $simulator) {
-                    $returnData[$simulator->shortened_name][] = [
-                        'developer' => $scenery->author,
-                        'link' => $scenery->link,
-                        'linkDomain' => parse_url($scenery->link, PHP_URL_HOST),
-                        'cheapestLink' => $scenery->link,
-                        'cheapestStore' => $scenery->author,
-                        'cheapestPrice' => null,
-                        'ratingAverage' => null,
-                        'payware' => (int) $scenery->payware,
-                        'fsac' => false,
-                    ];
-                }
-            }
+            // If FSAddonCompare API fails, get local sceneries
+            $returnData = $this->handleFsacFailure($airportIcao);
         }
 
-        // Sort the sceneries within each simulator. First by alphabetical order, then by payware/free
-        foreach ($returnData as $simulator => $sceneries) {
-            usort($sceneries, fn ($a, $b) => $a['developer'] <=> $b['developer']);
-            usort($sceneries, fn ($a, $b) => $a['payware'] <=> $b['payware']);
-            $returnData[$simulator] = $sceneries;
-        }
+        // 4. Sort sceneries
+        SceneryHelper::sortSceneries($returnData);
 
-        if (isset($returnData) && count($returnData) > 0) {
+        // 5. Return response
+        if (! empty($returnData)) {
             return response()->json(['message' => 'Success', 'data' => $returnData], 200);
         } else {
             return response()->json(['message' => 'Scenery not found'], 404);
         }
     }
 
-    private function getEmbeddedUrl($fullUrl)
+    /**
+     * Fetch FSAddonCompare sceneries
+     */
+    private function fetchFsacSceneries($airportIcao)
     {
-        // First, decode the URL (if necessary)
-        $decodedUrl = urldecode($fullUrl);
+        return Http::withHeaders([
+            'Authorization' => config('app.fsaddoncompare_key'),
+        ])->timeout(5)->get('https://api.fsaddoncompare.com/partner/search/icao/' . strtoupper($airportIcao));
+    }
 
-        // Parse the query part of the URL
-        $urlComponents = parse_url($decodedUrl);
+    /**
+     * Handle successful FSAddonCompare response
+     */
+    private function handleSuccessfulFsacResponse($fsacResponse, $airportIcao)
+    {
+        $returnData = [];
 
-        // Parse the query string into an associative array
-        parse_str($urlComponents['query'], $queryParams);
+        // Prepare references
+        $supportedSimulators = [
+            'MSFS2020' => Simulator::find(1),
+            'MSFS2024' => Simulator::find(11),
+        ];
 
-        // Retrieve the 'url' parameter value
-        $embeddedUrl = isset($queryParams['url']) ? $queryParams['url'] : null;
+        // Decode FSAddonCompare sceneries
+        $fsacSceneries = collect(json_decode($fsacResponse->body(), false)->results);
+        $fsacSceneryDevelopers = $fsacSceneries->pluck('developer');
 
-        // Strip 'www.' and 'secure.' and addoncompare from the URL
-        if ($embeddedUrl) {
-            $embeddedUrl = str_replace(['www.', 'secure.'], '', $embeddedUrl);
-            $embeddedUrl = str_replace('?ref=fsaddoncompare', '', $embeddedUrl);
+        // Remove sceneries already in our DB
+        $w2fSceneries = Scenery::where('icao', $airportIcao)->get();
+        $fsacSceneryDevelopers = $fsacSceneryDevelopers->diff($w2fSceneries->pluck('developer'));
+
+        // Define a blacklist of developers
+        $developerBlacklist = collect(['microsoft', 'va systems']);
+
+        // Save new FSAddonCompare sceneries to cache
+        foreach ($fsacSceneryDevelopers as $developer) {
+            if ($developerBlacklist->contains(strtolower($developer))) {
+                continue;
+            }
+
+            $sceneryModel = Scenery::create([
+                'icao' => strtoupper($airportIcao),
+                'developer' => $developer,
+                'airport_id' => Airport::where('icao', $airportIcao)->first()->id,
+            ]);
+
+            // Attach simulators to correct store link(s)
+            $stores = SceneryHelper::findOfficialOrMarketStore($fsacSceneries, $developer);
+            if ($stores) {
+                SceneryHelper::attachSimulators($stores, $supportedSimulators, $sceneryModel);
+            }
+
         }
 
-        return $embeddedUrl;
+        // Update FSAddonCompare sceneries if new simulatorVersions are available and add link and payware to the pivot table
+        foreach ($fsacSceneries as $scenery) {
+            $sceneryModel = Scenery::where('developer', $scenery->developer)->where('icao', $airportIcao)->first();
+            if ($sceneryModel) {
+                $storedSimulators = $sceneryModel->simulators->pluck('shortened_name')->toArray();
+                $newSimulators = $scenery->simulatorVersions;
+
+                if (array_diff($newSimulators, $storedSimulators) || array_diff($storedSimulators, $newSimulators)) {
+                    $stores = SceneryHelper::findOfficialOrMarketStore($fsacSceneries, $scenery->developer);
+                    if ($stores) {
+                        $sceneryModel->simulators()->detach();
+                        SceneryHelper::attachSimulators($stores, $supportedSimulators, $sceneryModel);
+                    }
+                }
+            }
+        }
+
+        // Add FSAddonCompare sceneries to $returnData
+        foreach ($fsacSceneries as $scenery) {
+            if ($developerBlacklist->contains(strtolower($scenery->developer))) {
+                continue;
+            }
+
+            foreach ($supportedSimulators as $supportedSim) {
+                if (in_array($supportedSim->shortened_name, $scenery->simulatorVersions)) {
+                    $cheapestStore = collect($scenery->prices)
+                        ->filter(fn ($store) => $store->simulatorVersions && collect($store->simulatorVersions)->contains($supportedSim->shortened_name))
+                        ->sortBy('currencyPrice.EUR')
+                        ->first();
+                    $returnData[$supportedSim->shortened_name][] = SceneryHelper::prepareSceneryData($scenery, $cheapestStore);
+                }
+            }
+        }
+
+        // Add our own sceneries which were not covered by FSAddonCompare
+        $w2fSceneries = Scenery::withPublished(true)->where('icao', $airportIcao)->get();
+        foreach ($w2fSceneries as $scenery) {
+            foreach ($scenery->simulators as $scenerySimulator) {
+
+                if (isset($supportedSimulators[$scenerySimulator->shortened_name]) && $fsacSceneries->pluck('developer')->contains($scenery->developer)) {
+                    continue;
+                }
+                $returnData[$scenerySimulator->shortened_name][] = SceneryHelper::prepareSceneryData($scenery, null, $scenerySimulator);
+            }
+        }
+
+        return $returnData;
+    }
+
+    /**
+     * Handle FSAddonCompare failure or timeout by returning sceneries from the cache instead
+     */
+    private function handleFsacFailure($airportIcao)
+    {
+        $returnData = [];
+
+        $sceneries = Scenery::withPublished(true)->where('icao', $airportIcao)->get();
+        foreach ($sceneries as $scenery) {
+            foreach ($scenery->simulators as $scenerySimulator) {
+                $returnData[$scenerySimulator->shortened_name][] = [
+                    'developer' => $scenery->developer,
+                    'link' => $scenerySimulator->pivot->link,
+                    'linkDomain' => parse_url($scenerySimulator->pivot->link, PHP_URL_HOST),
+                    'cheapestLink' => $scenerySimulator->pivot->link,
+                    'cheapestStore' => $scenerySimulator->pivot->developer,
+                    'cheapestPrice' => null,
+                    'ratingAverage' => null,
+                    'payware' => (int) $scenerySimulator->pivot->payware,
+                    'fsac' => false,
+                ];
+            }
+        }
+
+        return $returnData;
     }
 }

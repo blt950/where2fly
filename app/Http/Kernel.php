@@ -38,6 +38,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\UserActive::class,
             \App\Http\Middleware\CheckUtmSource::class,
+            \App\Http\Middleware\AdminVariables::class,
         ],
 
         'api' => [

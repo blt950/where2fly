@@ -191,7 +191,7 @@ class UserController extends Controller
         $listsCount = UserList::count();
         $sceneriesCount = Scenery::count();
 
-        $sceneries = Scenery::where('published', false)->get();
+        $sceneries = Scenery::withPublished(false)->get();
 
         return view('account.admin', compact('usersCount', 'listsCount', 'sceneriesCount', 'sceneries'));
     }

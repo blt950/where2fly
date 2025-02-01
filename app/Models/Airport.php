@@ -71,6 +71,18 @@ class Airport extends Model
         return $this->departureFlights()->where('arr_icao', $toIcao)->where('seen_counter', '>', $seenThreshold)->get()->groupBy('airline_icao');
     }
 
+    public static function whereHasPublishedSceneries($published, $filterSimulatorId = null)
+    {
+        return Airport::whereHas('sceneries', function ($query) use ($published, $filterSimulatorId) {
+            $query->whereHas('simulators', function ($query) use ($published, $filterSimulatorId) {
+                $query->where('published', $published);
+                if ($filterSimulatorId) {
+                    $query->where('simulator_id', $filterSimulatorId);
+                }
+            });
+        });
+    }
+
     public function hasWeatherScore()
     {
         foreach ($this->scores as $s) {

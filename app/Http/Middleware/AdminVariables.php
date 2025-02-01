@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use App\Models\Scenery;
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
+
+class AdminVariables
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     */
+    public function handle(Request $request, Closure $next)
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->admin) {
+                // Get the number of scenery->simulators who are not published
+                $counter = Scenery::withPublished(false)->first();
+                if ($counter) {
+                    $unpublishedSceneries = $counter->simulators->count();
+                } else {
+                    $unpublishedSceneries = 0;
+                }
+                View::share('hasNotifications', $unpublishedSceneries);
+            }
+
+        }
+
+        return $next($request);
+    }
+}
