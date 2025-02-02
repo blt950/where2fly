@@ -2,69 +2,103 @@
 
 namespace App\Helpers;
 
+use App\Models\SceneryDeveloper;
+
 class SceneryHelper
 {
-    public static function findOfficialOrMarketStore($fsacSceneries, $developer)
-    {
-        $fsacDeveloperScenery = $fsacSceneries->firstWhere('developer', $developer);
-        if (! $fsacDeveloperScenery) {
-            return false;
-        }
-
-        $stores = collect($fsacDeveloperScenery->prices)->where('isDeveloper', true);
-
-        if ($stores->isEmpty()) {
-            $stores = collect($fsacDeveloperScenery->prices)
-                ->where(fn ($price) => collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])
-                    ->contains(fn ($domain) => strpos($price->link, $domain) !== false));
-        }
-
-        if ($stores->isEmpty()) {
-            return false;
-        }
-
-        return $stores;
-    }
-
     /**
-     * Attach the correct stores to correct simulator versions
+     * Find the official or market store link for a scenery.
      */
-    public static function attachSimulators($stores, $supportedSimulators, $sceneryModel, $published = true)
+    public static function findOfficialOrMarketStore($stores, $compatibleSimulator)
     {
+        $officialOrMarketStoreLink = null;
+
         foreach ($stores as $store) {
-            foreach ($supportedSimulators as $supportedSim) {
-                if (in_array($supportedSim->shortened_name, $store->simulatorVersions)) {
-                    if (! $sceneryModel->simulators()->where('simulator_id', $supportedSim->id)->exists()) {
-                        $sceneryModel->simulators()->attach($supportedSim, [
-                            'link' => SceneryHelper::getEmbeddedUrl($store->link),
-                            'payware' => $store->currencyPrice->EUR > 0,
-                            'published' => $published,
-                            'source' => 'fsaddoncompare',
-                        ]);
-                    }
+
+            // Check if simulator is compatible
+            if ($store->simulatorVersions == null || empty($store->simulatorVersions)) {
+                continue;
+            }
+
+            if (in_array($compatibleSimulator, $store->simulatorVersions)) {
+                // If the store is the developer, return the link
+                if ($store->isDeveloper) {
+                    $officialOrMarketStoreLink = SceneryHelper::getEmbeddedUrl($store->link);
+                    break;
+                }
+
+                // If the store is a known official or market store, return the link
+                if (collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to', 'contrail.shop'])->contains(function ($domain) use ($store) {
+                    return strpos($store->link, $domain) !== false;
+                })) {
+                    $officialOrMarketStoreLink = SceneryHelper::getEmbeddedUrl($store->link);
+                    break;
                 }
             }
         }
+
+        return $officialOrMarketStoreLink;
+    }
+
+    /**
+     * Find the cheapest store for a scenery.
+     */
+    public static function findCheapestStore($stores, $compatibleSimulator)
+    {
+        $cheapestStore = null;
+        foreach ($stores as $store) {
+
+            if ($store->simulatorVersions == null || empty($store->simulatorVersions)) {
+                continue;
+            }
+
+            if (in_array($compatibleSimulator, $store->simulatorVersions)) {
+                if ($cheapestStore == null) {
+                    $cheapestStore = $store;
+                }
+                if ($store->currencyPrice->EUR < $cheapestStore->currencyPrice->EUR) {
+                    $cheapestStore = $store;
+                }
+            }
+        }
+
+        return $cheapestStore;
     }
 
     /**
      * Function to prepare scenery data
      */
-    public static function prepareSceneryData($scenery, $store = null, $scenerySimulator = null)
+    public static function prepareSceneryData($sceneryDeveloperData, $sceneryData, $apiData = null)
     {
         return [
-            'id' => $scenery->id ?? null,
-            'developer' => $scenery->developer,
-            'link' => isset($scenerySimulator->pivot) ? $scenerySimulator->pivot->link : $scenery->link,
-            'linkDomain' => $store ? null : parse_url($scenerySimulator->pivot->link, PHP_URL_HOST),
-            'currencyLink' => $store->currencyLink ?? null,
-            'cheapestLink' => $store->link ?? $scenerySimulator->pivot->link,
-            'cheapestStore' => $store->store ?? $scenerySimulator->pivot->developer,
-            'cheapestPrice' => $store->currencyPrice ?? null,
-            'ratingAverage' => $scenery->ratingAverage ?? null,
-            'payware' => (int) ($store ? $store->currencyPrice->EUR > 0 : $scenerySimulator->pivot->payware),
-            'fsac' => (bool) $store,
+            'id' => $sceneryData->id,
+            'developer' => $sceneryDeveloperData->developer,
+            'link' => $apiData['link'] ?? $sceneryData->link,
+            'linkDomain' => isset($apiData) ? null : parse_url($sceneryData->link, PHP_URL_HOST),
+            'currencyLink' => $apiData['currencyLink'] ?? null,
+            'cheapestLink' => $apiData['cheapestLink'] ?? $sceneryData->link,
+            'cheapestStore' => $apiData['cheapestStore'] ?? $sceneryDeveloperData->developer,
+            'cheapestPrice' => $apiData['cheapestPrice'] ?? null,
+            'ratingAverage' => $apiData['ratingAverage'] ?? null,
+            'payware' => $apiData['payware'] ?? $sceneryData->payware,
+            'fsac' => (bool) $apiData != null,
         ];
+    }
+
+    public static function fetchW2fSceneries(&$returnData, $airportIcao, $whereNotSourceReference = false)
+    {
+        $w2fDevelopers = SceneryDeveloper::where('icao', $airportIcao)->with('sceneries', 'sceneries.simulator')->get();
+        foreach ($w2fDevelopers as $sceneryDeveloperModel) {
+
+            $sceneryModels = $sceneryDeveloperModel->sceneries;
+            if ($whereNotSourceReference) {
+                $sceneryModels = $sceneryModels->whereNull('source_reference_id');
+            }
+
+            foreach ($sceneryModels as $sceneryModel) {
+                $returnData[$sceneryModel->simulator->shortened_name][] = SceneryHelper::prepareSceneryData($sceneryDeveloperModel, $sceneryModel);
+            }
+        }
     }
 
     /**

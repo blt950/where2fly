@@ -16,16 +16,14 @@ class Scenery extends Model
         return $this->belongsTo(Airport::class);
     }
 
-    public function simulators()
+    public function developer()
     {
-        return $this->belongsToMany(Simulator::class, 'scenery_simulators')->withPivot('link', 'payware', 'published', 'source', 'suggested_by_user_id')->withTimestamps();
+        return $this->belongsTo(SceneryDeveloper::class, 'scenery_developer_id');
     }
 
-    public static function withPublished($published)
+    public function simulator()
     {
-        return Scenery::whereHas('simulators', function ($query) use ($published) {
-            $query->where('published', $published);
-        })->with('simulators');
+        return $this->belongsTo(Simulator::class);
     }
 
     public function suggestedByUser()

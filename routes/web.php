@@ -33,9 +33,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::controller(SceneryController::class)->group(function () {
         Route::get('/scenery/create', 'create')->name('scenery.create');
         Route::post('/scenery/create', 'store')->name('scenery.store');
-        Route::get('/scenery/{scenery}/edit/{simulator}', 'edit')->name('scenery.edit');
-        Route::post('/scenery/{scenery}/edit/{simulator}', 'update')->name('scenery.update');
-        Route::get('/scenery/{scenery}/delete/{simulator}', 'destroy')->name('scenery.delete');
+        Route::get('/scenery/{scenery}/edit', 'edit')->name('scenery.edit');
+        Route::post('/scenery/{scenery}/edit', 'update')->name('scenery.update');
+        Route::get('/scenery/{scenery}/delete', 'destroy')->name('scenery.delete');
     });
 });
 

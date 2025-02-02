@@ -18,16 +18,12 @@ class AdminVariables
      */
     public function handle(Request $request, Closure $next)
     {
+
         if (Auth::check()) {
             $user = Auth::user();
             if ($user->admin) {
                 // Get the number of scenery->simulators who are not published
-                $counter = Scenery::withPublished(false)->first();
-                if ($counter) {
-                    $unpublishedSceneries = $counter->simulators->where('published', false)->count();
-                } else {
-                    $unpublishedSceneries = 0;
-                }
+                $unpublishedSceneries = Scenery::where('published', false)->count();
                 View::share('hasNotifications', $unpublishedSceneries);
             }
 

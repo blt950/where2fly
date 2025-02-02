@@ -15,38 +15,36 @@
             <div class="alert alert-warning mb-3">
                 <b><i class="fas fa-info-circle"></i> These sceneries are already in the database</b>
                 @foreach($existingSceneries as $existingScenery)
-                    @foreach($existingScenery->simulators as $simulator)
-                        <div>
-                            <span class="badge bg-dark">{{ $simulator->shortened_name }}</span>
-                            @if($simulator->pivot->payware == 1)
-                                <span class="badge bg-info">Payware</span>
-                            @elseif($simulator->pivot->payware == 0)
-                                <span class="badge bg-success">Freeware</span>
-                            @else
-                                <span class="badge bg-danger">Included</span>
-                            @endif
-                            {{ $existingScenery->developer }}
-                            @if($simulator->pivot->published == 0 && $simulator->id == $scenerySimulator->id)
-                                <b>(This review)</b>
-                            @elseif($simulator->pivot->published == 0)
-                                (Awaiting review)
-                            @endif
-                        </div>
-                    @endforeach
+                    <div>
+                        <span class="badge bg-dark">{{ $existingScenery->simulator->shortened_name }}</span>
+                        @if($existingScenery->payware == 1)
+                            <span class="badge bg-info">Payware</span>
+                        @elseif($existingScenery->payware == 0)
+                            <span class="badge bg-success">Freeware</span>
+                        @else
+                            <span class="badge bg-danger">Included</span>
+                        @endif
+                        {{ $existingScenery->developer->developer }}
+                        @if($existingScenery->id == $scenery->id)
+                            <b>(This review)</b>
+                        @elseif($existingScenery->published == 0)
+                            (Awaiting review)
+                        @endif
+                    </div>
                 @endforeach
             </div>
         @endisset
 
-        <form action="{{ route('scenery.update', [$scenery, $scenerySimulator]) }}" method="post">
+        <form action="{{ route('scenery.update', [$scenery]) }}" method="post">
             @csrf
-            <h2 class="mb-0">Scenery</h2>
-            <small class="form-text text-white-50">Changing this will change the whole scenery and connected sims ({{ $scenery->simulators->count() }}x)</small>
+            <h2 class="mb-0">Developer</h2>
+            <small class="form-text text-white-50">Changing this will change the whole developer and connected sceneries ({{ $scenery->developer->sceneries->count() }}x)</small>
 
-            <input type="hidden" name="suggested_by_user_id" value="{{ $scenerySimulator->pivot->suggested_by_user_id }}">
+            <input type="hidden" name="suggested_by_user_id" value="{{ $scenery->suggested_by_user_id }}">
 
             <div class="mt-3 mb-3">
                 <label for="icao" class="form-label">ICAO</label>
-                <input type="text" class="form-control" id="icao" name="icao" maxlength="4" value="{{ $scenery->icao }}" required>
+                <input type="text" class="form-control" id="icao" name="icao" maxlength="4" value="{{ $scenery->developer->icao }}" required>
                 @error('icao')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
@@ -54,17 +52,17 @@
 
             <div class="mb-3">
                 <label for="developer" class="form-label">Developer</label>
-                <input type="text" class="form-control" id="developer" name="developer" maxlength="256" value="{{ $scenery->developer }}" required>
+                <input type="text" class="form-control" id="developer" name="developer" maxlength="256" value="{{ $scenery->developer->developer }}" required>
                 @error('developer')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
-            <h2>Simulator: {{ $scenerySimulator->shortened_name }}</h2>
+            <h2>Scenery: {{ $scenery->simulator->shortened_name }}</h2>
         
             <div class="mb-3">
                 <label for="link" class="form-label">Link</label>
-                <input type="url" class="form-control" id="link" name="link" maxlength="256" value="{{ $scenerySimulator->pivot->link }}" required>
+                <input type="url" class="form-control" id="link" name="link" maxlength="256" value="{{ $scenery->link }}" required>
                 @error('link')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
@@ -74,8 +72,8 @@
                 <label class="form-label" for="payware">Payware</label>
                 <select class="form-select" id="payware" name="payware" required>
                     <option disabled selected>Select</option>
-                    <option value="1" @if($scenerySimulator->pivot->payware == 1) selected @endif>Payware</option>
-                    <option value="0" @if($scenerySimulator->pivot->payware == 0) selected @endif>Freeware</option>
+                    <option value="1" @if($scenery->payware == 1) selected @endif>Payware</option>
+                    <option value="0" @if($scenery->payware == 0) selected @endif>Freeware</option>
                 </select>
                 @error('payware')
                     <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -83,7 +81,7 @@
             </div>
 
             <div class="mb-3">
-                <input class="form-check-input" type="checkbox" id="published" value="1" name="published" {{ ($scenerySimulator->pivot->published) ? 'checked' : null }}>
+                <input class="form-check-input" type="checkbox" id="published" value="1" name="published" {{ ($scenery->published) ? 'checked' : null }}>
                 <label class="form-check-label" for="published">
                     <b>Published</b>
                 </label>
@@ -93,7 +91,7 @@
             </div>
 
             <div class="d-flex justify-content-between">
-                <a href="{{ route('scenery.delete', [$scenery, $scenerySimulator]) }}" class="btn btn-danger mt-3" onclick="return confirm('Are you sure you want to delete this scenery?')">
+                <a href="{{ route('scenery.delete', [$scenery]) }}" class="btn btn-danger mt-3" onclick="return confirm('Are you sure you want to delete this scenery?')">
                     <i class="fas fa-trash"></i>
                     Delete
                 </a>
@@ -106,7 +104,7 @@
 @section('js')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var route = "{{ route('scenery.edit', ['x', 'x']) }}";
+            var route = "{{ route('scenery.edit', ['x']) }}";
             route = route.replace(/^https?:\/\/[^\/]+/, '');
             umami.track(props => ({ ...props, url: route }));
         });
