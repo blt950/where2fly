@@ -4,66 +4,63 @@ namespace App\Helpers;
 
 class SceneryHelper
 {
-    public static function findOfficialOrMarketStore($fsacSceneries, $developer)
+    /**
+     * Find the official or market store link for a scenery.
+     */
+    public static function findOfficialOrMarketStore($stores, $developer)
     {
-        $fsacDeveloperScenery = $fsacSceneries->firstWhere('developer', $developer);
-        if (! $fsacDeveloperScenery) {
-            return false;
+        $officialOrMarketStoreLink = null;
+        foreach($stores as $store){
+
+            // If the store is the developer, return the link
+            if($store->isDeveloper == $developer){
+                $officialOrMarketStoreLink = SceneryHelper::getEmbeddedUrl($store->link);
+                break;
+            }
+
+            // If the store is a known official or market store, return the link
+            if($officialOrMarketStoreLink == null){
+                $officialOrMarketStoreLink = collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])->contains(function($domain) use ($store){
+                    return strpos($store->link, $domain) !== false;
+                }) ? SceneryHelper::getEmbeddedUrl($store->link) : null;
+            }
         }
-
-        $stores = collect($fsacDeveloperScenery->prices)->where('isDeveloper', true);
-
-        if ($stores->isEmpty()) {
-            $stores = collect($fsacDeveloperScenery->prices)
-                ->where(fn ($price) => collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])
-                    ->contains(fn ($domain) => strpos($price->link, $domain) !== false));
-        }
-
-        if ($stores->isEmpty()) {
-            return false;
-        }
-
-        return $stores;
+        return $officialOrMarketStoreLink;
     }
 
     /**
-     * Attach the correct stores to correct simulator versions
+     * Find the cheapest store for a scenery.
      */
-    public static function attachSimulators($stores, $supportedSimulators, $sceneryModel, $published = true)
+    public static function findCheapestStore($stores)
     {
-        foreach ($stores as $store) {
-            foreach ($supportedSimulators as $supportedSim) {
-                if (in_array($supportedSim->shortened_name, $store->simulatorVersions)) {
-                    if (! $sceneryModel->simulators()->where('simulator_id', $supportedSim->id)->exists()) {
-                        $sceneryModel->simulators()->attach($supportedSim, [
-                            'link' => SceneryHelper::getEmbeddedUrl($store->link),
-                            'payware' => $store->currencyPrice->EUR > 0,
-                            'published' => $published,
-                            'source' => 'fsaddoncompare',
-                        ]);
-                    }
-                }
+        $cheapestStore = null;
+        foreach($stores as $store){
+            if($cheapestStore == null) $cheapestStore = $store;
+            if($store->currencyPrice->EUR < $cheapestStore->currencyPrice->EUR){
+                $cheapestStore = $store;
             }
         }
+
+        return $cheapestStore;
     }
 
     /**
      * Function to prepare scenery data
      */
-    public static function prepareSceneryData($scenery, $store = null, $scenerySimulator = null)
+    public static function prepareSceneryData($sceneryDeveloperData, $sceneryData, $apiData = null)
     {
         return [
-            'id' => $scenery->id ?? null,
-            'developer' => $scenery->developer,
-            'link' => isset($scenerySimulator->pivot) ? $scenerySimulator->pivot->link : $scenery->link,
-            'linkDomain' => $store ? null : parse_url($scenerySimulator->pivot->link, PHP_URL_HOST),
-            'currencyLink' => $store->currencyLink ?? null,
-            'cheapestLink' => $store->link ?? $scenerySimulator->pivot->link,
-            'cheapestStore' => $store->store ?? $scenerySimulator->pivot->developer,
-            'cheapestPrice' => $store->currencyPrice ?? null,
-            'ratingAverage' => $scenery->ratingAverage ?? null,
-            'payware' => (int) ($store ? $store->currencyPrice->EUR > 0 : $scenerySimulator->pivot->payware),
-            'fsac' => (bool) $store,
+            'id' => $sceneryData->id,
+            'developer' => $sceneryDeveloperData->developer,
+            'link' => $apiData['link'] ?? $sceneryData->link,
+            'linkDomain' => isset($apiData) ? null : parse_url($sceneryData->link, PHP_URL_HOST),
+            'currencyLink' => $apiData['currencyLink'] ?? null,
+            'cheapestLink' => $apiData['link'] ?? $sceneryData->link,
+            'cheapestStore' => $apiData['cheapestStore'] ?? $sceneryDeveloperData->developer,
+            'cheapestPrice' => $apiData['cheapestPrice'] ?? null,
+            'ratingAverage' => $apiData['ratingAverage'] ?? null,
+            'payware' => $apiData['payware'] ?? $sceneryData->payware,
+            'fsac' => (bool) $apiData != null,
         ];
     }
 

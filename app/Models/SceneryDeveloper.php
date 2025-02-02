@@ -19,6 +19,5 @@ class SceneryDeveloper extends Model
     public function sceneries()
     {
         return $this->hasMany(Scenery::class, 'scenery_developer_id');
-    }
-    
+    }    
 }

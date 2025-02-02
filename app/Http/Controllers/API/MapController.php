@@ -14,6 +14,7 @@ use App\Models\UserList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use App\Models\SceneryDeveloper;
 
 class MapController extends Controller
 {
@@ -219,93 +220,83 @@ class MapController extends Controller
      */
     private function handleSuccessfulFsacResponse($fsacResponse, $airportIcao)
     {
-        $returnData = [];
-
         // Prepare references
-        $supportedSimulators = [
+        $returnData = [];
+        $supportedApiSimulators = [
             'MSFS2020' => Simulator::find(1),
             'MSFS2024' => Simulator::find(11),
         ];
 
-        // Decode FSAddonCompare sceneries
+        // Run through results and decide actions
         $fsacSceneries = collect(json_decode($fsacResponse->body(), false)->results);
-        $fsacSceneryDevelopers = $fsacSceneries->pluck('developer');
+        foreach($fsacSceneries as $scenery){
 
-        // Remove sceneries already in our DB
-        $w2fSceneries = Scenery::where('icao', $airportIcao)->get();
-        $fsacSceneryDevelopers = $fsacSceneryDevelopers->diff($w2fSceneries->pluck('developer'));
+            // Get id for the product
+            $fsacId = $scenery->id;
 
-        // Define a blacklist of developers
-        $developerBlacklist = collect(['microsoft', 'va systems']);
-
-        // Save new FSAddonCompare sceneries to cache
-        foreach ($fsacSceneryDevelopers as $developer) {
-            if ($developerBlacklist->contains(strtolower($developer))) {
+            // Skip blacklisted developers (due to irrelevant addons or duplicates)
+            if(in_array(strtolower($scenery->developer), ['microsoft', 'va systems'])){
                 continue;
             }
 
-            $sceneryModel = Scenery::create([
-                'icao' => strtoupper($airportIcao),
-                'developer' => $developer,
-                'airport_id' => Airport::where('icao', $airportIcao)->first()->id,
-            ]);
-
-            // Attach simulators to correct store link(s)
-            $stores = SceneryHelper::findOfficialOrMarketStore($fsacSceneries, $developer);
-            if ($stores) {
-                SceneryHelper::attachSimulators($stores, $supportedSimulators, $sceneryModel);
+            // Find developer in question, or create them
+            $sceneryDeveloperModel = SceneryDeveloper::where('icao', $airportIcao)->where('developer', $scenery->developer)->with('sceneries')->first();
+            if($sceneryDeveloperModel == null){
+                // Let's create the scenery developer that doesn't exist
+                $sceneryDeveloperModel = SceneryDeveloper::create([
+                    'icao' => strtoupper($airportIcao),
+                    'developer' => $scenery->developer,
+                    'airport_id' => Airport::where('icao', $airportIcao)->first()->id,
+                ]);
             }
 
-        }
+            // Find the cheapest store and official or market store for the scenery
+            $cheapestStore = SceneryHelper::findCheapestStore($scenery->prices);
+            $officialOrMarketStoreLink = SceneryHelper::findOfficialOrMarketStore($scenery->prices, $scenery->developer);
 
-        // Update FSAddonCompare sceneries if new simulatorVersions are available and add link and payware to the pivot table
-        foreach ($fsacSceneries as $scenery) {
-            $sceneryModel = Scenery::where('developer', $scenery->developer)->where('icao', $airportIcao)->first();
-            if ($sceneryModel) {
-                $storedSimulators = $sceneryModel->simulators->pluck('shortened_name')->toArray();
-                $newSimulators = $scenery->simulatorVersions;
+            // Loop through all supported simulators and create or update the sceneries table
+            foreach($scenery->simulatorVersions as $compatibleSimulator){
 
-                if (array_diff($newSimulators, $storedSimulators) || array_diff($storedSimulators, $newSimulators)) {
-                    $stores = SceneryHelper::findOfficialOrMarketStore($fsacSceneries, $scenery->developer);
-                    if ($stores) {
-                        $sceneryModel->simulators()->detach();
-                        SceneryHelper::attachSimulators($stores, $supportedSimulators, $sceneryModel);
+                $sceneryModel = $sceneryDeveloperModel->sceneries->where('simulator_id', $supportedApiSimulators[$compatibleSimulator]->id)->where('source_reference_id', $fsacId)->first();
+                if($sceneryModel == null){
+                    // Let's create the scenery that doesn't exist
+                    $sceneryModel = Scenery::create([
+                        'scenery_developer_id' => $sceneryDeveloperModel->id,
+                        'simulator_id' => $supportedApiSimulators[$compatibleSimulator]->id,
+                        'link' => $officialOrMarketStoreLink,
+                        'payware' => $cheapestStore->currencyPrice->EUR > 0,
+                        'published' => true,
+                        'source' => 'fsaddoncompare',
+                        'source_reference_id' => $fsacId,
+                    ]);
+                } else {
+                    // Check if the link has changed and update it
+                    if($sceneryModel->link != $officialOrMarketStoreLink){
+                        $sceneryModel->link = $officialOrMarketStoreLink;
+                        $sceneryModel->save();
                     }
                 }
+
+                // Add scenery to return data
+                $returnData[$supportedApiSimulators[$compatibleSimulator]->shortened_name][] = SceneryHelper::prepareSceneryData($sceneryDeveloperModel, $sceneryModel, [
+                    'link' => $officialOrMarketStoreLink,
+                    'currencyLink' => $cheapestStore->currencyLink,
+                    'cheapestLink' => $cheapestStore->link,
+                    'cheapestStore' => $cheapestStore->store,
+                    'cheapestPrice' => $cheapestStore->currencyPrice,
+                    'ratingAverage' => $scenery->ratingAverage,
+                    'payware' => $cheapestStore->currencyPrice->EUR > 0,
+                    'fsac' => true,
+                ]);
             }
+
         }
 
-        // Add FSAddonCompare sceneries to $returnData
-        foreach ($fsacSceneries as $scenery) {
-            if ($developerBlacklist->contains(strtolower($scenery->developer))) {
-                continue;
-            }
-
-            foreach ($supportedSimulators as $supportedSim) {
-                if (in_array($supportedSim->shortened_name, $scenery->simulatorVersions)) {
-                    $cheapestStore = collect($scenery->prices)
-                        ->filter(function ($store) use ($scenery, $supportedSim) {
-                            $storeVersions = $store->simulatorVersions ?? $scenery->simulatorVersions;
-
-                            return $storeVersions && collect($storeVersions)->contains($supportedSim->shortened_name);
-                        })
-                        ->sortBy('currencyPrice.EUR')
-                        ->first();
-
-                    $returnData[$supportedSim->shortened_name][] = SceneryHelper::prepareSceneryData($scenery, $cheapestStore);
-                }
-            }
-        }
-
-        // Add our own sceneries which were not covered by FSAddonCompare
-        $w2fSceneries = Scenery::withPublished(true)->where('icao', $airportIcao)->get();
-        foreach ($w2fSceneries as $scenery) {
-            foreach ($scenery->simulators as $scenerySimulator) {
-
-                if (isset($supportedSimulators[$scenerySimulator->shortened_name]) && $fsacSceneries->pluck('developer')->contains($scenery->developer)) {
-                    continue;
-                }
-                $returnData[$scenerySimulator->shortened_name][] = SceneryHelper::prepareSceneryData($scenery, null, $scenerySimulator);
+        // Add our own local sceneries which are not covered by FSAddonCompare
+        $w2fDevelopers = SceneryDeveloper::where('icao', $airportIcao)->with('sceneries')->get();
+        foreach($w2fDevelopers as $sceneryDeveloperModel){
+            foreach($sceneryDeveloperModel->sceneries->whereNull('source_reference_id') as $sceneryModel){
+                $returnData[$sceneryModel->simulator->shortened_name][] = SceneryHelper::prepareSceneryData($sceneryDeveloperModel, $sceneryModel);
             }
         }
 

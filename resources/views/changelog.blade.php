@@ -18,6 +18,7 @@
                 <li><a href="https://github.com/blt950/where2fly" target="_blank">The project is now open source!</a></li>
                 <li>Added MSFS2024 scenery support</li>
                 <li>Added simulator name to lists</li>
+                <li>Added notice of existing contributions when suggesting a new airport</li>
                 <li>Fixed SimMarket links</li>
             </ul>
 

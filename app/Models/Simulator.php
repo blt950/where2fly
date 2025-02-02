@@ -18,6 +18,6 @@ class Simulator extends Model
 
     public function sceneries()
     {
-        return $this->belongsToMany(Scenery::class, 'scenery_simulators')->withTimestamps();
+        return $this->hasMany(Scenery::class, 'simulator_id');
     }
 }
