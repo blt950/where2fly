@@ -18,7 +18,7 @@ class AdminVariables
      */
     public function handle(Request $request, Closure $next)
     {
-        
+
         if (Auth::check()) {
             $user = Auth::user();
             if ($user->admin) {

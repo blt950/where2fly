@@ -9,12 +9,12 @@ use App\Models\Airline;
 use App\Models\Airport;
 use App\Models\Flight;
 use App\Models\Scenery;
+use App\Models\SceneryDeveloper;
 use App\Models\Simulator;
 use App\Models\UserList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use App\Models\SceneryDeveloper;
 
 class MapController extends Controller
 {
@@ -215,8 +215,6 @@ class MapController extends Controller
         ])->timeout(5)->get('https://api.fsaddoncompare.com/partner/search/icao/' . strtoupper($airportIcao));
     }
 
-    
-
     /**
      * Handle successful FSAddonCompare response
      */
@@ -231,19 +229,19 @@ class MapController extends Controller
 
         // Run through results and decide actions
         $fsacSceneries = collect(json_decode($fsacResponse->body(), false)->results);
-        foreach($fsacSceneries as $scenery){
+        foreach ($fsacSceneries as $scenery) {
 
             // Get id for the product
             $fsacId = $scenery->id;
 
             // Skip blacklisted developers (due to irrelevant addons or duplicates)
-            if(in_array(strtolower($scenery->developer), ['microsoft', 'va systems'])){
+            if (in_array(strtolower($scenery->developer), ['microsoft', 'va systems'])) {
                 continue;
             }
 
             // Find developer in question, or create them
             $sceneryDeveloperModel = SceneryDeveloper::where('icao', $airportIcao)->where('developer', $scenery->developer)->with('sceneries')->first();
-            if($sceneryDeveloperModel == null){
+            if ($sceneryDeveloperModel == null) {
                 // Let's create the scenery developer that doesn't exist
                 $sceneryDeveloperModel = SceneryDeveloper::create([
                     'icao' => strtoupper($airportIcao),
@@ -253,16 +251,16 @@ class MapController extends Controller
             }
 
             // Loop through all supported simulators and create or update the sceneries table
-            foreach($scenery->simulatorVersions as $compatibleSimulator){
+            foreach ($scenery->simulatorVersions as $compatibleSimulator) {
 
                 $simulatorId = isset($supportedApiSimulators[$compatibleSimulator]) ? $supportedApiSimulators[$compatibleSimulator]->id : null;
-                if(!$simulatorId){
+                if (! $simulatorId) {
                     continue;
                 }
 
                 // Find the official or market store link
                 $officialOrMarketStoreLink = SceneryHelper::findOfficialOrMarketStore($scenery->prices, $compatibleSimulator);
-                if($officialOrMarketStoreLink == null){
+                if ($officialOrMarketStoreLink == null) {
                     continue;
                 }
 
@@ -270,7 +268,7 @@ class MapController extends Controller
                 $cheapestStore = SceneryHelper::findCheapestStore($scenery->prices, $compatibleSimulator);
 
                 $sceneryModel = $sceneryDeveloperModel->sceneries->where('simulator_id', $simulatorId)->where('source_reference_id', $fsacId)->first();
-                if($sceneryModel == null){
+                if ($sceneryModel == null) {
                     // Let's create the scenery that doesn't exist
                     $sceneryModel = Scenery::create([
                         'scenery_developer_id' => $sceneryDeveloperModel->id,
@@ -283,7 +281,7 @@ class MapController extends Controller
                     ]);
                 } else {
                     // Check if the link has changed and update it
-                    if($sceneryModel->link != $officialOrMarketStoreLink){
+                    if ($sceneryModel->link != $officialOrMarketStoreLink) {
                         $sceneryModel->link = $officialOrMarketStoreLink;
                         $sceneryModel->save();
                     }

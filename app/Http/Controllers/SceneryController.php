@@ -7,7 +7,6 @@ use App\Models\Airport;
 use App\Models\Scenery;
 use App\Models\SceneryDeveloper;
 use App\Models\Simulator;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
@@ -55,7 +54,7 @@ class SceneryController extends Controller
 
         // Attach the simulator to the scenery
         if ($request->simulators) {
-            foreach($request->simulators as $simulatorId){
+            foreach ($request->simulators as $simulatorId) {
                 Scenery::create([
                     'scenery_developer_id' => $scenery->id,
                     'simulator_id' => $simulatorId,
