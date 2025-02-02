@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Scenery;
+use App\Models\SceneryDeveloper;
 use Illuminate\Console\Command;
 
 class CleanupSceneries extends Command
@@ -27,7 +27,7 @@ class CleanupSceneries extends Command
     public function handle()
     {
         // Get all Sceneries with no attached Simulators and delete them
-        $sceneries = Scenery::doesntHave('simulators')->get();
+        $sceneries = SceneryDeveloper::doesntHave('sceneries')->get();
         $this->info('Deleting ' . $sceneries->count() . ' sceneries');
         $sceneries->each->delete();
     }

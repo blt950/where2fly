@@ -17,16 +17,11 @@
         @isset($sceneries)
             <ul>
                 @foreach($sceneries as $scenery)
-                    @foreach($scenery->simulators as $simulator)
-                        @if($simulator->pivot->published == 1)
-                            @continue
-                        @endif
-                        <li>
-                            <span class="badge bg-dark">{{ $simulator->shortened_name }}</span>
-                            <a href="{{ route('scenery.edit', [$scenery, $simulator]) }}">{{ $scenery->icao }}</a>
-                            <span class="text-white-50">by {{ isset($simulator->pivot->suggested_by_user_id) ? App\Models\User::find($simulator->pivot->suggested_by_user_id)->username : 'System' }}</span>
-                        </li>
-                    @endforeach
+                    <li>
+                        <span class="badge bg-dark">{{ $scenery->simulator->shortened_name }}</span>
+                        <a href="{{ route('scenery.edit', [$scenery]) }}">{{ $scenery->developer->icao }}</a>
+                        <span class="text-white-50">by {{ isset($scenery->suggested_by_user_id) ? App\Models\User::find($scenery->suggested_by_user_id)->username : 'System' }}</span>
+                    </li>
                 @endforeach
             </ul>
         @else
