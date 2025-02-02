@@ -16,22 +16,22 @@
                 @enderror
             </div>
 
-            @isset($sceneries)
+            @isset($existingDevelopers)
                 <div class="alert alert-warning mb-3">
                     <b><i class="fas fa-info-circle"></i> These sceneries are already in the database</b>
-                    @foreach($sceneries as $scenery)
-                        @foreach($scenery->simulators as $scenerySimulator)
+                    @foreach($existingDevelopers as $developer)
+                        @foreach($developer->sceneries as $existingScenery)
                             <div>
-                                <span class="badge bg-dark">{{ $scenerySimulator->shortened_name }}</span>
-                                @if($scenerySimulator->pivot->payware == 1)
+                                <span class="badge bg-dark">{{ $existingScenery->simulator->shortened_name }}</span>
+                                @if($existingScenery->payware == 1)
                                     <span class="badge bg-info">Payware</span>
-                                @elseif($scenerySimulator->pivot->payware == 0)
+                                @elseif($existingScenery->payware == 0)
                                     <span class="badge bg-success">Freeware</span>
                                 @else
                                     <span class="badge bg-danger">Included</span>
                                 @endif
-                                {{ $scenery->developer }}
-                                @if($scenerySimulator->pivot->published == 0)
+                                {{ $existingScenery->developer->developer }}
+                                @if($existingScenery->published == 0)
                                     (Awaiting review)
                                 @endif
                             </div>

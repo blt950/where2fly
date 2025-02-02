@@ -21,13 +21,13 @@ class SceneryController extends Controller
     {
         $availableSimulators = Simulator::all()->sortBy('order');
 
-        $airport = Airport::where('icao', $request->get('airport'))->first();
-        $sceneries = null;
+        $airport = Airport::where('icao', $request->get('airport'))->with('sceneryDevelopers', 'sceneryDevelopers.sceneries')->first();
+        $existingDevelopers = null;
         if ($airport) {
-            $sceneries = $airport->sceneries;
+            $existingDevelopers = $airport->sceneryDevelopers;
         }
 
-        return view('scenery.create', compact('availableSimulators', 'sceneries'));
+        return view('scenery.create', compact('availableSimulators', 'existingDevelopers'));
     }
 
     /**
