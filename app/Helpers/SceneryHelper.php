@@ -2,42 +2,61 @@
 
 namespace App\Helpers;
 
+use App\Models\SceneryDeveloper;
+
 class SceneryHelper
 {
     /**
      * Find the official or market store link for a scenery.
      */
-    public static function findOfficialOrMarketStore($stores, $developer)
+    public static function findOfficialOrMarketStore($stores, $compatibleSimulator)
     {
         $officialOrMarketStoreLink = null;
+
         foreach($stores as $store){
 
-            // If the store is the developer, return the link
-            if($store->isDeveloper == $developer){
-                $officialOrMarketStoreLink = SceneryHelper::getEmbeddedUrl($store->link);
-                break;
+            // Check if simulator is compatible
+            if($store->simulatorVersions == null || empty($store->simulatorVersions)){
+                continue;
             }
 
-            // If the store is a known official or market store, return the link
-            if($officialOrMarketStoreLink == null){
-                $officialOrMarketStoreLink = collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to'])->contains(function($domain) use ($store){
+            if(in_array($compatibleSimulator, $store->simulatorVersions)){
+                // If the store is the developer, return the link
+                if($store->isDeveloper){
+                    $officialOrMarketStoreLink = SceneryHelper::getEmbeddedUrl($store->link);
+                    break;
+                }
+
+                // If the store is a known official or market store, return the link
+                if (collect(['simmarket.com', 'aerosoft.com', 'orbxdirect.com', 'flightsim.to', 'contrail.shop'])->contains(function($domain) use ($store){
                     return strpos($store->link, $domain) !== false;
-                }) ? SceneryHelper::getEmbeddedUrl($store->link) : null;
-            }
+                })) {
+                    $officialOrMarketStoreLink = SceneryHelper::getEmbeddedUrl($store->link);
+                    break;
+                }
+            }            
         }
+
         return $officialOrMarketStoreLink;
     }
 
     /**
      * Find the cheapest store for a scenery.
      */
-    public static function findCheapestStore($stores)
+    public static function findCheapestStore($stores, $compatibleSimulator)
     {
         $cheapestStore = null;
         foreach($stores as $store){
-            if($cheapestStore == null) $cheapestStore = $store;
-            if($store->currencyPrice->EUR < $cheapestStore->currencyPrice->EUR){
-                $cheapestStore = $store;
+
+            if($store->simulatorVersions == null || empty($store->simulatorVersions)){
+                continue;
+            }
+
+            if(in_array($compatibleSimulator, $store->simulatorVersions)){
+                if($cheapestStore == null) $cheapestStore = $store;
+                if($store->currencyPrice->EUR < $cheapestStore->currencyPrice->EUR){
+                    $cheapestStore = $store;
+                }
             }
         }
 
@@ -62,6 +81,21 @@ class SceneryHelper
             'payware' => $apiData['payware'] ?? $sceneryData->payware,
             'fsac' => (bool) $apiData != null,
         ];
+    }
+
+    public static function fetchW2fSceneries(&$returnData, $airportIcao, $whereNotSourceReference = false){
+        $w2fDevelopers = SceneryDeveloper::where('icao', $airportIcao)->with('sceneries', 'sceneries.simulator')->get();
+        foreach($w2fDevelopers as $sceneryDeveloperModel){
+
+            $sceneryModels = $sceneryDeveloperModel->sceneries;
+            if($whereNotSourceReference){
+                $sceneryModels = $sceneryModels->whereNull('source_reference_id');
+            }
+
+            foreach($sceneryModels as $sceneryModel){
+                $returnData[$sceneryModel->simulator->shortened_name][] = SceneryHelper::prepareSceneryData($sceneryDeveloperModel, $sceneryModel);
+            }
+        }
     }
 
     /**

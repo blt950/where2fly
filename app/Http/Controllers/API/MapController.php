@@ -215,6 +215,8 @@ class MapController extends Controller
         ])->timeout(5)->get('https://api.fsaddoncompare.com/partner/search/icao/' . strtoupper($airportIcao));
     }
 
+    
+
     /**
      * Handle successful FSAddonCompare response
      */
@@ -250,14 +252,24 @@ class MapController extends Controller
                 ]);
             }
 
-            // Find the cheapest store and official or market store for the scenery
-            $cheapestStore = SceneryHelper::findCheapestStore($scenery->prices);
-            $officialOrMarketStoreLink = SceneryHelper::findOfficialOrMarketStore($scenery->prices, $scenery->developer);
-
             // Loop through all supported simulators and create or update the sceneries table
             foreach($scenery->simulatorVersions as $compatibleSimulator){
 
-                $sceneryModel = $sceneryDeveloperModel->sceneries->where('simulator_id', $supportedApiSimulators[$compatibleSimulator]->id)->where('source_reference_id', $fsacId)->first();
+                $simulatorId = isset($supportedApiSimulators[$compatibleSimulator]) ? $supportedApiSimulators[$compatibleSimulator]->id : null;
+                if(!$simulatorId){
+                    continue;
+                }
+
+                // Find the official or market store link
+                $officialOrMarketStoreLink = SceneryHelper::findOfficialOrMarketStore($scenery->prices, $compatibleSimulator);
+                if($officialOrMarketStoreLink == null){
+                    continue;
+                }
+
+                // Find the cheapest store and official or market store for the scenery
+                $cheapestStore = SceneryHelper::findCheapestStore($scenery->prices, $compatibleSimulator);
+
+                $sceneryModel = $sceneryDeveloperModel->sceneries->where('simulator_id', $simulatorId)->where('source_reference_id', $fsacId)->first();
                 if($sceneryModel == null){
                     // Let's create the scenery that doesn't exist
                     $sceneryModel = Scenery::create([
@@ -293,12 +305,7 @@ class MapController extends Controller
         }
 
         // Add our own local sceneries which are not covered by FSAddonCompare
-        $w2fDevelopers = SceneryDeveloper::where('icao', $airportIcao)->with('sceneries', 'sceneries.simulator')->get();
-        foreach($w2fDevelopers as $sceneryDeveloperModel){
-            foreach($sceneryDeveloperModel->sceneries->whereNull('source_reference_id') as $sceneryModel){
-                $returnData[$sceneryModel->simulator->shortened_name][] = SceneryHelper::prepareSceneryData($sceneryDeveloperModel, $sceneryModel);
-            }
-        }
+        SceneryHelper::fetchW2fSceneries($returnData, $airportIcao, true);
 
         return $returnData;
     }
@@ -309,23 +316,7 @@ class MapController extends Controller
     private function handleFsacFailure($airportIcao)
     {
         $returnData = [];
-
-        $sceneries = Scenery::withPublished(true)->where('icao', $airportIcao)->get();
-        foreach ($sceneries as $scenery) {
-            foreach ($scenery->simulators as $scenerySimulator) {
-                $returnData[$scenerySimulator->shortened_name][] = [
-                    'developer' => $scenery->developer,
-                    'link' => $scenerySimulator->pivot->link,
-                    'linkDomain' => parse_url($scenerySimulator->pivot->link, PHP_URL_HOST),
-                    'cheapestLink' => $scenerySimulator->pivot->link,
-                    'cheapestStore' => $scenerySimulator->pivot->developer,
-                    'cheapestPrice' => null,
-                    'ratingAverage' => null,
-                    'payware' => (int) $scenerySimulator->pivot->payware,
-                    'fsac' => false,
-                ];
-            }
-        }
+        SceneryHelper::fetchW2fSceneries($returnData, $airportIcao);
 
         return $returnData;
     }
