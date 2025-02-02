@@ -293,7 +293,7 @@ class MapController extends Controller
         }
 
         // Add our own local sceneries which are not covered by FSAddonCompare
-        $w2fDevelopers = SceneryDeveloper::where('icao', $airportIcao)->with('sceneries')->get();
+        $w2fDevelopers = SceneryDeveloper::where('icao', $airportIcao)->with('sceneries', 'sceneries.simulator')->get();
         foreach($w2fDevelopers as $sceneryDeveloperModel){
             foreach($sceneryDeveloperModel->sceneries->whereNull('source_reference_id') as $sceneryModel){
                 $returnData[$sceneryModel->simulator->shortened_name][] = SceneryHelper::prepareSceneryData($sceneryDeveloperModel, $sceneryModel);
