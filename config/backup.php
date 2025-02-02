@@ -234,7 +234,7 @@ return [
         ],
 
         'discord' => [
-            'webhook_url' => 'https://discord.com/api/webhooks/1267093342290837574/j2G_Fc_BOfsN_rrM0Q-pts8era0BfuzR3j9K1Dn7DXbWExbGk5TXQGkbWkkPbluBdclc',
+            'webhook_url' => env('B3_WEBHOOK', null),
 
             /*
              * If this is an empty string, the name field on the webhook will be used.
@@ -289,34 +289,29 @@ return [
 
         'default_strategy' => [
             /*
-             * The number of days for which backups must be kept.
-             */
+            * For the first 7 days, keep every backup (i.e. daily backups).
+            */
             'keep_all_backups_for_days' => 7,
 
             /*
-             * After the "keep_all_backups_for_days" period is over, the most recent backup
-             * of that day will be kept. Older backups within the same day will be removed.
-             * If you create backups only once a day, no backups will be removed yet.
-             */
-            'keep_daily_backups_for_days' => 16,
+            * After the first 7 days, we don't want to keep additional daily backups,
+            * so we set this to 0.
+            */
+            'keep_daily_backups_for_days' => 0,
 
             /*
-             * After the "keep_daily_backups_for_days" period is over, the most recent backup
-             * of that week will be kept. Older backups within the same week will be removed.
-             * If you create backups only once a week, no backups will be removed yet.
-             */
+            * After the daily period, keep one backup per week for 4 weeks (≈1 month).
+            */
             'keep_weekly_backups_for_weeks' => 4,
 
             /*
-             * After the "keep_weekly_backups_for_weeks" period is over, the most recent backup
-             * of that month will be kept. Older backups within the same month will be removed.
-             */
-            'keep_monthly_backups_for_months' => 1,
+            * Then keep one backup per month for 4 months.
+            */
+            'keep_monthly_backups_for_months' => 4,
 
             /*
-             * After the "keep_monthly_backups_for_months" period is over, the most recent backup
-             * of that year will be kept. Older backups within the same year will be removed.
-             */
+            * We don't want to keep any yearly backups.
+            */
             'keep_yearly_backups_for_years' => 0,
 
             /*
