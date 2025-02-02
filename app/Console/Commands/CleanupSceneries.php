@@ -28,6 +28,7 @@ class CleanupSceneries extends Command
     {
         // Get all Sceneries with no attached Simulators and delete them
         $sceneries = Scenery::doesntHave('simulators')->get();
+        $this->info('Deleting ' . $sceneries->count() . ' sceneries');
         $sceneries->each->delete();
     }
 }
