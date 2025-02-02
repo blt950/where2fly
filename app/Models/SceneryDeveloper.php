@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Scenery extends Model
+class SceneryDeveloper extends Model
 {
     use HasFactory;
 
@@ -16,13 +16,9 @@ class Scenery extends Model
         return $this->belongsTo(Airport::class);
     }
 
-    public function developer()
+    public function sceneries()
     {
-        return $this->belongsTo(SceneryDeveloper::class, 'scenery_developer_id');
+        return $this->hasMany(Scenery::class, 'scenery_developer_id');
     }
-
-    public function suggestedByUser()
-    {
-        return $this->belongsTo(User::class, 'suggested_by_user_id');
-    }
+    
 }
