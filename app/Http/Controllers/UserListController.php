@@ -134,6 +134,7 @@ class UserListController extends Controller
     private function processAirports(UserList $list, string $input)
     {
         $airportsInput = explode("\r\n", $input);
+        $airportsInput = array_map('trim', $airportsInput);
         $airportsInput = array_map('strtoupper', $airportsInput);
         $airportsInput = array_filter($airportsInput, function ($value) {
             return ! empty($value);
