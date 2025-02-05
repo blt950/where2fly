@@ -18,6 +18,12 @@ class ApiToken
      */
     public function handle(Request $request, Closure $next, $args = '')
     {
+
+        // Allow top endpoint to be accessed without token
+        if ($request->isMethod('GET') && $request->is('api/top')) {
+            return $next($request);
+        }
+
         // Authenticate by searching for the key, check if middleware requires edit rights and compare to key access
         $key = ApiKey::where('key', $request->bearerToken())->first();
 
