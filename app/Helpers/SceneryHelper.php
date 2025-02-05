@@ -87,7 +87,9 @@ class SceneryHelper
 
     public static function fetchW2fSceneries(&$returnData, $airportIcao, $whereNotSourceReference = false)
     {
-        $w2fDevelopers = SceneryDeveloper::where('icao', $airportIcao)->with('sceneries', 'sceneries.simulator')->get();
+        $w2fDevelopers = SceneryDeveloper::where('icao', $airportIcao)->with(['sceneries' => function ($query) {
+            $query->where('published', true);
+        }, 'sceneries.simulator'])->get();
         foreach ($w2fDevelopers as $sceneryDeveloperModel) {
 
             $sceneryModels = $sceneryDeveloperModel->sceneries;
