@@ -113,6 +113,9 @@ class MapController extends Controller
         }])->where('id', $secondaryAirport)->first();
         $metar = isset($airport->metar) ? $airport->metar->metar : null;
 
+        // Add name of country
+        $airport->country = getCountryName($airport->iso_country);
+
         // Get lists which this airport is present
         $lists = UserList::where('user_id', Auth::id())->where('public', false)->whereHas('airports', function ($query) use ($secondaryAirport) {
             $query->where('airport_id', $secondaryAirport);

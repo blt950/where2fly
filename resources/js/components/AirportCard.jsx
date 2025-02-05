@@ -8,6 +8,7 @@ import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
 import ExternalLinkTracker from './utils/ExternalLinkTracker';
+import TooltipRefresh from './utils/TooltipRefresh';
 
 function AirportCard({ airportId }) {
     const dataCache = useRef({});
@@ -76,13 +77,8 @@ function AirportCard({ airportId }) {
 
     // When data changes, initialize tooltips
     useEffect(() => {
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
-            container: 'body'
-        }));
-
         ExternalLinkTracker();
-
+        TooltipRefresh();
     }, [data]);
 
     return (
@@ -96,8 +92,8 @@ function AirportCard({ airportId }) {
                                 src={`/img/flags/${ data.airport.iso_country.toLowerCase() }.svg`} 
                                 height="16" 
                                 data-bs-toggle="tooltip" 
-                                data-bs-title={ data.airport.country_name } 
-                                alt={`Flag of ${data.airport.country_name}`}
+                                data-bs-title={ data.airport.country } 
+                                alt={`Flag of ${data.airport.country}`}
                             />
                             &nbsp;{data.airport.icao}
                         </div>

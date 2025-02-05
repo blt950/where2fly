@@ -3,6 +3,7 @@ import { CardContext } from './context/CardContext';
 import CurrencyDropdown from './ui/CurrencyDropdown';
 
 import ExternalLinkTracker from './utils/ExternalLinkTracker';
+import TooltipRefresh from './utils/TooltipRefresh';
 
 function SceneryCard({ airportId }) {
     const dataCache = useRef({});
@@ -49,6 +50,7 @@ function SceneryCard({ airportId }) {
 
     useEffect(() => {
         ExternalLinkTracker();
+        TooltipRefresh();
     }, [data]);
 
     useEffect(() => {
@@ -113,7 +115,11 @@ function SceneryCard({ airportId }) {
                                         )}
 
                                         {(item.fsac && item.cheapestPrice.EUR > 0) && (
-                                            <a href={item.currencyLink?.[currency] || item.cheapestLink} target="_blank" className="btn btn-outline-light btn-sm">
+                                            <a href={item.currencyLink?.[currency] || item.cheapestLink} target="_blank" className="btn btn-outline-light btn-sm"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="This link might be affiliated"
+                                                data-bs-placement="right"
+                                            >
                                                 Cheapest: {item.cheapestStore} {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}
                                                 <i className="fas fa-up-right-from-square ms-1"></i>
                                             </a>
@@ -129,7 +135,7 @@ function SceneryCard({ airportId }) {
 
                 <div className="d-flex flex-row justify-content-between align-items-end">
                     <span className="pb-1">
-                        Prices are excl. tax
+                        Prices are excl. tax.
                     </span>
                     <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-3" target="_blank">
                         <i className="fas fa-plus"></i> Add missing scenery

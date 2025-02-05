@@ -15,6 +15,8 @@
             <h2 class="mb-0">v2.5.1</h2>
             <span class="badge ps-0 pb-2">2025-02-05</span>
             <ul>
+                <li>Added notice of affiliate links</li>
+                <li>Fixed popover for country flag on airport card</li>
                 <li>Fixed multiple blank spaces creating issues with scenery import</li>
                 <li>Fixed non-approved sceneries showing up in the scenery list</li>
             </ul>

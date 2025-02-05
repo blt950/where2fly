@@ -55,5 +55,6 @@
         </div>
         
         @yield('js')
+        @vite('resources/js/functions/tooltip.js')
     </body>
 </html>
