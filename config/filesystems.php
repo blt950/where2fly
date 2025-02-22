@@ -70,7 +70,14 @@ return [
             'bucket' => env('B3_BUCKET'),
             'endpoint' => env('B3_ENDPOINT'),
             'url' => env('B3_URL'),
-            'use_path_style_endpoint' => true,
+            'visibility' => 'private',
+            'version' => 'latest',
+            'debug' => false,
+            'options' => [
+                'StorageClass' => 'STANDARD',
+            ],
+            'request_checksum_calculation' => 'when_required',
+            'response_checksum_validation' => 'when_required',
         ],
 
     ],
