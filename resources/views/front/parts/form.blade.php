@@ -432,7 +432,7 @@
                             @endforeach
                         @endforeach
                     @endisset
-                    <input list="aircraft-list" placeholder="All airlines">
+                    <input list="aircraft-list" placeholder="All aircraft">
                     <u-datalist id="aircraft-list" tabindex="-1" hidden>
                         @foreach($aircrafts as $aircraft)
                             <u-option value="{{ $aircraft }}">{{ $aircraft }}</u-option>
