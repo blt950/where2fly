@@ -12,6 +12,13 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.5.2</h2>
+            <span class="badge ps-0 pb-2">2025-03-05</span>
+            <ul>
+                <li>Fixed aircraft selector placeholder text</li>
+                <li>Security updates</li>
+            </ul>
+
             <h2 class="mb-0">v2.5.1</h2>
             <span class="badge ps-0 pb-2">2025-02-05</span>
             <ul>
