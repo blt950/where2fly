@@ -39,9 +39,6 @@ class Kernel extends ConsoleKernel
 
         // Fetch new disposable domains
         $schedule->command('disposable:update')->daily();
-
-        // Fetch Cloudflare IPs daily for proxies
-        $schedule->command('cloudflare:reload')->daily();
     }
 
     /**
