@@ -29,7 +29,7 @@ class ApiToken
 
         if ($key == null || ($request->getClientIp() != $key->ip_address && $key->ip_address != '*')) {
             return response()->json([
-                'message' => 'Unauthorized',
+                'message' => 'Unauthorized. Request origin: ' . collect($request->getClientIps())->implode(', '),
             ], 401);
         }
 
