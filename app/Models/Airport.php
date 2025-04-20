@@ -157,9 +157,7 @@ class Airport extends Model
      */
     public function scopeAirportOpen(Builder $query)
     {
-        $query->where('type', '!=', 'closed')->whereHas('runways', function ($query) {
-            $query->where('closed', false);
-        });
+        $query->where('type', '!=', 'closed')->where('w2f_has_open_runway', true);
     }
 
     /**

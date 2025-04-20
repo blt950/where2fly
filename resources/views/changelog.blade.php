@@ -17,6 +17,7 @@
             <ul>
                 <li>Fixed missing Oceania continent option</li>
                 <li>Fixed so aircraft code C is now by default selected in search</li>
+                <li>Optimized search times</li>
             </ul>
 
             <h2 class="mb-0">v2.5.2</h2>

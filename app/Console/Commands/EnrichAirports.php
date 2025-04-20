@@ -58,6 +58,12 @@ class EnrichAirports extends Command
             ->whereColumn('gps_code', '!=', 'icao')
             ->update(['icao' => \DB::raw('gps_code')]);
 
+        // Set the airport as closed if no runways are open
+        Airport::query()->update(['w2f_has_open_runway' => false]);
+        Airport::whereHas('runways', function ($query) {
+            $query->where('closed', false);
+        })->update(['w2f_has_open_runway' => true]);
+
         // Upsert the data
         $this->info('> Done with enriching airports in ' . round(microtime(true) - $processTime) . ' seconds!');
 
