@@ -57,10 +57,9 @@
         <div class="col-xs-12 text-start">
             <label for="codeletter">Aircraft Code Letter <i class="fas fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Select the aircraft closest to what you want to fly. This is used to calculate airtime and find compatible airports"></i></label>
             <select class="form-control" id="codeletter" name="codeletter">
-                <option disabled selected>Choose</option>
                 <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A - PIPER/CESSNA etc.</option>
                 <option value="B" {{ old('codeletter') == "B" ? "selected" : "" }}>B - CRJ/DHC etc.</option>
-                <option value="C" {{ old('codeletter') == "C" ? "selected" : "" }}>C - 737/A320/ERJ etc.</option>
+                <option value="C" selected {{ old('codeletter') == "C" ? "selected" : "" }}>C - 737/A320/ERJ etc.</option>
                 <option value="D" {{ old('codeletter') == "D" ? "selected" : "" }}>D - B767/A310 etc.</option>
                 <option value="E" {{ old('codeletter') == "E" ? "selected" : "" }}>E - B777/B787/A330 etc.</option>
                 <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F - 747-8/A380 etc.</option>
