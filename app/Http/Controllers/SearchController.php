@@ -331,6 +331,7 @@ class SearchController extends Controller
                 'C-EU' => 'Europe',
                 'C-NA' => 'North America',
                 'C-SA' => 'South America',
+                'C-OC' => 'Oceania',
             ],
             'Countries' => [
                 ...$this::$countries,
