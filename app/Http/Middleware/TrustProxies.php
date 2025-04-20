@@ -9,7 +9,6 @@ class TrustProxies extends Middleware
 {
     /**
      * The trusted proxies for this application.
-     * Trusts Docker network IP range by default.
      *
      * @var array<int, string>|string|null
      */
