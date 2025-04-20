@@ -43,24 +43,6 @@ $app->singleton(
 
 /*
 |--------------------------------------------------------------------------
-| Override Cloudflare’s proxy list to also trust your own IPs
-|--------------------------------------------------------------------------
-*/
-
-\Monicahq\Cloudflare\LaravelCloudflare::getProxiesUsing(function () {
-    // Fetch the up‑to‑date CF ranges
-    $cloudflare = \Monicahq\Cloudflare\Facades\CloudflareProxies::load();
-
-    // Append your extra proxy IP(s)
-    $custom = [
-        '172.16.0.0/12',
-    ];
-
-    return array_merge($cloudflare, $custom);
-});
-
-/*
-|--------------------------------------------------------------------------
 | Return The Application
 |--------------------------------------------------------------------------
 |
