@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Auth;
+use Sentry\State\Scope;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -44,7 +46,10 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            if (app()->bound('sentry')) {
+            if (app()->bound('sentry') && $this->shouldReport($e)) {
+                app('sentry')->configureScope(function (Scope $scope): void {
+                    $scope->setUser(['id' => Auth::id()]);
+                });
                 app('sentry')->captureException($e);
             }
         });
