@@ -69,7 +69,7 @@
                     @if($count == 1)
                         <tr>
                             <th colspan="9" class="text-center text-danger">
-                                <i class="fas fa-exclamation-triangle"></i> No top airports available in this area, the weather is too nice
+                                <i class="fas fa-exclamation-triangle"></i> No top airports available. Weather database could be updating, please try again in a few minutes.
                             </th>
                         </tr>
                     @endif
