@@ -88,7 +88,7 @@ class FetchMetars extends Command
                 }
 
                 // Check for missing data
-                if (!isset($temperature)) {
+                if (! isset($temperature)) {
                     continue;
                 }
 
