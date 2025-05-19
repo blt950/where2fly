@@ -87,6 +87,12 @@ class FetchMetars extends Command
                     }
                 }
 
+                // Check for missing data
+                if (!isset($temperature)) {
+                    continue;
+                }
+
+                // Upsert the data
                 $upsertData[] = [
                     'airport_id' => (int) $airport->id,
                     'last_update' => $time,
