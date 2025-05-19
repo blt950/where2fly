@@ -12,6 +12,14 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.5.4</h2>
+            <span class="badge ps-0 pb-2">2025-05-19</span>
+            <ul>
+                <li>Fixed registration and emails throwing errors</li>
+                <li>Fixed rare weather data issues</li>
+                <li>Improved text for some errors and messages</li>
+            </ul>
+
             <h2 class="mb-0">v2.5.3</h2>
             <span class="badge ps-0 pb-2">2025-04-20</span>
             <ul>
