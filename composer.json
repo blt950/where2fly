@@ -9,6 +9,7 @@
         "graham-campbell/markdown": "^15.0",
         "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^11.0",
+        "laravel/nightwatch": "^1.7",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
