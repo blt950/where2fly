@@ -345,6 +345,8 @@ class EnrichFlights extends Command
             'ZZZZ' => null,
         ];
 
+        $aircraftCache = []; // Aircraft cache to avoid multiple database queries for the same aircraft type.
+
         foreach ($flights as $flight) {
             // Directly attempt to get the converted aircraft type or fallback to the original ICAO code.
             if (array_key_exists($flight->last_aircraft_icao, $aircraftTypeConversions) && $aircraftTypeConversions[$flight->last_aircraft_icao] == null) {
@@ -354,7 +356,11 @@ class EnrichFlights extends Command
             $aircraftType = $aircraftTypeConversions[$flight->last_aircraft_icao] ?? $flight->last_aircraft_icao;
 
             // Use firstOrCreate method to either find the existing aircraft or create a new one, thereby reducing the code complexity and potential for duplicated entries.
-            $aircraft = Aircraft::firstOrCreate(['icao' => $aircraftType], ['icao' => $aircraftType]);
+            if (!isset($aircraftCache[$aircraftType])) {
+                $aircraftCache[$aircraftType] = Aircraft::firstOrCreate(['icao' => $aircraftType], ['icao' => $aircraftType]);
+            }
+
+            $aircraft = $aircraftCache[$aircraftType];
 
             // Prepare the data for bulk insertion/upsert after the loop.
             $upsertAircraftData[] = [
