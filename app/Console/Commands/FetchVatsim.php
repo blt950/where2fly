@@ -38,6 +38,7 @@ class FetchVatsim extends Command
 
         $upsertEventsData = [];
         $upsertControllerData = [];
+        $airportMap = Airport::all()->keyBy('icao');
 
         $this->info('Fetching events...');
         $response = Http::get('https://my.vatsim.net/api/v2/events/latest');
@@ -47,39 +48,36 @@ class FetchVatsim extends Command
             foreach ($data as $event) {
                 if (count($event->airports)) {
                     foreach ($event->airports as $airport) {
-
-                        $a = Airport::where('icao', $airport->icao)->get();
-                        if ($a->count() && $a->first()->id) {
+                        if (isset($airportMap[$airport->icao])) {
                             $upsertEventsData[] = [
-                                'airport_id' => $a->first()->id,
+                                'airport_id' => $airportMap[$airport->icao]->id,
                                 'event' => $event->name,
                                 'start_time' => Carbon::parse($event->start_time),
                                 'end_time' => Carbon::parse($event->end_time),
                             ];
                         }
-
                     }
                 }
             }
-
         }
 
         $this->info('Fetching online controllers...');
         $response = Http::get('https://data.vatsim.net/v3/vatsim-data.json');
+
         if ($response->successful()) {
             $data = json_decode($response->body(), false)->controllers;
 
             foreach ($data as $controller) {
                 $callsign = substr($controller->callsign, 0, 4);
-                if (Airport::where('icao', $callsign)->get()->count()) {
+
+                if (isset($airportMap[$callsign])) {
                     $upsertControllerData[] = [
-                        'airport_id' => Airport::where('icao', $callsign)->get()->first()->id,
+                        'airport_id' => $airportMap[$callsign]->id,
                         'callsign' => $controller->callsign,
                         'logon_time' => Carbon::parse($controller->logon_time),
                     ];
                 }
             }
-
         }
 
         Event::truncate();
