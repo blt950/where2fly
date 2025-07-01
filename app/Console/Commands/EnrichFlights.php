@@ -356,7 +356,7 @@ class EnrichFlights extends Command
             $aircraftType = $aircraftTypeConversions[$flight->last_aircraft_icao] ?? $flight->last_aircraft_icao;
 
             // Use firstOrCreate method to either find the existing aircraft or create a new one, thereby reducing the code complexity and potential for duplicated entries.
-            if (!isset($aircraftCache[$aircraftType])) {
+            if (! isset($aircraftCache[$aircraftType])) {
                 $aircraftCache[$aircraftType] = Aircraft::firstOrCreate(['icao' => $aircraftType], ['icao' => $aircraftType]);
             }
 
