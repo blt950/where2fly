@@ -12,6 +12,13 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.5.5</h2>
+            <span class="badge ps-0 pb-2">2025-07-xx</span>
+            <ul>
+                <li>Optimized some code under the hood</li>
+                <li>Updated airline database, some the of newly available are: Ajet, ASL Airlines Ireland, China Southern Airlines Cargo, Electra Airways, Sierra Pacific and more.</li>
+            </ul>
+
             <h2 class="mb-0">v2.5.4</h2>
             <span class="badge ps-0 pb-2">2025-05-19</span>
             <ul>
