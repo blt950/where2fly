@@ -68,7 +68,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                     </table>
                 </>
             ) : (
-                <p className="mb-0"><i className="fas fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
+                <p className="mb-0"><i className="fa-sharp fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
             )}
             </div>
         </>

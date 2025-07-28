@@ -14,7 +14,7 @@
                     <label for="email">Email address</label>
                     <input name="email" type="email" class="form-control" id="email" value="{{ old('email') }}">
                     @error('email')
-                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                        <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
 
                     <button class="btn btn-primary mt-2">RESET ACCOUNT</button>

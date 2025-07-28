@@ -89,7 +89,7 @@ addEventListener('pageshow', (event) => {
 
     submitButtons.forEach(function(button) {
         button.removeAttribute('disabled')
-        button.innerHTML = 'Search&nbsp;&nbsp;<i class="fas fa-search"></i>'
+        button.innerHTML = 'Search&nbsp;&nbsp;<i class="fa-sharp fa-search"></i>'
     });
 
     // Expand filters if they were expanded prior to page navigation

@@ -10,25 +10,25 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <a class="nav-link {{ Route::is('front*') || Route::is('search*') ? 'active' : '' }}" href="{{ route('front') }}">
-                        <i class="fas fa-search"></i>&nbsp;
+                        <i class="fa-sharp fa-search"></i>&nbsp;
                         Search
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ Route::is('top*') ? 'active' : '' }}" href="{{ route('top') }}">
-                        <i class="fas fa-list"></i>&nbsp;
+                        <i class="fa-sharp fa-list"></i>&nbsp;
                         Top List
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ Route::is('scenery*') ? 'active' : '' }}" href="{{ route('scenery') }}">
-                        <i class="fas fa-map"></i>&nbsp;
+                        <i class="fa-sharp fa-map"></i>&nbsp;
                         Scenery
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ Route::is('donate') ? 'active' : '' }}" href="{{ route('donate') }}">
-                        <i class="fas fa-donate"></i>&nbsp;
+                        <i class="fa-sharp fa-donate"></i>&nbsp;
                         Donate
                     </a>
                 </li>
@@ -36,7 +36,7 @@
                     @guest
                         <li class="nav-item">
                             <a class="nav-link {{ Route::is('login') || Route::is('register') ? 'active' : '' }}" href="{{ route('login') }}">
-                                <i class="fas fa-lock"></i>&nbsp;
+                                <i class="fa-sharp fa-lock"></i>&nbsp;
                                 Login
                             </a>
                         </li>
@@ -45,9 +45,9 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {{ Route::is('user.account') ? 'active' : '' }}" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 @if(isset($hasNotifications) && $hasNotifications)
-                                    <i class="fas fa-bell text-warning"></i>&nbsp;
+                                    <i class="fa-sharp fa-bell text-warning"></i>&nbsp;
                                 @else
-                                    <i class="fas fa-user"></i>&nbsp;
+                                    <i class="fa-sharp fa-user"></i>&nbsp;
                                 @endif
                                 {{ Auth::user()->username }}
                             </a>

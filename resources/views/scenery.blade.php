@@ -16,7 +16,7 @@
     <div class="container">
 
         <div class="d-block d-md-none">
-            <p class="text-primary"><i class="fas fa-exclamation-triangle"></i> Scenery map is not yet available for mobile devices. Please use a desktop or tablet.</p>
+            <p class="text-primary"><i class="fa-sharp fa-exclamation-triangle"></i> Scenery map is not yet available for mobile devices. Please use a desktop or tablet.</p>
         </div>
 
         <div class="d-none d-md-block">

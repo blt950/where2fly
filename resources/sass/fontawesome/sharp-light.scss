@@ -8,30 +8,30 @@
 @use 'mixins' as m;
 
 :root, :host {
-  --#{v.$css-prefix}-family-classic: '#{ v.$family }';
-  --#{v.$css-prefix}-font-light: normal 300 1em/1 var(--#{v.$css-prefix}-family-classic);
+  --#{v.$css-prefix}-family-sharp: 'Font Awesome 7 Sharp';
+  --#{v.$css-prefix}-font-sharp-light: normal 300 1em/1 var(--#{v.$css-prefix}-family-sharp);
 
   /* deprecated: this older custom property will be removed next major release */
-  --#{v.$css-prefix}-style-family-classic: var(--#{v.$css-prefix}-family-classic);
+  --#{v.$css-prefix}-style-family-sharp: var(--#{v.$css-prefix}-family-sharp);
 }
 
 
 @font-face {
-  font-family: 'Font Awesome 7 Pro';
+  font-family: 'Font Awesome 7 Sharp';
   font-style: normal;
   font-weight: 300;
   font-display: v.$font-display;
-  src: url('#{v.$font-path}/fa-light-300.woff2');
+  src: url('#{v.$font-path}/fa-sharp-light-300.woff2');
 }
 
 
-.fal {
-  --#{v.$css-prefix}-family: var(--#{v.$css-prefix}-family-classic);
+.fasl {
+  --#{v.$css-prefix}-family: var(--#{v.$css-prefix}-family-sharp);
   --#{v.$css-prefix}-style: 300;
 }
 
-.#{v.$css-prefix}-classic {
-  --#{v.$css-prefix}-family: var(--#{v.$css-prefix}-family-classic);
+.#{v.$css-prefix}-sharp {
+  --#{v.$css-prefix}-family: var(--#{v.$css-prefix}-family-sharp);
 }
 
 .#{v.$css-prefix}-light {
@@ -41,9 +41,9 @@
 // convenience mixin for declaring pseudo-elements by CSS variable,
 // including all style-specific font properties and ::before elements.
 @mixin icon($var) {
-  @include m.fa-icon(Font Awesome 7 Pro);
+  @include m.fa-icon(Font Awesome 7 Sharp);
   @extend .#{v.$css-prefix}-light;
-  @extend .#{v.$css-prefix}-classic;
+  @extend .#{v.$css-prefix}-sharp;
 
   &::before {
     content: string.unquote("\"#{ $var }\"");

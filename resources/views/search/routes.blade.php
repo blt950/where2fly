@@ -24,7 +24,7 @@
                 <dd>{{ $departure->name }}</dd>
             </dl>
 
-            <i class="fas fa-arrow-right fs-2"></i>
+            <i class="fa-sharp fa-arrow-right fs-2"></i>
 
             <dl>
                 <dt>Arrival<dt>
@@ -58,10 +58,10 @@
                                 <td data-sort="{{ $route->flight_icao }}">
                                     <strong>{{ $route->flight_icao }}</strong>
                                     <a class="d-block fs-6 text-info link-underline-info link-underline-opacity-25-hover font-work-sans ps-0" href="https://dispatch.simbrief.com/options/custom?orig={{ $departure->icao }}&dest={{ $arrival->icao }}&airline={{ $route->airline->icao_code }}&fltnum={{ $route->flight_number }}" target="_blank">
-                                        <span>SimBrief</span> <i class="fas fa-up-right-from-square"></i>
+                                        <span>SimBrief</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                     </a>
                                     <a class="d-block fs-6 text-info link-underline-info link-underline-opacity-25-hover font-work-sans ps-0" href="https://www.flightradar24.com/data/flights/{{ strtolower($route->airline->iata_code . $route->flight_number) }}" rel="noreferrer" target="_blank">
-                                        <span>FR24</span> <i class="fas fa-up-right-from-square"></i>
+                                        <span>FR24</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                     </a>
                                 </td>
                                 <td data-sort="{{ $route->airline->iata_code }}">

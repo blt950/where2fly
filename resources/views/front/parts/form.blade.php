@@ -6,7 +6,7 @@
             <input type="text" class="form-control" id="icao" name="icao" placeholder="Random" oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ isset($prefilledIcao) ? $prefilledIcao : old('icao') }}">
             <input type="hidden" name="direction" value="{{ $icao }}">
             @error('icao')
-            <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+            <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
             @enderror
         </div>
         
@@ -50,12 +50,12 @@
                 </u-datalist>
             </u-tags>
             @error('destinations')
-            <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+            <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
             @enderror
         </div>
         
         <div class="col-xs-12 text-start">
-            <label for="codeletter">Aircraft Code Letter <i class="fas fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Select the aircraft closest to what you want to fly. This is used to calculate airtime and find compatible airports"></i></label>
+            <label for="codeletter">Aircraft Code Letter <i class="fa-sharp fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Select the aircraft closest to what you want to fly. This is used to calculate airtime and find compatible airports"></i></label>
             <select class="form-control" id="codeletter" name="codeletter">
                 <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A - PIPER/CESSNA etc.</option>
                 <option value="B" {{ old('codeletter') == "B" ? "selected" : "" }}>B - CRJ/DHC etc.</option>
@@ -65,7 +65,7 @@
                 <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F - 747-8/A380 etc.</option>
             </select>
             @error('codeletter')
-            <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+            <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
             @enderror
         </div>
         
@@ -100,7 +100,7 @@
                     Worst Weather
                 </label>
                 @error('sortByWeather')
-                <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
             <div class="form-check mb-0">
@@ -109,14 +109,14 @@
                     ATC Coverage
                 </label>
                 @error('sortByATC')
-                <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
         </div>
         
         <div class="col-sm-12 align-self-start">
             <button type="submit" class="submitBtn btn btn-primary text-uppercase">
-                Search <i class="fas fa-search"></i>
+                Search <i class="fa-sharp fa-search"></i>
             </button>
         </div>
     </div>
@@ -143,23 +143,23 @@
                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                         <input type="radio" class="btn-check red" name="scores[{{ $k }}]" value="-1" id="{{ $k }}_exclude" {{ (!empty(old('scores')) && isset(old('scores')[$k]) && old('scores')[$k] == -1) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_exclude">
-                            <i class="fa-solid fa-xmark"></i>
+                            <i class="fa-sharp fa-xmark"></i>
                             <span class="visually-hidden">Exclude</span>
                         </label>
                         
                         <input type="radio" class="btn-check light" name="scores[{{ $k }}]" value="0" id="{{ $k }}_neutral" {{ (empty(old('scores')) || (!empty(old('scores')) && isset(old('scores')[$k]) && old('scores')[$k] == 0)) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_neutral">
-                            <i class="fa-solid fa-slash-forward"></i>
+                            <i class="fa-sharp fa-slash-forward"></i>
                             <span class="visually-hidden">Neutral</span>
                         </label>
                         
                         <input type="radio" class="btn-check green" name="scores[{{ $k }}]" value="1" id="{{ $k }}_include" {{ (!empty(old('scores')) && isset(old('scores')[$k]) && old('scores')[$k] == 1) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_include">
-                            <i class="fa-solid fa-check"></i>
+                            <i class="fa-sharp fa-check"></i>
                             <span class="visually-hidden">Include</span>
                         </label>
                     </div>
-                    <i class="ms-2 fa {{ $s['icon'] }}"></i>&nbsp;{{ $s['desc'] }}
+                    <i class="ms-2 fa-sharp {{ $s['icon'] }}"></i>&nbsp;{{ $s['desc'] }}
                 </div>
                 @endif
                 @endforeach
@@ -195,23 +195,23 @@
                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                         <input type="radio" class="btn-check red" name="scores[{{ $k }}]" value="-1" id="{{ $k }}_exclude" {{ (!empty(old('scores')) && old('scores')[$k] == -1) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_exclude">
-                            <i class="fa-solid fa-xmark"></i>
+                            <i class="fa-sharp fa-xmark"></i>
                             <span class="visually-hidden">Exclude</span>
                         </label>
                         
                         <input type="radio" class="btn-check light" name="scores[{{ $k }}]" value="0" id="{{ $k }}_neutral" {{ (empty(old('scores')) || (!empty(old('scores')) && old('scores')[$k] == 0)) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_neutral">
-                            <i class="fa-solid fa-slash-forward"></i>
+                            <i class="fa-sharp fa-slash-forward"></i>
                             <span class="visually-hidden">Neutral</span>
                         </label>
                         
                         <input type="radio" class="btn-check green" name="scores[{{ $k }}]" value="1" id="{{ $k }}_include" {{ (!empty(old('scores')) && old('scores')[$k] == 1) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_include">
-                            <i class="fa-solid fa-check"></i>
+                            <i class="fa-sharp fa-check"></i>
                             <span class="visually-hidden">Include</span>
                         </label>
                     </div>
-                    <i class="ms-2 fa {{ $s['icon'] }}"></i>&nbsp;{{ $s['desc'] }}
+                    <i class="ms-2 fa-sharp {{ $s['icon'] }}"></i>&nbsp;{{ $s['desc'] }}
                 </div>
                 @endif
                 @endforeach
@@ -222,69 +222,69 @@
                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                         <input type="radio" class="btn-check red" name="destinationWithRoutesOnly" value="-1" id="destinationWithRoutesOnly_exclude" {{ old('destinationWithRoutesOnly') == -1 ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="destinationWithRoutesOnly_exclude">
-                            <i class="fa-solid fa-xmark"></i>
+                            <i class="fa-sharp fa-xmark"></i>
                             <span class="visually-hidden">Exclude</span>
                         </label>
                         
                         <input type="radio" class="btn-check light" name="destinationWithRoutesOnly" value="0" id="destinationWithRoutesOnly_neutral" {{ (old('destinationWithRoutesOnly') == null || old('destinationWithRoutesOnly') == 0) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="destinationWithRoutesOnly_neutral">
-                            <i class="fa-solid fa-slash-forward"></i>
+                            <i class="fa-sharp fa-slash-forward"></i>
                             <span class="visually-hidden">Neutral</span>
                         </label>
                         
                         <input type="radio" class="btn-check green" name="destinationWithRoutesOnly" value="1" id="destinationWithRoutesOnly_include" {{ old('destinationWithRoutesOnly') == 1 ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="destinationWithRoutesOnly_include">
-                            <i class="fa-solid fa-check"></i>
+                            <i class="fa-sharp fa-check"></i>
                             <span class="visually-hidden">Include</span>
                         </label>
                     </div>
-                    <i class="ms-2 fa fa-route"></i>&nbsp;With routes only
+                    <i class="ms-2 fa-sharp fa-route"></i>&nbsp;With routes only
                 </div>
                 
                 <div class="mt-1">
                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                         <input type="radio" class="btn-check red" name="destinationRunwayLights" value="-1" id="destinationRunwayLights_exclude" {{ old('destinationRunwayLights') == -1 ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="destinationRunwayLights_exclude">
-                            <i class="fa-solid fa-xmark"></i>
+                            <i class="fa-sharp fa-xmark"></i>
                             <span class="visually-hidden">Exclude</span>
                         </label>
                         
                         <input type="radio" class="btn-check light" name="destinationRunwayLights" value="0" id="destinationRunwayLights_neutral" {{ (old('destinationRunwayLights') == null || old('destinationRunwayLights') == 0) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="destinationRunwayLights_neutral">
-                            <i class="fa-solid fa-slash-forward"></i>
+                            <i class="fa-sharp fa-slash-forward"></i>
                             <span class="visually-hidden">Neutral</span>
                         </label>
                         
                         <input type="radio" class="btn-check green" name="destinationRunwayLights" value="1" id="destinationRunwayLights_include" {{ old('destinationRunwayLights') == 1 ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="destinationRunwayLights_include">
-                            <i class="fa-solid fa-check"></i>
+                            <i class="fa-sharp fa-check"></i>
                             <span class="visually-hidden">Include</span>
                         </label>
                     </div>
-                    <i class="ms-2 fa fa-lightbulb-on"></i>&nbsp;Runway with lights
+                    <i class="ms-2 fa-sharp fa-lightbulb-on"></i>&nbsp;Runway with lights
                 </div>
                 
                 <div class="mt-1">
                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                         <input type="radio" class="btn-check light" name="destinationAirbases" value="-1" id="destinationAirbases_exclude" {{ (old('destinationAirbases') == null || old('destinationAirbases') == -1) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_exclude">
-                            <i class="fa-solid fa-xmark"></i>
+                            <i class="fa-sharp fa-xmark"></i>
                             <span class="visually-hidden">Exclude</span>
                         </label>
                         
                         <input type="radio" class="btn-check light" name="destinationAirbases" value="0" id="destinationAirbases_neutral" {{ (old('destinationAirbases') === 0) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_neutral">
-                            <i class="fa-solid fa-slash-forward"></i>
+                            <i class="fa-sharp fa-slash-forward"></i>
                             <span class="visually-hidden">Neutral</span>
                         </label>
                         
                         <input type="radio" class="btn-check green" name="destinationAirbases" value="1" id="destinationAirbases_include" {{ old('destinationAirbases') == 1 ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_include">
-                            <i class="fa-solid fa-check"></i>
+                            <i class="fa-sharp fa-check"></i>
                             <span class="visually-hidden">Exclude</span>
                         </label>
                     </div>
-                    <i class="ms-2 fa fa-jet-fighter"></i>&nbsp;Airbases
+                    <i class="ms-2 fa-sharp fa-jet-fighter"></i>&nbsp;Airbases
                 </div>
                 
                 <label class="pt-4">Flight direction</label>
@@ -292,14 +292,14 @@
                 <!-- Get validation errors -->
                 @error('flightDirection')
                 <div class="validation
-                        -error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                        -error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
                 
                 <div class="mt-1">
                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                         <input type="radio" class="btn-check light" name="flightDirection" value="0" id="flightDirection_neutral" {{ (old('flightDirection') == null || old('flightDirection') == 0) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="flightDirection_neutral">
-                            <i class="fa-solid fa-slash-forward"></i>
+                            <i class="fa-sharp fa-slash-forward"></i>
                             <span class="visually-hidden">Neutral</span>
                         </label>
                         
@@ -415,7 +415,7 @@
                     </u-datalist>
                 </u-tags>
                 @error('airlines')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
                 
                 <label for="aircraft" class="pt-4">
@@ -439,14 +439,14 @@
                     </u-datalist>
                 </u-tags>
                 @error('aircrafts')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
         
             </div>
 
             <div class="col-sm-12 align-self-start">
                 <button type="submit" class="submitBtn btn btn-primary text-uppercase">
-                    Search <i class="fas fa-search"></i>
+                    Search <i class="fa-sharp fa-search"></i>
                 </button>
             </div>
         </div>

@@ -9,7 +9,7 @@
 
 :root, :host {
   --#{v.$css-prefix}-family-duotone: 'Font Awesome 7 Duotone';
-  --#{v.$css-prefix}-font-duotone: normal 900 1em/1 var(--#{v.$css-prefix}-family-duotone);
+  --#{v.$css-prefix}-font-duotone-regular: normal 400 1em/1 var(--#{v.$css-prefix}-family-duotone);
 
   /* deprecated: this older custom property will be removed next major release */
   --#{v.$css-prefix}-style-family-duotone: var(--#{v.$css-prefix}-family-duotone);
@@ -18,63 +18,72 @@
 @font-face {
   font-family: 'Font Awesome 7 Duotone';
   font-style: normal;
-  font-weight: 900;
+  font-weight: 400;
   font-display: v.$font-display;
-  src: url('#{v.$font-path}/fa-duotone-900.woff2');
+  src: url('#{v.$font-path}/fa-duotone-regular-400.woff2');
 }
 
-.fad,
-.#{v.$css-prefix}-duotone {
+
+.fadr {
   --#{v.$css-prefix}-family: var(--#{v.$css-prefix}-family-duotone);
-  --#{v.$css-prefix}-style: 900;
+  --#{v.$css-prefix}-style: 400;
   position: relative;
   letter-spacing: normal;
 }
 
-.fad::before,
+.#{v.$css-prefix}-duotone {
+  --#{v.$css-prefix}-family: var(--#{v.$css-prefix}-family-duotone);
+  position: relative;
+  letter-spacing: normal;
+}
+
+.#{v.$css-prefix}-regular {
+  --#{v.$css-prefix}-style: 400;
+}
+
+.fadr::before,
 .#{v.$css-prefix}-duotone::before {
   position: absolute;
   color: var(--#{v.$css-prefix}-primary-color, currentColor);
   opacity: var(--#{v.$css-prefix}-primary-opacity, #{v.$primary-opacity});
 }
 
-.fad::after,
+.fadr::after,
 .#{v.$css-prefix}-duotone::after {
   color: var(--#{v.$css-prefix}-secondary-color, currentColor);
   opacity: var(--#{v.$css-prefix}-secondary-opacity, #{v.$secondary-opacity});
 }
 
-.#{v.$css-prefix}-swap-opacity .fad::before,
-.#{v.$css-prefix}-swap-opacity .fa-duotone::before,
-.fad.#{v.$css-prefix}-swap-opacity::before,
-.fa-duotone.#{v.$css-prefix}-swap-opacity::before {
+.#{v.$css-prefix}-swap-opacity .fadr::before,
+.#{v.$css-prefix}-swap-opacity .#{v.$css-prefix}-duotone::before,
+.#{v.$css-prefix}-swap-opacity.fadr::before,
+.#{v.$css-prefix}-swap-opacity.#{v.$css-prefix}-duotone::before {
   opacity: var(--#{v.$css-prefix}-secondary-opacity, #{v.$secondary-opacity});
 }
 
-.#{v.$css-prefix}-swap-opacity .fad::after,
-.#{v.$css-prefix}-swap-opacity .fa-duotone::after,
-.fad.#{v.$css-prefix}-swap-opacity::after,
-.fa-duotone.#{v.$css-prefix}-swap-opacity::after {
+.#{v.$css-prefix}-swap-opacity .fadr::after,
+.#{v.$css-prefix}-swap-opacity .#{v.$css-prefix}-duotone::after,
+.#{v.$css-prefix}-swap-opacity.fadr::after,
+.#{v.$css-prefix}-swap-opacity.#{v.$css-prefix}-duotone::after {
   opacity: var(--#{v.$css-prefix}-primary-opacity, #{v.$primary-opacity});
 }
 
-.fad.#{v.$css-prefix}-li,
-.#{v.$css-prefix}-duotone.#{v.$css-prefix}-li,
-.fad.#{v.$css-prefix}-stack-1x,
-.#{v.$css-prefix}-duotone.#{v.$css-prefix}-stack-1x,
-.fad.#{v.$css-prefix}-stack-2x,
-.#{v.$css-prefix}-duotone.#{v.$css-prefix}-stack-2x {
+.#{v.$css-prefix}-li.fadr,
+.#{v.$css-prefix}-li.#{v.$css-prefix}-duotone,
+.#{v.$css-prefix}-stack-1x.fadr,
+.#{v.$css-prefix}-stack-1x.#{v.$css-prefix}-duotone,
+.#{v.$css-prefix}-stack-2x.fadr,
+.#{v.$css-prefix}-stack-2x.#{v.$css-prefix}-duotone {
   position: absolute;
 }
 
-// convenience mixin for declaring pseudo-elements by CSS variable,
+// convenience mixins for declaring pseudo-elements by CSS variable,
 // including all style-specific font properties, and both the ::before
 // and ::after elements in the duotone case.
 @mixin icon($var) {
   @include m.fa-icon(Font Awesome 7 Duotone);
   @extend .#{v.$css-prefix}-duotone;
-  // We intentionally leave out @extend .#{v.$css-prefix}-classic because of
-  // the backward-compatibility puzzle that Duotone Solid represents
+  @extend .#{v.$css-prefix}-regular;
 
   &::before {
     content: string.unquote("\"#{ $var }\"");

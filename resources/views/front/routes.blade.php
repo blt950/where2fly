@@ -22,7 +22,7 @@
                     <label for="departure">Departure (ICAO)</label>
                     <input type="text" class="form-control" id="departure" name="departure" required oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('departure') }}">
                     @error('departure')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
 
@@ -30,7 +30,7 @@
                     <label for="arrival">Arrival (ICAO)</label>
                     <input type="text" class="form-control" id="arrival" name="arrival" required oninput="this.value = this.value.toUpperCase()" maxlength="4" value="{{ old('arrival') }}">
                     @error('arrival')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
 
@@ -41,13 +41,13 @@
                         <option value="timestamp" {{ old('sort') == "timestamp" ? "selected" : "" }}>Last seen</option>
                     </select>
                     @error('sort')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
         
                 <div class="col-sm-12 align-self-start">
                     <button type="submit" class="submitBtn btn btn-primary text-uppercase">
-                        Search <i class="fas fa-search"></i>
+                        Search <i class="fa-sharp fa-search"></i>
                     </button>
                 </div>
             </div>

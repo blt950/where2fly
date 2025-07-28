@@ -17,7 +17,7 @@
         <div>
             <div class="mb-4">
                 <a class="font-size-1rem" href="{{ route('register') }}">
-                    <i class="fas fa-user-plus"></i> Don't have an account? Register here
+                    <i class="fa-sharp fa-user-plus"></i> Don't have an account? Register here
                 </a>
             </div>
 
@@ -27,7 +27,7 @@
                     <label for="username">Username <small class="form-text text-white-50">or e-mail</small></label>
                     <input name="username" type="text" class="form-control" id="username" value="{{ old('username') }}">
                     @error('username')
-                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                        <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
 
@@ -36,7 +36,7 @@
                     <input name="password" type="password" class="form-control" id="password">
                     <a class="" href="{{ route('account.recovery') }}">Forgot your password?</a>
                     @error('password')
-                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                        <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
 
@@ -46,7 +46,7 @@
                     data-language="en"
                 />
                 @error('cf-turnstile-response')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
 
                 <div class="mt-2 mb-3">

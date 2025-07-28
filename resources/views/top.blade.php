@@ -56,7 +56,7 @@
                             <td class="fs-5" data-sort="{{ $airport->scores->count() }}">
                                 @foreach($airport->scores as $score)
                                     <i 
-                                        class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                        class="fa-sharp fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
                                         data-bs-html="true"
                                         data-bs-toggle="tooltip"
                                         data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
@@ -69,7 +69,7 @@
                     @if($count == 1)
                         <tr>
                             <th colspan="9" class="text-center text-danger">
-                                <i class="fas fa-exclamation-triangle"></i> No top airports available. Weather database could be updating, please try again in a few minutes.
+                                <i class="fa-sharp fa-exclamation-triangle"></i> No top airports available. Weather database could be updating, please try again in a few minutes.
                             </th>
                         </tr>
                     @endif

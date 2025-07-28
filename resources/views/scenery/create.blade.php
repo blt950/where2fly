@@ -12,13 +12,13 @@
                 <label for="icao" class="form-label">ICAO</label>
                 <input type="text" class="form-control" id="icao" name="icao" maxlength="4" value="{{ request()->get('airport') }}" required>
                 @error('icao')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
             @isset($existingDevelopers)
                 <div class="alert alert-warning mb-3">
-                    <b><i class="fas fa-info-circle"></i> These sceneries are already in the database</b>
+                    <b><i class="fa-sharp fa-info-circle"></i> These sceneries are already in the database</b>
                     @foreach($existingDevelopers as $developer)
                         @foreach($developer->sceneries as $existingScenery)
                             <div>
@@ -44,7 +44,7 @@
                 <label for="developer" class="form-label">Developer</label>
                 <input type="text" class="form-control" id="developer" name="developer" value="{{ old('developer') }}" maxlength="256" required>
                 @error('developer')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
@@ -53,7 +53,7 @@
                 <small class="form-text text-white-50">Preferably to an English official store or platform</small>
                 <input type="url" class="form-control" id="link" name="link" value="{{ old('link') }}" maxlength="256" required>
                 @error('link')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
@@ -65,7 +65,7 @@
                     <option value="0">Freeware</option>
                 </select>
                 @error('payware')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
@@ -82,7 +82,7 @@
                 @endforeach
                 
                 @error('simulators')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
             

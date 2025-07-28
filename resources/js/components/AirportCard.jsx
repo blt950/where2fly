@@ -100,7 +100,7 @@ function AirportCard({ airportId }) {
                         <h2>{data.airport.name}</h2>
 
                         {data.lists.map(list => (
-                            <span className="badge me-1" style={{ border: '1px solid ' + list.color, color: list.color }} key={list.id}><i className="fas fa-list"></i>&nbsp;{list.name}</span>
+                            <span className="badge me-1" style={{ border: '1px solid ' + list.color, color: list.color }} key={list.id}><i className="fa-sharp fa-list"></i>&nbsp;{list.name}</span>
                         ))}
 
                         <dl className="font-kanit">
@@ -147,23 +147,23 @@ function AirportCard({ airportId }) {
 
                         <div className="d-flex flex-wrap gap-2">
                             <button className="btn btn-outline-primary btn-sm font-work-sans" onClick={() => setShowSceneryIdCard(data.airport.icao)}>
-                                <i className="fas fa-map"></i> Scenery
+                                <i className="fa-sharp fa-map"></i> Scenery
                             </button>
 
                             {(primaryAirport === undefined || primaryAirport === null) && (
                                 <>
                                     <a className="btn btn-outline-primary btn-sm font-work-sans" href={route('front', {icao: data.airport.icao})}>
-                                    <i className="fas fa-search"></i> <span>Arrival</span>
+                                    <i className="fa-sharp fa-search"></i> <span>Arrival</span>
                                     </a>
                             
                                     <a className="btn btn-outline-primary btn-sm font-work-sans" href={route('front.departures', {icao: data.airport.icao})}>
-                                        <i className="fas fa-search"></i> <span>Departure</span>
+                                        <i className="fa-sharp fa-search"></i> <span>Departure</span>
                                     </a>
                                 </>
                             )}
 
                             <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://windy.com/${data.airport.icao}`} target="_blank">
-                                Windy <i className="fas fa-up-right-from-square"></i>
+                                Windy <i className="fa-sharp fa-up-right-from-square"></i>
                             </a>
 
                             <SimbriefLink 
@@ -175,7 +175,7 @@ function AirportCard({ airportId }) {
                         </div>
                     </>
                 ) : (
-                    <p className="mb-0"><i className="fas fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
+                    <p className="mb-0"><i className="fa-sharp fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
                 )}
             </div>
             {showFlightsIdCard && <FlightsCard airlineId={showFlightsIdCard} departureAirportId={departureAirportId} arrivalAirportId={arrivalAirportId} />}

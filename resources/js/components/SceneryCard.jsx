@@ -105,12 +105,12 @@ function SceneryCard({ airportId }) {
                                         </div>
 
                                         {(item.fsac && item.cheapestPrice.EUR > 0) ? (
-                                            <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">See all prices <i className="fas fa-up-right-from-square"></i></a>
+                                            <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">See all prices <i className="fa-sharp fa-up-right-from-square"></i></a>
                                         ) : (
                                             (item.link == 'https://www.flightsimulator.com/') ? (
                                                 <i>Included in the simulator</i>
                                             ) : (
-                                                <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">{item.linkDomain} <i className="fas fa-up-right-from-square"></i></a>
+                                                <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">{item.linkDomain} <i className="fa-sharp fa-up-right-from-square"></i></a>
                                             )
                                         )}
 
@@ -121,7 +121,7 @@ function SceneryCard({ airportId }) {
                                                 data-bs-placement="right"
                                             >
                                                 Cheapest: {item.cheapestStore} {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}
-                                                <i className="fas fa-up-right-from-square ms-1"></i>
+                                                <i className="fa-sharp fa-up-right-from-square ms-1"></i>
                                             </a>
                                         )}
                                         
@@ -138,12 +138,12 @@ function SceneryCard({ airportId }) {
                         Prices are excl. tax.
                     </span>
                     <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-3" target="_blank">
-                        <i className="fas fa-plus"></i> Add missing scenery
+                        <i className="fa-sharp fa-plus"></i> Add missing scenery
                     </a>
                 </div>
             </>
         ) : (
-            <p className="mb-0"><i className="fas fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
+            <p className="mb-0"><i className="fa-sharp fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
         )}
         </div>
     )

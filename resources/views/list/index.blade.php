@@ -15,21 +15,21 @@
                     <div style="background: {{ $list->color }}"></div>
                     <strong>{{ $list->name }}</strong>
                 </div>
-                <span class="list-airports {{ $list->hidden ? 'hidden' : '' }}"><i class="fas fa-joystick"></i>&nbsp;{{ $list->simulator->shortened_name }}</span>
-                <span class="list-airports {{ $list->hidden ? 'hidden' : '' }}"><i class="fas fa-tower-control"></i>&nbsp;{{ $list->airports_count }} airports {{ $list->hidden ? '(Hidden)' : '' }}</span>
+                <span class="list-airports {{ $list->hidden ? 'hidden' : '' }}"><i class="fa-sharp fa-joystick"></i>&nbsp;{{ $list->simulator->shortened_name }}</span>
+                <span class="list-airports {{ $list->hidden ? 'hidden' : '' }}"><i class="fa-sharp fa-tower-control"></i>&nbsp;{{ $list->airports_count }} airports {{ $list->hidden ? '(Hidden)' : '' }}</span>
             </div>
             <div>
                 @if($list->hidden)
-                    <a href="{{ route('list.toggle', $list) }}" class="btn btn-outline-light"><i class="fas fa-eye"></i> Show</a>
+                    <a href="{{ route('list.toggle', $list) }}" class="btn btn-outline-light"><i class="fa-sharp fa-eye"></i> Show</a>
                 @else
-                    <a href="{{ route('list.toggle', $list) }}" class="btn btn-outline-light"><i class="fas fa-eye-slash"></i> Hide</a>
+                    <a href="{{ route('list.toggle', $list) }}" class="btn btn-outline-light"><i class="fa-sharp fa-eye-slash"></i> Hide</a>
                 @endif
                 
-                <a href="{{ route('list.edit', $list) }}" class="btn btn-outline-primary"><i class="fas fa-pencil"></i> Edit</a>
+                <a href="{{ route('list.edit', $list) }}" class="btn btn-outline-primary"><i class="fa-sharp fa-pencil"></i> Edit</a>
             </div>
         </div>
         @endforeach
         
-        <a href="{{ route('list.create') }}" class="btn btn-success mt-5"><i class="fas fa-plus"></i> Create a new list</a>
+        <a href="{{ route('list.create') }}" class="btn btn-success mt-5"><i class="fa-sharp fa-plus"></i> Create a new list</a>
     </div>
 @endsection

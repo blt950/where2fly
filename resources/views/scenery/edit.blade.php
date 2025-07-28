@@ -13,7 +13,7 @@
 
         @isset($existingSceneries)
             <div class="alert alert-warning mb-3">
-                <b><i class="fas fa-info-circle"></i> These sceneries are already in the database</b>
+                <b><i class="fa-sharp fa-info-circle"></i> These sceneries are already in the database</b>
                 @foreach($existingSceneries as $existingScenery)
                     <div>
                         <span class="badge bg-dark">{{ $existingScenery->simulator->shortened_name }}</span>
@@ -46,7 +46,7 @@
                 <label for="icao" class="form-label">ICAO</label>
                 <input type="text" class="form-control" id="icao" name="icao" maxlength="4" value="{{ $scenery->developer->icao }}" required>
                 @error('icao')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
@@ -54,7 +54,7 @@
                 <label for="developer" class="form-label">Developer</label>
                 <input type="text" class="form-control" id="developer" name="developer" maxlength="256" value="{{ $scenery->developer->developer }}" required>
                 @error('developer')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
@@ -64,7 +64,7 @@
                 <label for="link" class="form-label">Link</label>
                 <input type="url" class="form-control" id="link" name="link" maxlength="256" value="{{ $scenery->link }}" required>
                 @error('link')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
@@ -76,7 +76,7 @@
                     <option value="0" @if($scenery->payware == 0) selected @endif>Freeware</option>
                 </select>
                 @error('payware')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
@@ -86,13 +86,13 @@
                     <b>Published</b>
                 </label>
                 @error('published')
-                    <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
 
             <div class="d-flex justify-content-between">
                 <a href="{{ route('scenery.delete', [$scenery]) }}" class="btn btn-danger mt-3" onclick="return confirm('Are you sure you want to delete this scenery?')">
-                    <i class="fas fa-trash"></i>
+                    <i class="fa-sharp fa-trash"></i>
                     Delete
                 </a>
                 <button type="submit" class="btn btn-primary mt-3">Save</button>

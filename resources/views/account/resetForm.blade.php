@@ -17,7 +17,7 @@
                     <label for="email">Email address</label>
                     <input name="email" type="email" class="form-control" id="email" value="{{ old('email') }}">
                     @error('email')
-                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                        <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
 
@@ -25,7 +25,7 @@
                     <label for="password">New Password</label>
                     <input name="password" type="password" class="form-control" id="password">
                     @error('password')
-                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                        <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
 
@@ -33,7 +33,7 @@
                     <label for="confirmPassword">Confirm Password</label>
                     <input name="password_confirmation" type="password" class="form-control" id="confirmPassword">
                     @error('confirm_password')
-                        <div class="validation-error"><i class="fas fa-exclamation-triangle"></i> {{ $message }}</div>
+                        <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                     @enderror
                 </div>
 

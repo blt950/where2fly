@@ -22,7 +22,7 @@
         @if($searchVersionWarning)
             <div class="alert alert-warning mb-4">
                 <p class="mb-0">
-                    <i class="fas fa-warning"></i> {{ $searchVersionWarning }}</a>
+                    <i class="fa-sharp fa-warning"></i> {{ $searchVersionWarning }}</a>
                 </p>
             </div>
         @endif
@@ -30,7 +30,7 @@
         @if($bearingWarning)
             <div class="alert alert-warning">
                 <p class="mb-0">
-                    <i class="fas fa-warning"></i> {{ $bearingWarning }}</a>
+                    <i class="fa-sharp fa-warning"></i> {{ $bearingWarning }}</a>
                 </p>
             </div>
         @endif
@@ -53,7 +53,7 @@
                         @endif
                     @endforeach
 
-                    <button id="randomiseBtn" type="submit" class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;">Randomise <i class="fas fa-shuffle"></i></button>
+                    <button id="randomiseBtn" type="submit" class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;">Randomise <i class="fa-sharp fa-shuffle"></i></button>
                 </form>
 
             </div>
@@ -83,14 +83,14 @@
                     @foreach($primaryAirport->scores as $score)
                         @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
                             <i 
-                                class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                class="text-success fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
                                 data-bs-html="true"
                                 data-bs-toggle="tooltip"
                                 data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
                             ></i>
                         @else
                             <i 
-                                class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                class="fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
                                 data-bs-html="true"
                                 data-bs-toggle="tooltip"
                                 data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
@@ -108,7 +108,7 @@
                         {{ \Carbon\Carbon::parse($primaryAirport->metar->last_update)->format('dHi\Z') }} {{ $primaryAirport->metar->metar }}
                         <span class="d-block mt-2"><button class="d-block btn btn-outline-secondary btn-sm" data-airport-icao="{{ $primaryAirport->icao }}" data-taf-button="true">Fetch TAF</button></span>
                     @else
-                        <i class="fas fa-info-square"></i> No METAR available
+                        <i class="fa-sharp fa-info-square"></i> No METAR available
                     @endif
                 </dd>
             </dl>
@@ -129,7 +129,7 @@
 
                         <tr class="font-work-sans">
                             <th class="text-center text-info fw-normal pt-3 pb-3" colspan="9">
-                                <i class="fas fa-info-square"></i> None of the airports in your range has interesting weather or ATC
+                                <i class="fa-sharp fa-info-square"></i> None of the airports in your range has interesting weather or ATC
                             </th>
                         </tr>
 
@@ -154,14 +154,14 @@
                                 @foreach($airport->scores as $score)
                                     @if(isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1)
                                         <i 
-                                            class="text-success fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                            class="text-success fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
                                             data-bs-html="true"
                                             data-bs-toggle="tooltip"
                                             data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
                                         ></i>
                                     @else
                                         <i 
-                                            class="fas {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
+                                            class="fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
                                             data-bs-html="true"
                                             data-bs-toggle="tooltip"
                                             data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
@@ -180,7 +180,7 @@
                     @if($count == 1)
                         <tr>
                             <th colspan="9" class="text-center text-danger">
-                                <i class="fas fa-exclamation-triangle"></i> No results matched your criteria
+                                <i class="fa-sharp fa-exclamation-triangle"></i> No results matched your criteria
                             </th>
                         </tr>
                     @elseif($count > 10)
