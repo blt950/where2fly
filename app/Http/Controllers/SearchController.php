@@ -182,9 +182,11 @@ class SearchController extends Controller
                     ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                     ->returnOnlyWhitelistedIcao($whitelist)
                     ->has('metar')->with('runways', 'scores', 'metar')
-                    ->shuffleAndSort()
-                    ->limit(10)
                     ->get();
+
+                // Shuffle and limit the results to 20
+                $primaryAirport = $airports->shuffle();
+                $primaryAirport = $airports->take(20);
 
                 if (! $primaryAirport || ! $primaryAirport->count()) {
                     return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
@@ -204,9 +206,11 @@ class SearchController extends Controller
                 ->returnOnlyWhitelistedIcao($whitelist)
                 ->sortByScores($sortByScores)
                 ->has('metar')->with('runways', 'scores', 'metar')
-                ->shuffleAndSort()
-                ->limit(20)
                 ->get();
+
+            // Shuffle and limit the results to 20
+            $airports = $airports->shuffle();
+            $airports = $airports->take(20);
 
             // Filter the eligible airports
             $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $temperatureMin, $temperatureMax, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);

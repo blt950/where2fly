@@ -82,9 +82,11 @@ class SearchController extends Controller
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
             ->sortByScores(($filterByScores) ? array_flip($filterByScores) : null)
             ->has('metar')->with('runways', 'scores', 'metar')
-            ->shuffleAndSort()
-            ->limit($resultLimit)
             ->get();
+
+        // Shuffle and limit the results to 20
+        $primaryAirport = $airports->shuffle();
+        $primaryAirport = $airports->take($resultLimit);
 
         $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 

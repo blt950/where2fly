@@ -527,12 +527,4 @@ class Airport extends Model
                 ->orderBy('score_count', 'desc');
         }
     }
-
-    /**
-     * Shuffle results around. Randomize the order of airports.
-     */
-    public function scopeShuffleAndSort(Builder $query)
-    {
-        $query->orderByRaw('RAND()');
-    }
 }
