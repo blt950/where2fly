@@ -15,6 +15,7 @@ yarn-error.log
 /.idea
 /.vscode
 apache/*
+.DS_Store
 
 /resources/fonts/fa-brands-400.ttf
 /resources/fonts/fa-brands-400.woff2
@@ -28,3 +29,27 @@ apache/*
 /resources/fonts/fa-solid-900.woff2
 /resources/fonts/fa-thin-100.ttf
 /resources/fonts/fa-thin-100.woff2
+/resources/fonts/fa-duotone-light-300.ttf
+/resources/fonts/fa-duotone-light-300.woff2
+/resources/fonts/fa-duotone-regular-400.ttf
+/resources/fonts/fa-duotone-regular-400.woff2
+/resources/fonts/fa-duotone-thin-100.ttf
+/resources/fonts/fa-duotone-thin-100.woff2
+/resources/fonts/fa-sharp-duotone-light-300.ttf
+/resources/fonts/fa-sharp-duotone-light-300.woff2
+/resources/fonts/fa-sharp-duotone-regular-400.ttf
+/resources/fonts/fa-sharp-duotone-regular-400.woff2
+/resources/fonts/fa-sharp-duotone-solid-900.ttf
+/resources/fonts/fa-sharp-duotone-solid-900.woff2
+/resources/fonts/fa-sharp-duotone-thin-100.ttf
+/resources/fonts/fa-sharp-duotone-thin-100.woff2
+/resources/fonts/fa-sharp-light-300.ttf
+/resources/fonts/fa-sharp-light-300.woff2
+/resources/fonts/fa-sharp-regular-400.ttf
+/resources/fonts/fa-sharp-regular-400.woff2
+/resources/fonts/fa-sharp-solid-900.ttf
+/resources/fonts/fa-sharp-solid-900.woff2
+/resources/fonts/fa-sharp-thin-100.ttf
+/resources/fonts/fa-sharp-thin-100.woff2
+/resources/fonts/fa-v4compatibility.ttf
+/resources/fonts/fa-v4compatibility.woff2
