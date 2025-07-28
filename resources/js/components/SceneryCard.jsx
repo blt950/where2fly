@@ -15,7 +15,8 @@ function SceneryCard({ airportId }) {
         { code: 'EUR', symbol: '€' },
         { code: 'USD', symbol: '$' },
         { code: 'GBP', symbol: '£' },
-        { code: 'AUD', symbol: 'A$' }
+        { code: 'AUD', symbol: 'A$' },
+        { code: 'CAD', symbol: 'C$' },
     ]
 
     // Fetch airport data if it's not in the cache
