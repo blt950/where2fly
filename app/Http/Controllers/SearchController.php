@@ -185,8 +185,8 @@ class SearchController extends Controller
                     ->get();
 
                 // Shuffle and limit the results to 20
-                $primaryAirport = $airports->shuffle();
-                $primaryAirport = $airports->take(20);
+                $primaryAirport = $primaryAirport->shuffle();
+                $primaryAirport = $primaryAirport->take(20);
 
                 if (! $primaryAirport || ! $primaryAirport->count()) {
                     return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();

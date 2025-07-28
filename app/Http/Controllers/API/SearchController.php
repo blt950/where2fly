@@ -85,8 +85,8 @@ class SearchController extends Controller
             ->get();
 
         // Shuffle and limit the results to 20
-        $primaryAirport = $airports->shuffle();
-        $primaryAirport = $airports->take($resultLimit);
+        $primaryAirport = $primaryAirport->shuffle();
+        $primaryAirport = $primaryAirport->take($resultLimit);
 
         $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
