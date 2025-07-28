@@ -12,10 +12,12 @@
     <div class="container">
         <div class="text-start">
 
-            <h2 class="mb-0">v2.5.5</h2>
+            <h2 class="mb-0">v2.6.0</h2>
             <span class="badge ps-0 pb-2">2025-07-xx</span>
             <ul>
-                <li>Optimized some code under the hood</li>
+                <li>Added canadian dollars (CAD) to scenery prices</li>
+                <li>Updated icons to new versions and changed to a more sharp look to match the rest.</li>
+                <li>Optimized some code under the hood. This should hopefully fix search freezing time to time.</li>
                 <li>Updated airline database, some the of newly available are: Ajet, ASL Airlines Ireland, China Southern Airlines Cargo, Electra Airways, Sierra Pacific and more.</li>
             </ul>
 
