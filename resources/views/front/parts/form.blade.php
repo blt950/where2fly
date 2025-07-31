@@ -83,9 +83,10 @@
             <label for="whitelist">
                 Whitelist
             </label>
-            <u-combobox id="whitelist" data-input-name="whitelists[]">
+            <u-combobox data-multiple id="whitelist" data-input-name="whitelists[]">
                 <input list="whitelist-list" placeholder="Restrict your search">
                 <u-datalist id="whitelist-list" tabindex="-1" hidden>
+                    <select name="whitelists[]"></select>
                     @foreach($lists as $list)
                         <u-option value="{{ $list->id }}">{{ $list->name }}</u-option>
                     @endforeach
