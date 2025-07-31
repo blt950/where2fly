@@ -6,7 +6,7 @@
 
 @section('resources')
     @vite('resources/js/nouislider.js')
-    @vite('resources/js/functions/tags.js')
+    @vite('resources/js/functions/combobox.js')
 @endsection
 
 @section('content')

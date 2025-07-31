@@ -16,7 +16,7 @@ export default defineConfig({
                 'resources/js/functions/searchForm.js',
                 'resources/js/functions/tooltip.js',
                 'resources/js/functions/taf.js',
-                'resources/js/functions/tags.js',
+                'resources/js/functions/combobox.js',
             ],
             refresh: true,
         }),
