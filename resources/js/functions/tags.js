@@ -58,21 +58,13 @@ document.querySelectorAll('u-combobox').forEach(element => {
     }
 })
 
-// When document is ready, go through all u-tags and find all <data> and add the hidden input to the form
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('u-tags').forEach(element => {
-        element.querySelectorAll('data').forEach(data => {
-            const value = data.value;
+// Clear input field after selection
+document.querySelectorAll('u-combobox').forEach(element => {
+    const input = element.querySelector('input');
 
-            // Create a hidden input element with the data-input-name and value equal to 'value'
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = element.dataset.inputName;
-            input.value = value;
-            input.dataset.tagValue = value; // For easy identification later
-
-            // Append the hidden input the element
-            element.appendChild(input);
+    if(input){
+        element.addEventListener('afterchange', (event) => {
+            input.value = null;
         });
-    });
-});
+    }
+})
