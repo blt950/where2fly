@@ -1,15 +1,4 @@
-// Focus input when clicking on u-tags whitespace
-document.querySelectorAll('u-datalist').forEach(datalist => {
-    const parent = datalist.parentElement;
-    if (parent.tagName === 'U-TAGS') {
-        parent.addEventListener('click', event => {
-            if (event.target === parent) {
-                parent.querySelector('input').focus();
-            }
-        });
-    }
-});
-
+/*
 // Prevent adding tags that don't exist in u-option's and add hidden input to form
 document.querySelectorAll('u-tags').forEach(element => {
     element.addEventListener('tags', (event) => {
@@ -46,14 +35,14 @@ document.querySelectorAll('u-tags').forEach(element => {
             datalist.hidden = true;
         }
     });
-})
+})*/
 
 // Dynamically adjust placeholder for destinations
-document.querySelectorAll('u-tags').forEach(element => {
+document.querySelectorAll('u-combobox').forEach(element => {
     const input = element.querySelector('input[placeholder="Anywhere"]');
 
     if(input){
-        element.addEventListener('tags', (event) => {
+        element.addEventListener('afterchange', (event) => {
             setTimeout(() => {
                 const element = event.target;
                 let count = element.querySelectorAll('data').length;

@@ -10,7 +10,7 @@ import './components/ui/TAF';
 // Other
 import '@u-elements/u-tabs';
 import '@u-elements/u-datalist';
-import '@u-elements/u-tags';
+import '@u-elements/u-combobox';
 
 // Metrics
 document.querySelectorAll('a[href^="http"]').forEach(link => {
