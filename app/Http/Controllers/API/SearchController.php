@@ -85,8 +85,9 @@ class SearchController extends Controller
             ->get();
 
         // Shuffle and limit the results to 20
-        $primaryAirport = $primaryAirport->shuffle();
-        $primaryAirport = $primaryAirport->take($resultLimit);
+        $airports = $airports->groupBy('score_count')->map(function ($group) {
+            return $group->shuffle();
+        })->flatten(1)->take(20);
 
         $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 

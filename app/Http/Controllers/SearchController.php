@@ -185,8 +185,9 @@ class SearchController extends Controller
                     ->get();
 
                 // Shuffle and limit the results to 20
-                $primaryAirport = $primaryAirport->shuffle();
-                $primaryAirport = $primaryAirport->take(20);
+                $primaryAirport = $primaryAirport->groupBy('score_count')->map(function ($group) {
+                    return $group->shuffle();
+                })->flatten(1)->take(20);
 
                 if (! $primaryAirport || ! $primaryAirport->count()) {
                     return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
@@ -209,8 +210,9 @@ class SearchController extends Controller
                 ->get();
 
             // Shuffle and limit the results to 20
-            $airports = $airports->shuffle();
-            $airports = $airports->take(20);
+            $airports = $airports->groupBy('score_count')->map(function ($group) {
+                return $group->shuffle();
+            })->flatten(1)->take(20);
 
             // Filter the eligible airports
             $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $temperatureMin, $temperatureMax, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
