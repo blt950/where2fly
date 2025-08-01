@@ -73,7 +73,7 @@
     }
 }
 
-u-tags {
+u-combobox {
     display: flex;
     flex-wrap: wrap;
     gap: .5rem;
@@ -83,6 +83,10 @@ u-tags {
 
     padding: 0.375rem 0.75rem;
     background-color: var(--bs-body-bg);
+
+    select{
+        display: none;
+    }
 
     data{
         color: black;
@@ -163,6 +167,6 @@ u-datalist {
 
     .divider{
         padding: 0.375rem 0.75rem;
-        background: $gray-200;
+        background: $gray-200;        
     }
 }

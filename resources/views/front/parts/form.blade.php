@@ -15,7 +15,9 @@
             <label for="destination">
                 {{ ucfirst($area) }} Area
             </label>
-            <u-tags id="destination" data-input-name="destinations[]">
+            <u-combobox data-multiple id="destination" data-input-name="destinations[]">
+
+                <select name="destinations[]"></select>
 
                 @if(old('destinations') !== null)
                     @foreach(old('destinations') as $key)
@@ -48,7 +50,7 @@
                     @endforeach
 
                 </u-datalist>
-            </u-tags>
+            </u-combobox>
             @error('destinations')
             <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
             @enderror
@@ -81,14 +83,15 @@
             <label for="whitelist">
                 Whitelist
             </label>
-            <u-tags id="whitelist" data-input-name="whitelists[]">
+            <u-combobox data-multiple id="whitelist" data-input-name="whitelists[]">
                 <input list="whitelist-list" placeholder="Restrict your search">
                 <u-datalist id="whitelist-list" tabindex="-1" hidden>
+                    <select name="whitelists[]"></select>
                     @foreach($lists as $list)
                         <u-option value="{{ $list->id }}">{{ $list->name }}</u-option>
                     @endforeach
                 </u-datalist>
-            </u-tags>
+            </u-combobox>
         </div>
     
         <div class="col-xs-12 text-start">
