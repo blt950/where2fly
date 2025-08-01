@@ -1,1 +1,1 @@
-import 'sortable-tablesort/sortable.min.js';
+import 'sortable-tablesort/dist/sortable.min.js';
