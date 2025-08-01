@@ -167,15 +167,6 @@ u-datalist {
 
     .divider{
         padding: 0.375rem 0.75rem;
-        background: $gray-200;
-        display: none; 
-
-        &:has(+ u-option:not([hidden])),
-        &:has(~ :not(.divider) ~ u-option:not([hidden])) {
-            display: block;
-        }
-
-        /* If next sibling is an option, hide the divider until the next visibe option */
-        
+        background: $gray-200;        
     }
 }
