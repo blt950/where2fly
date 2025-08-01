@@ -15,7 +15,7 @@
             <label for="destination">
                 {{ ucfirst($area) }} Area
             </label>
-            <u-combobox data-multiple id="destination" data-input-name="destinations[]">
+            <u-combobox data-multiple id="destination">
 
                 <select name="destinations[]"></select>
 
@@ -83,7 +83,7 @@
             <label for="whitelist">
                 Whitelist
             </label>
-            <u-combobox data-multiple id="whitelist" data-input-name="whitelists[]">
+            <u-combobox data-multiple id="whitelist">
                 <input list="whitelist-list" placeholder="Restrict your search">
                 <u-datalist id="whitelist-list" tabindex="-1" hidden>
                     <select name="whitelists[]"></select>
@@ -400,7 +400,8 @@
                 <label for="airlines" class="pt-4">
                     Airlines
                 </label>
-                <u-tags id="airlines" data-input-name="airlines[]">
+                <u-combobox id="airlines" data-multiple>
+                    <select name="airlines[]"></select>
                     @if(old('airlines') !== null)
                         @foreach(old('airlines') as $key)
                             @foreach($airlines as $airline)
@@ -416,7 +417,7 @@
                             <u-option value="{{ $airline->icao_code }}">{{ $airline->name }} ({{ $airline->icao_code }})</u-option>
                         @endforeach
                     </u-datalist>
-                </u-tags>
+                </u-combobox>
                 @error('airlines')
                     <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
@@ -424,7 +425,8 @@
                 <label for="aircraft" class="pt-4">
                     Aircraft
                 </label>
-                <u-tags id="aircraft" data-input-name="aircrafts[]">
+                <u-combobox id="aircraft" data-multiple>
+                    <select name="aircrafts[]"></select>
                     @if(old('aircrafts') !== null)
                         @foreach(old('aircrafts') as $key)
                             @foreach($aircrafts as $aircraft)
@@ -440,7 +442,7 @@
                             <u-option value="{{ $aircraft }}">{{ $aircraft }}</u-option>
                         @endforeach
                     </u-datalist>
-                </u-tags>
+                </u-combobox>
                 @error('aircrafts')
                     <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
