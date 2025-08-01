@@ -47,11 +47,8 @@ For the full legal text, see the [LICENSE](LICENSE) file or visit
 All required text fonts are included in this project. Icons are provided by Font Awesome Pro and need to be manually added by you to the project due to licensing restrictions.
 
 Add the following fonts (v7.0.0 or later) to your local project `resources/fonts` folder:
-- fa-brands-400.ttf
 - fa-brands-400.woff2
-- fa-sharp-regular-400.ttf
 - fa-sharp-regular-400.woff2
-- fa-sharp-solid-900.ttf
 - fa-sharp-solid-900.woff2
 
 ### Caching
