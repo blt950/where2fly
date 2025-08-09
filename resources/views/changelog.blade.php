@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.6.2</h2>
+            <span class="badge ps-0 pb-2">2025-08-09</span>
+            <ul>
+                <li>Fixed an issue with search without weather parameters throwing an error</li>
+            </ul>
+
             <h2 class="mb-0">v2.6.1</h2>
             <span class="badge ps-0 pb-2">2025-08-01</span>
             <ul>

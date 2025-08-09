@@ -121,6 +121,11 @@ class SearchController extends Controller
 
         $data = $validator->validated();
 
+        // If scores are not set, initialize it to an empty array
+        if (! isset($data['scores'])) {
+            $data['scores'] = [];
+        }
+
         $direction = $data['direction'];
         $destinations = isset($data['destinations']) ? $this->filterDestinations($data['destinations']) : $this->filterDestinations(['Anywhere']);
         $codeletter = $data['codeletter'];
