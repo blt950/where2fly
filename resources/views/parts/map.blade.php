@@ -14,4 +14,11 @@
             </div>
         @endif
     @endif
+
+    <div class="feedback">
+        <i class="fa-sharp fa-lightbulb-on"></i>
+        <b>We need your feedback!</b>
+        <br>
+        <a href="https://forms.gle/xiCMp853uqj5v3ui9" target="_blank">Help us by filling out this form.</a>
+    </div>
 @endif

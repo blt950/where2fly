@@ -155,3 +155,39 @@
         border-bottom: 10px solid $gray-500; /* Same color as the background of the div */
     }
 }
+
+.feedback {
+    height: auto;
+    width: 275px;
+
+    position: absolute;
+    left: calc($sidebar-width + 1rem);
+    bottom: calc($header-height - 1rem);
+    padding: 1rem;
+
+    background: rgba($secondary, 0.5);
+
+    z-index: 500;
+
+    color: $gray-200;
+    border: 1px solid $primary;
+
+    @include media-breakpoint-down(xl) { 
+        display: none;
+    }
+
+    // Pulse animation
+    animation: feedback-pulse 1.2s ease-out 1;
+
+    @keyframes feedback-pulse {
+        0% {
+            background: $primary;
+        }
+        60% {
+            background: rgba($secondary, 0.5);
+        }
+        100% {
+            background: rgba($secondary, 0.5);
+        }
+    }
+}
