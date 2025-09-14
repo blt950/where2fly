@@ -64,7 +64,9 @@ function submitFormMetrics(){
         });
     });
 
-    umami.track('Search', { props: props });
+    if(window.umami){
+        umami.track('Search', { props: props });
+    }
 }
 
 var submitButtons = Array.from(document.getElementsByClassName('submitBtn'));
@@ -107,7 +109,9 @@ function toggleFilters(goingBack = false){
     if (!filterExpanded) {
 
         if(!goingBack){
-            umami.track('Interactions', {interaction: 'Expand Filters'});
+            if(window.umami){
+                umami.track('Interactions', {interaction: 'Expand Filters'});
+            }
         }
 
         expandFilters();

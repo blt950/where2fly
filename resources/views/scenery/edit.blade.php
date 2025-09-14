@@ -106,7 +106,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             var route = "{{ route('scenery.edit', ['x']) }}";
             route = route.replace(/^https?:\/\/[^\/]+/, '');
-            umami.track(props => ({ ...props, url: route }));
+            if(window.umami){
+                umami.track(props => ({ ...props, url: route }));
+            }
         });
     </script>
 @endsection

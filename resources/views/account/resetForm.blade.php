@@ -48,7 +48,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             var route = "{{ route('password.reset', 'x') }}";
             route = route.replace(/^https?:\/\/[^\/]+/, '');
-            umami.track(props => ({ ...props, url: route }));
+            if(window.umami){
+                umami.track(props => ({ ...props, url: route }));
+            }
         });
     </script>
 @endsection

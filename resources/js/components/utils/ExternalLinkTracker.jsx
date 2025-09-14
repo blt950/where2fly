@@ -15,9 +15,11 @@ const ExternalLinkTracker = () => {
                     let url = new URL(link.href);
                     let domain = url.hostname;
 
-                    umami.track('External Link Click', {
-                        url: domain
-                    });
+                    if(window.umami){
+                        umami.track('External Link Click', {
+                            url: domain
+                        });
+                    }
                 });
             }
         });

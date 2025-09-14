@@ -69,10 +69,14 @@ function AirportCard({ airportId }) {
     }, [airportId]);
 
     useEffect(() => { if(showFlightsIdCard !== null) {
-        umami.track('Interactions', {interaction: `Open flights card`})
+        if(window.umami){
+            umami.track('Interactions', {interaction: `Open flights card`})
+        }
     }}, [showFlightsIdCard]);
     useEffect(() => {if(showSceneryIdCard !== null) {
-        umami.track('Interactions', {interaction: `Open scenery card`})
+        if(window.umami){
+            umami.track('Interactions', {interaction: `Open scenery card`})
+        }
     }}, [showSceneryIdCard]);
 
     // When data changes, initialize tooltips
