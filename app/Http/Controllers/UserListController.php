@@ -21,7 +21,7 @@ class UserListController extends Controller
      */
     public function index(Request $request)
     {
-        $lists = UserList::where('user_id', Auth::id())->withCount('airports')->get();
+        $lists = UserList::where('user_id', Auth::id())->withCount('airports')->get()->sortBy('name');
 
         return view('list.index', compact('lists'));
     }
