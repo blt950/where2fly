@@ -35,6 +35,7 @@ class SearchController extends Controller
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
         $destinationInputs = $this->getDestinationInputs();
+        $whitelistDatabase = null;
 
         if (Auth::check()) {
             $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
@@ -42,7 +43,11 @@ class SearchController extends Controller
             $lists = UserList::where('public', true)->get();
         }
 
-        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs'));
+        if(old('whitelists') !== null){
+            $whitelistDatabase = $this->getWhitelistsFromInput(old('whitelists'));
+        }
+        
+        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
     }
 
     /**
@@ -54,6 +59,7 @@ class SearchController extends Controller
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
         $destinationInputs = $this->getDestinationInputs();
+        $whitelistDatabase = null;
 
         if (Auth::check()) {
             $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
@@ -61,7 +67,11 @@ class SearchController extends Controller
             $lists = UserList::where('public', true)->get();
         }
 
-        return view('front.departures', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs'));
+        if(old('whitelists') !== null){
+            $whitelistDatabase = $this->getWhitelistsFromInput(old('whitelists'));
+        }
+
+        return view('front.departures', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
     }
 
     /**
@@ -326,6 +336,30 @@ class SearchController extends Controller
             return back()->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
         }
 
+    }
+
+    /**
+     * Edit an existing search
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function searchEdit(Request $request)
+    {
+        $direction = $request->input('direction');
+
+        if($direction == "arrival"){
+            return redirect()->route('front.departures')->withInput();
+        }
+
+        return redirect()->route('front')->withInput();
+    }
+
+    /**
+     * Get the relevant whitelist data
+     */
+    private function getWhitelistsFromInput($old)
+    {
+        return UserList::whereIn('id', $old)->get();
     }
 
     /**

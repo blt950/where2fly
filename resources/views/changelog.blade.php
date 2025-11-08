@@ -12,6 +12,13 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.7.0</h2>
+            <span class="badge ps-0 pb-2">2025-11-xx</span>
+            <ul>
+                <li>Added functionality to edit search filters from the results page</li>
+                <li>Lists are now sorted alphabetically</li>
+            </ul>
+
             <h2 class="mb-0">v2.6.3</h2>
             <span class="badge ps-0 pb-2">2025-09-14</span>
             <ul>

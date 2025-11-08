@@ -15,7 +15,7 @@
     $modalAirports = collect();
 @endphp
 
-    @include('layouts.title', ['title' => 'Search results'])
+    @include('layouts.title', ['title' => 'Search results', 'editLink' => true])
 
     <div class="container">   
 

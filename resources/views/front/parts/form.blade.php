@@ -61,7 +61,7 @@
             <select class="form-control" id="codeletter" name="codeletter">
                 <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A - PIPER/CESSNA etc.</option>
                 <option value="B" {{ old('codeletter') == "B" ? "selected" : "" }}>B - CRJ/DHC etc.</option>
-                <option value="C" selected {{ old('codeletter') == "C" ? "selected" : "" }}>C - 737/A320/ERJ etc.</option>
+                <option value="C" {{ old('codeletter') !== null ? (old('codeletter') == "C" ? "selected" : "") : "selected" }}>C - 737/A320/ERJ etc.</option>
                 <option value="D" {{ old('codeletter') == "D" ? "selected" : "" }}>D - B767/A310 etc.</option>
                 <option value="E" {{ old('codeletter') == "E" ? "selected" : "" }}>E - B777/B787/A330 etc.</option>
                 <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F - 747-8/A380 etc.</option>
@@ -84,6 +84,17 @@
                 Whitelist
             </label>
             <u-combobox data-multiple id="whitelist">
+
+                @if($whitelistDatabase !== null)
+                    @foreach($whitelistDatabase as $whitelistDatabaseList)
+                        @foreach(old('whitelists') as $key)
+                            @if($key == $whitelistDatabaseList["id"])
+                                <data value="{{ $key }}">{{ $whitelistDatabaseList["name"] }}</data>
+                            @endif
+                        @endforeach
+                    @endforeach
+                @endisset
+
                 <input list="whitelist-list" placeholder="Restrict your search">
                 <u-datalist id="whitelist-list" tabindex="-1" hidden>
                     <select name="whitelists[]"></select>
