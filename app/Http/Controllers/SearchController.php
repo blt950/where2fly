@@ -43,10 +43,10 @@ class SearchController extends Controller
             $lists = UserList::where('public', true)->get();
         }
 
-        if(old('whitelists') !== null){
+        if (old('whitelists') !== null) {
             $whitelistDatabase = $this->getWhitelistsFromInput(old('whitelists'));
         }
-        
+
         return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
     }
 
@@ -67,7 +67,7 @@ class SearchController extends Controller
             $lists = UserList::where('public', true)->get();
         }
 
-        if(old('whitelists') !== null){
+        if (old('whitelists') !== null) {
             $whitelistDatabase = $this->getWhitelistsFromInput(old('whitelists'));
         }
 
@@ -347,7 +347,7 @@ class SearchController extends Controller
     {
         $direction = $request->input('direction');
 
-        if($direction == "arrival"){
+        if ($direction == 'arrival') {
             return redirect()->route('front.departures')->withInput();
         }
 
