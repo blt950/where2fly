@@ -93,7 +93,7 @@
                             @endif
                         @endforeach
                     @endforeach
-                @endisset
+                @endif
 
                 <input list="whitelist-list" placeholder="Restrict your search">
                 <u-datalist id="whitelist-list" tabindex="-1" hidden>
