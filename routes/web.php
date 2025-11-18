@@ -47,6 +47,8 @@ Route::controller(SearchController::class)->group(function () {
 
     Route::get('/search', 'search')->name('search');
     Route::get('/search/routes', 'searchRoutes')->name('search.routes');
+
+    Route::post('/search/edit', 'searchEdit')->name('search.edit');
 });
 
 // TopController
