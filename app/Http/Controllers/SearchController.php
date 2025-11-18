@@ -43,6 +43,7 @@ class SearchController extends Controller
             $lists = UserList::where('public', true)->get();
         }
 
+        // Get whitelist table if present in old input
         if (old('whitelists') !== null) {
             $whitelistDatabase = $this->getWhitelistsFromInput(old('whitelists'));
         }
