@@ -355,7 +355,8 @@ class SearchController extends Controller
     }
 
     /**
-     * Get the relevant whitelist data
+     * Get the relevant whitelist data.
+     * Note: This allows a user to get whitelists even if they don't own them.
      */
     private function getWhitelistsFromInput($old)
     {
