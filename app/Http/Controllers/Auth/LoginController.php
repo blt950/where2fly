@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
+use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 class LoginController extends Controller
 {
@@ -22,7 +22,7 @@ class LoginController extends Controller
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
             'remember' => ['nullable', 'boolean'],
-            'cf-turnstile-response' => ['required', Rule::turnstile()],
+            'cf-turnstile-response' => ['required', new Turnstile],
         ]);
 
         $user = User::where('username', $request->username)->orWhere('email', $request->username)->first();

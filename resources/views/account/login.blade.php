@@ -5,7 +5,7 @@
 @endsection
 
 @section('resources')
-    @turnstileScripts()
+    <x-turnstile.scripts />
 @endsection
 
 @section('title', 'Login')

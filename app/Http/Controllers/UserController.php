@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
+use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 class UserController extends Controller
 {
@@ -29,7 +29,7 @@ class UserController extends Controller
             'username' => ['required', 'string', 'min:2', 'max:32', 'unique:' . User::class],
             'email' => ['required', 'string', 'lowercase', 'email', 'indisposable', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', 'min:8', 'max:255'],
-            'cf-turnstile-response' => ['required', Rule::turnstile()],
+            'cf-turnstile-response' => ['required', new Turnstile],
             'privacy_policy' => ['accepted'],
         ]);
 
