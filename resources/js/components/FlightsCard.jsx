@@ -59,7 +59,18 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                         <tbody>
                             {data.flights.map(flight => (
                                 <tr key={flight.id}>
-                                    <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.flight_icao}>{flight.flight_icao}</td>
+                                    <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.flight_icao}>
+                                        
+                                        <div className="dropdown fs-6 text-info link-underline-info link-underline-opacity-25-hover font-work-sans ps-0">
+                                            <button className="btn btn-xs btn-xs-light dropdown-toggle font-work-sans" type="button" data-bs-toggle="dropdown" aria-expanded="false">{flight.flight_icao}</button>
+                                            <ul className="dropdown-menu">
+                                                <li><a className="dropdown-item" href="https://dispatch.simbrief.com/options/custom?orig={{ $departure->icao }}&dest={{ $arrival->icao }}&airline={{ $route->airline->icao_code }}&fltnum={{ $route->flight_number }}" target="_blank">Simbrief</a></li>
+                                                <li><a className="dropdown-item" href="https://www.flightradar24.com/data/flights/{{ strtolower($route->airline->iata_code . $route->flight_number) }}" rel="noreferrer" target="_blank">Flightradar24</a></li>
+                                                <li><a className="dropdown-item" href="https://www.flightaware.com/live/flight/{{ strtolower($route->airline->icao_code . $route->flight_number) }}" target="_blank">FlightAware</a></li>
+                                                <li><a className="dropdown-item" href="https://www.airnavradar.com/data/flights/{{ strtolower($route->airline->iata_code . $route->flight_number) }}" target="_blank">AirNavRadar</a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
                                     <td className={flight.highlighted ? 'text-flight-success' : ''}>{flight.aircrafts.map(aircraft => aircraft.icao).join(', ')}</td>
                                     <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.last_seen_at}>{moment(flight.last_seen_at).fromNow()}</td>
                                 </tr>
