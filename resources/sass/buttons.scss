@@ -40,6 +40,11 @@ button {
             color: $white;
             border: 1px solid $white;
         }
+
+        &.show{
+            color: $primary;
+            border-color: $primary;
+        }
     }
 
     &-dark{
@@ -49,8 +54,28 @@ button {
             color: $black;
             border: 1px solid $black;
         }
+
+        &.show{
+            color: $white;
+            background: #202538;
+            border-color: #202538;
+        }
     }
 }
+
+.dropdown{
+    &-menu{
+        background-color: $table-bg;
+    }
+
+    &-item{
+        &:hover, &:active, &:focus{
+            background-color: #e2e2e2;
+            color: $black;
+        }
+    }
+}
+
 
 .btn-outline-light:hover{
     background-color: none;
