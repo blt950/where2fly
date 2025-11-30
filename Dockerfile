@@ -11,21 +11,41 @@ RUN npm ci --omit dev && \
 
 ####################################################################################################
 # Primary container
-FROM docker.io/library/php:8.3.26-apache-trixie
+FROM docker.io/library/php:8.3.28-apache-trixie
 
 # Default container port for the apache configuration
 EXPOSE 80 443
 
-# Install various dependencies
-# - git and unzip for composer
-# - vim and nano for our egos
-# - ca-certificates for OAuth2
+# Install base dependencies
 RUN apt-get update && \
-    apt-get install -y git unzip vim nano ca-certificates default-mysql-client && \
+    apt-get install -y --no-install-recommends curl xz-utils git unzip vim nano ca-certificates && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    a2enmod rewrite ssl remoteip
+    rm -rf /var/lib/apt/lists/*
 
+# Install runtime libs required by Oracle MySQL client
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        libncurses6 \
+        libtinfo6 \
+        libzstd1 \
+        zlib1g \
+        libssl3 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Oracle MySQL Client
+ARG MYSQL_CLIENT_VERSION=8.4.2
+RUN set -eux; \
+    curl -fsSL "https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-${MYSQL_CLIENT_VERSION}-linux-glibc2.28-x86_64.tar.xz" -o /tmp/mysql-client.tar.xz; \
+    tar -xf /tmp/mysql-client.tar.xz -C /usr/local; \
+    mv "/usr/local/mysql-${MYSQL_CLIENT_VERSION}-linux-glibc2.28-x86_64" /usr/local/mysql; \
+    ln -s /usr/local/mysql/bin/mysql /usr/local/bin/mysql; \
+    ln -s /usr/local/mysql/bin/mysqldump /usr/local/bin/mysqldump; \
+    mysql --version; \
+    rm /tmp/mysql-client.tar.xz
+
+# Enable required Apache modules
+RUN a2enmod rewrite ssl remoteip
 
 # Custom Apache2 configuration based on defaults; fairly straightforward
 COPY ./container/configs/000-default.conf /etc/apache2/sites-available/000-default.conf

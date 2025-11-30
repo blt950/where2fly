@@ -19,6 +19,9 @@ For the full legal text, see the [LICENSE](LICENSE) file or visit
 **Frontend:** Laravel Blade, React, JS and SCSS\
 **Backend:** PHP/Laravel with MySQL
 
+### MySQL Client
+The container image uses the Oracle MySQL Client (8.4.x) installed from the official generic Linux tarball instead of Debian's `default-mysql-client` (MariaDB). This ensures full compatibility with MySQL 8.4 features and protocol behavior. If you need to update the version, change the `MYSQL_CLIENT_VERSION` build argument in the `Dockerfile`.
+
 *You'll notice that React is only applied to the canvas of the map. The end goal is to have the whole application in React, since the current solution is sub-optimal and creates multiple page renders*
 
 ## Development Setup
