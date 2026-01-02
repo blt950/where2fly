@@ -15,10 +15,10 @@
         @endif
     @endif
 
-    <!--<div class="feedback">
-        <i class="fa-sharp fa-lightbulb-on"></i>
-        <b>We need your feedback!</b>
+    <div class="feedback">
+        <i class="fa-sharp fa-box-ballot"></i>
+        <b>Vote for the next feature!</b>
         <br>
-        <a href="https://forms.gle/xiCMp853uqj5v3ui9" target="_blank">Help us by filling out this form.</a>
-    </div>-->
+        <a href="https://discord.gg/UkFg9Yy4gP" target="_blank">Check out #general in our Discord</a>
+    </div>
 @endif
