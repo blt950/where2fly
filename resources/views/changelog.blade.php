@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.7.1</h2>
+            <span class="badge ps-0 pb-2">2024-06-13</span>
+            <ul>
+                <li>Fixed randomise button sending user to home</li>
+            </ul>
+
             <h2 class="mb-0">v2.7.0</h2>
             <span class="badge ps-0 pb-2">2025-11-29</span>
             <ul>

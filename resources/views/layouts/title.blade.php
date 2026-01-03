@@ -6,7 +6,7 @@
     @endisset
 
     @isset($editLink)
-        <form id="form" method="POST" action="{{ route('search.edit') }}">
+        <form id="filtersForm" method="POST" action="{{ route('search.edit') }}">
             @csrf
             @foreach(request()->all() as $key => $value)
                 @if(is_array($value))
@@ -19,7 +19,7 @@
             @endforeach
 
             <div class="d-flex flex-wrap gap-2" style="margin-top: 0.5rem;">
-                <button id="editSearchBtn" type="submit" class="btn btn-sm btn-outline-warning mb-1"><i class="fa-sharp fa-pencil"></i> Edit filters</button>
+                <button id="editSearchBtn" type="submit" form="filtersForm" class="btn btn-sm btn-outline-warning mb-1"><i class="fa-sharp fa-pencil"></i> Edit filters</button>
                 <button id="bookmarkBtn" type="button" class="btn btn-sm btn-outline-warning mb-1"><i class="fa-sharp fa-bookmark"></i> Bookmark search</button>
             </div>
 

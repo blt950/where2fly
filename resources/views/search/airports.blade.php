@@ -40,7 +40,7 @@
                 <h2>{{ ucfirst($direction) }} suggestion</h2>
 
                 {{-- Add possibility to re-post the search query for a new random departure --}}
-                <form id="form" method="GET" action="{{ route('search') }}">
+                <form id="randomiseForm" method="GET" action="{{ route('search') }}">
                     @foreach($_GET as $key => $value)
                         @if($key != '_token')
                             @if(is_array($value))
@@ -53,7 +53,7 @@
                         @endif
                     @endforeach
 
-                    <button id="randomiseBtn" type="submit" class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;">Randomise <i class="fa-sharp fa-shuffle"></i></button>
+                    <button id="randomiseBtn" type="submit" form="randomiseForm" class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;">Randomise <i class="fa-sharp fa-shuffle"></i></button>
                 </form>
 
             </div>

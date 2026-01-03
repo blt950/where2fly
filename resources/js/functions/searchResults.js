@@ -32,10 +32,11 @@ if(showMoreBtn){
 
 // Randomise spinner
 var button = document.getElementById('randomiseBtn');
+var form = document.getElementById('randomiseForm');
 if(button){
     button.addEventListener('click', function() {
         button.setAttribute('disabled', '')
         button.innerHTML = 'Randomise&nbsp;&nbsp;<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
-        document.getElementById('form').submit()
+        form.requestSubmit()
     });
 }
