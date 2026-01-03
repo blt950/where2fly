@@ -13,7 +13,7 @@
         <div class="text-start">
 
             <h2 class="mb-0">v2.7.1</h2>
-            <span class="badge ps-0 pb-2">2024-06-13</span>
+            <span class="badge ps-0 pb-2">2025-01-03</span>
             <ul>
                 <li>Fixed randomise button sending user to home</li>
             </ul>
