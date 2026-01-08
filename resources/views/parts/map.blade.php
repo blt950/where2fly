@@ -15,10 +15,12 @@
         @endif
     @endif
 
+    <!--
     <div class="feedback">
         <i class="fa-sharp fa-box-ballot"></i>
         <b>Vote for the next feature!</b>
         <br>
         <a href="https://discord.gg/UkFg9Yy4gP" target="_blank">Check out #general in our Discord</a>
     </div>
+    -->
 @endif
