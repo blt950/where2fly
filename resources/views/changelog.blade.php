@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.7.2</h2>
+            <span class="badge ps-0 pb-2">2026-01-09</span>
+            <ul>
+                <li>Fixed a rare code 500 error when updating lists</li>
+            </ul>
+
             <h2 class="mb-0">v2.7.1</h2>
             <span class="badge ps-0 pb-2">2026-01-03</span>
             <ul>

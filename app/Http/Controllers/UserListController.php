@@ -159,8 +159,11 @@ class UserListController extends Controller
             });
 
             if ($airportModel) {
-                $airportsToAttach->push($airportModel);
-                $addedAirports->push($airportInput);
+                // Avoid attaching duplicates e.g. if both ICAO and local code were provided
+                if (! $airportsToAttach->contains('id', $airportModel->id)) {
+                    $airportsToAttach->push($airportModel);
+                    $addedAirports->push($airportInput);
+                }
             } else {
                 $notFoundAirports->push($airportInput);
             }
