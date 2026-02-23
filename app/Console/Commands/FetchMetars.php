@@ -35,7 +35,7 @@ class FetchMetars extends Command
         $processTime = microtime(true);
         $this->info("Starting fetching of METAR's");
 
-        $response = Http::get('https://metar.vatsim.net?id=all');
+        $response = Http::timeout(60)->retry(3, 1000)->get('https://metar.vatsim.net?id=all');
         if ($response->successful()) {
             $data = collect(preg_split("/\r\n|\n|\r/", $response->body()));
 

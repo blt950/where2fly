@@ -41,7 +41,7 @@ class FetchVatsim extends Command
         $airportMap = Airport::all()->keyBy('icao');
 
         $this->info('Fetching events...');
-        $response = Http::get('https://my.vatsim.net/api/v2/events/latest');
+        $response = Http::timeout(60)->retry(3, 1000)->get('https://my.vatsim.net/api/v2/events/latest');
         if ($response->successful()) {
             $data = json_decode($response->body(), false)->data;
 

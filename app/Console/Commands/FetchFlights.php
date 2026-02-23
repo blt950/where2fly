@@ -37,7 +37,7 @@ class FetchFlights extends Command
         $touchCount = 0;
         $this->info('Starting fetching of flights');
 
-        $response = Http::get('https://airlabs.co/api/v9/flights?api_key=' . $apiKey);
+        $response = Http::timeout(60)->retry(3, 1000)->get('https://airlabs.co/api/v9/flights?api_key=' . $apiKey);
         if ($response->successful()) {
             $flights = collect(json_decode($response->body(), false)->response);
 
