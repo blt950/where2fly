@@ -60,10 +60,10 @@
                                     <div class="dropdown fs-6 text-info link-underline-info link-underline-opacity-25-hover font-work-sans ps-0">
                                         <button class="btn btn-xs btn-xs-dark dropdown-toggle font-work-sans" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{ $route->flight_icao }}</button>
                                         <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="https://dispatch.simbrief.com/options/custom?orig={{ $departure->icao }}&dest={{ $arrival->icao }}&airline={{ $route->airline->icao_code }}&fltnum={{ $route->flight_number }}" target="_blank">Simbrief</a></li>
-                                            <li><a class="dropdown-item" href="https://www.flightradar24.com/data/flights/{{ strtolower($route->airline->iata_code . $route->flight_number) }}" rel="noreferrer" target="_blank">Flightradar24</a></li>
-                                            <li><a class="dropdown-item" href="https://www.flightaware.com/live/flight/{{ strtolower($route->airline->icao_code . $route->flight_number) }}" target="_blank">FlightAware</a></li>
-                                            <li><a class="dropdown-item" href="https://www.airnavradar.com/data/flights/{{ strtolower($route->airline->iata_code . $route->flight_number) }}" target="_blank">AirNavRadar</a></li>
+                                            <li><a class="dropdown-item" href="https://dispatch.simbrief.com/options/custom?orig={{ $departure->icao }}&dest={{ $arrival->icao }}&airline={{ $route->airline->icao_code }}&fltnum={{ $route->flight_number }}&utm_campaign=where2fly.today" target="_blank">Simbrief</a></li>
+                                            <li><a class="dropdown-item" href="https://www.flightradar24.com/data/flights/{{ strtolower($route->airline->iata_code . $route->flight_number) }}?utm_campaign=where2fly.today" rel="noreferrer" target="_blank">Flightradar24</a></li>
+                                            <li><a class="dropdown-item" href="https://www.flightaware.com/live/flight/{{ strtolower($route->airline->icao_code . $route->flight_number) }}?utm_campaign=where2fly.today" target="_blank">FlightAware</a></li>
+                                            <li><a class="dropdown-item" href="https://www.airnavradar.com/data/flights/{{ strtolower($route->airline->iata_code . $route->flight_number) }}?utm_campaign=where2fly.today" target="_blank">AirNavRadar</a></li>
                                         </ul>
                                     </div>
                                 </td>

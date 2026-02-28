@@ -4,11 +4,11 @@ const SimbriefLink = ({ direction, primaryIcao, secondaryIcao }) => {
     return (
         <>
             {primaryIcao !== null ? (
-                <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://dispatch.simbrief.com/options/custom?${simbriefUrl}`} target="_blank">
+                <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://dispatch.simbrief.com/options/custom?${simbriefUrl}&utm_campaign=where2fly.today`} target="_blank">
                     <span>SimBrief</span> <i className="fa-sharp fa-up-right-from-square"></i>
                 </a>
             ) : (
-                <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://dispatch.simbrief.com/options/custom?dest=${secondaryIcao}`} target="_blank">
+                <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://dispatch.simbrief.com/options/custom?dest=${secondaryIcao}&utm_campaign=where2fly.today`} target="_blank">
                     <span>SimBrief</span> <i className="fa-sharp fa-up-right-from-square"></i>
                 </a>
             )}

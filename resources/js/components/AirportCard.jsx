@@ -166,7 +166,7 @@ function AirportCard({ airportId }) {
                                 </>
                             )}
 
-                            <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://windy.com/${data.airport.icao}`} target="_blank">
+                            <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://windy.com/${data.airport.icao}?utm_campaign=where2fly.today`} target="_blank">
                                 Windy <i className="fa-sharp fa-up-right-from-square"></i>
                             </a>
 

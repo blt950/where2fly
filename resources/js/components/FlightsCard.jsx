@@ -66,7 +66,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                                                 <li>
                                                     <a
                                                         className="dropdown-item"
-                                                        href={`https://dispatch.simbrief.com/options/custom?orig=${airports[primaryAirport].icao}&dest=${airports[focusAirport].icao}&airline=${data.airline.icao_code}&fltnum=${flight.flight_number}`}
+                                                        href={`https://dispatch.simbrief.com/options/custom?orig=${airports[primaryAirport].icao}&dest=${airports[focusAirport].icao}&airline=${data.airline.icao_code}&fltnum=${flight.flight_number}&utm_campaign=where2fly.today`}
                                                         target="_blank"
                                                         rel="noreferrer"
                                                     >
@@ -76,7 +76,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                                                 <li>
                                                     <a
                                                         className="dropdown-item"
-                                                        href={`https://www.flightradar24.com/data/flights/${(data.airline.iata_code + flight.flight_number).toLowerCase()}`}
+                                                        href={`https://www.flightradar24.com/data/flights/${(data.airline.iata_code + flight.flight_number).toLowerCase()}?utm_campaign=where2fly.today`}
                                                         target="_blank"
                                                     >
                                                         Flightradar24
@@ -85,7 +85,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                                                 <li>
                                                     <a
                                                         className="dropdown-item"
-                                                        href={`https://www.flightaware.com/live/flight/${(data.airline.icao_code + flight.flight_number).toLowerCase()}`}
+                                                        href={`https://www.flightaware.com/live/flight/${(data.airline.icao_code + flight.flight_number).toLowerCase()}?utm_campaign=where2fly.today`}
                                                         target="_blank"
                                                     >
                                                         FlightAware
@@ -94,7 +94,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                                                 <li>
                                                     <a
                                                         className="dropdown-item"
-                                                        href={`https://www.airnavradar.com/data/flights/${(data.airline.iata_code + flight.flight_number).toLowerCase()}`}
+                                                        href={`https://www.airnavradar.com/data/flights/${(data.airline.iata_code + flight.flight_number).toLowerCase()}?utm_campaign=where2fly.today`}
                                                         target="_blank"
                                                     >
                                                         AirNavRadar
