@@ -100,7 +100,7 @@ Route::controller(UserController::class)->group(function () {
 Route::view('/changelog', 'changelog')->name('changelog');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/api', 'api')->name('api');
-Route::view('/donate', 'donate')->name('donate');
+Route::redirect('/donate', 'https://ko-fi.com/X7X21V3MEX');
 
 // Old routes
 Route::permanentRedirect('/advanced', '/');

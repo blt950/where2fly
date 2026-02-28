@@ -1,8 +1,14 @@
 <header class="mb-auto">
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <a href="{{ route('front') }}" class="navbar-brand mb-0 logo">
-            Where2Fly
-        </a>
+        <div>
+            <a href="{{ route('front') }}" class="navbar-brand mb-0 logo">
+                Where2Fly
+            </a>
+            <a class="donate btn btn-sm btn-light" href="https://ko-fi.com/X7X21V3MEX" target="_blank">
+                <img src="/img/kofi_symbol.svg" alt="Coffee cup with a heart" />
+                Buy me a coffee
+            </a>
+        </div>
         <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -24,12 +30,6 @@
                     <a class="nav-link {{ Route::is('scenery*') ? 'active' : '' }}" href="{{ route('scenery') }}">
                         <i class="fa-sharp fa-map"></i>&nbsp;
                         Scenery
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ Route::is('donate') ? 'active' : '' }}" href="{{ route('donate') }}">
-                        <i class="fa-sharp fa-donate"></i>&nbsp;
-                        Donate
                     </a>
                 </li>
                 @if(session('efbpro') === null)

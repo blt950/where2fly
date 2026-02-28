@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2026-02-28</span>
             <ul>
                 <li>Fixed padding for top list legend on mobile screens</li>
+                <li>Introduced "Buy me a coffee" donation with more payment options</li>
                 <li>Minor changes under the hood</li>
             </ul>
 

@@ -21,6 +21,28 @@
     }
 }
 
+.donate{
+
+    background: #fffdf7;
+
+    img{
+        height: 16px;
+    }
+
+    &:hover img{
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        25% { transform: scale(1.25); }
+    }
+
+    @media (max-width: 375px){
+        display: none;
+    }
+}
+
 .navbar{
     height: $header-height;
     padding: 0;
