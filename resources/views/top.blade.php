@@ -33,7 +33,7 @@
         </div>
             
         <div class="table-responsive">
-            <table class="table table-hover text-start sortable asc">
+            <table class="table table-hover text-start sortable asc mb-0">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
