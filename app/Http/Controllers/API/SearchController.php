@@ -4,11 +4,11 @@ namespace App\Http\Controllers\API;
 
 use App\Helpers\CalculationHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ScoreController;
 use App\Models\Airport;
 use App\Rules\AirportExists;
-use Illuminate\Http\Request;
 use App\Rules\ValidDestinations;
-use App\Http\Controllers\ScoreController;
+use Illuminate\Http\Request;
 
 class SearchController extends Controller
 {
@@ -73,8 +73,8 @@ class SearchController extends Controller
         }
 
         // Make sure the destinations input structure is valid
-        if(is_array($destinations)){
-            if(array_key_exists('continents', $destinations) && !is_array($destinations['continents']) && !is_null($destinations['continents'])){
+        if (is_array($destinations)) {
+            if (array_key_exists('continents', $destinations) && ! is_array($destinations['continents']) && ! is_null($destinations['continents'])) {
                 return response()->json([
                     'message' => 'Invalid destinations format. The continents key should be an array of continent codes or null.',
                 ], 400);
@@ -82,15 +82,15 @@ class SearchController extends Controller
 
             if (
                 array_key_exists('countries', $destinations) &&
-                !is_null($destinations['countries']) &&
-                !(is_array($destinations['countries']) || $destinations['countries'] === "Domestic")
+                ! is_null($destinations['countries']) &&
+                ! (is_array($destinations['countries']) || $destinations['countries'] === 'Domestic')
             ) {
                 return response()->json([
                     'message' => 'Invalid destinations format. The countries key should be an array of country codes, string with content \'Domestic\' or null.',
                 ], 400);
             }
 
-            if(array_key_exists('states', $destinations) && !is_array($destinations['states']) && !is_null($destinations['states'])){
+            if (array_key_exists('states', $destinations) && ! is_array($destinations['states']) && ! is_null($destinations['states'])) {
                 return response()->json([
                     'message' => 'Invalid destinations format. The states key should be an array of state codes prefixed with \'US-\' or null.',
                 ], 400);
@@ -110,7 +110,6 @@ class SearchController extends Controller
         } else {
             $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->get()->first();
         }
-
 
         $airports = collect();
         $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
