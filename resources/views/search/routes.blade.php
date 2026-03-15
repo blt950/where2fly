@@ -85,7 +85,6 @@
                 </table>
             </div>
         </div>
-        @include('layouts.legend')
     </div>
 @endsection
 
