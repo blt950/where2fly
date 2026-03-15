@@ -14,10 +14,10 @@ class CheckUtmSource
      */
     public function handle(Request $request, Closure $next)
     {
-        // Check if 'utm_source' exists and is equal to 'efbpro'
-        if ($request->has('utm_source') && $request->get('utm_source') === 'efbpro') {
-            // Set session variable
-            session(['efbpro' => true]);
+        // Check if 'utm_source' exists and is equal to 'efbX'
+        if ($request->has('utm_source') && $request->get('utm_source') === 'efbX') {
+            // Persist session variable for the whole session
+            $request->session()->put('efbX', true);
         }
 
         return $next($request);

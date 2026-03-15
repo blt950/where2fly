@@ -1,6 +1,6 @@
 <aside id="map"></aside>
 
-@if(session('efbpro') === null)
+@if(session('efbX') === null)
     @if(!Auth::user() || (Auth::user() && Auth::user()->lists->count() == 0))
         @if(!Route::is('search') && !Route::is('top'))
             <div class="hint">

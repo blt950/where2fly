@@ -32,7 +32,7 @@
                         Scenery
                     </a>
                 </li>
-                @if(session('efbpro') === null)
+                @if(session('efbX') === null)
                     @guest
                         <li class="nav-item">
                             <a class="nav-link {{ Route::is('login') || Route::is('register') ? 'active' : '' }}" href="{{ route('login') }}">
