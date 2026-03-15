@@ -11,7 +11,7 @@ class ApiLog extends Model
 
     public $timestamps = false;
 
-    public $fillable = ['api_key_id', 'time'];
+    public $fillable = ['api_key_id', 'endpoint', 'time'];
 
     public function key()
     {

@@ -46,6 +46,7 @@ class ApiToken
 
         ApiLog::create([
             'api_key_id' => $key->id,
+            'endpoint' => $request->path(),
         ]);
 
         return $next($request);
