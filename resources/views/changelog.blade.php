@@ -19,6 +19,8 @@
                 <li>Fixed padding for top list legend on mobile screens</li>
                 <li>Introduced "Buy me a coffee" donation with more payment options</li>
                 <li>Minor changes under the hood</li>
+                <li>API: Added destination and temperature search parameters</li>
+                <li>API: Updated documentation</li>
             </ul>
 
             <h2 class="mb-0">v2.7.4</h2>

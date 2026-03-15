@@ -7,7 +7,7 @@
 - `https://qa.where2fly.today/` for **testing data** and quality assurance. Data in this environment is often static and rarely updated, so it's easier to debug your application. Do not share data from here to your users.
 - `https://where2fly.today/` for **live** production data
 
-### API
+### Access
 To get access to the API, please contact Blt950 on Discord.
 
 ## Endpoints
@@ -33,16 +33,18 @@ Returns airports matching your search query
 | --- | --- | --- | --- | --- |
 | `departure` | Yes | string | Departure airport | - |
 | `arrival` | Yes | string | Arrival airport | - |
-| `continent` | Yes | string | Filter on one continent described below | - |
+| `destinations` | Yes | array | Filter continent, countries and states. Described below | - |
 | `codeletter` | Yes | string | Select aircraft type | - |
 | `airtimeMin` | No | string | Minimum airtime | 0 |
 | `airtimeMax` | No | string | Maximum airtime | 24 |
 | `scores` | No | array* | Apply condition weather or ATC filters as described below | null |
 | `metconditions` | No | string | Apply weather filters `IFR` or `VFR` | null |
 | `destinationRunwayLights` | No | int* | Only show airports with runway lights | 0 |
-| `destinationAirbases` | No | int* | Only show airports with airbases | 0 |
+| `destinationAirbases` | No | int* | Only show airports with airbases | -1 |
 | `destinationAirportSize` | No | array | Only show airports with the selected size | airport_small, airport_medium, airport_large |
 | `destinationFilter` | No | array | Filter destinations to your liking | null |
+| `temperaturenMin` | No | string | Minimum temperature | -60 |
+| `temperaturenMax` | No | string | Maximum temperature | 60 |
 | `elevationMin` | No | string | Minimum airport elevation | 0 |
 | `elevationMax` | No | string | Maximum airport elevation | 18000 |
 | `rwyLengthMin` | No | string | Minimum runway length | 0 |
@@ -84,7 +86,19 @@ Due to the terms of service of the data provider, this won't be available for fu
 - `VATSIM_EVENT`
 - `VATSIM_POPULAR`
 
-### Available continents
+### Available destinations
+
+You may filter on continents, countries and/or US states. If you send no values, all destinations will be included. The input array should be formated like this and all entries as array of strings:
+
+```
+"destinations": {
+    "continents": null,
+    "countries": ["NL", "DE"],
+    "states": null
+}
+```
+
+#### Continents
 - `AF` - Africa
 - `AS` - Asia
 - `EU` - Europe
@@ -92,10 +106,19 @@ Due to the terms of service of the data provider, this won't be available for fu
 - `OC` - Oceania
 - `SA` - South America
 
+#### Countries
+Use two letter ISO 3166-1 alpha-2 country codes. E.g. `NL` for the Netherlands, `US` for the United States, etc.
+
+To  only search for domestic flights write `Domestic` **as string** in this field.
+
+#### US States
+Use two letter US state codes with a `US-` prefix. E.g. `US-CA` for California, `US-NY` for New York, etc.
+
 ### Available codeletters
-- `A` - e.g. PIPER/CESSNA
-- `B` - e.g. CRJ/DHC
-- `C` - e.g. A320/B737/ERJ
-- `D` - e.g. A330/B767/B777
-- `E` - e.g. A340/B747/B787
-- `F` - e.g. A380/B748
+This is used to calculate airtime and find compatible airports. Select aircraft closes to what user want to fly.
+- `A` - PIPER/CESSNA
+- `B` - CRJ/DHC
+- `C` - A320/B737/ERJ
+- `D` - B767/A310
+- `E` - B777/B787/A330
+- `F` - 747-8/A380

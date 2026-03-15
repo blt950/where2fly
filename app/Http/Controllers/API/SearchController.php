@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Airport;
 use App\Rules\AirportExists;
 use Illuminate\Http\Request;
+use App\Rules\ValidDestinations;
+use App\Http\Controllers\ScoreController;
 
 class SearchController extends Controller
 {
@@ -19,36 +21,40 @@ class SearchController extends Controller
         $data = request()->validate([
             'departure' => ['nullable', new AirportExists],
             'arrival' => ['nullable', new AirportExists],
-            'continent' => 'required_without:arrivalWhitelist|string',
-            'codeletter' => 'required|string',
-            'airtimeMin' => 'sometimes|numeric|between:0,24',
-            'airtimeMax' => 'sometimes|numeric|between:0,24',
-            'scores' => 'sometimes|array',
-            'metcondition' => 'sometimes|in:IFR,VFR,ANY',
-            'destinationWithRoutesOnly' => 'sometimes|numeric|between:-1,1',
-            'destinationRunwayLights' => 'sometimes|numeric|between:-1,1',
-            'destinationAirbases' => 'sometimes|numeric|between:-1,1',
-            'destinationAirportSize' => 'sometimes|array',
-            'elevationMin' => 'sometimes|numeric|between:-2000,18000',
-            'elevationMax' => 'sometimes|numeric|between:-2000,18000',
-            'rwyLengthMin' => 'sometimes|numeric|between:0,17000',
-            'rwyLengthMax' => 'sometimes|numeric|between:0,17000',
+            'destinations' => ['sometimes', 'array', new ValidDestinations],
+            'codeletter' => ['required', 'string'],
+            'airtimeMin' => ['sometimes', 'numeric', 'between:0,24'],
+            'airtimeMax' => ['sometimes', 'numeric', 'between:0,24'],
+            'scores' => ['sometimes', 'array'],
+            'metcondition' => ['sometimes', 'in:IFR,VFR,ANY'],
+            'destinationWithRoutesOnly' => ['sometimes', 'numeric', 'between:-1,1'],
+            'destinationRunwayLights' => ['sometimes', 'numeric', 'between:-1,1'],
+            'destinationAirbases' => ['sometimes', 'numeric', 'between:-1,1'],
+            'destinationAirportSize' => ['sometimes', 'array'],
+            'temperatureMin' => ['sometimes', 'numeric', 'between:-60,60'],
+            'temperatureMax' => ['sometimes', 'numeric', 'between:-60,60'],
+            'elevationMin' => ['sometimes', 'numeric', 'between:-2000,18000'],
+            'elevationMax' => ['sometimes', 'numeric', 'between:-2000,18000'],
+            'rwyLengthMin' => ['sometimes', 'numeric', 'between:0,17000'],
+            'rwyLengthMax' => ['sometimes', 'numeric', 'between:0,17000'],
 
-            'arrivalWhitelist' => 'sometimes|array',
-            'limit' => 'sometimes|integer|between:1,30',
+            'arrivalWhitelist' => ['sometimes', 'array'],
+            'limit' => ['sometimes', 'integer', 'between:1,30'],
         ]);
 
         isset($data['departure']) ? $departure = $data['departure'] : $departure = null;
         isset($data['arrival']) ? $arrival = $data['arrival'] : $arrival = null;
-        isset($data['continent']) ? $continent = $data['continent'] : $continent = null;
+        isset($data['destinations']) ? $destinations = $data['destinations'] : $destinations = ['continents' => null, 'countries' => null, 'states' => null];
         $codeletter = $data['codeletter'];
         isset($data['airtimeMin']) ? $airtimeMin = $data['airtimeMin'] : $airtimeMin = 0;
         isset($data['airtimeMax']) ? $airtimeMax = $data['airtimeMax'] : $airtimeMax = 24;
         isset($data['scores']) ? $filterByScores = array_map('intval', $data['scores']) : $filterByScores = null;
         isset($data['metcondition']) ? $metcon = $data['metcondition'] : $metcon = null;
         isset($data['destinationRunwayLights']) ? $destinationRunwayLights = (int) $data['destinationRunwayLights'] : $destinationRunwayLights = 0;
-        isset($data['destinationAirbases']) ? $destinationAirbases = (int) $data['destinationAirbases'] : $destinationAirbases = 0;
+        isset($data['destinationAirbases']) ? $destinationAirbases = (int) $data['destinationAirbases'] : $destinationAirbases = -1;
         (isset($data['destinationAirportSize']) && ! empty($data['destinationAirportSize'])) ? $destinationAirportSize = $data['destinationAirportSize'] : $destinationAirportSize = ['small_airport', 'medium_airport', 'large_airport'];
+        isset($data['temperatureMin']) ? $temperatureMin = $data['temperatureMin'] : $temperatureMin = -60;
+        isset($data['temperatureMax']) ? $temperatureMax = $data['temperatureMax'] : $temperatureMax = 60;
         isset($data['elevationMin']) ? $elevationMin = $data['elevationMin'] : $elevationMin = -2000;
         isset($data['elevationMax']) ? $elevationMax = $data['elevationMax'] : $elevationMax = 18000;
         isset($data['rwyLengthMin']) ? $rwyLengthMin = $data['rwyLengthMin'] : $rwyLengthMin = 0;
@@ -66,6 +72,36 @@ class SearchController extends Controller
             ], 400);
         }
 
+        // Make sure the destinations input structure is valid
+        if(is_array($destinations)){
+            if(array_key_exists('continents', $destinations) && !is_array($destinations['continents']) && !is_null($destinations['continents'])){
+                return response()->json([
+                    'message' => 'Invalid destinations format. The continents key should be an array of continent codes or null.',
+                ], 400);
+            }
+
+            if (
+                array_key_exists('countries', $destinations) &&
+                !is_null($destinations['countries']) &&
+                !(is_array($destinations['countries']) || $destinations['countries'] === "Domestic")
+            ) {
+                return response()->json([
+                    'message' => 'Invalid destinations format. The countries key should be an array of country codes, string with content \'Domestic\' or null.',
+                ], 400);
+            }
+
+            if(array_key_exists('states', $destinations) && !is_array($destinations['states']) && !is_null($destinations['states'])){
+                return response()->json([
+                    'message' => 'Invalid destinations format. The states key should be an array of state codes prefixed with \'US-\' or null.',
+                ], 400);
+            }
+
+        } else {
+            return response()->json([
+                'message' => 'Invalid destinations format. It should be an object with continents, countries and states keys.',
+            ], 400);
+        }
+
         /**
          *  Fetch the requested data
          */
@@ -75,12 +111,15 @@ class SearchController extends Controller
             $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->get()->first();
         }
 
+
         $airports = collect();
         $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
-            ->inContinent($continent)->withinDistance($airport, $minDistance, $maxDistance, $airport->icao)
-            ->filterRunwayLights($destinationRunwayLights)->filterAirbases($destinationAirbases)->filterByScores($filterByScores)
+            ->inContinent($destinations)->inCountry($destinations, $airport->iso_country)->inState($destinations)
+            ->withinDistance($airport, $minDistance, $maxDistance, $airport->icao)
+            ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
+            ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
-            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : null)
+            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes())
             ->has('metar')->with('runways', 'scores', 'metar')
             ->get();
 
@@ -89,7 +128,7 @@ class SearchController extends Controller
             return $group->shuffle();
         })->flatten(1)->take(20);
 
-        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $temperatureMin, $temperatureMax, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
 
         /**
          *  Prepare the data for the response
