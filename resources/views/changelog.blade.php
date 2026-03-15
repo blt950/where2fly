@@ -15,6 +15,7 @@
             <h2 class="mb-0">v2.8.0</h2>
             <span class="badge ps-0 pb-2">2026-03-15</span>
             <ul>
+                <li>Fixed "VATSIM ATC Online" filter not working for US/AU airports</li>
                 <li>Fixed padding for top list legend on mobile screens</li>
                 <li>Introduced "Buy me a coffee" donation with more payment options</li>
                 <li>Minor changes under the hood</li>

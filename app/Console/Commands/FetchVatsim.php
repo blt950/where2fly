@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\AirportCallsignHelper;
 use App\Models\Airport;
 use App\Models\Controller;
 use App\Models\Event;
@@ -68,7 +69,26 @@ class FetchVatsim extends Command
             $data = json_decode($response->body(), false)->controllers;
 
             foreach ($data as $controller) {
-                $callsign = substr($controller->callsign, 0, 4);
+
+                // Skip observers, FSS and enroute controllers
+                if ($controller->facility <= 1 || $controller->facility >= 6) {
+                    continue;
+                }
+
+                // Fetch callsign prefix
+                preg_match('/^([A-Z]*)_/', $controller->callsign, $matches);
+
+                // For callsigns with 3 letters or less
+                if (strlen($matches[1]) <= 3) {
+                    $australianCallsign = AirportCallsignHelper::returnAustralianAirport($matches[1]);
+                    if ($australianCallsign) {
+                        $callsign = $australianCallsign;
+                    } else {
+                        $callsign = AirportCallsignHelper::returnAmericanIcao($matches[1]);
+                    }
+                } else {
+                    $callsign = $matches[1];
+                }
 
                 if (isset($airportMap[$callsign])) {
                     $upsertControllerData[] = [
@@ -76,6 +96,8 @@ class FetchVatsim extends Command
                         'callsign' => $controller->callsign,
                         'logon_time' => Carbon::parse($controller->logon_time),
                     ];
+
+                    $this->info('Controller ' . $controller->callsign . ' online at ' . $callsign);
                 }
             }
         }
