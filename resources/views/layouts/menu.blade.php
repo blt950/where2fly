@@ -1,7 +1,7 @@
 <header class="mb-auto">
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div>
-            <a href="{{ route('front') }}" class="navbar-brand mb-0 logo">
+        <div class="d-flex d-row">
+            <a href="{{ route('front') }}" class="d-block navbar-brand mb-0 logo">
                 Where2Fly
             </a>
             <a class="donate btn btn-sm btn-light" href="https://ko-fi.com/X7X21V3MEX" target="_blank">

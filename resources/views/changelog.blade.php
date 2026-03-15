@@ -13,7 +13,7 @@
         <div class="text-start">
 
             <h2 class="mb-0">v2.8.0</h2>
-            <span class="badge ps-0 pb-2">2026-02-28</span>
+            <span class="badge ps-0 pb-2">2026-03-15</span>
             <ul>
                 <li>Fixed padding for top list legend on mobile screens</li>
                 <li>Introduced "Buy me a coffee" donation with more payment options</li>
