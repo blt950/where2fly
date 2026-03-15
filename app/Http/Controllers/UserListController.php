@@ -7,6 +7,8 @@ use App\Models\Simulator;
 use App\Models\UserList;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 
@@ -17,7 +19,7 @@ class UserListController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index(Request $request)
     {
@@ -29,7 +31,7 @@ class UserListController extends Controller
     /**
      * Show the form for creating a new list.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create(Request $request)
     {
@@ -41,7 +43,7 @@ class UserListController extends Controller
     /**
      * Store a newly created list in storage.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function store(Request $request)
     {
@@ -78,7 +80,7 @@ class UserListController extends Controller
     /**
      * Show the form for editing the list
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function edit(UserList $list)
     {
@@ -129,7 +131,7 @@ class UserListController extends Controller
     /**
      * Process the airports and save the models
      *
-     * @return \Illuminate\Support\Collection $notFoundAirports
+     * @return Collection $notFoundAirports
      */
     private function processAirports(UserList $list, string $input)
     {
@@ -179,7 +181,7 @@ class UserListController extends Controller
     /**
      * Remove the list
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy(UserList $list)
     {
@@ -192,7 +194,7 @@ class UserListController extends Controller
     /**
      * Toggle the list visibility
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function toggle(UserList $list)
     {

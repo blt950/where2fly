@@ -14,9 +14,11 @@ use App\Rules\ValidAircrafts;
 use App\Rules\ValidAirlines;
 use App\Rules\ValidDestinations;
 use App\Rules\ValidScores;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class SearchController extends Controller
 {
@@ -27,7 +29,7 @@ class SearchController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function indexArrivalSearch()
     {
@@ -86,7 +88,7 @@ class SearchController extends Controller
     /**
      * Search for a flight
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function search(Request $request)
     {
@@ -280,7 +282,7 @@ class SearchController extends Controller
     /**
      * Search for a route
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function searchRoutes(Request $request)
     {
@@ -342,7 +344,7 @@ class SearchController extends Controller
     /**
      * Edit an existing search
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function searchEdit(Request $request)
     {

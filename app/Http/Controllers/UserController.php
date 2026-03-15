@@ -9,6 +9,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -21,7 +22,7 @@ class UserController extends Controller
     /**
      * Handle a registration request for the application.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function store(Request $request)
     {
@@ -50,7 +51,7 @@ class UserController extends Controller
     /**
      * Show the user profile
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function show()
     {
@@ -60,7 +61,7 @@ class UserController extends Controller
     /**
      * Handle a user deletion request
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy(Request $request)
     {
@@ -73,7 +74,7 @@ class UserController extends Controller
     /**
      * Verification process: Show a verification notice to the user based on the previous URL
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function verifyNotice(Request $request)
     {
@@ -87,7 +88,7 @@ class UserController extends Controller
     /**
      * Verification process: Verify the email and redirect the user
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function verifyEmail(EmailVerificationRequest $request)
     {
@@ -99,7 +100,7 @@ class UserController extends Controller
     /**
      * Verification process: Resend the email verification link
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function verifyResendEmail(Request $request)
     {
@@ -111,7 +112,7 @@ class UserController extends Controller
     /**
      * Reset process: Show the password reset form
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function resetRequestForm()
     {
@@ -122,7 +123,7 @@ class UserController extends Controller
      * Reset process: Show the password reset form
      *
      * @param  string  $token
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function resetForm(Request $request, $token)
     {
@@ -134,7 +135,7 @@ class UserController extends Controller
     /**
      * Reset process: Send the password reset link
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function resetSendLink(Request $request)
     {
@@ -152,7 +153,7 @@ class UserController extends Controller
     /**
      * Reset process: Reset the password based on the input form
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function resetPassword(Request $request)
     {

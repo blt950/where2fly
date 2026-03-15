@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\MapHelper;
 use App\Models\AirportScore;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class TopController extends Controller
@@ -11,7 +12,7 @@ class TopController extends Controller
     /**
      * List all top airports
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function index(Request $request, ?string $continent = null)
     {

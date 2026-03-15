@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\API\MapController;
+use App\Http\Controllers\API\SearchController;
+use App\Http\Controllers\API\TopController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,12 +17,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['middleware' => ['api-token']], function () {
-    Route::get('/top', [App\Http\Controllers\API\TopController::class, 'index'])->name('api.top.index');
-    Route::post('/top', [App\Http\Controllers\API\TopController::class, 'indexWhitelist'])->name('api.top.index.whitelist');
-    Route::post('/search', [App\Http\Controllers\API\SearchController::class, 'search'])->name('api.search');
+    Route::get('/top', [TopController::class, 'index'])->name('api.top.index');
+    Route::post('/top', [TopController::class, 'indexWhitelist'])->name('api.top.index.whitelist');
+    Route::post('/search', [SearchController::class, 'search'])->name('api.search');
 });
 
-Route::get('/user/authenticated', [App\Http\Controllers\API\MapController::class, 'isAuthenticated'])->name('api.user.authenticated');
+Route::get('/user/authenticated', [MapController::class, 'isAuthenticated'])->name('api.user.authenticated');
 
 Route::post('/airport', [MapController::class, 'getAirport'])->name('api.airport.show');
 Route::post('/flights', [MapController::class, 'getFlights'])->name('api.airport.flights');

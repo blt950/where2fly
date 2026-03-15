@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
@@ -14,7 +15,7 @@ class LoginController extends Controller
     /**
      * Handle a login request for the application.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function login(Request $request, User $user)
     {
@@ -51,7 +52,7 @@ class LoginController extends Controller
     /**
      * Handle a logout request for the application.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public static function logout()
     {
@@ -63,7 +64,7 @@ class LoginController extends Controller
     /**
      * Show the registration form
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function showRegister()
     {
@@ -73,7 +74,7 @@ class LoginController extends Controller
     /**
      * Show the login form
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function showLogin()
     {
