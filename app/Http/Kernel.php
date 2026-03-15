@@ -5,7 +5,6 @@ namespace App\Http;
 use App\Http\Middleware\AdminVariables;
 use App\Http\Middleware\ApiToken;
 use App\Http\Middleware\Authenticate;
-use App\Http\Middleware\CheckUtmSource;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -63,7 +62,6 @@ class Kernel extends HttpKernel
             VerifyCsrfToken::class,
             SubstituteBindings::class,
             UserActive::class,
-            CheckUtmSource::class,
             AdminVariables::class,
         ],
 
