@@ -57,14 +57,16 @@
         </div>
         
         <div class="col-xs-12 text-start">
-            <label for="codeletter">Aircraft Code Letter <i class="fa-sharp fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Select the aircraft closest to what you want to fly. This is used to calculate airtime and find compatible airports"></i></label>
+            <label for="codeletter">Aircraft Type <i class="fa-sharp fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Select the aircraft closest to what you want to fly. This is used to calculate airtime and find compatible airports"></i></label>
             <select class="form-control" id="codeletter" name="codeletter">
-                <option value="A" {{ old('codeletter') == "A" ? "selected" : "" }}>A - PIPER/CESSNA etc.</option>
-                <option value="B" {{ old('codeletter') == "B" ? "selected" : "" }}>B - CRJ/DHC etc.</option>
-                <option value="C" {{ old('codeletter') !== null ? (old('codeletter') == "C" ? "selected" : "") : "selected" }}>C - 737/A320/ERJ etc.</option>
-                <option value="D" {{ old('codeletter') == "D" ? "selected" : "" }}>D - B767/A310 etc.</option>
-                <option value="E" {{ old('codeletter') == "E" ? "selected" : "" }}>E - B777/B787/A330 etc.</option>
-                <option value="F" {{ old('codeletter') == "F" ? "selected" : "" }}>F - 747-8/A380 etc.</option>
+                <option value="GA" {{ old('codeletter') == "GA" ? "selected" : "" }}>C172/PA28/C182 etc. - Light GA</option>
+                <option value="GAT" {{ old('codeletter') == "GAT" ? "selected" : "" }}>Bonanza/Baron/Caravan etc. - Turbo GA</option>
+                <option value="GTP" {{ old('codeletter') == "GTP" ? "selected" : "" }}>TBM/PC-12/King Air etc. - Heavy Turboprop</option>
+                <option value="JS" {{ old('codeletter') == "JS" ? "selected" : "" }}>CRJ/E145/PC-24 etc. - Regional Jet</option>
+                <option value="JM"  {{ old('codeletter') !== null ? (old('codeletter') == "JM" ? "selected" : "") : "selected" }}>B737/A320/E190 etc. - Narrow Body</option>
+                <option value="JML" {{ old('codeletter') == "JML" ? "selected" : "" }}>B757/B767 etc. - Mid Wide Body</option>
+                <option value="JL" {{ old('codeletter') == "JL" ? "selected" : "" }}>B777/B787/A350 etc. - Large Wide Body</option>
+                <option value="JXL" {{ old('codeletter') == "JXL" ? "selected" : "" }}>B747/A380 etc. - Super Heavy</option>
             </select>
             @error('codeletter')
             <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>

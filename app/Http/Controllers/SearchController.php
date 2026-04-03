@@ -100,7 +100,7 @@ class SearchController extends Controller
             'icao' => ['nullable', new AirportExists],
             'direction' => ['required', 'in:arrival,departure'],
             'destinations' => ['sometimes', 'array', new ValidDestinations],
-            'codeletter' => ['required', 'string', 'in:A,B,C,D,E,F'],
+            'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
             'airtimeMin' => ['required', 'numeric', 'between:0,12'],
             'airtimeMax' => ['required', 'numeric', 'between:0,12'],
             'sortByWeather' => ['in:0,1'],

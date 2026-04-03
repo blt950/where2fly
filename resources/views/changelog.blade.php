@@ -18,6 +18,7 @@
                 <li>Added expandable airport details on mobile with METAR, links and routes in search results</li>
                 <li>Fixed "VATSIM ATC Online" filter not working for US/AU airports</li>
                 <li>Fixed padding for top list legend on mobile screens</li>
+                <li>Reworked aircraft types to cover more types more accurately</li>
                 <li>Introduced "Buy me a coffee" donation with more payment options</li>
                 <li>Minor changes under the hood</li>
                 <li>API: Added destination and temperature search parameters</li>

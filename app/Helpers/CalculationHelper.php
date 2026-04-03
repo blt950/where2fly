@@ -17,17 +17,21 @@ class CalculationHelper
     public static function minimumRequiredRunwayLength(string $code)
     {
         switch ($code) {
-            case 'A':
+            case 'GA':
                 return 100;
-            case 'B':
-                return 1400;
-            case 'C':
-                return 5600;
-            case 'D':
-                return 6500;
-            case 'E':
-                return 7500;
-            case 'F':
+            case 'GAT':
+                return 2000;
+            case 'GTP':
+                return 2500;
+            case 'JS':
+                return 4000;
+            case 'JM':
+                return 5000;
+            case 'JML':
+                return 6000;
+            case 'JL':
+                return 7000;
+            case 'JXL':
                 return 8000;
             default:
                 return 0;
@@ -45,22 +49,28 @@ class CalculationHelper
 
         $crzSpeed = 0;
         switch ($actCode) {
-            case 'A':
+            case 'GA':
                 $crzSpeed = 115;
                 break;
-            case 'B':
-                $crzSpeed = 360;
+            case 'GAT':
+                $crzSpeed = 190;
                 break;
-            case 'C':
+            case 'GTP':
+                $crzSpeed = 280;
+                break;
+            case 'JS':
+                $crzSpeed = 340;
+                break;
+            case 'JM':
                 $crzSpeed = 460;
                 break;
-            case 'D':
+            case 'JML':
                 $crzSpeed = 480;
                 break;
-            case 'E':
+            case 'JL':
                 $crzSpeed = 510;
                 break;
-            case 'F':
+            case 'JXL':
                 $crzSpeed = 520;
                 break;
             default:
@@ -81,23 +91,29 @@ class CalculationHelper
 
         $addMinutes = 0;
         switch ($actCode) {
-            case 'A':
-                $addMinutes = 0.35;
+            case 'GA':
+                $addMinutes = 0.13;
                 break;
-            case 'B':
-                $addMinutes = 0.35;
+            case 'GAT':
+                $addMinutes = 0.20;
                 break;
-            case 'C':
-                $addMinutes = 0.5;
+            case 'GTP':
+                $addMinutes = 0.25;
                 break;
-            case 'D':
-                $addMinutes = 0.5;
+            case 'JS':
+                $addMinutes = 0.33;
                 break;
-            case 'E':
-                $addMinutes = 0.5;
+            case 'JM':
+                $addMinutes = 0.42;
                 break;
-            case 'F':
-                $addMinutes = 0.5;
+            case 'JML':
+                $addMinutes = 0.47;
+                break;
+            case 'JL':
+                $addMinutes = 0.50;
+                break;
+            case 'JXL':
+                $addMinutes = 0.58;
                 break;
             default:
                 $addMinutes = 0;
