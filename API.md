@@ -114,7 +114,7 @@ To  only search for domestic flights write `Domestic` **as string** in this fiel
 #### US States
 Use two letter US state codes with a `US-` prefix. E.g. `US-CA` for California, `US-NY` for New York, etc.
 
-### Available codeletters
+### Available aircraft type codes
 This is used to calculate airtime and find compatible airports. Select the aircraft closest to what the user wants to fly.
 - `GA` - C172/PA28/C182 etc. - Light GA
 - `GAT` - Bonanza/Baron/Caravan etc. - Turbo GA
