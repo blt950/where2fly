@@ -484,5 +484,5 @@
         </div>
     </div>
     
-    <input type="hidden" name="searchVersion" value="2">
+    <input type="hidden" name="searchVersion" value="{{ config('app.searchVersion') }}">
 </form>

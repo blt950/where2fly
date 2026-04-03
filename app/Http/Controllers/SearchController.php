@@ -121,7 +121,7 @@ class SearchController extends Controller
             'rwyLengthMax' => ['required', 'numeric', 'between:0,17000'],
             'airlines' => ['sometimes', 'array', new ValidAirlines],
             'aircrafts' => ['sometimes', 'array', new ValidAircrafts],
-            'searchVersion' => ['sometimes', 'numeric', 'in:2'],
+            'searchVersion' => ['sometimes', 'numeric', 'in:' . config('app.searchVersion')],
         ]);
 
         if ($validator->fails()) {
@@ -273,7 +273,7 @@ class SearchController extends Controller
 
                 // To ensure bookmarks works, let's comapre the searchVersion
                 $searchVersionWarning = false;
-                if (isset($data['searchVersion']) && (int) $data['searchVersion'] != 2) {
+                if (isset($data['searchVersion']) && (int) $data['searchVersion'] != config('app.searchVersion')) {
                     $searchVersionWarning = 'The search form has changed. Edit the search and bookmark again to ensure correct results.';
                 }
 
