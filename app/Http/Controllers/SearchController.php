@@ -224,7 +224,17 @@ class SearchController extends Controller
                 ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                 ->returnOnlyWhitelistedIcao($whitelist)
                 ->sortByScores($sortByScores)
-                ->has('metar')->with('runways', 'scores', 'metar')
+                ->has('metar')
+                ->with([
+                    'runways' => function ($query) {
+                        $query->where('closed', false)->whereNotNull('length_ft');
+                    },
+                    'scores',
+                    'metar',
+                    'sceneryDevelopers.sceneries' => function ($query) {
+                        $query->where('published', true)->with('simulator');
+                    },
+                ])
                 ->get();
 
             // Shuffle and limit the results to 20
@@ -299,7 +309,7 @@ class SearchController extends Controller
         $routes = Flight::where('airport_dep_id', $departure->id)->where('airport_arr_id', $arrival->id)->whereHas('airline')->with('airline', 'aircrafts')->get();
 
         if ($routes->count() == 0) {
-            return back()->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
+            return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
         }
 
         // Strip the stars from IATA codes for the logos to display correctly
@@ -336,7 +346,7 @@ class SearchController extends Controller
 
             return view('search.routes', compact('routes', 'departure', 'arrival', 'airportCoordinates'));
         } else {
-            return back()->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
+            return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
         }
 
     }

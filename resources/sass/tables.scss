@@ -29,6 +29,32 @@ table{
         &.active th, &.active td{
             background-color: #e2e2e2;
         }
+
+        .expand-chevron {
+            transition: transform 0.2s ease;
+            opacity: 0.35;
+        }
+
+        .row-number {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 0.25rem;
+        }
+
+        .row-count {
+            display: inline-block;
+            width: 2ch;
+        }
+
+        &:hover .expand-chevron {
+            opacity: 0.7;
+        }
+
+        .expand-chevron--open {
+            transform: rotate(90deg);
+            opacity: 1;
+        }
     }
 
     tr .hover-show{
@@ -58,6 +84,12 @@ table{
 
     tr.showmore-hidden{
         display: none;
+    }
+
+    @include media-breakpoint-up(md) {
+        tr[data-detail-row] {
+            display: none !important;
+        }
     }
 
     &.no-padding > thead > tr> th, &.no-padding > tbody > tr > td{
