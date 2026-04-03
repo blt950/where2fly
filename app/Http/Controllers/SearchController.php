@@ -224,7 +224,15 @@ class SearchController extends Controller
                 ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                 ->returnOnlyWhitelistedIcao($whitelist)
                 ->sortByScores($sortByScores)
-                ->has('metar')->with('runways', 'scores', 'metar')
+                ->has('metar')
+                ->with([
+                    'runways',
+                    'scores',
+                    'metar',
+                    'sceneryDevelopers.sceneries' => function ($query) {
+                        $query->where('published', true)->with('simulator');
+                    },
+                ])
                 ->get();
 
             // Shuffle and limit the results to 20

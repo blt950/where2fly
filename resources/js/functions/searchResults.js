@@ -30,6 +30,33 @@ if(showMoreBtn){
     }
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('table[data-detail-table]').forEach(function(table) {
+        function syncDetailRows() {
+            var tbody = table.querySelector('tbody[data-detail-table-body]')
+
+            if(!tbody) {
+                return
+            }
+
+            tbody.querySelectorAll('tr[data-airport-icao]').forEach(function(parentRow) {
+                var icao = parentRow.getAttribute('data-airport-icao')
+                var detailRow = tbody.querySelector('tr[data-detail-row="' + icao + '"]')
+
+                if(detailRow && parentRow.nextElementSibling !== detailRow) {
+                    parentRow.insertAdjacentElement('afterend', detailRow)
+                }
+            })
+        }
+
+        table.addEventListener('sort-end', function() {
+            syncDetailRows()
+        })
+
+        syncDetailRows()
+    })
+})
+
 // Randomise spinner
 var button = document.getElementById('randomiseBtn');
 var form = document.getElementById('randomiseForm');

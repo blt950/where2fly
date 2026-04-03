@@ -116,7 +116,7 @@
 
         <h2>{{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>
         <div class="table-responsive">
-            <table class="table table-hover text-start sortable asc mb-0">
+            <table class="table table-hover text-start sortable asc mb-0" data-detail-table="airport-results">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
@@ -135,12 +135,15 @@
 
                     @endif
                 </thead>
-                <tbody>
+                <tbody data-detail-table-body="airport-results">
                     @php $count = 1; @endphp
 
                     @foreach($suggestedAirports as $airport)
                         <tr class="pointer {{ ($count > 10) ? 'showmore-hidden' : null }}" data-airport-icao="{{ $airport->icao }}">
-                            <th scope="row">{{ $count }}</th>
+                            <th scope="row">
+                                <span class="d-sm-none"><i class="fa-sharp fa-chevron-right expand-chevron"></i></span>
+                                <span class="d-sm-none">&nbsp;</span>{{ $count }}<span class="d-sm-none">&nbsp;</span>
+                            </th>
                             <td data-sort="{{ $airport->icao }}">
                                 <div>
                                     <img class="flag" src="/img/flags/{{ strtolower($airport->iso_country) }}.svg" height="16" data-bs-toggle="tooltip" data-bs-title="{{ getCountryName($airport->iso_country) }}" alt="Flag of {{ getCountryName($airport->iso_country) }}"></img>
@@ -168,6 +171,53 @@
                                         ></i>
                                     @endif
                                 @endforeach
+                            </td>
+                        </tr>
+                        <tr id="details-{{ $airport->icao }}" data-detail-row="{{ $airport->icao }}" style="display:none">
+                            <td colspan="1"></td>
+                            <td colspan="5">
+                                <dl class="font-kanit">
+                                    <dt>Runways</dt>
+                                    <dd>
+                                        <strong>12/30:</strong>&nbsp;8,012ft <span class="text-black-50">(2,442m)</span>
+                                    </dd>
+                                    <dt class="mt-3">METAR</dt>
+                                    <dd>22005KT 0700 R12/0900N R30/0900N -DZ FG VV003 02/01 Q1007</dd>
+                                    <dt class="mt-3">TAF</dt>
+                                    <dd>
+                                        <button class="btn btn-outline-secondary btn-sm" data-airport-icao="{{ $airport->icao }}" data-taf-button="true">Fetch</button>
+                                    </dd>
+                                    <dt class="mt-3">Links</dt>
+                                    <dd>
+                                        <a class="btn btn-outline-secondary btn-sm font-work-sans" href="{{ route('search.routes', ['departure' => $primaryAirport->icao, 'arrival' => $airport->icao, 'sort' => 'flight']) }}" target="_blank">
+                                            <span>Routes</span></i>
+                                        </a>
+                                        <a class="btn btn-outline-secondary btn-sm font-work-sans" href="https://dispatch.simbrief.com/options/custom?orig={{ $airport->icao }}&amp;dest={{ $primaryAirport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
+                                            <span>SimBrief</span> <i class="fa-sharp fa-up-right-from-square"></i>
+                                        </a>
+                                        <a class="btn btn-outline-secondary btn-sm font-work-sans" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
+                                            <span>Windy</span> <i class="fa-sharp fa-up-right-from-square"></i>
+                                        </a>
+                                    </dd>
+                                    <dt class="mt-3">Sceneries available</dt>
+                                    <dd>
+                                        @php
+                                            $scenerySimulators = $airport->sceneryDevelopers
+                                                ->flatMap(function ($developer) {
+                                                    return $developer->sceneries;
+                                                })
+                                                ->pluck('simulator.shortened_name')
+                                                ->filter()
+                                                ->unique()
+                                                ->values();
+                                        @endphp
+                                        @if($scenerySimulators->count() > 0)
+                                            {{ $scenerySimulators->implode(', ') }}
+                                        @else
+                                            No known sceneries
+                                        @endif
+                                    </dd>
+                                </dl>
                             </td>
                         </tr>
 
@@ -224,10 +274,26 @@
             const rows = document.querySelectorAll('tr[data-airport-icao]');
             rows.forEach(row => {
                 row.addEventListener('click', function() {
-                    // Get the lat and lon from data attributes
                     const icao = this.getAttribute('data-airport-icao');
 
                     setFocusAirport(icao);
+
+                    // Close all other detail rows before toggling the clicked one
+                    const detailsRow = document.getElementById('details-' + icao);
+                    document.querySelectorAll('tr[id^="details-"]').forEach(function(r) {
+                        if (r !== detailsRow) r.style.display = 'none';
+                    });
+
+                    // Reset all chevrons
+                    rows.forEach(r => r.querySelector('.expand-chevron')?.classList.remove('expand-chevron--open'));
+
+                    const isOpen = detailsRow && detailsRow.style.display !== 'none';
+                    if (detailsRow) {
+                        detailsRow.style.display = isOpen ? 'none' : '';
+                    }
+                    if (!isOpen) {
+                        this.querySelector('.expand-chevron')?.classList.add('expand-chevron--open');
+                    }
 
                     // Remove 'active' class from all rows and add to the clicked row
                     rows.forEach(r => r.classList.remove('active'));
