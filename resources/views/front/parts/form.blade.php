@@ -1,3 +1,7 @@
+@error('searchVersion')
+<div class="validation-error mt-2 mb-2"><i class="fa-sharp fa-exclamation-triangle"></i> Your bookmarked search is incompatible with the new version of Where2Fly. Please review filters, search again and refresh your bookmark.</div>
+@enderror
+
 <form id="form" action="{{ route('search') }}" method="GET">
     
     <div class="row g-3 justify-content-center">
@@ -480,5 +484,5 @@
         </div>
     </div>
     
-    <input type="hidden" name="searchVersion" value="1">
+    <input type="hidden" name="searchVersion" value="2">
 </form>

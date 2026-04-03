@@ -121,7 +121,7 @@ class SearchController extends Controller
             'rwyLengthMax' => ['required', 'numeric', 'between:0,17000'],
             'airlines' => ['sometimes', 'array', new ValidAirlines],
             'aircrafts' => ['sometimes', 'array', new ValidAircrafts],
-            'searchVersion' => ['sometimes', 'numeric'],
+            'searchVersion' => ['sometimes', 'numeric', 'in:2'],
         ]);
 
         if ($validator->fails()) {
@@ -273,8 +273,8 @@ class SearchController extends Controller
 
                 // To ensure bookmarks works, let's comapre the searchVersion
                 $searchVersionWarning = false;
-                if (isset($data['searchVersion']) && (int) $data['searchVersion'] != 1) {
-                    $searchVersionWarning = 'The search form has changed. Please update your bookmarks to ensure correct results.';
+                if (isset($data['searchVersion']) && (int) $data['searchVersion'] != 2) {
+                    $searchVersionWarning = 'The search form has changed. Edit the search and bookmark again to ensure correct results.';
                 }
 
                 return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning', 'searchVersionWarning'));
