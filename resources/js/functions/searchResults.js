@@ -30,6 +30,7 @@ if(showMoreBtn){
     }
 }
 
+// Sync detail rows with parent rows after sorting
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('table[data-detail-table]').forEach(function(table) {
         function syncDetailRows() {

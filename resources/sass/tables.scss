@@ -35,6 +35,18 @@ table{
             opacity: 0.35;
         }
 
+        .row-number {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 0.25rem;
+        }
+
+        .row-count {
+            display: inline-block;
+            width: 2ch;
+        }
+
         &:hover .expand-chevron {
             opacity: 0.7;
         }
@@ -74,7 +86,7 @@ table{
         display: none;
     }
 
-    @include media-breakpoint-up(sm) {
+    @include media-breakpoint-up(md) {
         tr[data-detail-row] {
             display: none !important;
         }
