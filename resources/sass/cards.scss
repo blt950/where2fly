@@ -1,0 +1,115 @@
+.card, .card-title {
+    font-family: $font-family-sans-serif;
+
+    p {
+        font-family: $font-family-sans-serif;
+    }
+}
+
+.card{
+    &-title{
+        font-size: 1rem;
+        font-weight: 400;
+    }
+
+    &-body{
+        background: $table-bg;
+    }
+
+    &-text, &-body{
+        font-size: 0.775rem;
+    }
+
+    p:last-child{
+        margin: 0;
+    }
+}
+
+.sidebar{
+    .card{
+        &-body{
+            background: $table-bg;
+
+            img{
+                width: 20px;
+                height: auto;
+            }
+
+            .upvotes{
+                width: 4rem;
+                border: 2px solid $info;
+                padding: 0.5rem;
+            }
+        }
+
+        &-link{
+            text-decoration: none;
+
+            :hover{
+                background: #eeeeee;
+            }
+        }
+    }
+}
+
+.feedback-container{
+    .card{
+        width: 80%;
+        max-width: 850px;
+
+        &-text, &-body{
+            font-size: 0.875rem;
+        }
+
+        &-title{
+            padding: 1.5rem 1rem;
+            margin: 0;
+            border-bottom: 1px solid $gray-400;
+            background: $table-bg;
+
+            h3{
+                font-family: $font-family-sans-serif;
+            }
+
+            img{
+                width: 20px;
+                height: auto;
+            }
+
+            .upvotes{
+                min-width: 6rem;
+                height: 2.5rem;
+                border: 2px solid #997f13;
+                padding: 0.5rem;
+            }
+
+            .btn{
+                width: 6rem;
+            }
+        }
+
+        &-body{
+            img{
+                width: 100%;
+                max-width: 700px;
+                height: auto;
+                margin-bottom: 1rem;
+            }
+
+        
+            blockquote{
+                border-left: 2px solid $primary;
+                padding-left: 1rem;
+                margin-left: 0;
+            }
+        
+        }
+
+        &-footer{
+            img{
+                width: 20px;
+                height: auto;
+            }
+        }
+    }
+}

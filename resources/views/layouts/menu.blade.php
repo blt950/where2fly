@@ -32,6 +32,12 @@
                         Scenery
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ Route::is('feedback*') ? 'active' : '' }}" href="{{ route('feedback') }}">
+                        <i class="fa-sharp fa-message"></i>&nbsp;
+                        Feedback
+                    </a>
+                </li>
                 
                 @guest
                     <li class="nav-item">

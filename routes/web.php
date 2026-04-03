@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\SceneryController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TopController;
@@ -94,6 +95,11 @@ Route::controller(UserController::class)->group(function () {
 
     // Admin
     Route::get('/admin', 'showAdmin')->middleware(['auth', 'verified'])->name('admin');
+});
+
+Route::controller(FeedbackController::class)->group(function () {
+    Route::get('/feedback', 'index')->name('feedback');
+    Route::get('/feedback/{id}', 'show')->name('feedback.show');
 });
 
 // Pure views

@@ -45,6 +45,7 @@
 @import "leaflet/dist/leaflet.css";
 @import "leaflet.markercluster/dist/MarkerCluster.css";
 @import "buttons.scss";
+@import "cards.scss";
 @import "components.scss";
 @import "forms.scss";
 @import "filters.scss";
@@ -81,7 +82,7 @@ header {
     background: $secondary;
 }
 
-main{
+main, nav.sidebar{
     width: $sidebar-width;
     height: calc(100vh - $header-height);
     overflow-y: auto;
@@ -121,6 +122,14 @@ main{
             width: 100%;
             max-width: 100%;
         }
+    }
+
+    .feedback-container{
+        padding: 2rem 1rem 1rem 1rem;
+    }
+
+    &.nomap{
+        width: calc(100vw - $sidebar-width);
     }
 }
 
