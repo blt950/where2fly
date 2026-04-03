@@ -83,7 +83,7 @@ const MapDrawRoute = ({ departure, arrival, reverseDirection = false }) => {
         // Fly to bounds but with adjusted padding according to screen size
         if (window.innerWidth > 1920) {
             map.flyToBounds(routePath.current.getBounds(), { duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [400, 350], paddingBottomRight: [75, 50] });
-        } else {
+        } else if (window.innerWidth > 767) {
             map.flyToBounds(routePath.current.getBounds(), { duration: 0.35, minZoom: 3, maxZoom: 7, paddingTopLeft: [50, 350], paddingBottomRight: [50, 50] });
         }
         
