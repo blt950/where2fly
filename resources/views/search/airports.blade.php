@@ -180,15 +180,20 @@
                             <td colspan="5">
                                 <dl class="font-kanit">
                                     <dt>Runways</dt>
-                                    <dd>
-                                        <strong>12/30:</strong>&nbsp;8,012ft <span class="text-black-50">(2,442m)</span>
+                                    @foreach($airport->runways as $runway)
+                                    <dd class="mb-0">
+                                        <strong>{{ $runway->le_ident }}/{{ $runway->he_ident }}:</strong> {{ number_format((int)$runway->length_ft, 0, '.', ',') }}ft <span class="text-black-50">({{ number_format(round((int)$runway->length_ft * .3048), 0, '.', ',') }}m)</span>  
                                     </dd>
+                                    @endforeach
+
                                     <dt class="mt-3">METAR</dt>
-                                    <dd>22005KT 0700 R12/0900N R30/0900N -DZ FG VV003 02/01 Q1007</dd>
+                                    <dd>{{ $airport->metar->metar }}</dd>
+
                                     <dt class="mt-3">TAF</dt>
                                     <dd>
                                         <button class="btn btn-outline-secondary btn-sm" data-airport-icao="{{ $airport->icao }}" data-taf-button="true">Fetch</button>
                                     </dd>
+
                                     <dt class="mt-3">Links</dt>
                                     <dd>
                                         <a class="btn btn-outline-secondary btn-sm font-work-sans" href="{{ route('search.routes', ['departure' => $primaryAirport->icao, 'arrival' => $airport->icao, 'sort' => 'flight']) }}" target="_blank">
@@ -201,6 +206,7 @@
                                             <span>Windy</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                         </a>
                                     </dd>
+
                                     <dt class="mt-3">Sceneries available</dt>
                                     <dd>
                                         @php

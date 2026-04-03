@@ -226,7 +226,9 @@ class SearchController extends Controller
                 ->sortByScores($sortByScores)
                 ->has('metar')
                 ->with([
-                    'runways',
+                    'runways' => function ($query) {
+                        $query->where('closed', false)->whereNotNull('length_ft');
+                    },
                     'scores',
                     'metar',
                     'sceneryDevelopers.sceneries' => function ($query) {
