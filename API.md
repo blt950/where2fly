@@ -114,11 +114,13 @@ To  only search for domestic flights write `Domestic` **as string** in this fiel
 #### US States
 Use two letter US state codes with a `US-` prefix. E.g. `US-CA` for California, `US-NY` for New York, etc.
 
-### Available codeletters
-This is used to calculate airtime and find compatible airports. Select aircraft closes to what user want to fly.
-- `A` - PIPER/CESSNA
-- `B` - CRJ/DHC
-- `C` - A320/B737/ERJ
-- `D` - B767/A310
-- `E` - B777/B787/A330
-- `F` - 747-8/A380
+### Available aircraft type codes
+This is used to calculate airtime and find compatible airports. Select the aircraft closest to what the user wants to fly.
+- `GA` - C172/PA28/C182 etc. - Light GA
+- `GAT` - Bonanza/Baron/Caravan etc. - Turbo GA
+- `GTP` - TBM/PC-12/King Air etc. - Heavy Turboprop
+- `JS` - CRJ/E145/PC-24 etc. - Regional Jet
+- `JM` - B737/A320/E190 etc. - Narrow Body
+- `JML` - B757/B767 etc. - Mid Wide Body
+- `JL` - B777/B787/A350 etc. - Large Wide Body
+- `JXL` - B747/A380 etc. - Super Heavy

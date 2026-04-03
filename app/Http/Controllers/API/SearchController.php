@@ -22,7 +22,7 @@ class SearchController extends Controller
             'departure' => ['nullable', new AirportExists],
             'arrival' => ['nullable', new AirportExists],
             'destinations' => ['sometimes', 'array', new ValidDestinations],
-            'codeletter' => ['required', 'string'],
+            'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
             'airtimeMin' => ['sometimes', 'numeric', 'between:0,24'],
             'airtimeMax' => ['sometimes', 'numeric', 'between:0,24'],
             'scores' => ['sometimes', 'array'],
