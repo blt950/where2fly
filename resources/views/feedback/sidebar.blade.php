@@ -6,7 +6,7 @@
     @foreach($issues as $issue)
         <a class="sidebar card-link d-block" href="{{ route('feedback.show', $issue['number']) }}">
             <div class="card mb-3">
-                <div class="card-body d-flex justify-content-between align-items-center">
+                <div class="card-body {{ request()->route('id') == $issue['number'] ? 'active' : '' }} d-flex justify-content-between align-items-center">
                     <div>
                         <div class="card-title">{{ $issue['title'] }}</div>
                         <div class="d-flex align-items-center">

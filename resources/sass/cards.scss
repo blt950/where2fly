@@ -40,6 +40,14 @@
                 border: 2px solid $info;
                 padding: 0.5rem;
             }
+
+            &.active{
+                border-left: 5px solid $primary;
+
+                .card-title{
+                    font-weight: bold;
+                }
+            }
         }
 
         &-link{
