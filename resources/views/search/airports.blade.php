@@ -177,7 +177,7 @@
                         </tr>
                         <tr id="details-{{ $airport->icao }}" data-detail-row="{{ $airport->icao }}" style="display:none">
                             <td colspan="1"></td>
-                            <td colspan="5">
+                            <td colspan="4">
                                 <dl class="font-kanit">
                                     <dt>Runways</dt>
                                     @foreach($airport->runways as $runway)
