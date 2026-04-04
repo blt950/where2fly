@@ -126,10 +126,42 @@ main, nav.sidebar{
 
     .feedback-container{
         padding: 2rem 1rem 1rem 1rem;
+
+        &.action-text{
+            padding: 0;
+            height: 100%;
+        }
     }
 
     &.nomap{
         width: calc(100vw - $sidebar-width);
+        background: url('/img/bg2.jpg') no-repeat center center fixed;
+        background-size: cover;
+    }
+}
+
+@include media-breakpoint-down(lg) {
+    main{
+        &.mobile-nofocus{
+            display: none;
+        }
+
+        &.mobile-focus{
+            width: 100%;
+
+            .feedback-container .card{
+                width: 100%;
+            }
+        }
+    }
+
+    nav.sidebar{
+        &.mobile-nofocus{
+            display: none;
+        }
+        &.mobile-focus{
+            width: 100%;
+        }
     }
 }
 

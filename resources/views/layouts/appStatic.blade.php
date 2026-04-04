@@ -11,10 +11,10 @@
             @include('layouts.menu')
 
             <div class="d-flex flex-row">
-                <nav class="sidebar">
+                <nav class="sidebar @yield('sidebar-class')">
                     @yield('sidebar')
                 </nav>
-                <main class="nomap">
+                <main class="nomap @yield('main-class')">
                     @yield('content')
                 </main>
             </div>

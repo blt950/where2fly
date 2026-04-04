@@ -25,100 +25,101 @@
     }
 }
 
-.sidebar{
-    .card{
-        &-body{
-            background: $table-bg;
+.sidebar .card{
+    &-body{
+        background: $table-bg;
 
-            img{
-                width: 20px;
-                height: auto;
+        img{
+            width: 20px;
+            height: auto;
+        }
+
+        .upvotes{
+            width: 4rem;
+            border: 2px solid $info;
+            padding: 0.5rem;
+        }
+
+        &.active{
+            border-left: 10px solid $primary;
+            background: white;
+
+            .card-title{
+                font-weight: bold;
             }
 
             .upvotes{
-                width: 4rem;
-                border: 2px solid $info;
-                padding: 0.5rem;
-            }
-
-            &.active{
-                border-left: 5px solid $primary;
-
-                .card-title{
-                    font-weight: bold;
-                }
+                border-color: $primary;
             }
         }
+    }
 
-        &-link{
-            text-decoration: none;
+    &-link{
+        text-decoration: none;
 
-            :hover{
-                background: #eeeeee;
-            }
+        :hover{
+            background: #eeeeee;
         }
     }
 }
 
-.feedback-container{
-    .card{
-        width: 80%;
-        max-width: 850px;
+.feedback-container .card{
+    width: 80%;
+    max-width: 850px;
 
-        &-text, &-body{
-            font-size: 0.875rem;
+    &-text, &-body{
+        font-size: 0.875rem;
+    }
+
+    &-title{
+        padding: 1.5rem 1rem;
+        margin: 0;
+        border-bottom: 1px solid $gray-400;
+        background: $secondary;
+        color: white;
+
+        h3{
+            font-family: $font-family-sans-serif;
         }
 
-        &-title{
-            padding: 1.5rem 1rem;
-            margin: 0;
-            border-bottom: 1px solid $gray-400;
-            background: $secondary;
-            color: white;
-
-            h3{
-                font-family: $font-family-sans-serif;
-            }
-
-            img{
-                width: 20px;
-                height: auto;
-            }
-
-            .upvotes{
-                min-width: 6rem;
-                height: 2.5rem;
-                border: 2px solid #997f13;
-                padding: 0.5rem;
-            }
-
-            .btn{
-                width: 6rem;
-            }
+        img{
+            width: 20px;
+            height: auto;
         }
 
-        &-body{
-            img{
-                width: 100%;
-                max-width: 700px;
-                height: auto;
-                margin-bottom: 1rem;
-            }
-
-        
-            blockquote{
-                border-left: 2px solid $primary;
-                padding-left: 1rem;
-                margin-left: 0;
-            }
-        
+        .upvotes{
+            min-width: 6rem;
+            height: 2.5rem;
+            border: 2px solid #997f13;
+            padding: 0.5rem;
         }
 
-        &-footer{
-            img{
-                width: 20px;
-                height: auto;
-            }
+        .btn{
+            width: 6rem;
+        }
+    }
+
+    &-body{
+        img{
+            width: 100%;
+            max-width: 700px;
+            height: auto;
+            margin-bottom: 1rem;
+        }
+
+    
+        blockquote{
+            border-left: 2px solid $primary;
+            padding-left: 1rem;
+            margin-left: 0;
+        }
+    
+    }
+
+    &-footer{
+        img{
+            width: 20px;
+            height: auto;
         }
     }
 }

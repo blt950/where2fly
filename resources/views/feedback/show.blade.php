@@ -1,4 +1,4 @@
-@extends('layouts.app-nomap')
+@extends('layouts.appStatic')
 
 @section('meta-description')
     <meta name="description" content="Feedback details">
@@ -11,12 +11,15 @@
     @include('feedback.sidebar', ['issues' => $issues])
 @endsection
 
+@section('sidebar-class', 'mobile-nofocus')
+@section('main-class', 'mobile-focus')
+
 @section('content')
     <div class="feedback-container d-flex flex-column justify-content-center align-items-center gap-3">
         
         <div class="card">
             <div class="card-title">
-                <div class="d-flex flex-row justify-content-between align-items-center">
+                <div class="d-flex flex-row justify-content-between align-items-center flex-wrap">
 
                     <div class="d-flex flex-column">
                         <h3 class="mb-1">{{ $issue['title'] }}</h3>
@@ -28,7 +31,7 @@
                         </div>
                         <button class="btn btn-primary btn-sm me-2"><i class="fa-sharp fa-thumbs-up"></i> Add Vote</button>
                     </div>
-                </div>            
+                </div>
             </div>    
     
             <div class="card-body">
