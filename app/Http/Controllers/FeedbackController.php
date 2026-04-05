@@ -39,7 +39,15 @@ class FeedbackController extends Controller
         [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes();
         $issue = $issues->firstWhere('number', $id);
 
+        if(! $issue) {
+            abort(404);
+        }
+
         $response = Http::withToken(config('app.github_key'))->get("https://api.github.com/repos/blt950/where2fly/issues/{$id}/comments");
+        if($response->failed()) {
+            abort(502);
+        }
+
         $comments = $response->json();
 
         return view('feedback.show', compact('issues', 'issue', 'comments', 'groupedVotes', 'userVotes'));
@@ -116,6 +124,9 @@ class FeedbackController extends Controller
     private function fetchIssues()
     {
         $response = Http::withToken(config('app.github_key'))->get('https://api.github.com/repos/blt950/where2fly/issues');
+        if($response->failed()) {
+            abort(502);
+        }
 
         return collect($response->json())->filter(function ($item) {
             if (isset($item['pull_request'])) {
