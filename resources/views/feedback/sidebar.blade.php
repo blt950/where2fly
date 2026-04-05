@@ -1,7 +1,8 @@
 <div class="container">
-    <div class="alert alert-info mb-3" role="alert">
-        <p class="mb-0"><i class="fa-sharp fa-lightbulb-on"></i> Do you have a suggestion? Share it on <a class="text-secondary" href="https://github.com/blt950/where2fly/issues" target="_blank">GitHub</a> and it'll be available for vote here after a review.</p>
-    </div>
+
+    <a href="https://github.com/blt950/where2fly/issues" class="btn btn-outline-success w-100 mb-3" target="_blank">
+        Add a your new idea on Github <i class="fa-sharp fa-up-right-from-square"></i>
+    </a>
 
     @foreach($issues as $issue)
         <a class="sidebar card-link d-block" href="{{ route('feedback.show', $issue['number']) }}">

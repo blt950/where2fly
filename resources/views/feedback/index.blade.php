@@ -1,13 +1,13 @@
 @extends('layouts.appStatic')
 
 @section('meta-description')
-    <meta name="description" content="Provide feedback and upvote features for Where2Fly">
+    <meta name="description" content="Have your say on what gets built next">
 @endsection
 
 @section('title', 'Feedback')
 
 @section('sidebar')
-    @include('layouts.title', ['title' => 'Feedback', 'subtitle' => 'Upvote features and give your own suggestions for Where2Fly'])
+    @include('layouts.title', ['title' => 'Feedback', 'subtitle' => 'Have your say on what gets built next'])
     @include('feedback.sidebar', ['issues' => $issues])
 @endsection
 

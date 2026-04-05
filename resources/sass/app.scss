@@ -140,6 +140,10 @@ main, nav.sidebar{
     }
 }
 
+nav.sidebar p{
+    font-family: $font-family-sans-serif;
+}
+
 @include media-breakpoint-down(lg) {
     main{
         &.mobile-nofocus{

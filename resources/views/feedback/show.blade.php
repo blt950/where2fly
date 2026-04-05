@@ -1,13 +1,13 @@
 @extends('layouts.appStatic')
 
 @section('meta-description')
-    <meta name="description" content="Feedback details">
+    <meta name="description" content="Have your say on what gets built next">
 @endsection
 
 @section('title', 'Feedback')
 
 @section('sidebar')
-    @include('layouts.title', ['title' => 'Feedback', 'subtitle' => 'Upvote features and give your own suggestions for Where2Fly'])
+    @include('layouts.title', ['title' => 'Feedback', 'subtitle' => 'Have your say on what gets built next'])
     @include('feedback.sidebar', ['issues' => $issues, 'groupedVotes' => $groupedVotes])
 @endsection
 
@@ -27,8 +27,8 @@
                     </div>
 
                     <div class="w-200 align-items-center d-flex flex-row gap-1">
-                        <div class="upvotes d-flex flex-row align-items-center justify-content-center gap-2">
-                            <span class="fs-3 fw-bold">{{ $groupedVotes[$issue['number']] ?? 0 }}</span> Votes
+                        <div class="upvotes d-flex flex-row align-items-center justify-content-center gap-1">
+                            <span class="fw-bold">{{ $groupedVotes[$issue['number']] ?? 0 }}</span> {{ ($groupedVotes[$issue['number']] ?? 0) === 1 ? 'Vote' : 'Votes' }}
                         </div>
                         @auth 
                             @if($userVotes && in_array($issue['number'], $userVotes))
@@ -77,7 +77,7 @@
         @endforeach
 
         <div class="alert alert-info mb-3 w-80" role="alert">
-            <p class="mb-0">You may add to this conversation via the <a class="text-secondary" href="https://github.com/blt950/where2fly/issues/{{ $issue['number'] }}" target="_blank">GitHub issue <i class="fa-sharp fa-up-right-from-square"></i></a></p>
+            <p class="mb-0">Discuss this idea on <a class="text-secondary" href="https://github.com/blt950/where2fly/issues/{{ $issue['number'] }}" target="_blank">GitHub <i class="fa-sharp fa-up-right-from-square"></i></a></p>
         </div>
         
     </div>
