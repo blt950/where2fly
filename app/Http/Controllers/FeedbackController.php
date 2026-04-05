@@ -16,12 +16,16 @@ class FeedbackController extends Controller
     {
         [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes();
 
-        $user = auth()->user();
-        $userLastReadIssueNumber = $user->feedback_last_read_number;
-        $cacheHighestIssue = Cache::get('github_highest_issue', 0);
-        if ($userLastReadIssueNumber < $cacheHighestIssue) {
-            $user->feedback_last_read_number = $cacheHighestIssue;
-            $user->save();
+        if(auth()->check()) {
+            $user = auth()->user();
+            $userLastReadIssueNumber = $user->feedback_last_read_number;
+            $cacheHighestIssue = Cache::get('github_highest_issue', 0);
+            if ($userLastReadIssueNumber < $cacheHighestIssue) {
+                $user->feedback_last_read_number = $cacheHighestIssue;
+                $user->save();
+            }
+        } else {
+            $userLastReadIssueNumber = null;
         }
 
         return view('feedback.index', compact('issues', 'groupedVotes', 'userVotes', 'userLastReadIssueNumber'));
