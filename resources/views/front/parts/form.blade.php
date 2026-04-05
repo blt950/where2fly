@@ -37,7 +37,7 @@
                             @endif
                         @endforeach
                     @endforeach
-                @endisset
+                @endif
 
                 <input list="destination-list" placeholder="Anywhere">
                 <u-datalist id="destination-list" class="taller" tabindex="-1" hidden>
@@ -177,7 +177,7 @@
                                 @endif
                             @endforeach
                         @endforeach
-                    @endisset
+                    @endif
 
                     <input list="destinationExclusions-list" placeholder="Anywhere">
                     <u-datalist id="destinationExclusions-list" class="taller" tabindex="-1" hidden>

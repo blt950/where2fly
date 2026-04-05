@@ -213,7 +213,7 @@ class Airport extends Model
     }
 
     /**
-     * Scope a query to only include airports in the given continent
+     * Scope a query to exclude airports in the given continents
      */
     public function scopeNotInContinent(Builder $query, array $destinations)
     {
@@ -262,7 +262,7 @@ class Airport extends Model
     }
 
     /**
-     * Scope a query to only include airports in the given country
+     * Scope a query to only include airports not in the given country
      */
     public function scopeNotInCountry(Builder $query, array $destinations, ?string $country = null)
     {
