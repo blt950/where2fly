@@ -16,6 +16,7 @@ class FeedbackController extends Controller
     {
         [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes();
 
+        // Update the user's last read issue number to the current highest issue number in the cache
         if(auth()->check()) {
             $user = auth()->user();
             $userLastReadIssueNumber = $user->feedback_last_read_number;
@@ -39,16 +40,19 @@ class FeedbackController extends Controller
         [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes();
         $issue = $issues->firstWhere('number', $id);
 
+        // If the issue is not found
         if(! $issue) {
             abort(404);
         }
 
-        $response = Http::withToken(config('app.github_key'))->get("https://api.github.com/repos/blt950/where2fly/issues/{$id}/comments");
-        if($response->failed()) {
-            abort(502);
-        }
-
-        $comments = $response->json();
+        // Cache the comments for the issue to reduce API calls, cache for 10 minutes
+        $comments = Cache::remember("github_issue_{$id}", 600, function () use ($id) {
+            $response = Http::withToken(config('app.github_key'))->get("https://api.github.com/repos/blt950/where2fly/issues/{$id}/comments");
+            if($response->failed()) {
+                abort(502);
+            }
+            return $response->json();
+        });
 
         return view('feedback.show', compact('issues', 'issue', 'comments', 'groupedVotes', 'userVotes'));
     }
@@ -62,14 +66,16 @@ class FeedbackController extends Controller
             'github_issue_number' => 'required|integer',
         ]);
 
+        // Check if the user has already voted for this issue
         $existingVote = FeedbackVote::where('user_id', auth()->user()->id)
             ->where('github_issue_number', $data['github_issue_number'])
             ->first();
 
         if ($existingVote) {
-            return back()->with(['error' => 'You have already voted for this issue.'], 400);
+            return back()->with(['error' => 'You have already voted for this issue.']);
         }
 
+        // Create the vote
         FeedbackVote::create([
             'user_id' => auth()->user()->id,
             'github_issue_number' => $data['github_issue_number'],
@@ -83,14 +89,16 @@ class FeedbackController extends Controller
      */
     public function destroyVote(string $id)
     {
+        // Check if the vote exists
         $vote = FeedbackVote::where('user_id', auth()->user()->id)
             ->where('github_issue_number', $id)
             ->first();
 
         if (! $vote) {
-            return back()->with(['error' => 'Could not find vote to remove.'], 404);
+            return back()->with(['error' => 'Could not find vote to remove.']);
         }
 
+        // Delete the vote
         $vote->delete();
 
         return back()->with('success', 'Your vote has been removed.');
@@ -104,6 +112,7 @@ class FeedbackController extends Controller
         [$groupedVotes, $userVotes] = $this->fetchVotes();
         $issues = $this->fetchIssues();
 
+        // Sort issues by number of votes (descending) and then by creation date (descending)
         $issues = $issues->sort(function ($a, $b) use ($groupedVotes) {
             $aVotes = (int) ($groupedVotes[$a['number']] ?? 0);
             $bVotes = (int) ($groupedVotes[$b['number']] ?? 0);
@@ -123,12 +132,17 @@ class FeedbackController extends Controller
      */
     private function fetchIssues()
     {
-        $response = Http::withToken(config('app.github_key'))->get('https://api.github.com/repos/blt950/where2fly/issues');
-        if($response->failed()) {
-            abort(502);
-        }
+        // Cache the issues for 10 minutes to reduce API calls
+        $data = Cache::remember('github_issues', 600, function () {
+            $request = Http::withToken(config('app.github_key'))->get('https://api.github.com/repos/blt950/where2fly/issues');
+            if($request->failed()) {
+                abort(502);
+            }
+            return $request->json();
+        });
 
-        return collect($response->json())->filter(function ($item) {
+        // Filter out pull requests and only keep issues with the "open for vote" label
+        return collect($data)->filter(function ($item) {
             if (isset($item['pull_request'])) {
                 return false;
             }
@@ -147,10 +161,12 @@ class FeedbackController extends Controller
     {
         $allVotes = FeedbackVote::all();
 
+        // Group votes by issue number and count them
         $groupedVotes = $allVotes->groupBy('github_issue_number')->map(function ($votes) {
             return $votes->count();
         });
 
+        // Get the votes of the current user
         $userVotes = auth()->user() ? $allVotes->where('user_id', auth()->user()->id)->pluck('github_issue_number')->toArray() : null;
 
         return [$groupedVotes, $userVotes];
