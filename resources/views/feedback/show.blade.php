@@ -76,9 +76,9 @@
             </div>
         @endforeach
 
-        <div class="alert alert-info mb-3 w-80" role="alert">
-            <p class="mb-0">Discuss this idea on <a class="text-secondary" href="https://github.com/blt950/where2fly/issues/{{ $issue['number'] }}" target="_blank">GitHub <i class="fa-sharp fa-up-right-from-square"></i></a></p>
-        </div>
+        <a href="https://github.com/blt950/where2fly/issues/{{ $issue['number'] }}" class="btn btn-info" target="_blank">
+            Discuss this idea on GitHub <i class="fa-sharp fa-up-right-from-square"></i>
+        </a>
         
     </div>
 @endsection
