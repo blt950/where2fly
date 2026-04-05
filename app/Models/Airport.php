@@ -242,7 +242,6 @@ class Airport extends Model
         }
     }
 
-
     /**
      * Scope a query to only include airports in the given country
      */
