@@ -38,6 +38,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/scenery/{scenery}/edit', 'update')->name('scenery.update');
         Route::get('/scenery/{scenery}/delete', 'destroy')->name('scenery.delete');
     });
+
+    Route::controller(FeedbackController::class)->group(function () {
+        Route::post('/feedback/vote', 'storeVote')->name('feedback.vote');
+        Route::get('/feedback/vote/{id}/delete', 'destroyVote')->name('feedback.vote.delete');
+    });
 });
 
 // SearchController

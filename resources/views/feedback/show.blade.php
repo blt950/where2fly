@@ -8,7 +8,7 @@
 
 @section('sidebar')
     @include('layouts.title', ['title' => 'Feedback', 'subtitle' => 'Upvote features and give your own suggestions for Where2Fly'])
-    @include('feedback.sidebar', ['issues' => $issues])
+    @include('feedback.sidebar', ['issues' => $issues, 'groupedVotes' => $groupedVotes])
 @endsection
 
 @section('sidebar-class', 'mobile-nofocus')
@@ -27,9 +27,21 @@
 
                     <div class="w-200 d-flex flex-row align-items-space-between gap-1">
                         <div class="upvotes d-flex flex-row align-items-center justify-content-center gap-2">
-                            <span class="fs-3 fw-bold">19</span> Votes
+                            <span class="fs-3 fw-bold">{{ $groupedVotes[$issue['number']] ?? 0 }}</span> Votes
                         </div>
-                        <button class="btn btn-primary btn-sm me-2"><i class="fa-sharp fa-thumbs-up"></i> Add Vote</button>
+                        @auth 
+                            @if($userVotes && in_array($issue['number'], $userVotes))
+                                <a href="{{ route('feedback.vote.delete', ['id' => $issue['number']]) }}" class="btn btn-outline-primary btn-sm me-2"><i class="fa-sharp fa-xmark"></i> Remove vote</a>
+                            @else
+                                <form action="{{ route('feedback.vote') }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="github_issue_number" value="{{ $issue['number'] }}">
+                                    <button type="submit" class="btn btn-primary btn-sm me-2"><i class="fa-sharp fa-thumbs-up"></i> Add Vote</button>
+                                </form>
+                            @endif
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-primary btn-sm me-2"><i class="fa-sharp fa-lock"></i> Log in to vote</a>
+                        @endauth
                     </div>
                 </div>
             </div>    
