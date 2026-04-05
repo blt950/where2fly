@@ -17,7 +17,7 @@ class FeedbackController extends Controller
         [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes();
 
         // Update the user's last read issue number to the current highest issue number in the cache
-        if(auth()->check()) {
+        if (auth()->check()) {
             $user = auth()->user();
             $userLastReadIssueNumber = $user->feedback_last_read_number;
             $cacheHighestIssue = Cache::get('github_highest_issue', 0);
@@ -41,16 +41,17 @@ class FeedbackController extends Controller
         $issue = $issues->firstWhere('number', $id);
 
         // If the issue is not found
-        if(! $issue) {
+        if (! $issue) {
             abort(404);
         }
 
         // Cache the comments for the issue to reduce API calls, cache for 10 minutes
         $comments = Cache::remember("github_issue_{$id}", 600, function () use ($id) {
             $response = Http::withToken(config('app.github_key'))->get("https://api.github.com/repos/blt950/where2fly/issues/{$id}/comments");
-            if($response->failed()) {
+            if ($response->failed()) {
                 abort(502);
             }
+
             return $response->json();
         });
 
@@ -135,9 +136,10 @@ class FeedbackController extends Controller
         // Cache the issues for 10 minutes to reduce API calls
         $data = Cache::remember('github_issues', 600, function () {
             $request = Http::withToken(config('app.github_key'))->get('https://api.github.com/repos/blt950/where2fly/issues');
-            if($request->failed()) {
+            if ($request->failed()) {
                 abort(502);
             }
+
             return $request->json();
         });
 
