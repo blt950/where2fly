@@ -1,7 +1,7 @@
 <div class="container">
 
     <a href="https://github.com/blt950/where2fly/issues" class="btn btn-outline-success w-100 mb-3" target="_blank">
-        Add a your new idea on Github <i class="fa-sharp fa-up-right-from-square"></i>
+        Add your new idea on Github <i class="fa-sharp fa-up-right-from-square"></i>
     </a>
 
     @foreach($issues as $issue)

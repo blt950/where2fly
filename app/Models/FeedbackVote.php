@@ -9,12 +9,7 @@ class FeedbackVote extends Model
 {
     use HasFactory;
 
-    protected $casts = [
-        'last_seen_at' => 'datetime',
-        'first_seen_at' => 'datetime',
-    ];
-
-    public $fillable = ['user_id', 'github_issue_number'];
+    protected $fillable = ['user_id', 'github_issue_number'];
 
     public function user()
     {
