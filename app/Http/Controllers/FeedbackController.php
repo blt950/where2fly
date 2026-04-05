@@ -13,9 +13,7 @@ class FeedbackController extends Controller
      */
     public function index()
     {
-        $issues = $this->fetchIssues();
-        [$groupedVotes, $userVotes] = $this->fetchVotes();
-
+        [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes();
         return view('feedback.index', compact('issues', 'groupedVotes', 'userVotes'));
     }
 
@@ -24,9 +22,8 @@ class FeedbackController extends Controller
      */
     public function show(string $id)
     {
-        $issues = $this->fetchIssues();
+        [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes();
         $issue = $issues->firstWhere('number', $id);
-        [$groupedVotes, $userVotes] = $this->fetchVotes();
 
         $response = Http::withToken(config('app.github_key'))->get("https://api.github.com/repos/blt950/where2fly/issues/{$id}/comments");
         $comments = $response->json();
@@ -75,6 +72,28 @@ class FeedbackController extends Controller
         $vote->delete();
 
         return back()->with('success', 'Your vote has been removed.');
+    }
+
+    /**
+     * Fetch issues and votes, used for the index page to avoid multiple calls in the loop
+     */
+    private function fetchIssuesAndVotes()
+    {
+        [$groupedVotes, $userVotes] = $this->fetchVotes();
+        $issues = $this->fetchIssues();
+
+        $issues = $issues->sort(function ($a, $b) use ($groupedVotes) {
+            $aVotes = (int) ($groupedVotes[$a['number']] ?? 0);
+            $bVotes = (int) ($groupedVotes[$b['number']] ?? 0);
+
+            if ($aVotes !== $bVotes) {
+                return $bVotes <=> $aVotes; // higher votes first
+            }
+
+            return strtotime($b['created_at']) <=> strtotime($a['created_at']); // newer first
+        })->values();
+
+        return [$issues, $groupedVotes, $userVotes];
     }
 
     /**
