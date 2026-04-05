@@ -9,7 +9,15 @@
             <div class="card mb-3">
                 <div class="card-body {{ request()->route('id') == $issue['number'] ? 'active' : '' }} d-flex justify-content-between align-items-center gap-1">
                     <div>
-                        <div class="card-title">{{ $issue['title'] }}</div>
+                        @if(in_array($issue['number'], $userVotes ?? []))
+                            <span class="badge bg-success font-work-sans mb-2">
+                                <i class="fa-sharp fa-check"></i>
+                                Voted
+                            </span>
+                        @endif
+                        <div class="card-title">
+                            {{ $issue['title'] }}
+                        </div>
                         <div class="d-flex align-items-center flex-wrap">
                             <img src="{{ $issue['user']['avatar_url'] }}" alt="" class="rounded-circle me-1">
                             <p class="card-text mb-0 me-2">{{ $issue['user']['login'] }}</p>

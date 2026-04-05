@@ -1,16 +1,16 @@
 .results-container{
     padding: 1rem;
     margin-bottom: 2rem;
-
+    
     color: black;
     background: #fffdf7;
-
+    
     display: flex;
     justify-content: space-between;
     flex-direction: row;
     flex-wrap: wrap;
     gap: .5rem;
-
+    
     @include media-breakpoint-between(xs, md) {
         overflow-x: scroll;
     }
@@ -18,7 +18,7 @@
     dt{
         margin-bottom: 0.25rem;
     }
-
+    
     dd{
         margin-bottom: 0;
     }
@@ -27,19 +27,19 @@
 .airline-logo{
     width: 36px;
     height: 36px;
-
+    
     background: white;
     padding: 2px;
-
+    
     &.button{
         border: 2px solid $primary;
     }
-
+    
     &.small{
         width: 24px;
         height: 24px;
     }
-
+    
     &.nopadding{
         padding: 0;
     }
@@ -49,7 +49,7 @@
     position: fixed;
     bottom: .75rem;
     right: .75rem;
-
+    
     color: $primary;
     background-color: black;
     border: 2px solid $primary;
@@ -63,11 +63,11 @@
         height: 1.5rem;
         width: 1.5rem;
     }
-
+    
     strong{
         margin-left: 1rem;
     }
-
+    
     &.hidden{
         color: $gray-500;
     }
@@ -75,7 +75,7 @@
 
 .list-airports{
     margin-left: calc(1.5rem + 1rem);
-
+    
     &.hidden{
         color: $gray-500;
     }
@@ -83,9 +83,9 @@
 
 /* Add Discord colored alert */
 .alert{
-
+    
     margin-bottom: 0;
-
+    
     &.alert-discord{
         background-color: #7289DA;
         border-color: #7289DA;
@@ -127,43 +127,43 @@ img.flag{
 
 #markdown{
     padding: 2rem;
-
+    
     color: black;
     background: white;
-
+    
     overflow-x: scroll;
-
+    
     h2{
         padding-top: 1rem;
         padding-bottom: 0.5rem;
-
+        
         &:not(:first-of-type){
             border-top: 1px solid $gray-200;
         }
-
+        
     }
-
+    
     h3, h4, h5, h6 {
         padding-top: 0.5rem;
     }
-
+    
     p{
         font-family: "Work Sans", sans-serif;
     }
-
+    
     code{
         color: black;
         background: #efefef;
         padding: 2px 5px;
     }
-
+    
     table{
         width: 100%;
-
+        
         tr{
             border-top: 1px solid $gray-200;
         }
-
+        
         th,td{
             padding-left: 1rem;
         }
@@ -176,7 +176,7 @@ img.flag{
             color: black;
             background: $primary;
         }
-    
+        
         &.show{
             --bs-dropdown-min-width: 0rem;
         }
@@ -191,31 +191,31 @@ img.flag{
 .scenery-row{
     margin: 0;
     padding: 0.75rem 1rem 1rem 1rem;
-
+    
     border-bottom: 1px solid $primary;
     background: $secondary;
     
     &:nth-child(odd){
         background: #202538;
     }
-
+    
     &:first-of-type{
         margin-top: 0;
         border-top: 2px solid $primary;
     }
-
+    
     &:last-of-type{
         margin-bottom: 0;
         border-bottom: none;
     }
-
+    
     .title{
         .developer{
             font-family: $font-family-sans-serif;
             font-size: 1.25rem;
             margin-right: 0.5rem;
         }
-
+        
         .star{
             color: $primary;
             font-size: 1rem;
@@ -224,21 +224,37 @@ img.flag{
                 padding-right: 0.25rem;
             }
         }
-
+        
         .badge{
             font-size: .75rem;
         }
     }
-
+    
     .btn{
         margin-top: 0.5rem;
+    }
+}
+
+.unread {
+    position: relative;
+    
+    &::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 12px;
+        height: 12px;
+        background-color: $primary;
+        border-radius: 50%;
+        border: 2px solid $secondary;
     }
 }
 
 u-tab {
     color: $primary;
     background: $secondary;
-
+    
     border: 1px solid $primary;
     padding: .5em;
 }
