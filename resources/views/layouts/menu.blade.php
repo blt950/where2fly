@@ -34,7 +34,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ Route::is('feedback*') ? 'active' : '' }}" href="{{ route('feedback') }}">
-                        <i class="fa-sharp fa-message unread"></i>&nbsp;
+                        <i class="fa-sharp fa-message {{ isset($unreadFeedback) && $unreadFeedback ? 'unread' : '' }}"></i>&nbsp;
                         Feedback
                     </a>
                 </li>

@@ -24,6 +24,9 @@ class Kernel extends ConsoleKernel
         // Update if airlines have flights
         $schedule->command('calc:flights')->daily();
 
+        // Fetch Github Issues cache
+        $schedule->command('fetch:github')->everyTenMinutes();
+
         // Cleanup sceneries without attached simulators
         $schedule->command('cleanup:sceneries')->daily();
 

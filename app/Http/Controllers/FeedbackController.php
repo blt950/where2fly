@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FeedbackVote;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class FeedbackController extends Controller
@@ -14,7 +15,16 @@ class FeedbackController extends Controller
     public function index()
     {
         [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes();
-        return view('feedback.index', compact('issues', 'groupedVotes', 'userVotes'));
+
+        $user = auth()->user();
+        $userLastReadIssueNumber = $user->feedback_last_read_number;
+        $cacheHighestIssue = Cache::get('github_highest_issue', 0);
+        if ($userLastReadIssueNumber < $cacheHighestIssue) {
+            $user->feedback_last_read_number = $cacheHighestIssue;
+            $user->save();
+        }
+
+        return view('feedback.index', compact('issues', 'groupedVotes', 'userVotes', 'userLastReadIssueNumber'));
     }
 
     /**

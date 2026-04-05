@@ -9,6 +9,11 @@
             <div class="card mb-3">
                 <div class="card-body {{ request()->route('id') == $issue['number'] ? 'active' : '' }} d-flex justify-content-between align-items-center gap-1">
                     <div>
+                        @if(isset($userLastReadIssueNumber) && $userLastReadIssueNumber < $issue['number'])
+                            <span class="badge bg-primary text-black font-work-sans mb-2">
+                                New!
+                            </span>
+                        @endif
                         @if(in_array($issue['number'], $userVotes ?? []))
                             <span class="badge bg-success font-work-sans mb-2">
                                 <i class="fa-sharp fa-check"></i>
