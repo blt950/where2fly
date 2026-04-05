@@ -104,7 +104,13 @@ class FeedbackController extends Controller
         $response = Http::withToken(config('app.github_key'))->get('https://api.github.com/repos/blt950/where2fly/issues');
 
         return collect($response->json())->filter(function ($item) {
-            return ! isset($item['pull_request']);
+            if (isset($item['pull_request'])) {
+                return false;
+            }
+
+            return collect($item['labels'] ?? [])->contains(function ($label) {
+                return strtolower($label['name'] ?? '') === 'open for vote';
+            });
         });
     }
 
