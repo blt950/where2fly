@@ -243,7 +243,10 @@ function Map() {
 
 export default Map;
 
-const root = ReactDOM.createRoot(document.getElementById('map'));
-root.render(
-    <Map />
-);
+const mapElement = document.getElementById('map');
+if (mapElement) {
+    const root = ReactDOM.createRoot(mapElement);
+    root.render(
+        <Map />
+    );
+}

@@ -13,8 +13,9 @@
         <div class="text-start">
 
             <h2 class="mb-0">v2.8.0</h2>
-            <span class="badge ps-0 pb-2">2026-04-03</span>
+            <span class="badge ps-0 pb-2">2026-04-05</span>
             <ul>
+                <li>Added feedback page with voting system to give you a say in what to build next</li> 
                 <li>Added expandable airport details on mobile with METAR, links and routes in search results</li>
                 <li>Fixed "VATSIM ATC Online" filter not working for US/AU airports</li>
                 <li>Fixed padding for top list legend on mobile screens</li>

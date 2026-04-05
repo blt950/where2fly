@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\SceneryController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TopController;
@@ -36,6 +37,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/scenery/{scenery}/edit', 'edit')->name('scenery.edit');
         Route::post('/scenery/{scenery}/edit', 'update')->name('scenery.update');
         Route::get('/scenery/{scenery}/delete', 'destroy')->name('scenery.delete');
+    });
+
+    Route::controller(FeedbackController::class)->group(function () {
+        Route::post('/feedback/vote', 'storeVote')->name('feedback.vote');
+        Route::get('/feedback/vote/{id}/delete', 'destroyVote')->name('feedback.vote.delete');
     });
 });
 
@@ -94,6 +100,11 @@ Route::controller(UserController::class)->group(function () {
 
     // Admin
     Route::get('/admin', 'showAdmin')->middleware(['auth', 'verified'])->name('admin');
+});
+
+Route::controller(FeedbackController::class)->group(function () {
+    Route::get('/feedback', 'index')->name('feedback');
+    Route::get('/feedback/{id}', 'show')->name('feedback.show');
 });
 
 // Pure views

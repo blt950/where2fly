@@ -17,8 +17,8 @@
 <!--
 <div class="feedback">
     <i class="fa-sharp fa-box-ballot"></i>
-    <b>Vote for the next feature!</b>
+    <b>Have your say on what gets built next</b>
     <br>
-    <a href="https://discord.gg/UkFg9Yy4gP" target="_blank">Check out #general in our Discord</a>
+    <a href="{{ route('feedback') }}">Check out our new Feedback page</a>
 </div>
 -->
