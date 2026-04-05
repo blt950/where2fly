@@ -100,6 +100,7 @@ class SearchController extends Controller
             'icao' => ['nullable', new AirportExists],
             'direction' => ['required', 'in:arrival,departure'],
             'destinations' => ['sometimes', 'array', new ValidDestinations],
+            'destinationExclusions' => ['sometimes', 'array', new ValidDestinations],
             'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
             'airtimeMin' => ['required', 'numeric', 'between:0,12'],
             'airtimeMax' => ['required', 'numeric', 'between:0,12'],
@@ -141,6 +142,7 @@ class SearchController extends Controller
 
         $direction = $data['direction'];
         $destinations = isset($data['destinations']) ? $this->filterDestinations($data['destinations']) : $this->filterDestinations(['Anywhere']);
+        $destinationExclusions = isset($data['destinationExclusions']) ? $this->filterDestinations($data['destinationExclusions']) : $this->filterDestinations(['Anywhere']);
         $codeletter = $data['codeletter'];
         $airtimeMin = (int) $data['airtimeMin'];
         $airtimeMax = (int) $data['airtimeMax'];
@@ -219,6 +221,7 @@ class SearchController extends Controller
             $airports = collect();
             $airports = Airport::airportOpen()->notIcao($primaryAirport->icao)->isAirportSize($destinationAirportSize)
                 ->inContinent($destinations)->inCountry($destinations, $primaryAirport->iso_country)->inState($destinations)
+                ->notInContinent($destinationExclusions)->notInCountry($destinationExclusions, $primaryAirport->iso_country)->notInState($destinationExclusions)
                 ->withinDistance($primaryAirport, $minDistance, $maxDistance, $primaryAirport->icao)->withinBearing($primaryAirport, $flightDirection, $minDistance, $maxDistance)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                 ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)

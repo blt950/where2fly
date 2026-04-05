@@ -37,7 +37,7 @@
                             @endif
                         @endforeach
                     @endforeach
-                @endisset
+                @endif
 
                 <input list="destination-list" placeholder="Anywhere">
                 <u-datalist id="destination-list" class="taller" tabindex="-1" hidden>
@@ -153,6 +153,52 @@
 
     <div id="filters" class="hide-filters">             
         <div class="row g-3 mt-3 pb-4 justify-content-center bt">
+
+            <div class="col-xs-12 text-start">
+
+                <label for="destinationExclusions">
+                    {{ ucfirst($area) }} Exclusions
+                </label>
+                <u-combobox data-multiple id="destinationExclusions">
+
+                    <select name="destinationExclusions[]"></select>
+
+                    @if(old('destinationExclusions') !== null)
+                        @foreach(old('destinationExclusions') as $key)
+                            @foreach($destinationInputs as $destinationKey => $destinationValue)
+                                @if(is_array($destinationValue))
+                                    @if(array_key_exists($key, $destinationValue))
+                                        <data value="{{ $key }}">{{ $destinationValue[$key] }}</data>
+                                    @endif
+                                @else
+                                    @if($key == $destinationKey)
+                                        <data value="{{ $key }}">{{ $destinationValue }}</data>
+                                    @endif
+                                @endif
+                            @endforeach
+                        @endforeach
+                    @endif
+
+                    <input list="destinationExclusions-list" placeholder="Anywhere">
+                    <u-datalist id="destinationExclusions-list" class="taller" tabindex="-1" hidden>
+
+                        @foreach($destinationInputs as $key => $value)
+                            @if(is_array($value))
+                                <div class="divider">{{ $key }}</div>
+                                @foreach($value as $subKey => $subValue)
+                                    <u-option value="{{ $subKey }}">{{ $subValue }}</u-option>
+                                @endforeach
+                            @else
+                                <u-option value="{{ $key }}">{{ $value }}</u-option>
+                            @endif
+                        @endforeach
+
+                    </u-datalist>
+                </u-combobox>
+                @error('destinationExclusions')
+                <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
+            </div>
             
             <div class="col-sm-12 text-start">
                 <label>Weather parameters</label>

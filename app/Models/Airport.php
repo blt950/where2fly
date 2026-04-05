@@ -188,28 +188,56 @@ class Airport extends Model
     public function scopeInContinent(Builder $query, array $destinations)
     {
         if (isset($destinations['continents'])) {
-            if (isset($destinations['continents'])) {
-                $continents = $destinations['continents'];
+            $continents = $destinations['continents'];
 
-                if (in_array('EU', $continents) && in_array('AS', $continents)) {
-                    $query->whereIn('airports.continent', $continents);
-                } else {
-                    $query->where(function ($query) use ($continents) {
-                        foreach ($continents as $continent) {
-                            $query->orWhere(function ($query) use ($continent) {
-                                if ($continent == 'EU') {
-                                    $query->where('airports.continent', $continent)
-                                        ->whereNotIn('airports.iso_region', getRussianAsianRegions());
-                                } elseif ($continent == 'AS') {
-                                    $query->where('airports.continent', $continent)
-                                        ->orWhereIn('airports.iso_region', getRussianAsianRegions());
-                                } else {
-                                    $query->where('airports.continent', $continent);
-                                }
-                            });
-                        }
-                    });
-                }
+            if (in_array('EU', $continents) && in_array('AS', $continents)) {
+                $query->whereIn('airports.continent', $continents);
+            } else {
+                $query->where(function ($query) use ($continents) {
+                    foreach ($continents as $continent) {
+                        $query->orWhere(function ($query) use ($continent) {
+                            if ($continent == 'EU') {
+                                $query->where('airports.continent', $continent)
+                                    ->whereNotIn('airports.iso_region', getRussianAsianRegions());
+                            } elseif ($continent == 'AS') {
+                                $query->where('airports.continent', $continent)
+                                    ->orWhereIn('airports.iso_region', getRussianAsianRegions());
+                            } else {
+                                $query->where('airports.continent', $continent);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Scope a query to exclude airports in the given continents
+     */
+    public function scopeNotInContinent(Builder $query, array $destinations)
+    {
+        if (isset($destinations['continents'])) {
+            $continents = $destinations['continents'];
+
+            if (in_array('EU', $continents) && in_array('AS', $continents)) {
+                $query->whereNotIn('airports.continent', $continents);
+            } else {
+                $query->where(function ($query) use ($continents) {
+                    foreach ($continents as $continent) {
+                        $query->where(function ($query) use ($continent) {
+                            if ($continent == 'EU') {
+                                $query->where('airports.continent', '!=', $continent)
+                                    ->orWhereIn('airports.iso_region', getRussianAsianRegions());
+                            } elseif ($continent == 'AS') {
+                                $query->where('airports.continent', '!=', $continent)
+                                    ->whereNotIn('airports.iso_region', getRussianAsianRegions());
+                            } else {
+                                $query->where('airports.continent', '!=', $continent);
+                            }
+                        });
+                    }
+                });
             }
         }
     }
@@ -234,12 +262,40 @@ class Airport extends Model
     }
 
     /**
+     * Scope a query to only include airports not in the given country
+     */
+    public function scopeNotInCountry(Builder $query, array $destinations, ?string $country = null)
+    {
+        // If filter is domestic, that should override all other country filters
+        if (isset($destinations['countries']) && $destinations['countries'] == 'Domestic') {
+            $query->where('iso_country', '!=', $country);
+
+            return;
+        }
+
+        // Filter on countries
+        if (isset($destinations['countries'])) {
+            $query->whereNotIn('iso_country', $destinations['countries']);
+        }
+    }
+
+    /**
      * Scope a query to only include airports in the US state
      */
     public function scopeInState(Builder $query, array $destinations)
     {
         if (isset($destinations['states'])) {
             $query->whereIn('iso_region', $destinations['states']);
+        }
+    }
+
+    /**
+     * Scope a query to only include airports not in the given US state
+     */
+    public function scopeNotInState(Builder $query, array $destinations)
+    {
+        if (isset($destinations['states'])) {
+            $query->whereNotIn('iso_region', $destinations['states']);
         }
     }
 
