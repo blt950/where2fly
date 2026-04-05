@@ -16,7 +16,7 @@
                         </div>
                     </div>
                     <div class="upvotes d-flex flex-column align-items-center flex-shrink-0">
-                        <div class="fs-3 fw-bold">9</div>
+                        <div class="fs-3 fw-bold">{{ $groupedVotes[$issue['number']] ?? 0 }}</div>
                         Votes
                     </div>
                 </div>

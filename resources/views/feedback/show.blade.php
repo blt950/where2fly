@@ -17,6 +17,7 @@
 @section('content')
     <div class="feedback-container d-flex flex-column justify-content-center align-items-center gap-3">
         
+        
         <div class="card">
             <div class="card-title">
                 <div class="d-flex flex-row justify-content-between align-items-center flex-wrap">
@@ -25,7 +26,7 @@
                         <h3 class="mb-1">{{ $issue['title'] }}</h3>
                     </div>
 
-                    <div class="w-200 d-flex flex-row align-items-space-between gap-1">
+                    <div class="w-200 align-items-center d-flex flex-row gap-1">
                         <div class="upvotes d-flex flex-row align-items-center justify-content-center gap-2">
                             <span class="fs-3 fw-bold">{{ $groupedVotes[$issue['number']] ?? 0 }}</span> Votes
                         </div>
