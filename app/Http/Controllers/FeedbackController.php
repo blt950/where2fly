@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\FeedbackVote;
-use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 

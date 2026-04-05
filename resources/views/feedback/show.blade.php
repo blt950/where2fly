@@ -48,7 +48,11 @@
             </div>    
     
             <div class="card-body">
-                {{ Illuminate\Mail\Markdown::parse($issue['body']) }}
+                {!! Str::of($issue['body'])->markdown([
+                    'html_input' => 'strip',
+                    'allow_unsafe_links' => false,
+                ])
+                !!}
             </div>
 
             <div class="card-footer">
@@ -63,7 +67,11 @@
         @foreach($comments as $comment)
             <div class="card">
                 <div class="card-body">
-                    {{ Illuminate\Mail\Markdown::parse($comment['body']) }}
+                    {!! Str::of($comment['body'])->markdown([
+                        'html_input' => 'strip',
+                        'allow_unsafe_links' => false,
+                    ])
+                    !!}
                 </div>
         
                 <div class="card-footer">
