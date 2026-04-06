@@ -3,10 +3,8 @@ table{
 
     margin-bottom: 2rem !important;
 
-    // Add a bit margin to hide horizontal scroll fade
     @include media-breakpoint-between(xs, md) {
         background: transparent;
-        margin-right: 2rem;
     }
 
     th:first-child,td:first-child{
