@@ -141,6 +141,10 @@ main, nav.sidebar{
         width: calc(100vw - $sidebar-width);
         background: url('/img/bg2.jpg') no-repeat center center fixed;
         background-size: cover;
+
+        @include media-breakpoint-down(lg) { 
+            width: calc(100vw - $sidebar-width-min);
+        }
     }
 }
 
@@ -148,7 +152,7 @@ nav.sidebar p{
     font-family: $font-family-sans-serif;
 }
 
-@include media-breakpoint-down(lg) {
+@include media-breakpoint-down(md) {
     body.d-flex.h-100 {
         height: auto !important;
         min-height: 100dvh;
