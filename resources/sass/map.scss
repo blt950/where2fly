@@ -79,11 +79,9 @@
         
         display: flex;
         flex-flow: column;
-        gap: 1rem;
 
         z-index: 500;
-        overflow-y: auto;
-        pointer-events: auto;
+        pointer-events: none;
 
         @include media-breakpoint-down(lg) { 
             width: 300px;
@@ -93,6 +91,18 @@
         @include media-breakpoint-down(md) { 
             display: none;
         }
+    }
+
+    &-scroll{
+        width: 100%;
+        max-height: 100%;
+
+        display: flex;
+        flex-flow: column;
+        gap: 1rem;
+
+        overflow-y: auto;
+        pointer-events: auto;
     }
 
     &-card{
