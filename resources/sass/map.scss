@@ -93,6 +93,7 @@
         }
     }
 
+    /* @TODO See if this can be fixed differently, seems bit hacky way to make pointer events on tablets work when cards are not populated in the container */
     &-scroll{
         width: 100%;
         max-height: 100%;

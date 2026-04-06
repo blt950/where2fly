@@ -13,20 +13,20 @@
         <div class="text-start">
 
             <h2 class="mb-0">v2.8.0</h2>
-            <span class="badge ps-0 pb-2">2026-04-06</span>
+            <span class="badge ps-0 pb-2">2026-04-07</span>
             <ul>
                 <li>Added area exclusion filter for search</li> 
                 <li>Added feedback page with voting system to give you a say in what to build next</li> 
                 <li>Added expandable airport details on mobile with METAR, links and routes in search results</li>
+                <li>Introduced "Buy me a coffee" donation with more payment options</li>
                 <li>Reworked aircraft types to cover more types more accurately</li>
                 <li>Fixed "VATSIM ATC Online" filter not working for US/AU airports</li>
-                <li>Fixed area filter options disappearing when editing search</li>
+                <li>Fixed area filter options randomly disappearing when editing search</li>
                 <li>Fixed padding for top list legend on mobile screens</li>
                 <li>Fixed mobile browsers not minimizing address bar on scroll</li>
                 <li>Fixed mobiles zooming in when clicking on multiple choice inputs</li>
                 <li>Fixed some buttons resizing when hovered over</li>
                 <li>Fixed multiple choice dropdown not showing correct icons</li>
-                <li>Introduced "Buy me a coffee" donation with more payment options</li>
                 <li>Minor changes under the hood</li>
                 <li>API: Added destination and temperature search parameters</li>
                 <li>API: Updated documentation</li>
