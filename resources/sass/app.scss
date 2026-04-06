@@ -89,6 +89,7 @@ header {
 main, nav.sidebar{
     width: $sidebar-width;
     height: calc(100vh - $header-height);
+    height: calc(100dvh - $header-height);
     overflow-y: auto;
 
     background: $secondary;
@@ -153,6 +154,9 @@ nav.sidebar p{
 }
 
 @include media-breakpoint-down(md) {
+    
+    /* Mobile specific styles fixing scroll behavour for browsers to hide UI */
+    /* @TODO Find a better solution for this, feel hacky. */
     body.d-flex.h-100 {
         height: auto !important;
         min-height: 100dvh;
@@ -170,6 +174,7 @@ nav.sidebar p{
         min-height: calc(100dvh - $header-height);
         overflow-y: visible;
     }
+    /* End of mobile specific styles */
 
     main{
         &.mobile-nofocus{

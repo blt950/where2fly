@@ -1,5 +1,6 @@
 .map{
     height: calc(100vh - $header-height);
+    height: calc(100dvh - $header-height);
     width: calc(100vw - $sidebar-width);
 
     @include media-breakpoint-down(lg) { 
@@ -69,6 +70,7 @@
 
     &-container{
         height: calc(100vh - $header-height - $footer-height - 2rem);
+        height: calc(100dvh - $header-height - $footer-height - 2rem);
         width: 400px;
         
         position: absolute;
@@ -81,7 +83,7 @@
 
         z-index: 500;
         overflow-y: auto;
-        pointer-events: none;
+        pointer-events: auto;
 
         @include media-breakpoint-down(lg) { 
             width: 300px;
