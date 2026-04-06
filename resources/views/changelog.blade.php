@@ -23,6 +23,7 @@
                 <li>Fixed area filter options disappearing when editing search</li>
                 <li>Fixed padding for top list legend on mobile screens</li>
                 <li>Fixed some buttons resizing when hovered over</li>
+                <li>Fixed mobiles zooming in when clicking on combo inputs fields</li>
                 <li>Introduced "Buy me a coffee" donation with more payment options</li>
                 <li>Minor changes under the hood</li>
                 <li>API: Added destination and temperature search parameters</li>
