@@ -20,7 +20,7 @@
 <meta name="msapplication-TileColor" content="#ddb81c">
 <meta name="msapplication-config" content="/img/favicon/browserconfig.xml">
 <meta name="theme-color" content="#ddb81c">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
 <meta property="og:title" content="Where2Fly">
