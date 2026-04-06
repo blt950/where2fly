@@ -53,7 +53,7 @@ function submitFormMetrics(){
         }
 
         includeCheckboxes.forEach(function(checkbox){
-            if(element.name == checkbox & element.checked){
+            if(element.name == checkbox && element.checked){
                 // Remove the scores in name
                 if(checkbox.includes('scores[')){
                     checkbox = checkbox.replace('scores[', '');
@@ -83,7 +83,7 @@ submitButtons.forEach(function(button) {
             submitFormMetrics();
         }
 
-        document.getElementById('form').submit()
+        document.getElementById('form').requestSubmit()
     });
 });
 
