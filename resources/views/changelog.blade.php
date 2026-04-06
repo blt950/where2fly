@@ -27,7 +27,6 @@
                 <li>Fixed mobiles zooming in when clicking on multiple choice inputs</li>
                 <li>Fixed some buttons resizing when hovered over</li>
                 <li>Fixed multiple choice dropdown not showing correct icons</li>
-                <li>Minor changes under the hood</li>
                 <li>API: Added destination and temperature search parameters</li>
                 <li>API: Updated documentation</li>
             </ul>
