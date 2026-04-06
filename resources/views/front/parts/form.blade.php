@@ -186,10 +186,14 @@
                             @if(is_array($value))
                                 <div class="divider">{{ $key }}</div>
                                 @foreach($value as $subKey => $subValue)
-                                    <u-option value="{{ $subKey }}">{{ $subValue }}</u-option>
+                                    @if($subKey !== 'Anywhere' && $subKey !== 'Domestic')
+                                        <u-option value="{{ $subKey }}">{{ $subValue }}</u-option>
+                                    @endif
                                 @endforeach
                             @else
-                                <u-option value="{{ $key }}">{{ $value }}</u-option>
+                                @if($key !== 'Anywhere' && $key !== 'Domestic')
+                                    <u-option value="{{ $key }}">{{ $value }}</u-option>
+                                @endif
                             @endif
                         @endforeach
 
