@@ -59,6 +59,10 @@
 * Base structure
 */
 
+html, body, body.bg-dark {
+    background-color: $secondary !important;
+}
+
 h1, h2, h3, h4, h5, h6, button, p, a, footer, .btn, .badge{
     font-family: 'Kanit', 'Work Sans', sans-serif;
 }
@@ -145,6 +149,24 @@ nav.sidebar p{
 }
 
 @include media-breakpoint-down(lg) {
+    body.d-flex.h-100 {
+        height: auto !important;
+        min-height: 100dvh;
+    }
+
+    body > .d-flex.w-100.h-100.mx-auto.flex-column {
+        height: auto !important;
+        min-height: 100dvh;
+    }
+
+    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > main.mobile-focus,
+    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > nav.sidebar.mobile-focus,
+    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > main:not(.mobile-focus):not(.mobile-nofocus) {
+        height: auto;
+        min-height: calc(100dvh - $header-height);
+        overflow-y: visible;
+    }
+
     main{
         &.mobile-nofocus{
             display: none;
