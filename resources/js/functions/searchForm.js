@@ -31,13 +31,11 @@ function submitFormMetrics(){
         'flightDirection'
     ]
     var props = {}
+    var multiselect = {}
     Array.from(form.elements).forEach(function(element){
         if(element.name == 'icao'){
             props.icao = element.value || 'Random';
         }
-
-        // We don't have an easy way to track multi select inputs such as destinations, aircrafts and airlines.
-        // Hence it's skipped for now.
 
         if(element.name == 'codeletter'){
             var selected = element.options[element.selectedIndex];
@@ -50,6 +48,31 @@ function submitFormMetrics(){
 
         if(element.name == 'sortByATC'){
             props.sortByATC = (element.checked) ? true : false;
+        }
+
+        if(element.name == 'destinations[]'){
+            var selected = Array.from(element.selectedOptions).map(option => option.value);
+            multiselect.destinations = selected;
+        }
+
+        if(element.name == 'whitelists[]'){
+            var selected = Array.from(element.selectedOptions).map(option => option.value);
+            multiselect.whitelists = selected;
+        }
+
+        if(element.name == 'destinationExclusions[]'){
+            var selected = Array.from(element.selectedOptions).map(option => option.value);
+            multiselect.destinationExclusions = selected;
+        }
+
+        if(element.name == 'airlines[]'){
+            var selected = Array.from(element.selectedOptions).map(option => option.value);
+            multiselect.airlines = selected;
+        }
+
+        if(element.name == 'aircrafts[]'){
+            var selected = Array.from(element.selectedOptions).map(option => option.value);
+            multiselect.aircrafts = selected;
         }
 
         includeCheckboxes.forEach(function(checkbox){
@@ -66,6 +89,27 @@ function submitFormMetrics(){
 
     if(window.umami){
         umami.track('Search', { props: props });
+
+        // For multiselects, also track each selected value separately for better filtering in umami.
+        var multiselectDefaults = {
+            destinations: 'Anywhere',
+            whitelists: 'None',
+            destinationExclusions: 'None',
+            airlines: 'Any',
+            aircrafts: 'Any',
+        };
+
+        Object.entries(multiselectDefaults).forEach(function([key, fallback]){
+            var values = multiselect[key];
+            if(values && values.length > 0){
+                values.forEach(function(value){
+                    umami.track('Search', { ['props.' + key]: value });
+                });
+            } else {
+                umami.track('Search', { ['props.' + key]: fallback });
+            }
+        });
+
     }
 }
 
