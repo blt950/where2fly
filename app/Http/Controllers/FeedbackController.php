@@ -107,7 +107,7 @@ class FeedbackController extends Controller
     /**
      * Fetch issues and votes, used for the index page to avoid multiple calls in the loop
      */
-    private function fetchIssuesAndVotes(int|null $userLastReadIssueNumber = null)
+    private function fetchIssuesAndVotes(?int $userLastReadIssueNumber = null)
     {
         [$groupedVotes, $userVotes] = $this->fetchVotes();
         $issues = $this->fetchIssues();
@@ -118,14 +118,14 @@ class FeedbackController extends Controller
             $bIsNew = isset($userLastReadIssueNumber) && $userLastReadIssueNumber < $b['number'];
 
             if ($aIsNew !== $bIsNew) {
-            return $aIsNew ? -1 : 1; // new issues first
+                return $aIsNew ? -1 : 1; // new issues first
             }
 
             $aVotes = (int) ($groupedVotes[$a['number']] ?? 0);
             $bVotes = (int) ($groupedVotes[$b['number']] ?? 0);
 
             if ($aVotes !== $bVotes) {
-            return $bVotes <=> $aVotes; // higher votes second
+                return $bVotes <=> $aVotes; // higher votes second
             }
 
             return strtotime($b['created_at']) <=> strtotime($a['created_at']); // newer last
