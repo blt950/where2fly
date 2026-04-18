@@ -15,6 +15,7 @@
             <h2 class="mb-0">v2.8.1</h2>
             <span class="badge ps-0 pb-2">2026-04-18</span>
             <ul>
+                <li>Updated freeware scenery database for MSFS2024 with ~2000 new sceneries from ~1000 developers</li>
                 <li>Fixed VATSIM data not refreshing sometimes, causing the weather filters to be outdated</li>
                 <li>Fixed "Use as departure/arrival" button in airport cards when searching</li>
                 <li>Fixed order by checkboxes not saving when editing filters</li>
