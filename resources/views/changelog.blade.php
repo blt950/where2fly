@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2026-04-18</span>
             <ul>
                 <li>Fixed VATSIM data not refreshing sometimes, causing the weather filters to be outdated</li>
+                <li>Fixed "Use as departure/arrival" button in airport cards when searching</li>
                 <li>Fixed order by checkboxes not saving when editing filters</li>
             </ul>
 

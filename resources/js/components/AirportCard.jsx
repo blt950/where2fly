@@ -166,6 +166,22 @@ function AirportCard({ airportId }) {
                                 </>
                             )}
 
+                            {(primaryAirport !== undefined && primaryAirport !== null) && (
+                                <>
+                                    <button className="btn btn-outline-primary btn-sm font-work-sans" onClick={() => {
+                                        const params = new URLSearchParams(window.location.search);
+                                        params.set('icao', data.airport.icao);
+                                        window.location.href = `${window.location.pathname}?${params.toString()}`;
+
+                                        if(window.umami){
+                                            umami.track('Interactions', {interaction: `Change airport from card`})
+                                        }
+                                    }}>
+                                        <i className="fa-sharp fa-pencil"></i> Use as {reverseDirection ? 'Arrival' : 'Departure'}
+                                    </button>
+                                </>    
+                            )}
+
                             <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://windy.com/${data.airport.icao}?utm_campaign=where2fly.today`} target="_blank">
                                 Windy <i className="fa-sharp fa-up-right-from-square"></i>
                             </a>
