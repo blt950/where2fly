@@ -18,6 +18,7 @@
                 <li>Fixed VATSIM data not refreshing sometimes, causing the weather filters to be outdated</li>
                 <li>Fixed "Use as departure/arrival" button in airport cards when searching</li>
                 <li>Fixed order by checkboxes not saving when editing filters</li>
+                <li>Fixed incorrect placeholder in destination exclude input</li>
             </ul>
 
             <h2 class="mb-0">v2.8.0</h2>

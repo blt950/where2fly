@@ -179,7 +179,7 @@
                         @endforeach
                     @endif
 
-                    <input list="destinationExclusions-list" placeholder="Anywhere">
+                    <input list="destinationExclusions-list" placeholder="None">
                     <u-datalist id="destinationExclusions-list" class="taller" tabindex="-1" hidden>
 
                         @foreach($destinationInputs as $key => $value)

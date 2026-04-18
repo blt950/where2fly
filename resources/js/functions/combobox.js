@@ -1,29 +1,29 @@
 // Dynamically adjust placeholder for destinations
-document.querySelectorAll('u-combobox').forEach(element => {
-    const input = element.querySelector('input[placeholder="Anywhere"]');
+const placeholderConfigs = [
+    { selector: 'input[placeholder="Anywhere"]', default: "Anywhere" },
+    { selector: 'input[placeholder="None"]', default: "None" }
+];
 
-    if(input){
-        element.addEventListener('comboboxafterselect', (event) => {
-            setTimeout(() => {
-                const element = event.target;
-                let count = element.querySelectorAll('data').length;
-    
-                if(count == 0){
-                    input.placeholder = "Anywhere";
-                } else {
-                    input.placeholder = "Choose";
-                }
-    
+placeholderConfigs.forEach(config => {
+    document.querySelectorAll('u-combobox').forEach(element => {
+        const input = element.querySelector(config.selector);
+
+        if(input){
+            element.addEventListener('comboboxafterselect', (event) => {
+                setTimeout(() => {
+                    const count = event.target.querySelectorAll('data').length;
+                    input.placeholder = count === 0 ? config.default : "Choose";
+                });
             });
-        });
 
-        // Check if there's already data and apply the correct placeholder on page load
-        let count = element.querySelectorAll('data').length;
-        if(count > 0){
-            input.placeholder = "Choose";
+            // Check if there's already data and apply the correct placeholder on page load
+            const count = element.querySelectorAll('data').length;
+            if(count > 0){
+                input.placeholder = "Choose";
+            }
         }
-    }
-})
+    });
+});
 
 // @TODO Cleanup this hack. The issue is that the u-combobox component doesn't update the underlying select element's options 
 // to reflect the current chips, which causes issues when the form is submitted. 
