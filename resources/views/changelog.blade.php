@@ -12,6 +12,13 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.8.1</h2>
+            <span class="badge ps-0 pb-2">2026-04-18</span>
+            <ul>
+                <li>Fixed VATSIM data not refreshing sometimes, causing the weather filters to be outdated</li>
+                <li>Fixed order by checkboxes not saving when editing filters</li>
+            </ul>
+
             <h2 class="mb-0">v2.8.0</h2>
             <span class="badge ps-0 pb-2">2026-04-07</span>
             <ul>

@@ -18,6 +18,14 @@
                 @endif
             @endforeach
 
+            @if(!isset(request()->all()['sortByWeather']))
+                <input type="hidden" name="sortByWeather" value="0">
+            @endif
+            
+            @if(!isset(request()->all()['sortByATC']))
+                <input type="hidden" name="sortByATC" value="0">
+            @endif
+
             <div class="d-flex flex-wrap gap-2" style="margin-top: 0.5rem;">
                 <button id="editSearchBtn" type="submit" form="filtersForm" class="btn btn-sm btn-outline-warning mb-1"><i class="fa-sharp fa-pencil"></i> Edit filters</button>
                 <button id="bookmarkBtn" type="button" class="btn btn-sm btn-outline-warning mb-1"><i class="fa-sharp fa-bookmark"></i> Bookmark search</button>

@@ -115,7 +115,7 @@
             <label>Order by</label>
             
             <div class="form-check mb-0">
-                <input class="form-check-input" type="checkbox" value="1" id="sortByWeather" name="sortByWeather" checked>
+                <input class="form-check-input" type="checkbox" value="1" id="sortByWeather" name="sortByWeather" {{ old('sortByWeather') !== null ? (old('sortByWeather') ? 'checked' : '') : 'checked' }}>
                 <label class="form-check-label" for="sortByWeather">
                     Worst Weather
                 </label>
@@ -124,7 +124,7 @@
                 @enderror
             </div>
             <div class="form-check mb-0">
-                <input class="form-check-input" type="checkbox" value="1" id="sortByATC" name="sortByATC" checked>
+                <input class="form-check-input" type="checkbox" value="1" id="sortByATC" name="sortByATC" {{ old('sortByATC') !== null ? (old('sortByATC') ? 'checked' : '') : 'checked' }}>
                 <label class="form-check-label" for="sortByATC">
                     ATC Coverage
                 </label>
