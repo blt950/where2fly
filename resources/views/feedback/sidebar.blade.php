@@ -1,12 +1,11 @@
 <div class="container">
-
     <a href="https://github.com/blt950/where2fly/issues" class="btn btn-outline-success w-100 mb-3" target="_blank">
         Add your new idea on Github <i class="fa-sharp fa-up-right-from-square"></i>
     </a>
 
     @foreach($issues as $issue)
         <a class="sidebar card-link d-block" href="{{ route('feedback.show', $issue['number']) }}">
-            <div class="card mb-3">
+            <div class="card mb-3 {{ (isset($userLastReadIssueNumber) && $userLastReadIssueNumber < $issue['number']) ? 'new' : '' }}">
                 <div class="card-body {{ request()->route('id') == $issue['number'] ? 'active' : '' }} d-flex justify-content-between align-items-center gap-1">
                     <div>
                         @if(isset($userLastReadIssueNumber) && $userLastReadIssueNumber < $issue['number'])

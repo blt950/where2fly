@@ -26,6 +26,10 @@
     p:last-child{
         margin: 0;
     }
+
+    &.new{
+        border: 3px solid $primary;
+    }
 }
 
 .sidebar .card{

@@ -13,8 +13,6 @@ class FeedbackController extends Controller
      */
     public function index()
     {
-        [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes();
-
         // Update the user's last read issue number to the current highest issue number in the cache
         if (auth()->check()) {
             $user = auth()->user();
@@ -27,6 +25,8 @@ class FeedbackController extends Controller
         } else {
             $userLastReadIssueNumber = null;
         }
+
+        [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes($userLastReadIssueNumber);
 
         return view('feedback.index', compact('issues', 'groupedVotes', 'userVotes', 'userLastReadIssueNumber'));
     }
@@ -107,21 +107,28 @@ class FeedbackController extends Controller
     /**
      * Fetch issues and votes, used for the index page to avoid multiple calls in the loop
      */
-    private function fetchIssuesAndVotes()
+    private function fetchIssuesAndVotes(int|null $userLastReadIssueNumber = null)
     {
         [$groupedVotes, $userVotes] = $this->fetchVotes();
         $issues = $this->fetchIssues();
 
         // Sort issues by number of votes (descending) and then by creation date (descending)
-        $issues = $issues->sort(function ($a, $b) use ($groupedVotes) {
+        $issues = $issues->sort(function ($a, $b) use ($groupedVotes, $userLastReadIssueNumber) {
+            $aIsNew = isset($userLastReadIssueNumber) && $userLastReadIssueNumber < $a['number'];
+            $bIsNew = isset($userLastReadIssueNumber) && $userLastReadIssueNumber < $b['number'];
+
+            if ($aIsNew !== $bIsNew) {
+            return $aIsNew ? -1 : 1; // new issues first
+            }
+
             $aVotes = (int) ($groupedVotes[$a['number']] ?? 0);
             $bVotes = (int) ($groupedVotes[$b['number']] ?? 0);
 
             if ($aVotes !== $bVotes) {
-                return $bVotes <=> $aVotes; // higher votes first
+            return $bVotes <=> $aVotes; // higher votes second
             }
 
-            return strtotime($b['created_at']) <=> strtotime($a['created_at']); // newer first
+            return strtotime($b['created_at']) <=> strtotime($a['created_at']); // newer last
         })->values();
 
         return [$issues, $groupedVotes, $userVotes];

@@ -19,6 +19,7 @@
                 <li>Fixed "Use as departure/arrival" button in airport cards when searching</li>
                 <li>Fixed order by checkboxes not saving when editing filters</li>
                 <li>Fixed incorrect placeholder in destination exclude input</li>
+                <li>Fixed new votes to show on top of feedback page</li>
             </ul>
 
             <h2 class="mb-0">v2.8.0</h2>

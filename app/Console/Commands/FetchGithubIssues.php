@@ -38,6 +38,5 @@ class FetchGithubIssues extends Command
         }
 
         $this->info('Fetched ' . count($data) . ' issues.');
-        $this->info('Cache driver is ' . config('cache.default'));
     }
 }
