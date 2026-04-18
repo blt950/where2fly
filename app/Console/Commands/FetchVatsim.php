@@ -78,6 +78,10 @@ class FetchVatsim extends Command
                 // Fetch callsign prefix
                 preg_match('/^([A-Z]*)_/', $controller->callsign, $matches);
 
+                if (! isset($matches[1])) {
+                    continue;
+                }
+
                 // For callsigns with 3 letters or less
                 if (strlen($matches[1]) <= 3) {
                     $australianCallsign = AirportCallsignHelper::returnAustralianAirport($matches[1]);
