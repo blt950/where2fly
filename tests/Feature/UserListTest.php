@@ -239,18 +239,19 @@ class UserListTest extends TestCase
     {
         $user = User::factory()->create();
         $simulator = Simulator::first();
-        $airport = $this->airports['EDDF'];
         $list = UserList::create([
             'name' => 'Shrinking List',
             'color' => '#FEDCBA',
             'simulator_id' => $simulator->id,
             'user_id' => $user->id,
             'public' => false,
-            'airports' => "EDDF\r\nKLAX",
         ]);
-        $list->airports()->attach($airport->id);
+        $list->airports()->attach([
+            $this->airports['EDDF']->id,
+            $this->airports['KLAX']->id,
+        ]);
 
-        // Update list with empty airports string → all airports removed
+        // Update list with only KLAX, dropping EDDF
         $response = $this->actingAs($user)->post("/lists/{$list->id}/edit", [
             'name' => 'Shrinking List',
             'color' => '#FEDCBA',
@@ -261,6 +262,7 @@ class UserListTest extends TestCase
         $response->assertRedirect(route('list.index'));
         $list->refresh();
         $this->assertCount(1, $list->airports);
+        $this->assertEquals('KLAX', $list->airports->first()->icao);
     }
 
     // -------------------------------------------------------------------------
