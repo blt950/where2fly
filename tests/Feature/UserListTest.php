@@ -65,7 +65,7 @@ class UserListTest extends TestCase
             'name' => 'My Test List',
             'color' => '#FF5733',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
         ]);
 
         $response->assertRedirect(route('list.index'));
@@ -117,7 +117,7 @@ class UserListTest extends TestCase
         $response = $this->actingAs($user)->post('/lists/create', [
             'color' => '#FF5733',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
         ]);
 
         $response->assertSessionHasErrors('name');
@@ -132,7 +132,7 @@ class UserListTest extends TestCase
             'name' => 'Bad Color',
             'color' => 'not-a-color',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
         ]);
 
         $response->assertSessionHasErrors('color');
@@ -146,7 +146,7 @@ class UserListTest extends TestCase
             'name' => 'Bad Sim',
             'color' => '#FF5733',
             'simulator' => 99999,
-            'airports' => '',
+            'airports' => 'KLAX',
         ]);
 
         $response->assertSessionHasErrors('simulator');
@@ -172,7 +172,7 @@ class UserListTest extends TestCase
             'name' => 'Updated Name',
             'color' => '#222222',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
         ]);
 
         $response->assertRedirect(route('list.index'));
@@ -199,7 +199,7 @@ class UserListTest extends TestCase
             'name' => 'Hijacked Name',
             'color' => '#222222',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
         ]);
 
         $response->assertForbidden();
@@ -246,6 +246,7 @@ class UserListTest extends TestCase
             'simulator_id' => $simulator->id,
             'user_id' => $user->id,
             'public' => false,
+            'airports' => "EDDF\r\nKLAX",
         ]);
         $list->airports()->attach($airport->id);
 
@@ -254,12 +255,12 @@ class UserListTest extends TestCase
             'name' => 'Shrinking List',
             'color' => '#FEDCBA',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
         ]);
 
         $response->assertRedirect(route('list.index'));
         $list->refresh();
-        $this->assertCount(0, $list->airports);
+        $this->assertCount(1, $list->airports);
     }
 
     // -------------------------------------------------------------------------
@@ -316,7 +317,7 @@ class UserListTest extends TestCase
             'name' => 'Public Attempt',
             'color' => '#FF0000',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
             'public' => true,
         ]);
 
@@ -333,7 +334,7 @@ class UserListTest extends TestCase
             'name' => 'Admin Public List',
             'color' => '#00FF00',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
             'public' => true,
         ]);
 

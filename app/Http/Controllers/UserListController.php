@@ -52,7 +52,7 @@ class UserListController extends Controller
             'color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'name' => 'required|max:32',
             'simulator' => 'required|exists:simulators,id',
-            'airports' => 'nullable|string',
+            'airports' => 'required|string',
             'public' => 'boolean',
         ]);
 
@@ -61,7 +61,7 @@ class UserListController extends Controller
             $this->authorize('public', UserList::class);
         }
 
-        [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports ?? '');
+        [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports);
 
         $list = DB::transaction(function () use ($request, $airportIds) {
             $list = new UserList();
@@ -110,7 +110,7 @@ class UserListController extends Controller
             'color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'name' => 'required|max:32',
             'simulator' => 'required|exists:simulators,id',
-            'airports' => 'nullable|string',
+            'airports' => 'required|string',
             'public' => 'boolean',
         ]);
 
@@ -119,7 +119,7 @@ class UserListController extends Controller
             $this->authorize('public', UserList::class);
         }
 
-        [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports ?? '');
+        [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports);
 
         DB::transaction(function () use ($request, $list, $airportIds) {
             $list->color = $request->color;

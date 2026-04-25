@@ -54,7 +54,7 @@ class AdminTest extends TestCase
             'name' => 'Sneaky Public List',
             'color' => '#AAAAAA',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
             'public' => true,
         ]);
 
@@ -78,7 +78,7 @@ class AdminTest extends TestCase
             'name' => 'Private List',
             'color' => '#BBBBBB',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
             'public' => true,
         ]);
 
@@ -103,7 +103,7 @@ class AdminTest extends TestCase
             'name' => 'To Be Public',
             'color' => '#CCCCCC',
             'simulator' => $simulator->id,
-            'airports' => '',
+            'airports' => 'KLAX',
             'public' => true,
         ]);
 
