@@ -41,7 +41,7 @@ abstract class TestCase extends BaseTestCase
 
         // Only seed if the airports table exists (i.e. migrations have run,
         // which happens automatically when a test uses RefreshDatabase).
-        if (!\Schema::hasTable('airports')) {
+        if (! \Schema::hasTable('airports')) {
             return;
         }
 

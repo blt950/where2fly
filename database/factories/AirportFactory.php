@@ -22,7 +22,7 @@ class AirportFactory extends Factory
         return [
             'icao' => strtoupper(fake()->unique()->lexify('K???')),
             'type' => 'medium_airport',
-            'name' => fake()->city().' Airport',
+            'name' => fake()->city() . ' Airport',
             'latitude_deg' => $lat,
             'longitude_deg' => $lon,
             'elevation_ft' => fake()->numberBetween(0, 5000),
