@@ -41,10 +41,10 @@ class SearchTest extends TestCase
 
     public function test_search_requires_direction(): void
     {
-        $response = $this->get('/search', [
+        $response = $this->get('/search?' . http_build_query([
             'codeletter' => 'JS',
             'metcondition' => 'ANY',
-        ]);
+        ]));
 
         // Missing required fields → redirected back with errors
         $response->assertRedirect();
@@ -52,7 +52,7 @@ class SearchTest extends TestCase
 
     public function test_search_fails_with_invalid_codeletter(): void
     {
-        $response = $this->get('/search', [
+        $response = $this->get('/search?' . http_build_query([
             'direction' => 'departure',
             'codeletter' => 'INVALID',
             'airtimeMin' => 1,
@@ -68,14 +68,14 @@ class SearchTest extends TestCase
             'elevationMax' => 18000,
             'rwyLengthMin' => 0,
             'rwyLengthMax' => 17000,
-        ]);
+        ]));
 
         $response->assertSessionHasErrors();
     }
 
     public function test_search_fails_with_invalid_metcondition(): void
     {
-        $response = $this->get('/search', [
+        $response = $this->get('/search?' . http_build_query([
             'direction' => 'departure',
             'codeletter' => 'JS',
             'airtimeMin' => 1,
@@ -91,14 +91,14 @@ class SearchTest extends TestCase
             'elevationMax' => 18000,
             'rwyLengthMin' => 0,
             'rwyLengthMax' => 17000,
-        ]);
+        ]));
 
         $response->assertSessionHasErrors();
     }
 
     public function test_search_fails_with_out_of_range_airtime(): void
     {
-        $response = $this->get('/search', [
+        $response = $this->get('/search?' . http_build_query([
             'direction' => 'departure',
             'codeletter' => 'JS',
             'airtimeMin' => -1,
@@ -114,14 +114,14 @@ class SearchTest extends TestCase
             'elevationMax' => 18000,
             'rwyLengthMin' => 0,
             'rwyLengthMax' => 17000,
-        ]);
+        ]));
 
         $response->assertSessionHasErrors();
     }
 
     public function test_search_fails_with_invalid_direction(): void
     {
-        $response = $this->get('/search', [
+        $response = $this->get('/search?' . http_build_query([
             'direction' => 'sideways',
             'codeletter' => 'JS',
             'airtimeMin' => 1,
@@ -137,7 +137,7 @@ class SearchTest extends TestCase
             'elevationMax' => 18000,
             'rwyLengthMin' => 0,
             'rwyLengthMax' => 17000,
-        ]);
+        ]));
 
         $response->assertSessionHasErrors();
     }
