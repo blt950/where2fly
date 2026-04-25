@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.8.2</h2>
+            <span class="badge ps-0 pb-2">2026-04-25</span>
+            <ul>
+                <li>Fixed an error when updating lists</li>
+            </ul>
+
             <h2 class="mb-0">v2.8.1</h2>
             <span class="badge ps-0 pb-2">2026-04-18</span>
             <ul>

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 
 class UserListController extends Controller
@@ -60,15 +61,21 @@ class UserListController extends Controller
             $this->authorize('public', UserList::class);
         }
 
-        $list = new UserList();
-        $list->color = $request->color;
-        $list->name = $request->name;
-        $list->simulator_id = $request->simulator;
-        $list->user_id = Auth::id();
-        $list->public = $request->public;
-        $list->save();
+        [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports);
 
-        $notFoundAirports = $this->processAirports($list, $request->airports);
+        $list = DB::transaction(function () use ($request, $airportIds) {
+            $list = new UserList();
+            $list->color = $request->color;
+            $list->name = $request->name;
+            $list->simulator_id = $request->simulator;
+            $list->user_id = Auth::id();
+            $list->public = $request->public;
+            $list->save();
+
+            $list->airports()->sync($airportIds);
+
+            return $list;
+        });
 
         if (count($notFoundAirports) > 0) {
             return redirect()->route('list.index')->with('warning', 'List created successfully, however following airports could not be found: ' . $notFoundAirports->implode(', '));
@@ -112,14 +119,17 @@ class UserListController extends Controller
             $this->authorize('public', UserList::class);
         }
 
-        $list->color = $request->color;
-        $list->name = $request->name;
-        $list->simulator_id = $request->simulator;
-        $list->public = $request->public;
-        $list->save();
+        [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports);
 
-        $list->airports()->detach();
-        $notFoundAirports = $this->processAirports($list, $request->airports);
+        DB::transaction(function () use ($request, $list, $airportIds) {
+            $list->color = $request->color;
+            $list->name = $request->name;
+            $list->simulator_id = $request->simulator;
+            $list->public = $request->public;
+            $list->save();
+
+            $list->airports()->sync($airportIds);
+        });
 
         if (count($notFoundAirports) > 0) {
             return redirect()->route('list.index')->with('warning', 'List updated successfully, however following airports could not be found: ' . $notFoundAirports->implode(', '));
@@ -129,11 +139,11 @@ class UserListController extends Controller
     }
 
     /**
-     * Process the airports and save the models
+     * Resolve airport inputs into unique airport IDs and unknown inputs.
      *
-     * @return Collection $notFoundAirports
+     * @return array{0: array<int, int>, 1: Collection}
      */
-    private function processAirports(UserList $list, string $input)
+    private function resolveAirports(string $input): array
     {
         $airportsInput = explode("\r\n", $input);
         $airportsInput = array_map('trim', $airportsInput);
@@ -146,36 +156,22 @@ class UserListController extends Controller
             ->orWhereIn('local_code', $airportsInput)
             ->get();
 
-        $addedAirports = collect();
         $notFoundAirports = collect();
-        $airportsToAttach = collect();
+        $airportIdsToAttach = [];
 
         foreach ($airportsInput as $airportInput) {
-            // Skip if we already added it
-            if ($addedAirports->contains($airportInput)) {
-                continue;
-            }
-
             $airportModel = $airportModels->first(function ($model) use ($airportInput) {
                 return $model->icao === $airportInput || $model->local_code === $airportInput;
             });
 
             if ($airportModel) {
-                // Avoid attaching duplicates e.g. if both ICAO and local code were provided
-                if (! $airportsToAttach->contains('id', $airportModel->id)) {
-                    $airportsToAttach->push($airportModel);
-                    $addedAirports->push($airportInput);
-                }
+                $airportIdsToAttach[$airportModel->id] = $airportModel->id;
             } else {
                 $notFoundAirports->push($airportInput);
             }
         }
 
-        if (! $airportsToAttach->isEmpty()) {
-            $list->airports()->attach($airportsToAttach->pluck('id'));
-        }
-
-        return $notFoundAirports;
+        return [array_values($airportIdsToAttach), $notFoundAirports];
     }
 
     /**
