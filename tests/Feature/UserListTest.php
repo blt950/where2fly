@@ -102,7 +102,7 @@ class UserListTest extends TestCase
             'name' => 'List With Unknown',
             'color' => '#AABBCC',
             'simulator' => $simulator->id,
-            'airports' => "ZZZZ",
+            'airports' => 'ZZZZ',
         ]);
 
         $response->assertRedirect(route('list.index'));
@@ -226,7 +226,7 @@ class UserListTest extends TestCase
             'name' => 'Growing List',
             'color' => '#ABCDEF',
             'simulator' => $simulator->id,
-            'airports' => "EGLL",
+            'airports' => 'EGLL',
         ]);
 
         $response->assertRedirect(route('list.index'));

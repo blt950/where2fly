@@ -3,9 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\ApiKey;
+use App\Models\Simulator;
 use App\Models\User;
 use App\Models\UserList;
-use App\Models\Simulator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
