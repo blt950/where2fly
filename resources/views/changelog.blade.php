@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2026-04-25</span>
             <ul>
                 <li>Fixed an error when updating lists</li>
+                <li>Fixed an error when editing bookmarks</li>
             </ul>
 
             <h2 class="mb-0">v2.8.1</h2>

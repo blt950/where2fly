@@ -263,19 +263,19 @@
                 @if(str_starts_with($k, 'VATSIM'))
                 <div class="mt-1">
                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                        <input type="radio" class="btn-check red" name="scores[{{ $k }}]" value="-1" id="{{ $k }}_exclude" {{ (!empty(old('scores')) && old('scores')[$k] == -1) ? 'checked' : null }}>
+                        <input type="radio" class="btn-check red" name="scores[{{ $k }}]" value="-1" id="{{ $k }}_exclude" {{ (!empty(old('scores')) && isset(old('scores')[$k]) && old('scores')[$k] == -1) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_exclude">
                             <i class="fa-sharp fa-xmark"></i>
                             <span class="visually-hidden">Exclude</span>
                         </label>
                         
-                        <input type="radio" class="btn-check light" name="scores[{{ $k }}]" value="0" id="{{ $k }}_neutral" {{ (empty(old('scores')) || (!empty(old('scores')) && old('scores')[$k] == 0)) ? 'checked' : null }}>
+                        <input type="radio" class="btn-check light" name="scores[{{ $k }}]" value="0" id="{{ $k }}_neutral" {{ (empty(old('scores')) || (!empty(old('scores')) && isset(old('scores')[$k]) && old('scores')[$k] == 0)) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_neutral">
                             <i class="fa-sharp fa-slash-forward"></i>
                             <span class="visually-hidden">Neutral</span>
                         </label>
                         
-                        <input type="radio" class="btn-check green" name="scores[{{ $k }}]" value="1" id="{{ $k }}_include" {{ (!empty(old('scores')) && old('scores')[$k] == 1) ? 'checked' : null }}>
+                        <input type="radio" class="btn-check green" name="scores[{{ $k }}]" value="1" id="{{ $k }}_include" {{ (!empty(old('scores')) && isset(old('scores')[$k]) && old('scores')[$k] == 1) ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="{{ $k }}_include">
                             <i class="fa-sharp fa-check"></i>
                             <span class="visually-hidden">Include</span>
