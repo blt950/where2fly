@@ -42,4 +42,3 @@ abstract class TestCase extends BaseTestCase
             ->all();
     }
 }
-
