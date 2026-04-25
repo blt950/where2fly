@@ -2,9 +2,6 @@
 name: "Tests"
 
 on:
-  push:
-    paths-ignore:
-      - "**.md"
   pull_request:
     paths-ignore:
       - "**.md"
@@ -36,6 +33,10 @@ jobs:
         uses: ./.github/actions/setup-dependencies
         with:
           path: "."
+          setup-node: "true"
+
+      - name: Build frontend assets
+        run: npm run build
 
       - name: Copy environment file
         run: cp .env.example .env
