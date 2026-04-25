@@ -369,4 +369,75 @@ class UserListTest extends TestCase
         $list->refresh();
         $this->assertTrue((bool) $list->hidden);
     }
+
+    // -------------------------------------------------------------------------
+    // Unauthorized public flag change should not be applied
+    // -------------------------------------------------------------------------
+
+    public function test_non_admin_cannot_make_list_public_when_creating(): void
+    {
+        $user = User::factory()->create(['admin' => false]);
+        $simulator = Simulator::first();
+
+        $response = $this->actingAs($user)->post('/lists/create', [
+            'name' => 'Sneaky Public List',
+            'color' => '#AAAAAA',
+            'simulator' => $simulator->id,
+            'airports' => 'KLAX',
+            'public' => true,
+        ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseMissing('user_lists', ['name' => 'Sneaky Public List']);
+    }
+
+    public function test_non_admin_cannot_make_list_public_when_editing(): void
+    {
+        $user = User::factory()->create(['admin' => false]);
+        $simulator = Simulator::first();
+        $list = UserList::create([
+            'name' => 'Private List',
+            'color' => '#BBBBBB',
+            'simulator_id' => $simulator->id,
+            'user_id' => $user->id,
+            'public' => false,
+        ]);
+
+        $response = $this->actingAs($user)->post("/lists/{$list->id}/edit", [
+            'name' => 'Private List',
+            'color' => '#BBBBBB',
+            'simulator' => $simulator->id,
+            'airports' => 'KLAX',
+            'public' => true,
+        ]);
+
+        $response->assertForbidden();
+        $list->refresh();
+        $this->assertFalse((bool) $list->public);
+    }
+
+    public function test_admin_can_make_list_public_when_editing(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $simulator = Simulator::first();
+        $list = UserList::create([
+            'name' => 'To Be Public',
+            'color' => '#CCCCCC',
+            'simulator_id' => $simulator->id,
+            'user_id' => $admin->id,
+            'public' => false,
+        ]);
+
+        $response = $this->actingAs($admin)->post("/lists/{$list->id}/edit", [
+            'name' => 'To Be Public',
+            'color' => '#CCCCCC',
+            'simulator' => $simulator->id,
+            'airports' => 'KLAX',
+            'public' => true,
+        ]);
+
+        $response->assertRedirect(route('list.index'));
+        $list->refresh();
+        $this->assertTrue((bool) $list->public);
+    }
 }
