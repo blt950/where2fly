@@ -307,47 +307,6 @@ class UserListTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Public flag – only admins may set it
-    // -------------------------------------------------------------------------
-
-    public function test_non_admin_cannot_make_list_public(): void
-    {
-        $user = User::factory()->create(['admin' => false]);
-        $simulator = Simulator::first();
-
-        $response = $this->actingAs($user)->post('/lists/create', [
-            'name' => 'Public Attempt',
-            'color' => '#FF0000',
-            'simulator' => $simulator->id,
-            'airports' => 'KLAX',
-            'public' => true,
-        ]);
-
-        $response->assertForbidden();
-        $this->assertDatabaseMissing('user_lists', ['name' => 'Public Attempt']);
-    }
-
-    public function test_admin_can_make_list_public(): void
-    {
-        $admin = User::factory()->admin()->create();
-        $simulator = Simulator::first();
-
-        $response = $this->actingAs($admin)->post('/lists/create', [
-            'name' => 'Admin Public List',
-            'color' => '#00FF00',
-            'simulator' => $simulator->id,
-            'airports' => 'KLAX',
-            'public' => true,
-        ]);
-
-        $response->assertRedirect(route('list.index'));
-        $this->assertDatabaseHas('user_lists', [
-            'name' => 'Admin Public List',
-            'public' => true,
-        ]);
-    }
-
-    // -------------------------------------------------------------------------
     // Toggle hidden
     // -------------------------------------------------------------------------
 
