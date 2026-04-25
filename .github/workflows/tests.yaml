@@ -1,10 +1,7 @@
 ---
 name: "Tests"
 
-on:
-  pull_request:
-    paths-ignore:
-      - "**.md"
+on: {}  # Superseded by ci.yaml
 
 jobs:
   tests:

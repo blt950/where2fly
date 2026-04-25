@@ -1,8 +1,7 @@
 ---
 name: Linting
 
-on:
-  pull_request:
+on: {}  # Superseded by ci.yaml
 
 jobs:
   lint-formatting:
