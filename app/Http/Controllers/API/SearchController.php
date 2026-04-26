@@ -110,7 +110,6 @@ class SearchController extends Controller
             $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->first();
         }
 
-        $airports = collect();
         $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
             ->inContinent($destinations)->inCountry($destinations, $airport->iso_country)->inState($destinations)
             ->withinDistance($airport, $minDistance, $maxDistance, $airport->icao)
