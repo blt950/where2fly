@@ -81,9 +81,9 @@ class SearchTest extends TestCase
 
     public function test_search_requires_direction(): void
     {
-        $response = $this->get('/search?' . http_build_query([array_merge($this->validSearchParams, [
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
             'direction' => null,
-        ])]));
+        ])));
 
         // Missing required fields → redirected back with errors
         $response->assertRedirect();
@@ -133,7 +133,7 @@ class SearchTest extends TestCase
     // Search results
     // -------------------------------------------------------------------------
 
-    public function test_search_fails_with_unrealistic_flight_lenght_and_destinations(): void
+    public function test_search_fails_with_unrealistic_flight_length_and_destinations(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
             'icao' => 'ENGM',
