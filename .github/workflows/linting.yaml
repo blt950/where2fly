@@ -1,8 +1,7 @@
 ---
 name: Linting
 
-on:
-  push:
+on: {}  # Superseded by ci.yaml
 
 jobs:
   lint-formatting:
