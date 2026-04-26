@@ -63,14 +63,14 @@ class UserListController extends Controller
 
         [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports);
 
-        $list = DB::transaction(function () use ($request, $airportIds) {
-            $list = new UserList();
-            $list->color = $request->color;
-            $list->name = $request->name;
-            $list->simulator_id = $request->simulator;
-            $list->user_id = Auth::id();
-            $list->public = $request->public;
-            $list->save();
+        DB::transaction(function () use ($request, $airportIds) {
+            $list = UserList::create([
+                'color' => $request->color,
+                'name' => $request->name,
+                'simulator_id' => $request->simulator,
+                'user_id' => Auth::id(),
+                'public' => $request->boolean('public'),
+            ]);
 
             $list->airports()->sync($airportIds);
 
