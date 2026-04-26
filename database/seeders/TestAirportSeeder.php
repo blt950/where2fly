@@ -40,19 +40,19 @@ class TestAirportSeeder extends Seeder
             $airport = Airport::updateOrCreate(
                 ['icao' => $data['icao']],
                 [
-                    'local_code'            => $data['icao'],
-                    'name'                  => $data['name'],
-                    'type'                  => $data['type'],
-                    'latitude_deg'          => $data['lat'],
-                    'longitude_deg'         => $data['lon'],
-                    'continent'             => $data['continent'],
-                    'iso_country'           => $data['iso_country'],
-                    'iso_region'            => $data['iso_region'],
-                    'municipality'          => $data['municipality'],
-                    'elevation_ft'          => $data['elevation_ft'] ?? 100,
-                    'scheduled_service'     => 'yes',
-                    'w2f_has_open_runway'   => true,
-                    'coordinates'           => new Point($data['lat'], $data['lon'], Srid::WGS84->value),
+                    'local_code' => $data['icao'],
+                    'name' => $data['name'],
+                    'type' => $data['type'],
+                    'latitude_deg' => $data['lat'],
+                    'longitude_deg' => $data['lon'],
+                    'continent' => $data['continent'],
+                    'iso_country' => $data['iso_country'],
+                    'iso_region' => $data['iso_region'],
+                    'municipality' => $data['municipality'],
+                    'elevation_ft' => $data['elevation_ft'] ?? 100,
+                    'scheduled_service' => 'yes',
+                    'w2f_has_open_runway' => true,
+                    'coordinates' => new Point($data['lat'], $data['lon'], Srid::WGS84->value),
                 ]
             );
 
@@ -60,14 +60,14 @@ class TestAirportSeeder extends Seeder
                 ['airport_id' => $airport->id, 'le_ident' => '18'],
                 [
                     'airport_ident' => $data['icao'],
-                    'length_ft'     => $data['rwy_length_ft'] ?? 9000,
-                    'width_ft'      => 150,
-                    'surface'       => 'ASP',
-                    'lighted'       => true,
-                    'closed'        => false,
-                    'le_heading'    => 180.0,
-                    'he_ident'      => '36',
-                    'he_heading'    => 360.0,
+                    'length_ft' => $data['rwy_length_ft'] ?? 9000,
+                    'width_ft' => 150,
+                    'surface' => 'ASP',
+                    'lighted' => true,
+                    'closed' => false,
+                    'le_heading' => 180.0,
+                    'he_ident' => '36',
+                    'he_heading' => 360.0,
                 ]
             );
         }

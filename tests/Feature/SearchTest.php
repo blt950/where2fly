@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\AirportScore;
 use App\Models\Airport;
 use App\Models\User;
 use App\Models\UserList;
@@ -19,42 +18,43 @@ class SearchTest extends TestCase
         parent::setUp();
         $this->seed(TestAirportSeeder::class);
     }
+
     private array $validSearchParams = [
-        'icao'                      => 'ENGM',
-        'direction'                 => 'departure',
-        'destinations'              => ['Anywhere'],
-        'codeletter'                => 'JM',
-        'airtimeMin'                => 0,
-        'airtimeMax'                => 5,
-        'sortByWeather'             => 1,
-        'sortByATC'                 => 1,
-        'scores'                    => [
-            'METAR_WINDY'           => 0,
-            'METAR_GUSTS'           => 0,
-            'METAR_CROSSWIND'       => 0,
-            'METAR_SIGHT'           => 0,
-            'METAR_RVR'             => 0,
-            'METAR_CEILING'         => 0,
-            'METAR_FOGGY'           => 0,
-            'METAR_HEAVY_RAIN'      => 0,
-            'METAR_HEAVY_SNOW'      => 0,
-            'METAR_THUNDERSTORM'    => 0,
-            'VATSIM_ATC'            => 0,
-            'VATSIM_EVENT'          => 0,
-            'VATSIM_POPULAR'        => 0,
+        'icao' => 'ENGM',
+        'direction' => 'departure',
+        'destinations' => ['Anywhere'],
+        'codeletter' => 'JM',
+        'airtimeMin' => 0,
+        'airtimeMax' => 5,
+        'sortByWeather' => 1,
+        'sortByATC' => 1,
+        'scores' => [
+            'METAR_WINDY' => 0,
+            'METAR_GUSTS' => 0,
+            'METAR_CROSSWIND' => 0,
+            'METAR_SIGHT' => 0,
+            'METAR_RVR' => 0,
+            'METAR_CEILING' => 0,
+            'METAR_FOGGY' => 0,
+            'METAR_HEAVY_RAIN' => 0,
+            'METAR_HEAVY_SNOW' => 0,
+            'METAR_THUNDERSTORM' => 0,
+            'VATSIM_ATC' => 0,
+            'VATSIM_EVENT' => 0,
+            'VATSIM_POPULAR' => 0,
         ],
-        'metcondition'              => 'ANY',
+        'metcondition' => 'ANY',
         'destinationWithRoutesOnly' => 0,
-        'destinationRunwayLights'   => 0,
-        'destinationAirbases'       => -1,
-        'flightDirection'           => 0,
-        'destinationAirportSize'    => ['small_airport', 'medium_airport', 'large_airport'],
-        'temperatureMin'            => -60,
-        'temperatureMax'            => 60,
-        'elevationMin'              => -2000,
-        'elevationMax'              => 18000,
-        'rwyLengthMin'              => 0,
-        'rwyLengthMax'              => 17000,
+        'destinationRunwayLights' => 0,
+        'destinationAirbases' => -1,
+        'flightDirection' => 0,
+        'destinationAirportSize' => ['small_airport', 'medium_airport', 'large_airport'],
+        'temperatureMin' => -60,
+        'temperatureMax' => 60,
+        'elevationMin' => -2000,
+        'elevationMax' => 18000,
+        'rwyLengthMin' => 0,
+        'rwyLengthMax' => 17000,
     ];
 
     // -------------------------------------------------------------------------
@@ -143,9 +143,9 @@ class SearchTest extends TestCase
     public function test_search_fails_with_unrealistic_flight_lenght_and_destinations(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
-            'icao'         => 'ENGM',
-            'airtimeMin'   => '1',
-            'airtimeMax'   => '2',
+            'icao' => 'ENGM',
+            'airtimeMin' => '1',
+            'airtimeMax' => '2',
             'destinations' => ['C-AS'],
         ])));
 
@@ -155,10 +155,10 @@ class SearchTest extends TestCase
     public function test_search_doesnt_show_airport_without_metar(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
-            'icao'         => 'ENBR',
+            'icao' => 'ENBR',
             'destinations' => ['Domestic'],
-            'airtimeMin'   => '0',
-            'airtimeMax'   => '5',
+            'airtimeMin' => '0',
+            'airtimeMax' => '5',
         ])));
 
         $response->assertOk();
@@ -170,10 +170,10 @@ class SearchTest extends TestCase
     public function test_search_only_shows_domestic_when_searching_for_domestic(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
-            'icao'         => 'ENBR',
+            'icao' => 'ENBR',
             'destinations' => ['Domestic'],
-            'airtimeMin'   => '0',
-            'airtimeMax'   => '5',
+            'airtimeMin' => '0',
+            'airtimeMax' => '5',
         ])));
 
         $response->assertOk();
@@ -214,7 +214,7 @@ class SearchTest extends TestCase
     public function test_search_airtime_is_within_searched_bounds(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
-            'icao'       => 'ENGM',
+            'icao' => 'ENGM',
             'airtimeMin' => '1',
             'airtimeMax' => '2',
         ])));
@@ -229,7 +229,7 @@ class SearchTest extends TestCase
     public function test_search_foggy_score_filter_returns_only_foggy_airports(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
-            'icao'   => 'ENGM',
+            'icao' => 'ENGM',
             'scores' => array_merge($this->validSearchParams['scores'], ['METAR_FOGGY' => 1]),
         ])));
 
