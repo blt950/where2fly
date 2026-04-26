@@ -39,7 +39,7 @@ class AirportScore extends Model
 
         // Filter out VATSIM scores if requested
         if ($exclude) {
-            if ($exclude = 'vatsim') {
+            if ($exclude == 'vatsim') {
                 $returnQuery = $returnQuery->where('airport_scores.reason', 'NOT LIKE', 'VATSIM_%');
             }
         }

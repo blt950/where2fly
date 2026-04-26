@@ -85,60 +85,27 @@ class Airport extends Model
 
     public function hasWeatherScore()
     {
-        foreach ($this->scores as $s) {
-            if ($s->isWeatherScore()) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->scores->contains(fn ($s) => $s->isWeatherScore());
     }
 
     public function weatherScore()
     {
-        $score = 0;
-        foreach ($this->scores as $s) {
-            if ($s->isWeatherScore()) {
-                $score++;
-            }
-        }
-
-        return $score;
+        return $this->scores->filter(fn ($s) => $s->isWeatherScore())->count();
     }
 
     public function hasVatsimScore()
     {
-        foreach ($this->scores as $s) {
-            if ($s->isVatsimScore()) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->scores->contains(fn ($s) => $s->isVatsimScore());
     }
 
     public function vatsimScore()
     {
-        $score = 0;
-        foreach ($this->scores as $s) {
-            if ($s->isVatsimScore()) {
-                $score++;
-            }
-        }
-
-        return $score;
+        return $this->scores->filter(fn ($s) => $s->isVatsimScore())->count();
     }
 
     public function longestRunway()
     {
-        $length = 0;
-        foreach ($this->runways as $rwy) {
-            if ($rwy->closed == false && $rwy->length_ft > $length) {
-                $length = $rwy->length_ft;
-            }
-        }
-
-        return $length;
+        return $this->runways->where('closed', false)->max('length_ft') ?? 0;
     }
 
     public function hasVisualCondition()

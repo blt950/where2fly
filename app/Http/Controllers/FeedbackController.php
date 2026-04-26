@@ -67,7 +67,7 @@ class FeedbackController extends Controller
         ]);
 
         // Check if the user has already voted for this issue
-        $existingVote = FeedbackVote::where('user_id', auth()->user()->id)
+        $existingVote = FeedbackVote::where('user_id', auth()->id())
             ->where('github_issue_number', $data['github_issue_number'])
             ->first();
 
@@ -77,7 +77,7 @@ class FeedbackController extends Controller
 
         // Create the vote
         FeedbackVote::create([
-            'user_id' => auth()->user()->id,
+            'user_id' => auth()->id(),
             'github_issue_number' => $data['github_issue_number'],
         ]);
 
@@ -90,7 +90,7 @@ class FeedbackController extends Controller
     public function destroyVote(string $id)
     {
         // Check if the vote exists
-        $vote = FeedbackVote::where('user_id', auth()->user()->id)
+        $vote = FeedbackVote::where('user_id', auth()->id())
             ->where('github_issue_number', $id)
             ->first();
 
@@ -170,12 +170,10 @@ class FeedbackController extends Controller
         $allVotes = FeedbackVote::all();
 
         // Group votes by issue number and count them
-        $groupedVotes = $allVotes->groupBy('github_issue_number')->map(function ($votes) {
-            return $votes->count();
-        });
+        $groupedVotes = $allVotes->groupBy('github_issue_number')->map->count();
 
         // Get the votes of the current user
-        $userVotes = auth()->user() ? $allVotes->where('user_id', auth()->user()->id)->pluck('github_issue_number')->toArray() : null;
+        $userVotes = auth()->check() ? $allVotes->where('user_id', auth()->id())->pluck('github_issue_number')->toArray() : null;
 
         return [$groupedVotes, $userVotes];
     }

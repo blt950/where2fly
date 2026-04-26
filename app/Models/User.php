@@ -45,17 +45,11 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getAirportsFromLists()
     {
-
-        $airports = [];
-        $userLists = UserList::where('user_id', $this->id)->with('airports', 'airports.metar', 'airports.runways')->get();
-
-        foreach ($userLists as $list) {
-            foreach ($list->airports as $airport) {
-                $airports[] = $airport;
-            }
-        }
-
-        return $airports;
+        return $this->lists()->with('airports', 'airports.metar', 'airports.runways')
+            ->get()
+            ->pluck('airports')
+            ->flatten()
+            ->all();
     }
 
     public function lists()

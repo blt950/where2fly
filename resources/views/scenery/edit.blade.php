@@ -72,8 +72,8 @@
                 <label class="form-label" for="payware">Payware</label>
                 <select class="form-select" id="payware" name="payware" required>
                     <option disabled selected>Select</option>
-                    <option value="1" @if($scenery->payware == 1) selected @endif>Payware</option>
-                    <option value="0" @if($scenery->payware == 0) selected @endif>Freeware</option>
+                    <option value="1" @selected($scenery->payware == 1)>Payware</option>
+                    <option value="0" @selected($scenery->payware == 0)>Freeware</option>
                 </select>
                 @error('payware')
                     <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -81,7 +81,7 @@
             </div>
 
             <div class="mb-3">
-                <input class="form-check-input" type="checkbox" id="published" value="1" name="published" {{ ($scenery->published) ? 'checked' : null }}>
+                <input class="form-check-input" type="checkbox" id="published" value="1" name="published" @checked($scenery->published)>
                 <label class="form-check-label" for="published">
                     <b>Published</b>
                 </label>

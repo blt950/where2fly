@@ -11,7 +11,7 @@ class Metar extends Model
 
     public $timestamps = false;
 
-    protected $cats = [
+    protected $casts = [
         'last_updated' => 'datetime',
     ];
 

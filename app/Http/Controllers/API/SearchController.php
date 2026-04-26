@@ -42,26 +42,25 @@ class SearchController extends Controller
             'limit' => ['sometimes', 'integer', 'between:1,30'],
         ]);
 
-        isset($data['departure']) ? $departure = $data['departure'] : $departure = null;
-        isset($data['arrival']) ? $arrival = $data['arrival'] : $arrival = null;
-        isset($data['destinations']) ? $destinations = $data['destinations'] : $destinations = ['continents' => null, 'countries' => null, 'states' => null];
+        $departure = $data['departure'] ?? null;
+        $arrival = $data['arrival'] ?? null;
+        $destinations = $data['destinations'] ?? ['continents' => null, 'countries' => null, 'states' => null];
         $codeletter = $data['codeletter'];
-        isset($data['airtimeMin']) ? $airtimeMin = $data['airtimeMin'] : $airtimeMin = 0;
-        isset($data['airtimeMax']) ? $airtimeMax = $data['airtimeMax'] : $airtimeMax = 24;
-        isset($data['scores']) ? $filterByScores = array_map('intval', $data['scores']) : $filterByScores = null;
-        isset($data['metcondition']) ? $metcon = $data['metcondition'] : $metcon = null;
-        isset($data['destinationRunwayLights']) ? $destinationRunwayLights = (int) $data['destinationRunwayLights'] : $destinationRunwayLights = 0;
-        isset($data['destinationAirbases']) ? $destinationAirbases = (int) $data['destinationAirbases'] : $destinationAirbases = -1;
-        (isset($data['destinationAirportSize']) && ! empty($data['destinationAirportSize'])) ? $destinationAirportSize = $data['destinationAirportSize'] : $destinationAirportSize = ['small_airport', 'medium_airport', 'large_airport'];
-        isset($data['temperatureMin']) ? $temperatureMin = $data['temperatureMin'] : $temperatureMin = -60;
-        isset($data['temperatureMax']) ? $temperatureMax = $data['temperatureMax'] : $temperatureMax = 60;
-        isset($data['elevationMin']) ? $elevationMin = $data['elevationMin'] : $elevationMin = -2000;
-        isset($data['elevationMax']) ? $elevationMax = $data['elevationMax'] : $elevationMax = 18000;
-        isset($data['rwyLengthMin']) ? $rwyLengthMin = $data['rwyLengthMin'] : $rwyLengthMin = 0;
-        isset($data['rwyLengthMax']) ? $rwyLengthMax = $data['rwyLengthMax'] : $rwyLengthMax = 17000;
-
-        isset($data['arrivalWhitelist']) ? $arrivalWhitelist = $data['arrivalWhitelist'] : $arrivalWhitelist = null;
-        isset($data['limit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
+        $airtimeMin = $data['airtimeMin'] ?? 0;
+        $airtimeMax = $data['airtimeMax'] ?? 24;
+        $filterByScores = isset($data['scores']) ? array_map('intval', $data['scores']) : null;
+        $metcon = $data['metcondition'] ?? null;
+        $destinationRunwayLights = (int) ($data['destinationRunwayLights'] ?? 0);
+        $destinationAirbases = (int) ($data['destinationAirbases'] ?? -1);
+        $destinationAirportSize = ! empty($data['destinationAirportSize'] ?? []) ? $data['destinationAirportSize'] : ['small_airport', 'medium_airport', 'large_airport'];
+        $temperatureMin = $data['temperatureMin'] ?? -60;
+        $temperatureMax = $data['temperatureMax'] ?? 60;
+        $elevationMin = $data['elevationMin'] ?? -2000;
+        $elevationMax = $data['elevationMax'] ?? 18000;
+        $rwyLengthMin = $data['rwyLengthMin'] ?? 0;
+        $rwyLengthMax = $data['rwyLengthMax'] ?? 17000;
+        $arrivalWhitelist = $data['arrivalWhitelist'] ?? null;
+        $resultLimit = $data['limit'] ?? 10;
 
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
 
@@ -106,9 +105,9 @@ class SearchController extends Controller
          *  Fetch the requested data
          */
         if ($departure) {
-            $airport = Airport::where('icao', $departure)->orWhere('local_code', $departure)->get()->first();
+            $airport = Airport::where('icao', $departure)->orWhere('local_code', $departure)->first();
         } else {
-            $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->get()->first();
+            $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->first();
         }
 
         $airports = collect();

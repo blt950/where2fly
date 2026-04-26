@@ -56,7 +56,7 @@ class UserListController extends Controller
             'public' => 'boolean',
         ]);
 
-        $request->public = $request->public ? true : false;
+        $request->public = (bool) $request->public;
         if ($request->public) {
             $this->authorize('public', UserList::class);
         }
@@ -114,7 +114,7 @@ class UserListController extends Controller
             'public' => 'boolean',
         ]);
 
-        $request->public = $request->public ? true : false;
+        $request->public = (bool) $request->public;
         if ($request->public) {
             $this->authorize('public', UserList::class);
         }
@@ -145,12 +145,10 @@ class UserListController extends Controller
      */
     private function resolveAirports(string $input): array
     {
-        $airportsInput = explode("\r\n", $input);
-        $airportsInput = array_map('trim', $airportsInput);
-        $airportsInput = array_map('strtoupper', $airportsInput);
-        $airportsInput = array_filter($airportsInput, function ($value) {
-            return ! empty($value);
-        });
+        $airportsInput = collect(explode("\r\n", $input))
+            ->map(fn ($v) => strtoupper(trim($v)))
+            ->filter()
+            ->all();
 
         $airportModels = Airport::whereIn('icao', $airportsInput)
             ->orWhereIn('local_code', $airportsInput)
