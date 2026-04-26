@@ -14,7 +14,7 @@ class Metar extends Model
     protected function casts(): array
     {
         return [
-            'last_updated' => 'datetime',
+            'last_update' => 'datetime',
         ];
     }
 
