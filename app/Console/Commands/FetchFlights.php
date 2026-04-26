@@ -104,7 +104,7 @@ class FetchFlights extends Command
             Flight::where('last_seen_at', '<', now()->subHours(6))->where('lock_counter', false)->update(['seen_counter' => \DB::raw('seen_counter + 1'), 'lock_counter' => true]);
 
             // Enrich the flights with aircraft types
-            Artisan::call('enrich:flights');
+            $this->call('enrich:flights');
 
         } else {
             $this->error('Failed to fetch flights. API response not successful.');
