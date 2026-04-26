@@ -22,9 +22,12 @@ class Airport extends Model
 
     protected $guarded = [];
 
-    protected $casts = [
-        'coordinates' => Point::class,
-    ];
+    protected function casts(): array
+    {
+        return [
+            'coordinates' => Point::class,
+        ];
+    }
 
     public function metar()
     {
