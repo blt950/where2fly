@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Airport;
 use App\Models\Metar;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
@@ -39,19 +38,16 @@ class FetchMetars extends Command
         if ($response->successful()) {
             $data = collect(preg_split("/\r\n|\n|\r/", $response->body()));
 
-            // Fetch all airports
-            $airportsFilter = [];
-            $airportsData = [];
-            foreach ($data as $d) {
-                $icao = substr($d, 0, 4);
-                $airportsFilter[] = $icao;
-                $airportsData[$icao] = $d;
-            }
+            // Index METAR lines by ICAO code
+            $airportsData = $data->keyBy(fn ($d) => substr($d, 0, 4));
 
             // Get the relevant airports
             $upsertData = [];
-            foreach (Airport::whereIn('icao', $airportsFilter)->get() as $airport) {
+            foreach (Airport::whereIn('icao', $airportsData->keys()->all())->get() as $airport) {
                 $d = $airportsData[strtoupper($airport->icao)];
+
+                // Reset temperature to avoid carrying over a value from a previous iteration
+                unset($temperature);
 
                 // Don't add the METAR if it's not from today
                 $metarDate = (int) substr($d, 5, 2);
@@ -59,7 +55,7 @@ class FetchMetars extends Command
                     continue;
                 }
 
-                $time = Carbon::now()->setDay($metarDate)->setHour((int) substr($d, 7, 2))->setMinute((int) substr($d, 9, 2))->setSeconds(0);
+                $time = now()->setDay($metarDate)->setHour((int) substr($d, 7, 2))->setMinute((int) substr($d, 9, 2))->setSeconds(0);
                 $metar = substr($d, 13, null);
 
                 // Fetch the wind direction and speed
@@ -80,11 +76,9 @@ class FetchMetars extends Command
                 }
 
                 if (preg_match('/(M?\d\d)\/(M?\d\d)/', $metar, $temperatureResult)) {
-                    if (substr($temperatureResult[1], 0, 1) == 'M') {
-                        $temperature = (int) substr($temperatureResult[1], 1) * -1;
-                    } else {
-                        $temperature = (int) $temperatureResult[1];
-                    }
+                    $temperature = str_starts_with($temperatureResult[1], 'M')
+                        ? -(int) substr($temperatureResult[1], 1)
+                        : (int) $temperatureResult[1];
                 }
 
                 // Check for missing data

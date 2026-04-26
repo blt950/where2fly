@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\ApiKey;
 use Illuminate\Console\Command;
-use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Str;
 
 class CreateApiKey extends Command
 {
@@ -33,7 +33,7 @@ class CreateApiKey extends Command
         $ip = $this->ask('Which IP address can use this key?');
 
         // Generate key
-        $secret = Uuid::uuid4();
+        $secret = Str::uuid();
         ApiKey::create([
             'key' => $secret,
             'name' => $name,

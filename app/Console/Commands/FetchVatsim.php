@@ -44,7 +44,7 @@ class FetchVatsim extends Command
         $this->info('Fetching events...');
         $response = Http::timeout(60)->retry(3, 1000)->get('https://my.vatsim.net/api/v2/events/latest');
         if ($response->successful()) {
-            $data = json_decode($response->body(), false)->data;
+            $data = $response->object()->data;
 
             foreach ($data as $event) {
                 if (count($event->airports)) {
@@ -66,7 +66,7 @@ class FetchVatsim extends Command
         $response = Http::get('https://data.vatsim.net/v3/vatsim-data.json');
 
         if ($response->successful()) {
-            $data = json_decode($response->body(), false)->controllers;
+            $data = $response->object()->controllers;
 
             foreach ($data as $controller) {
 

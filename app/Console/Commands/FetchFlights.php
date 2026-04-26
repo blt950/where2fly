@@ -39,7 +39,7 @@ class FetchFlights extends Command
 
         $response = Http::timeout(60)->retry(3, 1000)->get('https://airlabs.co/api/v9/flights?api_key=' . $apiKey);
         if ($response->successful()) {
-            $flights = collect(json_decode($response->body(), false)->response);
+            $flights = collect($response->object()->response);
 
             $upsertData = [];
             foreach ($flights as $flight) {
@@ -60,7 +60,6 @@ class FetchFlights extends Command
                     continue;
                 }
 
-                isset($flight->reg_number) ? $regNumber = $flight->reg_number : $regNumber = null;
                 $upsertData[] = [
                     'airline_icao' => $flight->airline_icao,
                     'airline_iata' => $flight->airline_iata,
@@ -69,7 +68,7 @@ class FetchFlights extends Command
                     'dep_icao' => $flight->dep_icao,
                     'arr_icao' => $flight->arr_icao,
                     'last_aircraft_icao' => $flight->aircraft_icao,
-                    'reg_number' => $regNumber,
+                    'reg_number' => $flight->reg_number,
                     'last_seen_at' => now(),
                     'lock_counter' => false,
                 ];
