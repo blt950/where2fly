@@ -93,7 +93,7 @@
         <div id="menu-overlay" class="menu-overlay d-md-none"></div>
     </nav>
 </header>
-@if(config('app.env') != 'production')
+@if(!app()->isProduction())
 <span class="testbadge badge bg-danger  ms-2 mt-2" role="alert">
     TEST
 </span>

@@ -1,4 +1,4 @@
-@if(config('app.env') == 'production')
+@if(app()->isProduction())
     <script defer src="https://metrics.blt950.com/script.js" data-website-id="{{ config('umami.website_id_prod') }}" data-domains="where2fly.today" data-performance="true" @isset($manualTracking) data-auto-track="false" @endisset></script>
 @else
     <meta name="robots" content="noindex">

@@ -64,7 +64,7 @@ class TopController extends Controller
                 'contient' => $as->airport->continent,
                 'country' => $as->airport->iso_country,
                 'region' => $as->airport->iso_region,
-                'metar' => (config('app.env') == 'production') ? $as->airport->metar->metar : 'TEST-DATA ' . $as->airport->metar->metar,
+                'metar' => app()->isProduction() ? $as->airport->metar->metar : 'TEST-DATA ' . $as->airport->metar->metar,
                 'longestRwyFt' => $as->airport->longestRunway(),
                 'scores' => $scores,
 
