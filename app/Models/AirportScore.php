@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class AirportScore extends Model
 {
@@ -32,7 +33,7 @@ class AirportScore extends Model
     {
 
         // Establish the return query
-        $returnQuery = AirportScore::select('airport_id', \DB::raw('count(airport_scores.id) as id_count'))
+        $returnQuery = AirportScore::select('airport_id', DB::raw('count(airport_scores.id) as id_count'))
             ->groupBy('airport_id')
             ->orderByDesc('id_count')
             ->join('airports', 'airport_scores.airport_id', '=', 'airports.id');

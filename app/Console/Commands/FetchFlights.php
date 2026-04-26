@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Flight;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 
 class FetchFlights extends Command
