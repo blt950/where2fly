@@ -9,7 +9,7 @@ class CollectionAirportFilter
 {
     public function filterWithCriteria()
     {
-        return function ($departureAirport, $codeletter, $airtimeMin, $airtimeMax, $requiredMetcon = null, $temperatureMin = null, $temperatureMax = null, $runwayLengthMin = null, $runwayLengthMax = null, $airportElevationMin = null, $airportElevationMax = null) {
+        return function ($departureAirport, $codeletter, $requiredMetcon = null, $temperatureMin = null, $temperatureMax = null, $airportElevationMin = null, $airportElevationMax = null) {
 
             $returnCollection = $this
                 ->transform(function ($arrivalAirport) use ($departureAirport, $codeletter) {

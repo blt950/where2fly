@@ -235,7 +235,7 @@ class SearchController extends Controller
             })->flatten(1)->take(20);
 
             // Filter the eligible airports
-            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $temperatureMin, $temperatureMax, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax);
 
             // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy
             $bearingWarning = false;

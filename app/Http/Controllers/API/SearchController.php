@@ -126,7 +126,7 @@ class SearchController extends Controller
             return $group->shuffle();
         })->flatten(1)->take(20);
 
-        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $temperatureMin, $temperatureMax, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax);
 
         /**
          *  Prepare the data for the response
