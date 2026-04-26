@@ -51,7 +51,8 @@ class FetchFlights extends Command
                     ! isset($flight->flight_icao) ||
                     ! isset($flight->dep_icao) ||
                     ! isset($flight->arr_icao) ||
-                    ! isset($flight->aircraft_icao)
+                    ! isset($flight->aircraft_icao) ||
+                    ! isset($flight->reg_number)
                 ) {
                     $this->info('Skipped flight due to missing data');
 
@@ -66,7 +67,7 @@ class FetchFlights extends Command
                     'dep_icao' => $flight->dep_icao,
                     'arr_icao' => $flight->arr_icao,
                     'last_aircraft_icao' => $flight->aircraft_icao,
-                    'reg_number' => $flight->reg_number ?? null,
+                    'reg_number' => $flight->reg_number,
                     'last_seen_at' => now(),
                     'lock_counter' => false,
                 ];
