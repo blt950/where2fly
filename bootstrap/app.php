@@ -74,7 +74,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(fn () => route('front'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->reportable(function (Throwable $e) {
+        $exceptions->reportable(function (\Throwable $e) {
             if (app()->bound('sentry')) {
                 app('sentry')->configureScope(function (Scope $scope): void {
                     $scope->setUser(['id' => Auth::id()]);
