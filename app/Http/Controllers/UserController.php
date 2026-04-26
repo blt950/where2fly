@@ -34,13 +34,10 @@ class UserController extends Controller
             'privacy_policy' => ['accepted'],
         ]);
 
-        // Hash the password
-        $data['password'] = Hash::make($data['password']);
-
         $user = User::create($data);
         if ($user) {
             event(new Registered($user));
-            Auth::login($user);
+                Auth::login($user);
 
             return redirect()->route('front')->with('success', 'Your account has been created. Check your email to verify your account.');
         } else {
