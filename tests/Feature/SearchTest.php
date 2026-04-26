@@ -474,9 +474,9 @@ class SearchTest extends TestCase
     {
         // From KLAX with C-NA and 0–2h JM only KSFO (~330 nm) is reachable in the seed data
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
-            'icao'         => 'KLAX',
+            'icao' => 'KLAX',
             'destinations' => ['C-NA'],
-            'airtimeMax'   => '2',
+            'airtimeMax' => '2',
         ])));
 
         $response->assertOk();
