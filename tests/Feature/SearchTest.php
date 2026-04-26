@@ -5,19 +5,12 @@ namespace Tests\Feature;
 use App\Models\Airport;
 use App\Models\User;
 use App\Models\UserList;
-use Database\Seeders\TestAirportSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SearchTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed(TestAirportSeeder::class);
-    }
 
     private array $validSearchParams = [
         'icao' => 'ENGM',
@@ -144,7 +137,7 @@ class SearchTest extends TestCase
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
             'icao' => 'ENGM',
-            'airtimeMin' => '1',
+            'airtimeMin' => '0',
             'airtimeMax' => '2',
             'destinations' => ['C-AS'],
         ])));
@@ -215,14 +208,14 @@ class SearchTest extends TestCase
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
             'icao' => 'ENGM',
-            'airtimeMin' => '1',
+            'airtimeMin' => '0',
             'airtimeMax' => '2',
         ])));
 
         $response->assertOk();
         $response->assertViewHas('suggestedAirports', function ($airports) {
             return $airports->isNotEmpty()
-                && $airports->every(fn ($a) => $a->airtime >= 1.0 && $a->airtime <= 2.5);
+                && $airports->every(fn ($a) => $a->airtime >= 0.0 && $a->airtime <= 2.0);
         });
     }
 
