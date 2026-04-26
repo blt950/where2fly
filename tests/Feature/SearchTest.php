@@ -232,4 +232,337 @@ class SearchTest extends TestCase
                 && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENTC');
         });
     }
+
+    // -------------------------------------------------------------------------
+    // Weather conditions (metcondition)
+    // -------------------------------------------------------------------------
+
+    public function test_metcondition_vfr_excludes_ifr_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'metcondition' => 'VFR',
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            // ENTC has 1800m visibility (IFR) — must not appear in VFR results
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->doesntContain('ENTC');
+        });
+    }
+
+    public function test_metcondition_ifr_only_returns_ifr_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'metcondition' => 'IFR',
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            // ENTC is the only IFR airport in the seed data within 5h JM range
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENTC');
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Score filters — include (=1): each score type assigned to one airport
+    // -------------------------------------------------------------------------
+
+    public function test_score_windy_only_shows_windy_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('METAR_WINDY', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENBR');
+        });
+    }
+
+    public function test_score_gusts_only_shows_gusty_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('METAR_GUSTS', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENTO');
+        });
+    }
+
+    public function test_score_crosswind_only_shows_crosswind_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('METAR_CROSSWIND', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENSG');
+        });
+    }
+
+    public function test_score_sight_only_shows_reduced_sight_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('METAR_SIGHT', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENSD');
+        });
+    }
+
+    public function test_score_rvr_only_shows_rvr_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('METAR_RVR', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'EDDB');
+        });
+    }
+
+    public function test_score_ceiling_only_shows_low_ceiling_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('METAR_CEILING', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'EHAM');
+        });
+    }
+
+    public function test_score_heavy_rain_only_shows_heavy_rain_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('METAR_HEAVY_RAIN', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'EGLL');
+        });
+    }
+
+    public function test_score_heavy_snow_only_shows_heavy_snow_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('METAR_HEAVY_SNOW', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'EDDF');
+        });
+    }
+
+    public function test_score_thunderstorm_only_shows_thunderstorm_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('METAR_THUNDERSTORM', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'EDDS');
+        });
+    }
+
+    public function test_score_vatsim_atc_only_shows_atc_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('VATSIM_ATC', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'LFPG');
+        });
+    }
+
+    public function test_score_vatsim_event_only_shows_event_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('VATSIM_EVENT', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'EDDM');
+        });
+    }
+
+    public function test_score_vatsim_popular_only_shows_popular_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('VATSIM_POPULAR', 1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENTC');
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Score filters — exclude (=-1)
+    // -------------------------------------------------------------------------
+
+    public function test_score_foggy_exclusion_hides_scored_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('METAR_FOGGY', -1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->doesntContain('ENTC');
+        });
+    }
+
+    public function test_score_vatsim_popular_exclusion_hides_scored_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->paramsWithScore('VATSIM_POPULAR', -1)));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->doesntContain('ENTC');
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Destination filters
+    // -------------------------------------------------------------------------
+
+    public function test_destination_small_airports_only_returns_small_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'destinationAirportSize' => ['small_airport'],
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('type')->every(fn ($t) => $t === 'small_airport');
+        });
+    }
+
+    public function test_destination_large_airports_only_excludes_smaller_types(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'destinationAirportSize' => ['large_airport'],
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('type')->every(fn ($t) => $t === 'large_airport');
+        });
+    }
+
+    public function test_destination_country_filter_returns_only_matching_country(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'destinations' => ['DE'],
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('iso_country')->every(fn ($c) => $c === 'DE');
+        });
+    }
+
+    public function test_destination_continent_filter_returns_only_matching_continent(): void
+    {
+        // From KLAX with C-NA and 0–2h JM only KSFO (~330 nm) is reachable in the seed data
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'icao'         => 'KLAX',
+            'destinations' => ['C-NA'],
+            'airtimeMax'   => '2',
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('continent')->every(fn ($c) => $c === 'NA');
+        });
+    }
+
+    public function test_destination_lighted_runways_only_excludes_unlighted_airports(): void
+    {
+        // ENBO has an unlighted runway and must not appear
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'destinationRunwayLights' => 1,
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->doesntContain('ENBO');
+        });
+    }
+
+    public function test_destination_unlighted_runways_only_returns_unlighted_airports(): void
+    {
+        // ENBO is the only seeded airport with an unlighted runway
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'destinationRunwayLights' => -1,
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENBO');
+        });
+    }
+
+    public function test_destination_airbases_only_returns_airbase_airports(): void
+    {
+        // ENHF is the only seeded airport with w2f_airforcebase=true
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'destinationAirbases' => 1,
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENHF');
+        });
+    }
+
+    public function test_destination_exclude_airbases_hides_airbase_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'destinationAirbases' => -1,
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->doesntContain('ENHF');
+        });
+    }
+
+    public function test_destination_flight_direction_south_excludes_northern_airports(): void
+    {
+        // From ENGM, flying South: ENTC (69°N, north of ENGM) must not appear
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'flightDirection' => 'S',
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->doesntContain('ENTC');
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private function paramsWithScore(string $score, int $value): array
+    {
+        return array_merge($this->validSearchParams, [
+            'scores' => array_merge($this->validSearchParams['scores'], [$score => $value]),
+        ]);
+    }
 }

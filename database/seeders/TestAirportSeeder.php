@@ -34,25 +34,30 @@ class TestAirportSeeder extends Seeder
             ['icao' => 'ENTO', 'name' => 'Sandefjord Airport, Torp',     'lat' => 59.19,   'lon' => 10.26,   'type' => 'medium_airport', 'iso_country' => 'NO', 'iso_region' => 'NO-39',  'continent' => 'EU', 'municipality' => 'Torp',      'elevation_ft' => 286],
             ['icao' => 'ENSG', 'name' => 'Sogndal Airport, Haukåsen',    'lat' => 61.16,   'lon' => 7.14,    'type' => 'small_airport',  'iso_country' => 'NO', 'iso_region' => 'NO-46',  'continent' => 'EU', 'municipality' => 'Sogndal',   'elevation_ft' => 1633],
             ['icao' => 'ENSD', 'name' => 'Sandane Airport, Anda',        'lat' => 61.83,   'lon' => 6.11,    'type' => 'small_airport',  'iso_country' => 'NO', 'iso_region' => 'NO-46',  'continent' => 'EU', 'municipality' => 'Sandane',   'elevation_ft' => 196],
+            // ENBO: unlighted runway — used to test destinationRunwayLights=-1
+            ['icao' => 'ENBO', 'name' => 'Bodø Airport',               'lat' => 67.27,   'lon' => 14.37,   'type' => 'medium_airport', 'iso_country' => 'NO', 'iso_region' => 'NO-18',  'continent' => 'EU', 'municipality' => 'Bodø',      'elevation_ft' => 42,  'rwy_lighted' => false],
+            // ENHF: military airbase — used to test destinationAirbases=1
+            ['icao' => 'ENHF', 'name' => 'Hammerfest Airport',          'lat' => 70.68,   'lon' => 23.67,   'type' => 'small_airport',  'iso_country' => 'NO', 'iso_region' => 'NO-54',  'continent' => 'EU', 'municipality' => 'Hammerfest', 'elevation_ft' => 266, 'w2f_airforcebase' => true],
         ];
 
         foreach ($airports as $data) {
             $airport = Airport::updateOrCreate(
                 ['icao' => $data['icao']],
                 [
-                    'local_code' => $data['icao'],
-                    'name' => $data['name'],
-                    'type' => $data['type'],
-                    'latitude_deg' => $data['lat'],
-                    'longitude_deg' => $data['lon'],
-                    'continent' => $data['continent'],
-                    'iso_country' => $data['iso_country'],
-                    'iso_region' => $data['iso_region'],
-                    'municipality' => $data['municipality'],
-                    'elevation_ft' => $data['elevation_ft'] ?? 100,
-                    'scheduled_service' => 'yes',
-                    'w2f_has_open_runway' => true,
-                    'coordinates' => new Point($data['lat'], $data['lon'], Srid::WGS84->value),
+                    'local_code'            => $data['icao'],
+                    'name'                  => $data['name'],
+                    'type'                  => $data['type'],
+                    'latitude_deg'          => $data['lat'],
+                    'longitude_deg'         => $data['lon'],
+                    'continent'             => $data['continent'],
+                    'iso_country'           => $data['iso_country'],
+                    'iso_region'            => $data['iso_region'],
+                    'municipality'          => $data['municipality'],
+                    'elevation_ft'          => $data['elevation_ft'] ?? 100,
+                    'scheduled_service'     => 'yes',
+                    'w2f_has_open_runway'   => true,
+                    'w2f_airforcebase'      => $data['w2f_airforcebase'] ?? false,
+                    'coordinates'           => new Point($data['lat'], $data['lon'], Srid::WGS84->value),
                 ]
             );
 
@@ -63,7 +68,7 @@ class TestAirportSeeder extends Seeder
                     'length_ft' => $data['rwy_length_ft'] ?? 9000,
                     'width_ft' => 150,
                     'surface' => 'ASP',
-                    'lighted' => true,
+                    'lighted' => $data['rwy_lighted'] ?? true,
                     'closed' => false,
                     'le_heading' => 180.0,
                     'he_ident' => '36',
@@ -89,6 +94,9 @@ class TestAirportSeeder extends Seeder
             'ENSG' => ['last_update' => now(), 'metar' => 'AUTO 21004KT 110V260 9999 BKN045/// OVC177/// 01/M07 Q1022 RMK WIND 3806FT 26007KT',                                  'wind_direction' => 210, 'wind_speed' => 4,  'wind_gusts' => 0, 'temperature' => 1],
             'ENSD' => ['last_update' => now(), 'metar' => 'AUTO 27003KT 9999 FEW025/// OVC057/// 04/M03 Q1025 RMK WIND RWY 26 26005KT WIND 1126FT 28004KT',                      'wind_direction' => 270, 'wind_speed' => 3,  'wind_gusts' => 0, 'temperature' => 4],
             'EDDB' => ['last_update' => now(), 'metar' => 'AUTO 02007KT 340V070 CAVOK 11/00 Q1024 NOSIG',                                                                         'wind_direction' => 20,  'wind_speed' => 7,  'wind_gusts' => 0, 'temperature' => 11],
+            'EDDM' => ['last_update' => now(), 'metar' => 'AUTO 06007KT 9999 FEW020 09/M02 Q1023 NOSIG',                                                                          'wind_direction' => 60,  'wind_speed' => 7,  'wind_gusts' => 0, 'temperature' => 9],
+            'ENBO' => ['last_update' => now(), 'metar' => 'AUTO 02005KT 9999 FEW025 06/01 Q1015 NOSIG',                                                                           'wind_direction' => 20,  'wind_speed' => 5,  'wind_gusts' => 0, 'temperature' => 6],
+            'ENHF' => ['last_update' => now(), 'metar' => 'AUTO 31004KT 9999 FEW018 03/M01 Q1012 NOSIG',                                                                          'wind_direction' => 310, 'wind_speed' => 4,  'wind_gusts' => 0, 'temperature' => 3],
         ];
 
         foreach ($metars as $icao => $data) {
@@ -98,13 +106,32 @@ class TestAirportSeeder extends Seeder
             }
         }
 
-        // Seed airport scores
-        $entc = Airport::where('icao', 'ENTC')->first();
-        if ($entc) {
-            AirportScore::firstOrCreate(
-                ['airport_id' => $entc->id, 'reason' => 'METAR_FOGGY'],
-                ['score' => 1]
-            );
+        // Seed airport scores — one unique score type per airport for clean filter tests
+        $scores = [
+            'ENBR' => ['METAR_WINDY'],
+            'ENTO' => ['METAR_GUSTS'],
+            'ENSG' => ['METAR_CROSSWIND'],
+            'ENSD' => ['METAR_SIGHT'],
+            'EDDB' => ['METAR_RVR'],
+            'EHAM' => ['METAR_CEILING'],
+            'ENTC' => ['METAR_FOGGY', 'VATSIM_POPULAR'],
+            'EGLL' => ['METAR_HEAVY_RAIN'],
+            'EDDF' => ['METAR_HEAVY_SNOW'],
+            'EDDS' => ['METAR_THUNDERSTORM'],
+            'LFPG' => ['VATSIM_ATC'],
+            'EDDM' => ['VATSIM_EVENT'],
+        ];
+
+        foreach ($scores as $icao => $reasons) {
+            $airport = Airport::where('icao', $icao)->first();
+            if ($airport) {
+                foreach ($reasons as $reason) {
+                    AirportScore::firstOrCreate(
+                        ['airport_id' => $airport->id, 'reason' => $reason],
+                        ['score' => 1]
+                    );
+                }
+            }
         }
     }
 }
