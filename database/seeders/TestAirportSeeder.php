@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Airport;
+use App\Models\AirportScore;
 use App\Models\Metar;
 use App\Models\Runway;
 use Illuminate\Database\Seeder;
@@ -95,6 +96,15 @@ class TestAirportSeeder extends Seeder
             if ($airport) {
                 Metar::updateOrCreate(['airport_id' => $airport->id], $data);
             }
+        }
+
+        // Seed airport scores
+        $entc = Airport::where('icao', 'ENTC')->first();
+        if ($entc) {
+            AirportScore::firstOrCreate(
+                ['airport_id' => $entc->id, 'reason' => 'METAR_FOGGY'],
+                ['score' => 1]
+            );
         }
     }
 }

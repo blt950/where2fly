@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\AirportScore;
+use App\Models\Airport;
 use App\Models\User;
+use App\Models\UserList;
 use Database\Seeders\TestAirportSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -111,6 +114,32 @@ class SearchTest extends TestCase
         $response->assertSessionHasErrors('metcondition');
     }
 
+    // -------------------------------------------------------------------------
+    // Search edit
+    // -------------------------------------------------------------------------
+
+    public function test_search_edit_redirects_to_arrival_page_for_departure_direction(): void
+    {
+        $response = $this->post('/search/edit', [
+            'direction' => 'departure',
+        ]);
+
+        $response->assertRedirect(route('front'));
+    }
+
+    public function test_search_edit_redirects_to_departure_page_for_arrival_direction(): void
+    {
+        $response = $this->post('/search/edit', [
+            'direction' => 'arrival',
+        ]);
+
+        $response->assertRedirect(route('front.departures'));
+    }
+
+    // -------------------------------------------------------------------------
+    // Search results
+    // -------------------------------------------------------------------------
+
     public function test_search_fails_with_unrealistic_flight_lenght_and_destinations(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
@@ -154,25 +183,60 @@ class SearchTest extends TestCase
         });
     }
 
-    // -------------------------------------------------------------------------
-    // Search edit
-    // -------------------------------------------------------------------------
-
-    public function test_search_edit_redirects_to_arrival_page_for_departure_direction(): void
+    public function test_default_search_returns_at_least_3_results(): void
     {
-        $response = $this->post('/search/edit', [
-            'direction' => 'departure',
-        ]);
+        $response = $this->get('/search?' . http_build_query($this->validSearchParams));
 
-        $response->assertRedirect(route('front'));
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->count() >= 3;
+        });
     }
 
-    public function test_search_edit_redirects_to_departure_page_for_arrival_direction(): void
+    public function test_whitelist_restricts_results_to_whitelisted_airports(): void
     {
-        $response = $this->post('/search/edit', [
-            'direction' => 'arrival',
-        ]);
+        $user = User::factory()->create();
+        $enbr = Airport::where('icao', 'ENBR')->first();
+        $list = UserList::create(['name' => 'Test Whitelist', 'user_id' => $user->id, 'public' => true]);
+        $list->airports()->attach($enbr);
 
-        $response->assertRedirect(route('front.departures'));
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'whitelists' => [$list->id],
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENBR');
+        });
+    }
+
+    public function test_search_airtime_is_within_searched_bounds(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'icao'       => 'ENGM',
+            'airtimeMin' => '1',
+            'airtimeMax' => '2',
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->every(fn ($a) => $a->airtime >= 1.0 && $a->airtime <= 2.5);
+        });
+    }
+
+    public function test_search_foggy_score_filter_returns_only_foggy_airports(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'icao'   => 'ENGM',
+            'scores' => array_merge($this->validSearchParams['scores'], ['METAR_FOGGY' => 1]),
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENTC');
+        });
     }
 }
