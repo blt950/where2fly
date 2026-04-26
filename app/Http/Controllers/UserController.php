@@ -34,9 +34,6 @@ class UserController extends Controller
             'privacy_policy' => ['accepted'],
         ]);
 
-        // Hash the password
-        $data['password'] = Hash::make($data['password']);
-
         $user = User::create($data);
         if ($user) {
             event(new Registered($user));

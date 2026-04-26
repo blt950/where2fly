@@ -48,7 +48,7 @@
 
 @section('js')
     <script>
-        var airportMapData = {!! isset($airportMapData) ? $airportMapData : '[]' !!}
+        var airportMapData = {!! $airportMapData ?? '[]' !!}
 
         // Listen for the custom event indicating the map is ready
         window.addEventListener('mapReady', function() {

@@ -40,7 +40,7 @@ class CalcScores extends Command
         $vatsimRequest = Http::get('https://data.vatsim.net/v3/vatsim-data.json');
         $vatsimPilots = null;
         if ($vatsimRequest->successful()) {
-            $vatsimPilots = json_decode($vatsimRequest->body(), false)->pilots;
+            $vatsimPilots = $vatsimRequest->object()->pilots;
         }
 
         // Grab relevant aerodromes for calculations
@@ -50,7 +50,7 @@ class CalcScores extends Command
         foreach ($airports as $airport) {
 
             // Skip airport with old metars
-            if (Carbon::now()->gt(Carbon::parse($airport->metar->last_update)->addHour(1))) {
+            if (now()->gt(Carbon::parse($airport->metar->last_update)->addHour(1))) {
                 continue;
             }
 
@@ -88,11 +88,11 @@ class CalcScores extends Command
                     }
 
                     // Set the components
-                    $headwindComponentLe = abs($airport->metar->wind_speed * cos(($airport->metar->wind_direction - $runway->le_heading) / 180 * 3.14));
-                    $crosswindComponentLe = abs($airport->metar->wind_speed * sin(($airport->metar->wind_direction - $runway->le_heading) / 180 * pi()));
+                    $headwindComponentLe = abs($airport->metar->wind_speed * cos(deg2rad($airport->metar->wind_direction - $runway->le_heading)));
+                    $crosswindComponentLe = abs($airport->metar->wind_speed * sin(deg2rad($airport->metar->wind_direction - $runway->le_heading)));
 
-                    $headwindComponentHe = abs($airport->metar->wind_speed * cos(($airport->metar->wind_direction - $runway->he_heading) / 180 * 3.14));
-                    $crosswindComponentHe = abs($airport->metar->wind_speed * sin(($airport->metar->wind_direction - $runway->he_heading) / 180 * pi()));
+                    $headwindComponentHe = abs($airport->metar->wind_speed * cos(deg2rad($airport->metar->wind_direction - $runway->he_heading)));
+                    $crosswindComponentHe = abs($airport->metar->wind_speed * sin(deg2rad($airport->metar->wind_direction - $runway->he_heading)));
 
                     if ($activeRunwayComponents['headwind'] < $headwindComponentLe) {
                         $activeRunwayComponents['headwind'] = $headwindComponentLe;
@@ -172,7 +172,7 @@ class CalcScores extends Command
 
             // Check if ongoing VATSIM event
             foreach ($airport->events as $event) {
-                if (Carbon::now()->gt($event->start_time) && Carbon::now()->lt($event->end_time)) {
+                if (now()->gt($event->start_time) && now()->lt($event->end_time)) {
                     $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_EVENT', 'score' => 1, 'data' => $event->event . ' until ' . Carbon::parse($event->end_time)->format('H:i\z')];
 
                 }

@@ -27,16 +27,12 @@ class LoginController extends Controller
         ]);
 
         $user = User::where('username', $request->username)->orWhere('email', $request->username)->first();
-        $remember = ($request->remember) ? true : false;
+        $remember = (bool) $request->remember;
 
         // Check if the user exists and the password is correct
         if ($user && Hash::check($request->password, $user->password)) {
 
-            if ($remember) {
-                Auth::login($user, true);
-            } else {
-                Auth::login($user);
-            }
+            Auth::login($user, $remember);
 
             // Route to the original url the user was trying to access before promoted with login
             if ($request->session()->has('url.intended')) {

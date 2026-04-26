@@ -48,7 +48,7 @@ class SceneryController extends Controller
             $scenery = new SceneryDeveloper();
             $scenery->icao = strtoupper($request->icao);
             $scenery->developer = $request->developer;
-            $scenery->airport_id = Airport::where('icao', $request->icao)->get()->first()->id;
+            $scenery->airport_id = Airport::where('icao', $request->icao)->first()->id;
             $scenery->save();
         }
 
@@ -59,7 +59,7 @@ class SceneryController extends Controller
                     'scenery_developer_id' => $scenery->id,
                     'simulator_id' => $simulatorId,
                     'link' => $request->link,
-                    'payware' => $request->payware ? true : false,
+                    'payware' => (bool) $request->payware,
                     'published' => false,
                     'source' => 'user_contribution',
                     'suggested_by_user_id' => Auth::id(),
@@ -110,8 +110,8 @@ class SceneryController extends Controller
         $sceneryDeveloper->save();
 
         $scenery->link = $request->link;
-        $scenery->payware = $request->payware ? true : false;
-        $scenery->published = $request->published ? true : false;
+        $scenery->payware = (bool) $request->payware;
+        $scenery->published = (bool) $request->published;
         $scenery->source = 'user_contribution';
         $scenery->suggested_by_user_id = ($request->suggested_by_user_id) ? $request->suggested_by_user_id : Auth::id();
         $scenery->save();

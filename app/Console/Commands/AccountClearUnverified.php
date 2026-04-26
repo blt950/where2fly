@@ -27,7 +27,7 @@ class AccountClearUnverified extends Command
     public function handle()
     {
         // Delete users who haven't verified their email address for 7 days
-        $users = User::where('email_verified_at', null)
+        $users = User::whereNull('email_verified_at')
             ->where('created_at', '<', now()->subDays(7))
             ->get();
 

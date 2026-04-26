@@ -33,24 +33,7 @@ class SearchController extends Controller
      */
     public function indexArrivalSearch()
     {
-        $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
-        $aircrafts = Aircraft::all()->pluck('icao')->sort();
-        $prefilledIcao = request()->input('icao');
-        $destinationInputs = $this->getDestinationInputs();
-        $whitelistDatabase = null;
-
-        if (Auth::check()) {
-            $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
-        } else {
-            $lists = UserList::where('public', true)->get();
-        }
-
-        // Get whitelist table if present in old input
-        if (old('whitelists') !== null) {
-            $whitelistDatabase = $this->getWhitelistsFromInput(old('whitelists'));
-        }
-
-        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
+        return $this->buildSearchView('front.arrivals');
     }
 
     /**
@@ -58,23 +41,29 @@ class SearchController extends Controller
      */
     public function indexDepartureSearch()
     {
+        return $this->buildSearchView('front.departures');
+    }
+
+    /**
+     * Build the shared view data for the arrival/departure search forms.
+     */
+    private function buildSearchView(string $view): View
+    {
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
         $destinationInputs = $this->getDestinationInputs();
         $whitelistDatabase = null;
 
-        if (Auth::check()) {
-            $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
-        } else {
-            $lists = UserList::where('public', true)->get();
-        }
+        $lists = UserList::where('public', true)
+            ->when(Auth::check(), fn ($q) => $q->orWhere('user_id', Auth::id()))
+            ->get();
 
         if (old('whitelists') !== null) {
             $whitelistDatabase = $this->getWhitelistsFromInput(old('whitelists'));
         }
 
-        return view('front.departures', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
+        return view($view, compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
     }
 
     /**
@@ -178,8 +167,8 @@ class SearchController extends Controller
         $rwyLengthMin = (int) $data['rwyLengthMin'];
         $rwyLengthMax = (int) $data['rwyLengthMax'];
 
-        isset($data['airlines']) ? $filterByAirlines = $data['airlines'] : $filterByAirlines = null;
-        isset($data['aircrafts']) ? $filterByAircrafts = $data['aircrafts'] : $filterByAircrafts = null;
+        $filterByAirlines = $data['airlines'] ?? null;
+        $filterByAircrafts = $data['aircrafts'] ?? null;
 
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
 
@@ -194,7 +183,7 @@ class SearchController extends Controller
             // Use the supplied departure or select a random airport
             $suggestedAirport = false;
             if (isset($data['icao'])) {
-                $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->get()->first();
+                $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->first();
             } else {
                 // Select primary airport based on the criteria
                 $primaryAirport = Airport::airportOpen()->isAirportSize($destinationAirportSize)
@@ -218,7 +207,6 @@ class SearchController extends Controller
             }
 
             // Get airports according to filter
-            $airports = collect();
             $airports = Airport::airportOpen()->notIcao($primaryAirport->icao)->isAirportSize($destinationAirportSize)
                 ->inContinent($destinations)->inCountry($destinations, $primaryAirport->iso_country)->inState($destinations)
                 ->notInContinent($destinationExclusions)->notInCountry($destinationExclusions, $primaryAirport->iso_country)->notInState($destinationExclusions)
@@ -246,7 +234,7 @@ class SearchController extends Controller
             })->flatten(1)->take(20);
 
             // Filter the eligible airports
-            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $temperatureMin, $temperatureMax, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax);
 
             // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy
             $bearingWarning = false;
@@ -285,11 +273,7 @@ class SearchController extends Controller
 
         }
 
-        if ($direction == 'departure') {
-            return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable arrival airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
-        } else {
-            return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable arrival airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
-        }
+        return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
     }
 
     /**
@@ -306,8 +290,8 @@ class SearchController extends Controller
             'sort' => ['required', 'in:flight,airline,timestamp'],
         ]);
 
-        $departure = Airport::where('icao', $data['departure'])->orWhere('local_code', $data['departure'])->get()->first();
-        $arrival = Airport::where('icao', $data['arrival'])->orWhere('local_code', $data['arrival'])->get()->first();
+        $departure = Airport::where('icao', $data['departure'])->orWhere('local_code', $data['departure'])->first();
+        $arrival = Airport::where('icao', $data['arrival'])->orWhere('local_code', $data['arrival'])->first();
 
         $routes = Flight::where('airport_dep_id', $departure->id)->where('airport_arr_id', $arrival->id)->whereHas('airline')->with('airline', 'aircrafts')->get();
 
@@ -427,9 +411,9 @@ class SearchController extends Controller
                     'countries' => 'Domestic',
                     'states' => null,
                 ];
-            } elseif (strpos($destination, 'C-') === 0) {
+            } elseif (str_starts_with($destination, 'C-')) {
                 $continents[] = substr($destination, 2);
-            } elseif (strpos($destination, 'US-') === 0) {
+            } elseif (str_starts_with($destination, 'US-')) {
                 $states[] = $destination;
             } else {
                 $countries[] = $destination;

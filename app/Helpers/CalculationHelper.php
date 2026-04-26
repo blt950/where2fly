@@ -16,26 +16,17 @@ class CalculationHelper
      */
     public static function minimumRequiredRunwayLength(string $code)
     {
-        switch ($code) {
-            case 'GA':
-                return 100;
-            case 'GAT':
-                return 2000;
-            case 'GTP':
-                return 2500;
-            case 'JS':
-                return 4000;
-            case 'JM':
-                return 5000;
-            case 'JML':
-                return 6000;
-            case 'JL':
-                return 7000;
-            case 'JXL':
-                return 8000;
-            default:
-                return 0;
-        }
+        return match ($code) {
+            'GA' => 100,
+            'GAT' => 2000,
+            'GTP' => 2500,
+            'JS' => 4000,
+            'JM' => 5000,
+            'JML' => 6000,
+            'JL' => 7000,
+            'JXL' => 8000,
+            default => 0,
+        };
     }
 
     /**
@@ -47,37 +38,17 @@ class CalculationHelper
     public static function aircraftNmPerHour(string $actCode)
     {
 
-        $crzSpeed = 0;
-        switch ($actCode) {
-            case 'GA':
-                $crzSpeed = 115;
-                break;
-            case 'GAT':
-                $crzSpeed = 190;
-                break;
-            case 'GTP':
-                $crzSpeed = 280;
-                break;
-            case 'JS':
-                $crzSpeed = 340;
-                break;
-            case 'JM':
-                $crzSpeed = 460;
-                break;
-            case 'JML':
-                $crzSpeed = 480;
-                break;
-            case 'JL':
-                $crzSpeed = 510;
-                break;
-            case 'JXL':
-                $crzSpeed = 520;
-                break;
-            default:
-                $crzSpeed = 0;
-        }
-
-        return $crzSpeed;
+        return match ($actCode) {
+            'GA' => 115,
+            'GAT' => 190,
+            'GTP' => 280,
+            'JS' => 340,
+            'JM' => 460,
+            'JML' => 480,
+            'JL' => 510,
+            'JXL' => 520,
+            default => 0,
+        };
     }
 
     /**
@@ -89,37 +60,17 @@ class CalculationHelper
     public static function timeClimbDescend(string $actCode)
     {
 
-        $addMinutes = 0;
-        switch ($actCode) {
-            case 'GA':
-                $addMinutes = 0.13;
-                break;
-            case 'GAT':
-                $addMinutes = 0.20;
-                break;
-            case 'GTP':
-                $addMinutes = 0.25;
-                break;
-            case 'JS':
-                $addMinutes = 0.33;
-                break;
-            case 'JM':
-                $addMinutes = 0.42;
-                break;
-            case 'JML':
-                $addMinutes = 0.47;
-                break;
-            case 'JL':
-                $addMinutes = 0.50;
-                break;
-            case 'JXL':
-                $addMinutes = 0.58;
-                break;
-            default:
-                $addMinutes = 0;
-        }
-
-        return $addMinutes;
+        return match ($actCode) {
+            'GA' => 0.13,
+            'GAT' => 0.20,
+            'GTP' => 0.25,
+            'JS' => 0.33,
+            'JM' => 0.42,
+            'JML' => 0.47,
+            'JL' => 0.50,
+            'JXL' => 0.58,
+            default => 0,
+        };
 
     }
 
@@ -133,12 +84,11 @@ class CalculationHelper
      */
     public static function aircraftNmPerHourRange(string $actCode, int $minHours, int $maxHours)
     {
-        $minDistance = self::aircraftNmPerHour($actCode);
-        $maxDistance = self::aircraftNmPerHour($actCode);
+        $speed = self::aircraftNmPerHour($actCode);
 
         // Convert to nm and multiply by hours
-        $minDistance = ($minDistance) * $minHours;
-        $maxDistance = ($maxDistance) * $maxHours;
+        $minDistance = $speed * $minHours;
+        $maxDistance = $speed * $maxHours;
 
         if ($minDistance !== 0) {
             $minDistance += self::timeClimbDescend($actCode);
@@ -169,19 +119,8 @@ class CalculationHelper
         $Φ = rad2deg($Φ);
         $Λ = rad2deg($Λ);
 
-        if ($Φ > 90) {
-            $Φ = 90;
-        }
-        if ($Φ < -90) {
-            $Φ = -90;
-        }
-
-        if ($Λ > 180) {
-            $Λ = 180;
-        }
-        if ($Λ < -180) {
-            $Λ = -180;
-        }
+        $Φ = max(-90.0, min(90.0, $Φ));
+        $Λ = max(-180.0, min(180.0, $Λ));
 
         return new Coordinate($Φ, $Λ);
     }

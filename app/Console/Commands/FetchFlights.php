@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Flight;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 
 class FetchFlights extends Command
@@ -39,7 +38,7 @@ class FetchFlights extends Command
 
         $response = Http::timeout(60)->retry(3, 1000)->get('https://airlabs.co/api/v9/flights?api_key=' . $apiKey);
         if ($response->successful()) {
-            $flights = collect(json_decode($response->body(), false)->response);
+            $flights = collect($response->object()->response);
 
             $upsertData = [];
             foreach ($flights as $flight) {
@@ -60,7 +59,6 @@ class FetchFlights extends Command
                     continue;
                 }
 
-                isset($flight->reg_number) ? $regNumber = $flight->reg_number : $regNumber = null;
                 $upsertData[] = [
                     'airline_icao' => $flight->airline_icao,
                     'airline_iata' => $flight->airline_iata,
@@ -69,7 +67,7 @@ class FetchFlights extends Command
                     'dep_icao' => $flight->dep_icao,
                     'arr_icao' => $flight->arr_icao,
                     'last_aircraft_icao' => $flight->aircraft_icao,
-                    'reg_number' => $regNumber,
+                    'reg_number' => $flight->reg_number,
                     'last_seen_at' => now(),
                     'lock_counter' => false,
                 ];
@@ -105,7 +103,7 @@ class FetchFlights extends Command
             Flight::where('last_seen_at', '<', now()->subHours(6))->where('lock_counter', false)->update(['seen_counter' => \DB::raw('seen_counter + 1'), 'lock_counter' => true]);
 
             // Enrich the flights with aircraft types
-            Artisan::call('enrich:flights');
+            $this->call('enrich:flights');
 
         } else {
             $this->error('Failed to fetch flights. API response not successful.');

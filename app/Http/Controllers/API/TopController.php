@@ -16,7 +16,7 @@ class TopController extends Controller
             'limit' => 'sometimes|integer|between:1,30',
         ]);
         $continent = $data['continent'] ?? null;
-        isset($data['limit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
+        $resultLimit = $data['limit'] ?? 10;
 
         $airportScores = AirportScore::getTopAirports($continent, null, $resultLimit);
         $airports = $this->prepareResponse($airportScores);
@@ -36,7 +36,7 @@ class TopController extends Controller
             'limit' => 'sometimes|integer|between:1,30',
         ]);
 
-        isset($data['limit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
+        $resultLimit = $data['limit'] ?? 10;
 
         $airportScores = AirportScore::getTopAirports(null, $data['whitelist'], $resultLimit);
         $airports = $this->prepareResponse($airportScores);
@@ -64,7 +64,7 @@ class TopController extends Controller
                 'contient' => $as->airport->continent,
                 'country' => $as->airport->iso_country,
                 'region' => $as->airport->iso_region,
-                'metar' => (config('app.env') == 'production') ? $as->airport->metar->metar : 'TEST-DATA ' . $as->airport->metar->metar,
+                'metar' => app()->isProduction() ? $as->airport->metar->metar : 'TEST-DATA ' . $as->airport->metar->metar,
                 'longestRwyFt' => $as->airport->longestRunway(),
                 'scores' => $scores,
 

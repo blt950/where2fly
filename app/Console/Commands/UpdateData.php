@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 
 class UpdateData extends Command
 {
@@ -33,13 +32,13 @@ class UpdateData extends Command
         $this->info('> Calling all relevant data update commands...');
 
         $this->info('>> fetch:metars running');
-        Artisan::call('fetch:metars');
+        $this->call('fetch:metars');
 
         $this->info('>> fetch:vatsim running');
-        Artisan::call('fetch:vatsim');
+        $this->call('fetch:vatsim');
 
         $this->info('>> calc:scores running');
-        Artisan::call('calc:scores');
+        $this->call('calc:scores');
 
         $this->info('> Done with all commands in ' . round(microtime(true) - $processTime) . ' seconds!');
 
