@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v2.8.3</h2>
+            <span class="badge ps-0 pb-2">2026-05-23</span>
+            <ul>
+                <li>Fixed SimBrief link origin and destination order in flight details card</li>
+            </ul>
+
             <h2 class="mb-0">v2.8.2</h2>
             <span class="badge ps-0 pb-2">2026-04-25</span>
             <ul>
