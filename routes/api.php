@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['middleware' => ['api-token']], function () {
+Route::middleware('api-token')->group(function () {
     Route::get('/top', [TopController::class, 'index'])->name('api.top.index');
     Route::post('/top', [TopController::class, 'indexWhitelist'])->name('api.top.index.whitelist');
     Route::post('/search', [SearchController::class, 'search'])->name('api.search');
