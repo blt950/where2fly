@@ -15,6 +15,7 @@
             <h2 class="mb-0">v3.0.0</h2>
             <span class="badge ps-0 pb-2">2026-XX-XX</span>
             <ul>
+                <li>Added Navigraph charts link to airport cards</li>
                 <li>A lot changes under the hood for stability and performance</li>
             </ul>
 

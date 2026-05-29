@@ -186,6 +186,10 @@ function AirportCard({ airportId }) {
                                 Windy <i className="fa-sharp fa-up-right-from-square"></i>
                             </a>
 
+                            <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://charts.navigraph.com/airport/${data.airport.icao}?chartCategory=APP&informationSection=General&section=Charts&utm_campaign=where2fly.today`} target="_blank">
+                                Navigraph <i className="fa-sharp fa-up-right-from-square"></i>
+                            </a>
+
                             <SimbriefLink 
                                 className="btn btn-outline-primary btn-sm font-work-sans"
                                 direction={reverseDirection}
