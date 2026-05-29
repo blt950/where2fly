@@ -351,7 +351,7 @@
                         <input type="radio" class="btn-check green" name="destinationAirbases" value="1" id="destinationAirbases_include" {{ old('destinationAirbases') == 1 ? 'checked' : null }}>
                         <label class="btn btn-sm btn-dark btn-filter-width" for="destinationAirbases_include">
                             <i class="fa-sharp fa-check"></i>
-                            <span class="visually-hidden">Exclude</span>
+                            <span class="visually-hidden">Include</span>
                         </label>
                     </div>
                     <i class="ms-2 fa-sharp fa-jet-fighter"></i>&nbsp;Airbases
