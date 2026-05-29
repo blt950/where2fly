@@ -4,17 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Helpers\MapHelper;
 use App\Models\AirportScore;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class TopController extends Controller
 {
     /**
      * List all top airports
-     *
-     * @return RedirectResponse
      */
-    public function index(Request $request, ?string $continent = null)
+    public function index(Request $request, ?string $continent = null): View
     {
         $exclude = $request->input('exclude');
         $airportScores = AirportScore::getTopAirports($continent, null, 30, $exclude);
