@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Helpers\CalculationHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ScoreController;
+use App\Http\Resources\AirportResource;
+use App\Http\Resources\SuggestedAirportResource;
 use App\Models\Airport;
 use App\Rules\AirportExists;
 use App\Rules\ValidDestinations;
@@ -151,38 +153,9 @@ class SearchController extends Controller
 
     public function prepareAirportData($airport, $suggestedAirports)
     {
-        $airportData = [
-            'name' => $airport->name,
-            'icao' => $airport->icao,
-            'iata' => $airport->iata_code ? $airport->iata_code : null,
-            'contient' => $airport->continent,
-            'country' => $airport->iso_country,
-            'region' => $airport->iso_region,
-            'metar' => app()->isProduction() ? $airport->metar->metar : 'TEST-DATA ' . $airport->metar->metar,
-            'longestRwyFt' => $airport->longestRunway(),
-            'scores' => $airport->scores->pluck('reason'),
+        return [
+            new AirportResource($airport),
+            SuggestedAirportResource::collection($suggestedAirports),
         ];
-
-        $suggestedData = collect();
-        foreach ($suggestedAirports as $suggestedAirport) {
-            $scores = $suggestedAirport->scores->pluck('reason');
-            $suggestedData->push([
-                'name' => $suggestedAirport->name,
-                'icao' => $suggestedAirport->icao,
-                'iata' => $suggestedAirport->iata_code ? $suggestedAirport->iata_code : null,
-                'contient' => $suggestedAirport->continent,
-                'country' => $suggestedAirport->iso_country,
-                'region' => $suggestedAirport->iso_region,
-                'metar' => app()->isProduction() ? $suggestedAirport->metar->metar : 'TEST-DATA ' . $suggestedAirport->metar->metar,
-                'longestRwyFt' => $suggestedAirport->longestRunway(),
-                'scores' => $scores,
-                'airtime' => $suggestedAirport->airtime,
-                'distanceNm' => $suggestedAirport->distance,
-                'isAirforcebase' => $suggestedAirport->w2f_airforcebase,
-                'hasAirlineService' => $suggestedAirport->w2f_scheduled_service,
-            ]);
-        }
-
-        return [$airportData, $suggestedData];
     }
 }

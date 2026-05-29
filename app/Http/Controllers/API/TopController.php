@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AirportResource;
 use App\Models\AirportScore;
 use Illuminate\Http\Request;
 
@@ -19,7 +20,7 @@ class TopController extends Controller
         $resultLimit = $data['limit'] ?? 10;
 
         $airportScores = AirportScore::getTopAirports($continent, null, $resultLimit);
-        $airports = $this->prepareResponse($airportScores);
+        $airports = AirportResource::collection($airportScores->pluck('airport'));
 
         return response()->json([
             'message' => 'Success',
@@ -39,38 +40,12 @@ class TopController extends Controller
         $resultLimit = $data['limit'] ?? 10;
 
         $airportScores = AirportScore::getTopAirports(null, $data['whitelist'], $resultLimit);
-        $airports = $this->prepareResponse($airportScores);
+        $airports = AirportResource::collection($airportScores->pluck('airport'));
 
         return response()->json([
             'message' => 'Success',
             'data' => $airports,
         ], 200);
 
-    }
-
-    private function prepareResponse($airportScores)
-    {
-        $result = collect();
-
-        foreach ($airportScores as $as) {
-
-            $scores = $as->airport->scores->pluck('reason');
-
-            $result->push([
-
-                'name' => $as->airport->name,
-                'icao' => $as->airport->icao,
-                'iata' => $as->airport->iata_code ? $as->airport->iata_code : null,
-                'contient' => $as->airport->continent,
-                'country' => $as->airport->iso_country,
-                'region' => $as->airport->iso_region,
-                'metar' => app()->isProduction() ? $as->airport->metar->metar : 'TEST-DATA ' . $as->airport->metar->metar,
-                'longestRwyFt' => $as->airport->longestRunway(),
-                'scores' => $scores,
-
-            ]);
-        }
-
-        return $result;
     }
 }

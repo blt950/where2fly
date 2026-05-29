@@ -139,9 +139,9 @@ class SceneryController extends Controller
         $filteredSimulator = $availableSimulators->where('shortened_name', $filteredSim)->first();
 
         if ($filteredSimulator) {
-            $airports = Airport::whereHasPublishedSceneries(true, $filteredSimulator->id)->get();
+            $airports = Airport::publishedSceneries(true, $filteredSimulator->id)->get();
         } else {
-            $airports = Airport::whereHasPublishedSceneries(true)->get();
+            $airports = Airport::publishedSceneries(true)->get();
         }
 
         $airportMapData = json_encode(MapHelper::generateAirportMapDataFromAirports($airports));
