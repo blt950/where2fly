@@ -17,9 +17,12 @@ class ApiKey extends Model
         'key', 'name', 'ip_address', 'last_used_at',
     ];
 
-    public $casts = [
-        'disabled' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'disabled' => 'boolean',
+        ];
+    }
 
     public function logs()
     {

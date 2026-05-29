@@ -35,27 +35,26 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'last_activity_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
 
     public function getAirportsFromLists()
     {
-
-        $airports = [];
-        $userLists = UserList::where('user_id', $this->id)->with('airports', 'airports.metar', 'airports.runways')->get();
-
-        foreach ($userLists as $list) {
-            foreach ($list->airports as $airport) {
-                $airports[] = $airport;
-            }
-        }
-
-        return $airports;
+        return $this->lists()->with('airports', 'airports.metar', 'airports.runways')
+            ->get()
+            ->pluck('airports')
+            ->flatten()
+            ->all();
     }
 
     public function lists()

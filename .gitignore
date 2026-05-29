@@ -54,3 +54,4 @@ apache/*
 /resources/fonts/fa-v4compatibility.ttf
 /resources/fonts/fa-v4compatibility.woff2
 .phpunit.cache/test-results
+.abacusai/config.json

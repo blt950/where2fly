@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,10 +17,14 @@ class UserActive
      */
     public function handle(Request $request, Closure $next)
     {
-        if (\Auth::check()) {
-            $user = \Auth::user();
-            $user->last_activity_at = Carbon::now();
-            $user->save();
+        if (auth()->check()) {
+            $user = auth()->user();
+
+            if ($user->last_activity_at === null || $user->last_activity_at->lt(now()->subMinutes(5))) {
+                $user->timestamps = false;
+                $user->last_activity_at = now();
+                $user->save();
+            }
         }
 
         return $next($request);

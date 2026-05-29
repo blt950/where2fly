@@ -31,7 +31,7 @@
                         </div>
                     @else
                         @auth
-                            @if(auth()->user()->email_verified_at == null)
+                            @if(!auth()->user()->hasVerifiedEmail())
                                 <div class="alert alert-warning" role="alert">
                                     Your account is awaiting email verification.
                                     

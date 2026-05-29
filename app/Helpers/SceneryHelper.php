@@ -53,10 +53,7 @@ class SceneryHelper
             }
 
             if (in_array($compatibleSimulator, $store->simulatorVersions)) {
-                if ($cheapestStore == null) {
-                    $cheapestStore = $store;
-                }
-                if ($store->currencyPrice->EUR < $cheapestStore->currencyPrice->EUR) {
+                if ($cheapestStore === null || $store->currencyPrice->EUR < $cheapestStore->currencyPrice->EUR) {
                     $cheapestStore = $store;
                 }
             }
@@ -129,7 +126,7 @@ class SceneryHelper
         parse_str($urlComponents['query'], $queryParams);
 
         // Retrieve the 'url' parameter value
-        $embeddedUrl = isset($queryParams['url']) ? $queryParams['url'] : null;
+        $embeddedUrl = $queryParams['url'] ?? null;
 
         // Strip 'www.' and 'secure.' and addoncompare from the URL
         if ($embeddedUrl) {

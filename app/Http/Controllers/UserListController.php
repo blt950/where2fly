@@ -56,21 +56,21 @@ class UserListController extends Controller
             'public' => 'boolean',
         ]);
 
-        $request->public = $request->public ? true : false;
+        $request->public = (bool) $request->public;
         if ($request->public) {
             $this->authorize('public', UserList::class);
         }
 
         [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports);
 
-        $list = DB::transaction(function () use ($request, $airportIds) {
-            $list = new UserList();
-            $list->color = $request->color;
-            $list->name = $request->name;
-            $list->simulator_id = $request->simulator;
-            $list->user_id = Auth::id();
-            $list->public = $request->public;
-            $list->save();
+        DB::transaction(function () use ($request, $airportIds) {
+            $list = UserList::create([
+                'color' => $request->color,
+                'name' => $request->name,
+                'simulator_id' => $request->simulator,
+                'user_id' => Auth::id(),
+                'public' => $request->boolean('public'),
+            ]);
 
             $list->airports()->sync($airportIds);
 
@@ -114,7 +114,7 @@ class UserListController extends Controller
             'public' => 'boolean',
         ]);
 
-        $request->public = $request->public ? true : false;
+        $request->public = (bool) $request->public;
         if ($request->public) {
             $this->authorize('public', UserList::class);
         }
@@ -145,12 +145,10 @@ class UserListController extends Controller
      */
     private function resolveAirports(string $input): array
     {
-        $airportsInput = explode("\r\n", $input);
-        $airportsInput = array_map('trim', $airportsInput);
-        $airportsInput = array_map('strtoupper', $airportsInput);
-        $airportsInput = array_filter($airportsInput, function ($value) {
-            return ! empty($value);
-        });
+        $airportsInput = collect(explode("\r\n", $input))
+            ->map(fn ($v) => strtoupper(trim($v)))
+            ->filter()
+            ->all();
 
         $airportModels = Airport::whereIn('icao', $airportsInput)
             ->orWhereIn('local_code', $airportsInput)

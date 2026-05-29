@@ -6,11 +6,11 @@ class AirportFilterHelper
 {
     public static function hasCorrectMetcon($metcon, $airport)
     {
-        if ($metcon == 'VFR' && ! $airport->hasVisualCondition()) {
-            return false;
+        if ($metcon === 'VFR') {
+            return $airport->hasVisualCondition();
         }
-        if ($metcon == 'IFR' && $airport->hasVisualCondition()) {
-            return false;
+        if ($metcon === 'IFR') {
+            return ! $airport->hasVisualCondition();
         }
 
         return true;

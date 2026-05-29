@@ -9,9 +9,9 @@ class CollectionAirportFilter
 {
     public function filterWithCriteria()
     {
-        return function ($departureAirport, $codeletter, $airtimeMin, $airtimeMax, $requiredMetcon = null, $temperatureMin = null, $temperatureMax = null, $runwayLengthMin = null, $runwayLengthMax = null, $airportElevationMin = null, $airportElevationMax = null) {
+        return function ($departureAirport, $codeletter, $requiredMetcon = null, $temperatureMin = null, $temperatureMax = null, $airportElevationMin = null, $airportElevationMax = null) {
 
-            $returnCollection = $this
+            return $this
                 ->transform(function ($arrivalAirport) use ($departureAirport, $codeletter) {
                     // Insert the calculated distance and airtime into the collection
                     $distance = distance($departureAirport->latitude_deg, $departureAirport->longitude_deg, $arrivalAirport->latitude_deg, $arrivalAirport->longitude_deg, 'N');
@@ -25,8 +25,6 @@ class CollectionAirportFilter
                 ->filter(fn ($a) => AirportFilterHelper::hasCorrectMetcon($requiredMetcon, $a))
                 ->filter(fn ($a) => AirportFilterHelper::hasRequiredTemperature($temperatureMin, $temperatureMax, $a))
                 ->filter(fn ($a) => AirportFilterHelper::hasRequiredAirportElevation($airportElevationMin, $airportElevationMax, $a));
-
-            return $returnCollection;
 
         };
 

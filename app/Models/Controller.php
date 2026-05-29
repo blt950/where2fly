@@ -13,9 +13,12 @@ class Controller extends Model
 
     protected $guarded = [];
 
-    protected $casts = [
-        'logon_time' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'logon_time' => 'datetime',
+        ];
+    }
 
     public function airport()
     {
