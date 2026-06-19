@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2026-XX-XX</span>
             <ul>
                 <li>Added Navigraph charts link to airport cards</li>
+                <li>Fixed options randomly disappearing when editing search</li>
                 <li>A lot changes under the hood for stability and performance</li>
             </ul>
 

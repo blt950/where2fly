@@ -21,7 +21,7 @@
             </label>
             <u-combobox data-multiple id="destination">
 
-                <select name="destinations[]"></select>
+                <select name="destinations[]" multiple></select>
 
                 @if(old('destinations') !== null)
                     @foreach(old('destinations') as $key)
@@ -103,7 +103,7 @@
 
                 <input list="whitelist-list" placeholder="Restrict your search">
                 <u-datalist id="whitelist-list" tabindex="-1" hidden>
-                    <select name="whitelists[]"></select>
+                    <select name="whitelists[]" multiple></select>
                     @foreach($lists as $list)
                         <u-option value="{{ $list->id }}">{{ $list->name }}</u-option>
                     @endforeach
@@ -161,7 +161,7 @@
                 </label>
                 <u-combobox data-multiple id="destinationExclusions">
 
-                    <select name="destinationExclusions[]"></select>
+                    <select name="destinationExclusions[]" multiple></select>
 
                     @if(old('destinationExclusions') !== null)
                         @foreach(old('destinationExclusions') as $key)
@@ -468,7 +468,7 @@
                     Airlines
                 </label>
                 <u-combobox id="airlines" data-multiple>
-                    <select name="airlines[]"></select>
+                    <select name="airlines[]" multiple></select>
                     @if(old('airlines') !== null)
                         @foreach(old('airlines') as $key)
                             @foreach($airlines as $airline)
@@ -493,7 +493,7 @@
                     Aircraft
                 </label>
                 <u-combobox id="aircraft" data-multiple>
-                    <select name="aircrafts[]"></select>
+                    <select name="aircrafts[]" multiple></select>
                     @if(old('aircrafts') !== null)
                         @foreach(old('aircrafts') as $key)
                             @foreach($aircrafts as $aircraft)

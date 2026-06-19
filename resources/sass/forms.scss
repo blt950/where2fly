@@ -81,13 +81,21 @@ u-combobox{
 u-combobox {
     display: flex;
     flex-wrap: wrap;
-    gap: .5rem;
     position: relative;
 
     min-height: 42px;
 
     padding: 0.375rem 0.75rem;
     background-color: var(--bs-body-bg);
+
+    &::part(items) {
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
+
+    &:has(data)::part(items) {
+        margin-inline-end: .5rem;
+    }
 
     select{
         display: none;
@@ -110,6 +118,7 @@ u-combobox {
     }
 
     input{
+        min-height: 32px;
         border: none;
         background-color: var(--bs-body-bg);
 
