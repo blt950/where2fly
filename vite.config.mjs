@@ -20,16 +20,14 @@ export default defineConfig({
         },
     },
     build: {
-        rollupOptions: {
+        rolldownOptions: {
             output: {
-                // Split large vendor libraries into separately-cached chunks
-                // instead of one ~600 kB app bundle.
-                manualChunks(id) {
-                    if (id.includes('node_modules')) {
-                        if (id.includes('leaflet')) return 'leaflet';
-                        if (id.includes('react') || id.includes('scheduler')) return 'react';
-                        return 'vendor';
-                    }
+                codeSplitting: {
+                    groups: [
+                        { name: 'leaflet', test: /node_modules\/.*leaflet/ },
+                        { name: 'react', test: /node_modules\/(react|react-dom|scheduler)\// },
+                        { name: 'vendor', test: /node_modules/ },
+                    ],
                 },
             },
         },
