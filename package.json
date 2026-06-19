@@ -24,7 +24,7 @@
         "react-dom": "^18.2.0",
         "react-leaflet": "^4.2.1",
         "react-leaflet-cluster": "^2.1.0",
-        "sass": "1.77.6",
+        "sass": "^1.77.6",
         "sortable-tablesort": "^4.0.2",
         "vite": "^7.2.1"
     },

@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 /*
 * Scrollbar
 */
@@ -11,11 +13,11 @@
 }
 
 *::-webkit-scrollbar-track:hover {
-    background-color: lighten($secondary, 10%);
+    background-color: color.adjust($secondary, $lightness: 10%);
 }
 
 *::-webkit-scrollbar-track:active {
-    background-color: lighten($secondary, 10%);
+    background-color: color.adjust($secondary, $lightness: 10%);
 }
 
 *::-webkit-scrollbar-thumb {
@@ -23,9 +25,9 @@
 }
 
 *::-webkit-scrollbar-thumb:hover {
-    background-color: darken($primary, 10%);
+    background-color: color.adjust($primary, $lightness: -10%);
 }
 
 *::-webkit-scrollbar-thumb:active {
-    background-color: darken($primary, 10%);
+    background-color: color.adjust($primary, $lightness: -10%);
 }
