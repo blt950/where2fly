@@ -40,7 +40,7 @@
 
             &-check.light:checked + .btn {
                 color: white;
-                background: var(--bs-btn-active-bg);
+                background: $tertiary;
             }
 
             &-check.green:checked + .btn {
