@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 .form-control{
     height: 42px;
 
@@ -79,6 +81,10 @@ u-combobox{
 #slider-airtime, #slider-rwy, #slider-elevation, #slider-temperature {
     padding: 0 1rem;
     background: $tertiary;
+
+    box-shadow: none;
+    border-radius: 2px;
+    border: 1px solid color.adjust($secondary, $lightness: 20%);
     
     .noUi-connect {
         background: $secondary;
@@ -87,9 +93,11 @@ u-combobox{
     .noUi-handle {
         height: 26px;
         top: -5px;
-        border-radius: 3px;
+        border-radius: 2px;
         box-shadow: none;
         background: $tertiary;
+
+        border: 1px solid color.adjust($secondary, $lightness: 20%);
     }
 }
 
