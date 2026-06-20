@@ -108,8 +108,12 @@ class SceneryHelper
         foreach ($returnData as $simulator => $sceneries) {
             // First sort by developer name
             usort($sceneries, fn ($a, $b) => $a['developer'] <=> $b['developer']);
-            // Then sort by payware/free
-            usort($sceneries, fn ($a, $b) => $a['payware'] <=> $b['payware']);
+            // Then sort by payware/free: -1 (bundled) on top, then payware, then freeware
+            usort($sceneries, function ($a, $b) {
+                if ($a['payware'] === -1 && $b['payware'] !== -1) return -1;
+                if ($a['payware'] !== -1 && $b['payware'] === -1) return 1;
+                return $b['payware'] <=> $a['payware'];
+            });
             $returnData[$simulator] = $sceneries;
         }
     }

@@ -59,8 +59,8 @@ button {
 
         &.show{
             color: $white;
-            background: #202538;
-            border-color: #202538;
+            background: $tertiary;
+            border-color: $tertiary;
         }
     }
 }

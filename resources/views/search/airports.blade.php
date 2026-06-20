@@ -35,31 +35,39 @@
             </div>
         @endif
 
-        @if($suggestedAirport)
-            <div class="d-flex flex-wrap justify-content-between">
-                <h2>{{ ucfirst($direction) }} suggestion</h2>
+        <div class="results-header">
+            @if($suggestedAirport)
+                <div class="d-flex flex-wrap justify-content-between">
+                    <h2 class="mb-0">
+                        <i class="fa-sharp fa-plane-{{ $direction }}"></i>
+                        {{ ucfirst($direction) }} suggestion
+                    </h2>
 
-                {{-- Add possibility to re-post the search query for a new random departure --}}
-                <form id="randomiseForm" method="GET" action="{{ route('search') }}">
-                    @foreach($_GET as $key => $value)
-                        @if($key != '_token')
-                            @if(is_array($value))
-                                @foreach($value as $subkey => $subvalue)
-                                    <input type="hidden" name="{{ $key }}[{{ $subkey }}]" value="{{ $subvalue }}">
-                                @endforeach
-                            @else
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    {{-- Add possibility to re-post the search query for a new random departure --}}
+                    <form id="randomiseForm" method="GET" action="{{ route('search') }}">
+                        @foreach($_GET as $key => $value)
+                            @if($key != '_token')
+                                @if(is_array($value))
+                                    @foreach($value as $subkey => $subvalue)
+                                        <input type="hidden" name="{{ $key }}[{{ $subkey }}]" value="{{ $subvalue }}">
+                                    @endforeach
+                                @else
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endif
                             @endif
-                        @endif
-                    @endforeach
+                        @endforeach
 
-                    <button id="randomiseBtn" type="submit" form="randomiseForm" class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;">Randomise <i class="fa-sharp fa-shuffle"></i></button>
-                </form>
+                        <button id="randomiseBtn" type="submit" form="randomiseForm" class="btn btn-sm btn-outline-warning">Randomise <i class="fa-sharp fa-shuffle"></i></button>
+                    </form>
 
-            </div>
-        @else
-            <h2>{{ ucfirst($direction) }}</h2>
-        @endif
+                </div>
+            @else
+                <h2 class="mb-0">
+                    <i class="fa-sharp fa-plane-{{ $direction }}"></i>
+                    {{ ucfirst($direction) }}
+                </h2>
+            @endif
+        </div>
         <div class="results-container">
             <dl>
                 <dt>Airport<dt>
@@ -106,7 +114,7 @@
                 <dd>
                     @if($primaryAirport->metar)
                         {{ \Carbon\Carbon::parse($primaryAirport->metar->last_update)->format('dHi\Z') }} {{ $primaryAirport->metar->metar }}
-                        <span class="d-block mt-2"><button class="d-block btn btn-outline-secondary btn-sm" data-airport-icao="{{ $primaryAirport->icao }}" data-taf-button="true">Fetch TAF</button></span>
+                        <span class="d-block mt-2"><button class="d-block btn btn-outline-light btn-sm" data-airport-icao="{{ $primaryAirport->icao }}" data-taf-button="true">Fetch TAF</button></span>
                     @else
                         <i class="fa-sharp fa-info-square"></i> No METAR available
                     @endif
@@ -114,7 +122,11 @@
             </dl>
         </div>
 
-        <h2>{{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>
+        <div class="results-header">
+            <h2 class="mb-0">
+                <i class="fa-sharp fa-plane-{{ ($direction == 'departure') ? 'arrival' : 'departure' }}"></i>
+                {{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover text-start sortable asc mb-0" data-detail-table="airport-results">
                 <thead>
@@ -256,7 +268,7 @@
                     @elseif($count > 10)
                         <tr id="showMoreRow">
                             <th colspan="10" class="text-center text-danger">
-                                <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
+                                <button id="showMoreBtn" class="btn btn-outline-primary">Show more</button>
                             </th>
                         </tr>
                     @endif

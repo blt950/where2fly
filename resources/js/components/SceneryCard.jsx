@@ -85,48 +85,47 @@ function SceneryCard({ airportId }) {
                         {Object.keys(data).map((key) => (
                             <u-tabpanel id={key} key={key}>
                                 {data[key].map((item, index) => (
-                                    <div key={index} className="scenery-row" data-scenery-id={item.id}>
-                                        
-                                        <div className="title d-flex flex-row justify-content-between align-items-center">
-                                            <div className="d-flex align-items-center flex-wrap">
-                                                <span className="developer">{item.developer}</span>
-                                                {(item.fsac && item.ratingAverage > 0) && (
-                                                    <span className="star"><i className="fa-sharp fa-regular fa-star"></i>&nbsp;{parseFloat(item.ratingAverage).toFixed(1)}</span>
-                                                )}
+                                    <a href={item.link} target="_blank" key={index} className="scenery-row" data-scenery-id={item.id}>
+                                        <div>
+                                            <div className="title d-flex flex-row justify-content-between align-items-center">
+                                                <div className="d-flex align-items-center flex-wrap">
+                                                    <span className="developer">{item.developer}</span>
+                                                    {(item.fsac && item.ratingAverage > 0) && (
+                                                        <span className="star"><i className="fa-sharp fa-regular fa-star"></i>&nbsp;{parseFloat(item.ratingAverage).toFixed(1)}</span>
+                                                    )}
+                                                </div>
                                             </div>
+
+                                            {(item.fsac && item.cheapestPrice.EUR > 0) && (
+                                                <p class="mb-1  ">Starting at {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}</p>
+                                            )}
+
                                             {item.payware > 0 ? (
                                                 <span className="badge bg-info">Payware</span>
                                             ) : (
                                                 (item.payware == -1 ? (
-                                                    <span className="badge bg-danger">Included</span>
+                                                    <span className="badge bg-danger">Included in simulator</span>
                                                 ) : (
                                                     <span className="badge bg-success">Freeware</span>
                                                 ))
                                             )}
                                         </div>
-
-                                        {(item.fsac && item.cheapestPrice.EUR > 0) ? (
-                                            <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">See all prices <i className="fa-sharp fa-up-right-from-square"></i></a>
-                                        ) : (
-                                            (item.link == 'https://www.flightsimulator.com/') ? (
-                                                <i>Included in the simulator</i>
+                                        <div className="d-flex align-items-center">
+                                            {(item.fsac ? (
+                                                <>
+                                                See all prices
+                                                <i className="fa-sharp fa-solid fa-chevron-right fs-5"></i>
+                                                </>
                                             ) : (
-                                                <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">{item.linkDomain} <i className="fa-sharp fa-up-right-from-square"></i></a>
-                                            )
-                                        )}
-
-                                        {(item.fsac && item.cheapestPrice.EUR > 0) && (
-                                            <a href={item.currencyLink?.[currency] || item.cheapestLink} target="_blank" className="btn btn-outline-light btn-sm"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-title="This link might be affiliated"
-                                                data-bs-placement="right"
-                                            >
-                                                Cheapest: {item.cheapestStore} {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}
-                                                <i className="fa-sharp fa-up-right-from-square ms-1"></i>
-                                            </a>
-                                        )}
-                                        
-                                    </div>
+                                                (item.payware != -1 && (
+                                                    <>
+                                                    flightsim.to
+                                                    <i className="fa-sharp fa-solid fa-chevron-right fs-5"></i>
+                                                    </>
+                                                ))
+                                            ))}
+                                        </div>
+                                    </a>
                                 ))}
                             </u-tabpanel>
                         ))}
