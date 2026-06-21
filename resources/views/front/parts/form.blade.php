@@ -528,7 +528,7 @@
         <div class="col-sm-12 align-self-end mb-3"> 
             <div class="expandFilterGroup">
                 <div class="divider"></div>
-                <button type="button" id="expandFilters" class="button">Show more filters</button>
+                <button type="button" id="expandFilters" class="button">Show more filters <i class="fa-sharp fa-chevron-down expand-chevron"></i></button>
                 <div class="divider"></div>
             </div>
         </div>
