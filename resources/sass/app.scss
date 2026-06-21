@@ -79,6 +79,11 @@ h2 {
 
 .font-work-sans{
     font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.font-antialiased{
+    -webkit-font-smoothing: antialiased;
 }
 
 header {

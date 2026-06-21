@@ -214,13 +214,12 @@
     }
 
     &:first-of-type{
-        margin-top: 0;
+        margin-top: -1px;
         border-top: 1px solid $primary;
     }
     
     &:last-of-type{
         margin-bottom: 0;
-        border-bottom: 1px solid $primary;
     }
     
     .title{
@@ -230,17 +229,15 @@
             margin-right: 0.5rem;
         }
         
-        .star{
-            color: $primary;
-            font-size: 1rem;
-            
-            .far{
-                padding-right: 0.25rem;
-            }
-        }
-        
         .badge{
             font-size: .75rem;
+        }
+    }
+
+    .star{
+        i.fa-star{
+            font-size: 0.7rem;
+            margin-right: 1px;
         }
     }
     

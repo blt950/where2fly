@@ -90,18 +90,22 @@ function SceneryCard({ airportId }) {
                                             <div className="title d-flex flex-row justify-content-between align-items-center">
                                                 <div className="d-flex align-items-center flex-wrap">
                                                     <span className="developer">{item.developer}</span>
-                                                    {(item.fsac && item.ratingAverage > 0) && (
-                                                        <span className="star"><i className="fa-sharp fa-regular fa-star"></i>&nbsp;{parseFloat(item.ratingAverage).toFixed(1)}</span>
-                                                    )}
                                                 </div>
                                             </div>
 
                                             {(item.fsac && item.cheapestPrice.EUR > 0) && (
-                                                <p class="mb-1  ">Starting at {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}</p>
+                                                <p className="mb-1 font-antialiased" style={{marginTop: '-5px'}}>Starting at {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}</p>
                                             )}
 
                                             {item.payware > 0 ? (
-                                                <span className="badge bg-info">Payware</span>
+                                                <span className="badge bg-info">Payware
+                                                    {(item.fsac && item.ratingAverage > 0) && (
+                                                        <>
+                                                        &nbsp;
+                                                        <span className="star"><i className="fa-sharp fa-star"></i>{parseFloat(item.ratingAverage).toFixed(1)}</span>
+                                                        </>
+                                                    )}
+                                                </span>
                                             ) : (
                                                 (item.payware == -1 ? (
                                                     <span className="badge bg-danger">Included in simulator</span>
@@ -113,7 +117,7 @@ function SceneryCard({ airportId }) {
                                         <div className="d-flex align-items-center">
                                             {(item.fsac ? (
                                                 <>
-                                                See all prices
+                                                See prices
                                                 <i className="fa-sharp fa-solid fa-chevron-right fs-5"></i>
                                                 </>
                                             ) : (
