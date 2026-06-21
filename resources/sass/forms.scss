@@ -95,9 +95,13 @@ u-combobox{
         top: -5px;
         border-radius: 2px;
         box-shadow: none;
-        background: $tertiary;
 
+        background: $bluewhite;
         border: 1px solid color.adjust($secondary, $lightness: 20%);
+
+        &::before, &::after{
+            background: $secondary;
+        }
     }
 }
 
