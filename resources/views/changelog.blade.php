@@ -17,6 +17,7 @@
             <ul>
                 <li>Added Navigraph charts link to airport cards</li>
                 <li>Fixed options randomly disappearing when editing search</li>
+                <li>Fixed performance and clustering of maps with many airports</li>
                 <li>A lot changes under the hood for stability and performance</li>
             </ul>
 
