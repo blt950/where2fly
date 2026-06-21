@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { MapContext } from './context/MapContext';
@@ -15,6 +15,7 @@ import MapMarkerGroup from './map/MapMarkerGroup';
 import MapPan from './map/MapPan';
 import MapSaveView from './map/MapSaveView';
 import MapTerminator from './map/MapTerminator';
+import MapTooltipZoom from './map/MapTooltipZoom';
 
 // Check if the current route is the default view
 const isDefaultView = () => {
@@ -182,28 +183,33 @@ function Map() {
         
         if(airportsKeys.length > 0){
             if (airportsKeys.length >= 1000) {
-                setClusterRadius(200);
+                setClusterRadius(60);
             } else if(airportsKeys.length > 200 && airportsKeys.length < 1000) {
-                setClusterRadius(80)
+                setClusterRadius(50);
             } else {
-                setClusterRadius(40);
+                setClusterRadius(30);
             }
         }
 
     }, [airports]);
 
+    // Memoise the context value so unrelated Map state changes (coordinates,
+    // mapBounds, showAirportIdCard, panning) don't give it a new identity and
+    // re-render every marker. Only changes to the listed values propagate.
+    const mapContextValue = useMemo(() => ({
+        airports,
+        setAirports,
+        focusAirport,
+        highlightedAircrafts,
+        primaryAirport,
+        reverseDirection,
+        setFocusAirport,
+        setShowAirportIdCard,
+        userAuthenticated,
+    }), [airports, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection, userAuthenticated]);
+
     return (
-        <MapContext.Provider value={{ 
-            airports, 
-            setAirports,
-            focusAirport, 
-            highlightedAircrafts,
-            primaryAirport,
-            reverseDirection,
-            setFocusAirport, 
-            setShowAirportIdCard, 
-            userAuthenticated, 
-            }}>
+        <MapContext.Provider value={mapContextValue}>
             <MapContainer 
                 className="map" 
                 center={getInitMapPosition()}
@@ -221,7 +227,7 @@ function Map() {
                 {clusterRadius && (
                     <>
                     {cluster ? (
-                        <MarkerClusterGroup showCoverageOnHover={true} polygonOptions={{ color: '#46517c', fillColor: '#6676b6' }} maxClusterRadius={clusterRadius} iconCreateFunction={createClusterIcon}>
+                        <MarkerClusterGroup chunkedLoading showCoverageOnHover={true} polygonOptions={{ color: '#46517c', fillColor: '#6676b6' }} maxClusterRadius={clusterRadius} iconCreateFunction={createClusterIcon}>
                             <MapMarkerGroup/>
                         </MarkerClusterGroup>
                     ) : (
@@ -235,6 +241,7 @@ function Map() {
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
                 <MapTerminator />
+                <MapTooltipZoom />
             </MapContainer>
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
