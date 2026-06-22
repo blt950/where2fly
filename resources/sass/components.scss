@@ -177,12 +177,7 @@
 }
 
 .btn-group{
-    .dropdown-menu{
-        li .dropdown-item:hover{
-            color: black;
-            background: $primary;
-        }
-        
+    .dropdown-menu{        
         &.show{
             --bs-dropdown-min-width: 0rem;
         }

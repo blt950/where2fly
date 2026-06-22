@@ -67,12 +67,14 @@ button {
 
 .dropdown{
     &-menu{
-        background-color: $table-bg;
+        background: $secondary;
     }
 
     &-item{
+        color: $offwhite;
+
         &:hover, &:active, &:focus{
-            background-color: #e2e2e2;
+            background: $offwhite;
             color: $black;
         }
     }
