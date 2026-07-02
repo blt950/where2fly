@@ -94,7 +94,7 @@ function SceneryCard({ airportId }) {
                                             </div>
 
                                             {(item.fsac && item.cheapestPrice.EUR > 0) && (
-                                                <p className="mb-1 font-antialiased" style={{marginTop: '-5px'}}>Starting at {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}</p>
+                                                <p className="mb-1" style={{marginTop: '-5px'}}>Starting at {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}</p>
                                             )}
 
                                             {item.payware > 0 ? (
@@ -141,7 +141,7 @@ function SceneryCard({ airportId }) {
                     <span className="pb-1">
                         Prices are excl. tax.
                     </span>
-                    <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-3" target="_blank">
+                    <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm mt-3" target="_blank">
                         <i className="fa-sharp fa-plus"></i> Add missing scenery
                     </a>
                 </div>

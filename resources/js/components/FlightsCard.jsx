@@ -60,8 +60,8 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                             {data.flights.map(flight => (
                                 <tr key={flight.id}>
                                     <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.flight_icao}>
-                                        <div className="dropdown fs-6 text-info link-underline-info link-underline-opacity-25-hover font-work-sans ps-0">
-                                            <button className="btn btn-xs btn-xs-light dropdown-toggle font-work-sans" type="button" data-bs-toggle="dropdown" aria-expanded="false">{flight.flight_icao}</button>
+                                        <div className="dropdown fs-6 text-info link-underline-info link-underline-opacity-25-hover ps-0">
+                                            <button className="btn btn-xs btn-xs-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{flight.flight_icao}</button>
                                             <ul className="dropdown-menu">
                                                 <li>
                                                     <a

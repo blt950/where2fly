@@ -6,7 +6,7 @@
 
     <div class="container">
 
-        <p class="font-work-sans mb-5">Create lists of airports to whitelist during search and see on the map. Perfect way to only find destinations you're interested in.</p>
+        <p class="mb-5">Create lists of airports to whitelist during search and see on the map. Perfect way to only find destinations you're interested in.</p>
         
         @foreach($lists as $list)
         <div class="d-flex justify-content-between font-size-1rem mt-4">

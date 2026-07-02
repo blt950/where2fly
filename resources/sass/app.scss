@@ -77,15 +77,6 @@ h2 {
     font-weight: normal;
 }
 
-.font-work-sans{
-    font-family: 'Work Sans', sans-serif;
-    -webkit-font-smoothing: antialiased;
-}
-
-.font-antialiased{
-    -webkit-font-smoothing: antialiased;
-}
-
 header {
     height: $header-height;
     background: $secondary;
@@ -152,10 +143,6 @@ main, nav.sidebar{
             width: calc(100vw - $sidebar-width-min);
         }
     }
-}
-
-nav.sidebar p{
-    font-family: $font-family-sans-serif;
 }
 
 @include media-breakpoint-down(md) {
