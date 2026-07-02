@@ -1,5 +1,5 @@
 <header class="mb-auto">
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-xl navbar-dark">
         <div class="d-flex d-row">
             <a href="{{ route('front') }}" class="d-block navbar-brand mb-0 logo">
                 Where2Fly
