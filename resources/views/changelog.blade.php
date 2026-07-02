@@ -18,6 +18,7 @@
                 <li>Added refreshed design with darker colors for input fields, results and other color tweaks. Scenery list is also simplified.</li>
                 <li>Added Navigraph charts link to airport cards</li>
                 <li>Fixed options randomly disappearing when editing search</li>
+                <li>Fixed the menu breaking on tablet screens</li>
                 <li>A lot changes under the hood for stability and performance</li>
             </ul>
 
