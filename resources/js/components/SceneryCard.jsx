@@ -123,7 +123,7 @@ function SceneryCard({ airportId }) {
                                             ) : (
                                                 (item.payware != -1 && (
                                                     <>
-                                                    flightsim.to
+                                                    { item.linkDomain }
                                                     <i className="fa-sharp fa-solid fa-chevron-right fs-5"></i>
                                                     </>
                                                 ))

@@ -72,8 +72,6 @@ class SceneryHelper
             'developer' => $sceneryDeveloperData->developer,
             'link' => $apiData['link'] ?? $sceneryData->link,
             'linkDomain' => isset($apiData) ? null : parse_url($sceneryData->link, PHP_URL_HOST),
-            'currencyLink' => $apiData['currencyLink'] ?? null,
-            'cheapestLink' => $apiData['cheapestLink'] ?? $sceneryData->link,
             'cheapestStore' => $apiData['cheapestStore'] ?? $sceneryDeveloperData->developer,
             'cheapestPrice' => $apiData['cheapestPrice'] ?? null,
             'ratingAverage' => $apiData['ratingAverage'] ?? null,
