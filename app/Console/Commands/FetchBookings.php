@@ -43,7 +43,8 @@ class FetchBookings extends Command
             return Command::FAILURE;
         }
 
-        $airportsByIcao = Airport::all()->keyBy('icao');
+        // Only the id is used from these maps — don't load full models for all airports
+        $airportsByIcao = Airport::select('id', 'icao', 'local_code')->get()->keyBy('icao');
         $airportsByLocalCode = $airportsByIcao->filter(fn ($airport) => ! empty($airport->local_code))->keyBy('local_code');
 
         $upsertData = [];
