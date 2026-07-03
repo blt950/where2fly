@@ -35,6 +35,16 @@ class Airport extends Model
         return $this->hasOne(Metar::class);
     }
 
+    public function tafs()
+    {
+        return $this->hasMany(Taf::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
     public function runways()
     {
         return $this->hasMany(Runway::class);

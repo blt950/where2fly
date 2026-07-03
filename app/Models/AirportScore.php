@@ -10,9 +10,39 @@ class AirportScore extends Model
 {
     use HasFactory;
 
+    public const SOURCE_METAR = 'metar';
+
+    public const SOURCE_TAF = 'taf';
+
+    public const SOURCE_VATSIM = 'vatsim';
+
+    public const SOURCE_EVENT = 'event';
+
+    public const SOURCE_BOOKING = 'booking';
+
+    public const SOURCE_LOGON_ESTIMATE = 'logon_estimate';
+
+    /** Sources whose window must contain the ETA exactly */
+    public const EXACT_MATCH_SOURCES = [self::SOURCE_METAR, self::SOURCE_TAF, self::SOURCE_VATSIM, self::SOURCE_BOOKING];
+
+    /** Inexact sources, matched with a ±2h interval overlap against the ETA */
+    public const OVERLAP_MATCH_SOURCES = [self::SOURCE_EVENT, self::SOURCE_LOGON_ESTIMATE];
+
+    /** Hours of query-time tolerance applied to the inexact sources */
+    public const OVERLAP_MATCH_HOURS = 2;
+
     public $timestamps = false;
 
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'data' => 'array',
+            'valid_from' => 'datetime',
+            'valid_to' => 'datetime',
+        ];
+    }
 
     public function airport()
     {
