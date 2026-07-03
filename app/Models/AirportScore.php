@@ -71,6 +71,26 @@ class AirportScore extends Model
     }
 
     /**
+     * PHP-side twin of the coversEta scope, for filtering already-loaded score
+     * collections per candidate. The caller supplies whether the airport has a
+     * scoreable TAF period covering the ETA (the metar-fallback input), since
+     * that spans the whole airport, not this row.
+     */
+    public function coversEtaAt(Carbon $eta, bool $airportHasTafAtEta): bool
+    {
+        if (in_array($this->source, self::OVERLAP_MATCH_SOURCES)) {
+            return $this->valid_from->lte($eta->copy()->addHours(self::OVERLAP_MATCH_HOURS))
+                && $this->valid_to->gte($eta->copy()->subHours(self::OVERLAP_MATCH_HOURS));
+        }
+
+        if ($this->source === self::SOURCE_METAR && ! $airportHasTafAtEta) {
+            return true;
+        }
+
+        return $this->valid_from->lte($eta) && $this->valid_to->gte($eta);
+    }
+
+    /**
      * Same conditions as the coversEta scope, but applicable to any query
      * builder that has airport_scores in scope (e.g. a join on airports).
      */

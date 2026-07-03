@@ -20,6 +20,14 @@ class CollectionAirportFilter
                     $airtime = ($distance / CalculationHelper::aircraftNmPerHour($codeletter)) + CalculationHelper::timeClimbDescend($codeletter);
                     $arrivalAirport->airtime = round($airtime, 1);
 
+                    // Narrow the loaded scores to those applicable at this candidate's
+                    // ETA, and flag whether they're TAF-backed or a METAR fallback
+                    if ($arrivalAirport->relationLoaded('scores')) {
+                        [$scores, $hasTafAtEta] = $arrivalAirport->scoresAtEta(CalculationHelper::forecastEta($arrivalAirport->airtime));
+                        $arrivalAirport->setRelation('scores', $scores);
+                        $arrivalAirport->forecast_source = $hasTafAtEta ? 'taf' : 'metar_fallback';
+                    }
+
                     return $arrivalAirport;
                 })
                 ->filter(fn ($a) => AirportFilterHelper::hasCorrectMetcon($requiredMetcon, $a))

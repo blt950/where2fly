@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Helpers\CalculationHelper;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Location\Coordinate;
 use MatanYadaev\EloquentSpatial\Enums\Srid;
 use MatanYadaev\EloquentSpatial\Objects\LineString;
@@ -96,6 +98,36 @@ class Airport extends Model
                 }
             });
         });
+    }
+
+    /**
+     * The loaded scores applicable at the given ETA, plus whether the airport has
+     * a scoreable TAF period covering it (drives the metar-fallback matching and
+     * the forecastSource indicator).
+     *
+     * @return array{0: Collection, 1: bool}
+     */
+    public function scoresAtEta(Carbon $eta): array
+    {
+        $hasTafAtEta = $this->tafs->contains(
+            fn ($taf) => $taf->isScoreable() && $taf->valid_from->lte($eta) && $taf->valid_to->gte($eta)
+        );
+
+        return [
+            $this->scores->filter(fn ($score) => $score->coversEtaAt($eta, $hasTafAtEta))->values(),
+            $hasTafAtEta,
+        ];
+    }
+
+    /**
+     * The loaded scores deduplicated to one row per reason for rendering —
+     * several sources can assert the same reason (e.g. a booking and an event
+     * both predicting VATSIM_ATC). The row starting latest wins, so the most
+     * recent forecast period speaks for overlapping windows.
+     */
+    public function displayScores()
+    {
+        return $this->scores->sortByDesc('valid_from')->unique('reason')->values();
     }
 
     public function hasWeatherScore()
@@ -445,22 +477,30 @@ class Airport extends Model
     }
 
     /**
-     * Scope a query to only include airports that have scores
+     * Scope a query to only include airports that have scores. When an ETA is
+     * given (a Carbon instant or a per-candidate SQL expression), only score
+     * rows whose validity window applies at that ETA count.
      */
     #[Scope]
-    protected function filterByScores(Builder $query, ?array $filterByScores = null): void
+    protected function filterByScores(Builder $query, ?array $filterByScores = null, Carbon|string|null $eta = null): void
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
 
-            $query->where(function ($query) use ($filterByScores) {
+            $query->where(function ($query) use ($filterByScores, $eta) {
                 foreach ($filterByScores as $score => $value) {
                     if ($value == 1) {
-                        $query->whereHas('scores', function ($query) use ($score) {
+                        $query->whereHas('scores', function ($query) use ($score, $eta) {
                             $query->where('reason', $score);
+                            if ($eta) {
+                                $query->coversEta($eta);
+                            }
                         });
                     } elseif ($value == -1) {
-                        $query->whereDoesntHave('scores', function ($query) use ($score) {
+                        $query->whereDoesntHave('scores', function ($query) use ($score, $eta) {
                             $query->where('reason', $score);
+                            if ($eta) {
+                                $query->coversEta($eta);
+                            }
                         });
                     }
                 }
@@ -567,20 +607,26 @@ class Airport extends Model
     }
 
     /**
-     * Scope a query to only include airports that have the given scores
+     * Scope a query to sort airports by how many of the given scores they have,
+     * counting only rows valid at the ETA when one is given. The reason and
+     * window conditions live in the join clause, not the where clause, so an
+     * airport with no applicable scores still appears — with a count of zero —
+     * instead of dropping out of the results. Distinct reasons are counted:
+     * several sources can predict the same VATSIM_ATC reason, which shouldn't
+     * outrank an airport with a single real signal.
      */
     #[Scope]
-    protected function sortByScores(Builder $query, $filterByScores)
+    protected function sortByScores(Builder $query, $filterByScores, Carbon|string|null $eta = null)
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
-            // Count distinct reasons — several sources can predict the same VATSIM_ATC
-            // reason, which shouldn't outrank an airport with a single real signal
-            return $query->leftJoin('airport_scores', 'airports.id', '=', 'airport_scores.airport_id')
+            return $query->leftJoin('airport_scores', function ($join) use ($filterByScores, $eta) {
+                $join->on('airports.id', '=', 'airport_scores.airport_id')
+                    ->whereIn('airport_scores.reason', $filterByScores);
+                if ($eta) {
+                    AirportScore::applyCoversEta($join, $eta);
+                }
+            })
                 ->selectRaw('airports.*, COUNT(DISTINCT airport_scores.reason) as score_count')
-                ->where(function ($query) use ($filterByScores) {
-                    $query->whereIn('airport_scores.reason', $filterByScores)
-                        ->orWhereNull('airport_scores.reason');
-                })
                 ->groupBy('airports.id')
                 ->orderBy('score_count', 'desc');
         }

@@ -188,7 +188,7 @@ class SearchController extends Controller
                 // Select primary airport based on the criteria
                 $primaryAirport = Airport::airportOpen()->isAirportSize($destinationAirportSize)
                     ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-                    ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                    ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, now())->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                     ->returnOnlyWhitelistedIcao($whitelist)
                     ->has('metar')->with('runways', 'scores', 'metar')
                     ->get();
@@ -206,15 +206,18 @@ class SearchController extends Controller
                 $suggestedAirport = true;
             }
 
+            // Score windows are matched against each candidate's ETA
+            $eta = CalculationHelper::forecastEtaSql($primaryAirport, $codeletter);
+
             // Get airports according to filter
             $airports = Airport::airportOpen()->notIcao($primaryAirport->icao)->isAirportSize($destinationAirportSize)
                 ->inContinent($destinations)->inCountry($destinations, $primaryAirport->iso_country)->inState($destinations)
                 ->notInContinent($destinationExclusions)->notInCountry($destinationExclusions, $primaryAirport->iso_country)->notInState($destinationExclusions)
                 ->withinDistance($primaryAirport, $minDistance, $maxDistance, $primaryAirport->icao)->withinBearing($primaryAirport, $flightDirection, $minDistance, $maxDistance)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                 ->returnOnlyWhitelistedIcao($whitelist)
-                ->sortByScores($sortByScores)
+                ->sortByScores($sortByScores, $eta)
                 ->has('metar')
                 ->with([
                     'runways' => function ($query) {
@@ -222,6 +225,7 @@ class SearchController extends Controller
                     },
                     'scores',
                     'metar',
+                    'tafs',
                     'sceneryDevelopers.sceneries' => function ($query) {
                         $query->where('published', true)->with('simulator');
                     },
@@ -261,6 +265,10 @@ class SearchController extends Controller
                     $airportCoordinates[$airport->icao]['type'] = $airport->type;
                     $airportCoordinates[$airport->icao]['color'] = 'grey';
                 }
+
+                // The primary airport is where the pilot is now — its scores are windowed at now
+                [$primaryScores] = $primaryAirport->scoresAtEta(now());
+                $primaryAirport->setRelation('scores', $primaryScores);
 
                 // To ensure bookmarks works, let's comapre the searchVersion
                 $searchVersionWarning = false;

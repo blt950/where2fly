@@ -112,14 +112,18 @@ class SearchController extends Controller
             $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->first();
         }
 
+        // Score windows are matched against each candidate's ETA — internal only,
+        // it never changes the airtime returned in the response
+        $eta = CalculationHelper::forecastEtaSql($airport, $codeletter);
+
         $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
             ->inContinent($destinations)->inCountry($destinations, $airport->iso_country)->inState($destinations)
             ->withinDistance($airport, $minDistance, $maxDistance, $airport->icao)
             ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-            ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)
+            ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta)
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
-            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes())
-            ->has('metar')->with('runways', 'scores', 'metar')
+            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes(), $eta)
+            ->has('metar')->with('runways', 'scores', 'metar', 'tafs')
             ->get();
 
         // Shuffle and limit the results to 20
@@ -153,6 +157,10 @@ class SearchController extends Controller
 
     public function prepareAirportData($airport, $suggestedAirports)
     {
+        // The anchor airport is where the pilot is now — its scores are windowed at now
+        [$scores] = $airport->scoresAtEta(now());
+        $airport->setRelation('scores', $scores);
+
         return [
             new AirportResource($airport),
             SuggestedAirportResource::collection($suggestedAirports),

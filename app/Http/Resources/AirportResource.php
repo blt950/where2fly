@@ -17,8 +17,9 @@ class AirportResource extends JsonResource
             'country' => $this->iso_country,
             'region' => $this->iso_region,
             'metar' => app()->isProduction() ? $this->metar->metar : 'TEST-DATA ' . $this->metar->metar,
+            'taf' => optional($this->tafs->first())->raw_text,
             'longestRwyFt' => $this->longestRunway(),
-            'scores' => $this->scores->pluck('reason'),
+            'scores' => $this->scores->pluck('reason')->unique()->values(),
         ];
     }
 }

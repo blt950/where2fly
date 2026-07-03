@@ -2,11 +2,43 @@
 
 namespace App\Helpers;
 
+use App\Models\Airport;
+use Carbon\Carbon;
 use InvalidArgumentException;
 use Location\Coordinate;
 
 class CalculationHelper
 {
+    /**
+     * The estimated arrival time for a flight of the given airtime, used only to
+     * time-scope forecast lookups — never returned to the client and never a
+     * replacement for the airtime value itself. No buffer: ETA = now + airtime.
+     */
+    public static function forecastEta(float $airtimeHours): Carbon
+    {
+        return now()->addSeconds((int) round($airtimeHours * 3600));
+    }
+
+    /**
+     * The same ETA as forecastEta(), but as a SQL expression evaluated per
+     * candidate airport row — the airtime part of the ETA depends on each
+     * candidate's distance from the anchor airport, which only the database
+     * knows while filtering.
+     */
+    public static function forecastEtaSql(Airport $anchorAirport, string $codeletter): string
+    {
+        $connection = $anchorAirport->getConnection();
+        $anchorPoint = $anchorAirport->coordinates->toSqlExpression($connection)->getValue($connection->getQueryGrammar());
+
+        // Same airtime formula the filterWithCriteria collection macro uses: nm / cruise speed + climb/descend time
+        return sprintf(
+            'DATE_ADD(NOW(), INTERVAL ((ST_DISTANCE_SPHERE(airports.coordinates, %s) / 1852 / %d + %F) * 3600) SECOND)',
+            $anchorPoint,
+            self::aircraftNmPerHour($codeletter),
+            self::timeClimbDescend($codeletter)
+        );
+    }
+
     /**
      * Calculate the distance between two points
      *
