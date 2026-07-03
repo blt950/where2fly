@@ -132,6 +132,35 @@ class AirportScore extends Model
         });
     }
 
+    /**
+     * A readable tooltip line built from the structured data payload,
+     * shaped by which source generated the row.
+     */
+    public function tooltipText(): ?string
+    {
+        if (! $this->data) {
+            return null;
+        }
+
+        if (isset($this->data['stations'])) {
+            return implode(', ', $this->data['stations']);
+        }
+
+        if (isset($this->data['event'])) {
+            return $this->data['event'] . ' until ' . Carbon::parse($this->data['end'])->format('H:i\z');
+        }
+
+        if (isset($this->data['callsign'])) {
+            return 'Booked: ' . $this->data['callsign'] . ' ' . $this->valid_from->format('H:i\z') . '–' . $this->valid_to->format('H:i\z');
+        }
+
+        if (isset($this->data['position'])) {
+            return $this->data['position'] . ' online until ~' . Carbon::parse($this->data['estimated_logoff'])->format('H:i\z');
+        }
+
+        return null;
+    }
+
     public function isWeatherScore()
     {
         return str_starts_with($this->reason, 'METAR_');

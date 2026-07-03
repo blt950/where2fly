@@ -265,3 +265,15 @@ u-tab[aria-selected="true"] {
     color: black;
     background: $primary;
 }
+.score-icon {
+    display: inline-block;
+
+    .score-probability-badge {
+        top: -6px;
+        right: -7px;
+        font-size: .55em;
+        color: $primary;
+        background-color: $secondary;
+        border-radius: 50%;
+    }
+}

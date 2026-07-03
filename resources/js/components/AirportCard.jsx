@@ -121,7 +121,7 @@ function AirportCard({ airportId }) {
 
                             <dt>TAF</dt>
                             <dd>
-                                <TAF icao={data.airport.icao}/>
+                                <TAF taf={data.taf}/>
                             </dd>
 
                             {data.airlines && data.airlines.length > 0 && (

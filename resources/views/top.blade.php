@@ -38,7 +38,7 @@
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Airport</th>
-                        <th scope="col" width="10%">Conditions</th>
+                        <th scope="col" width="10%">Forecast</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,14 +53,9 @@
                                 </div>
                                 {{ $airport->name }}
                             </td>
-                            <td class="fs-5" data-sort="{{ $airport->scores->count() }}">
-                                @foreach($airport->scores as $score)
-                                    <i 
-                                        class="fa-sharp fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                        data-bs-html="true"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                                    ></i>
+                            <td class="fs-5" data-sort="{{ $airport->displayScores()->count() }}">
+                                @foreach($airport->displayScores() as $score)
+                                    @include('layouts.score-icon', ['score' => $score])
                                 @endforeach
                             </td>
                         </tr>

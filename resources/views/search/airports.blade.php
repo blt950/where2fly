@@ -86,24 +86,10 @@
 
             @if($primaryAirport->scores->count() > 0)
                 <dl>
-                    <dt>Conditions<dt>
+                    <dt>Forecast<dt>
                     <dd>
-                    @foreach($primaryAirport->scores as $score)
-                        @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
-                            <i 
-                                class="text-success fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                data-bs-html="true"
-                                data-bs-toggle="tooltip"
-                                data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                            ></i>
-                        @else
-                            <i 
-                                class="fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                data-bs-html="true"
-                                data-bs-toggle="tooltip"
-                                data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                            ></i>
-                        @endif
+                    @foreach($primaryAirport->displayScores() as $score)
+                        @include('layouts.score-icon', ['score' => $score, 'highlighted' => isset($filteredScores) && in_array($score->reason, $filteredScores)])
                     @endforeach
                     </dd>
                 </dl>
@@ -114,7 +100,14 @@
                 <dd>
                     @if($primaryAirport->metar)
                         {{ \Carbon\Carbon::parse($primaryAirport->metar->last_update)->format('dHi\Z') }} {{ $primaryAirport->metar->metar }}
-                        <span class="d-block mt-2"><button class="d-block btn btn-outline-light btn-sm" data-airport-icao="{{ $primaryAirport->icao }}" data-taf-button="true">Fetch TAF</button></span>
+                        <span class="d-block mt-2">
+                            @if($primaryAirport->tafs->first())
+                                <button class="d-block btn btn-outline-light btn-sm" data-taf-button="true">Show TAF</button>
+                                <span class="d-none" data-taf-text="true">{{ $primaryAirport->tafs->first()->raw_text }}</span>
+                            @else
+                                <i class="fa-sharp fa-info-square"></i> No TAF available
+                            @endif
+                        </span>
                     @else
                         <i class="fa-sharp fa-info-square"></i> No METAR available
                     @endif
@@ -135,7 +128,7 @@
                         <th scope="col">Airport</th>
                         <th scope="col">Distance</th>
                         <th scope="col">Time</th>
-                        <th scope="col">Conditions</th>
+                        <th scope="col">Forecast</th>
                     </tr>
                     @if( !empty($sortByScores) && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
 
@@ -167,23 +160,9 @@
                             </td>
                             <td data-sort="{{ $airport->distance }}">{{ $airport->distance }}nm</td>
                             <td data-sort="{{ $airport->airtime }}">{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
-                            <td class="fs-5" data-sort={{ $airport->scores->count() }}>
-                                @foreach($airport->scores as $score)
-                                    @if(isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1)
-                                        <i 
-                                            class="text-success fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                            data-bs-html="true"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                                        ></i>
-                                    @else
-                                        <i 
-                                            class="fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                            data-bs-html="true"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                                        ></i>
-                                    @endif
+                            <td class="fs-5" data-sort={{ $airport->displayScores()->count() }}>
+                                @foreach($airport->displayScores() as $score)
+                                    @include('layouts.score-icon', ['score' => $score, 'highlighted' => isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1])
                                 @endforeach
                             </td>
                         </tr>
@@ -203,7 +182,12 @@
 
                                     <dt class="mt-3">TAF</dt>
                                     <dd>
-                                        <button class="btn btn-outline-secondary btn-sm" data-airport-icao="{{ $airport->icao }}" data-taf-button="true">Fetch</button>
+                                        @if($airport->tafs->first())
+                                            <button class="btn btn-outline-secondary btn-sm" data-taf-button="true">Show</button>
+                                            <span class="d-none" data-taf-text="true">{{ $airport->tafs->first()->raw_text }}</span>
+                                        @else
+                                            No TAF available
+                                        @endif
                                     </dd>
 
                                     <dt class="mt-3">Links</dt>
