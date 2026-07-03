@@ -48,6 +48,20 @@
     }
 }
 
+// Tooltip visibility by zoom/type, driven by classes set imperatively on the map container (see MapTooltipZoom).
+.map.tt-filter {
+    .leaflet-tooltip.airport--small_airport,
+    .leaflet-tooltip.airport--medium_airport {
+        display: none;
+    }
+
+    &.tt-show-medium .leaflet-tooltip.airport--medium_airport { display: block; }
+    &.tt-show-small  .leaflet-tooltip.airport--small_airport  { display: block; }
+
+    // Focused / primary airport always keeps its label, regardless of zoom.
+    .leaflet-tooltip.airport--pinned { display: block; }
+}
+
 .leaflet-marker-icon.marker-cluster{
     color: black;
     background: $primary;
@@ -60,7 +74,6 @@
     -webkit-font-smoothing: antialiased;
     font-size: 1rem;
     text-align: center;
-    align-content: center;
 
     &.inverted{
         color: white;
