@@ -16,6 +16,7 @@ yarn-error.log
 /.vscode
 apache/*
 .DS_Store
+graphify-out
 
 /resources/fonts/fa-brands-400.ttf
 /resources/fonts/fa-brands-400.woff2
