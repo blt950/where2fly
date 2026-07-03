@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -49,6 +52,66 @@ class AirportScore extends Model
         return $this->belongsTo(Airport::class);
     }
 
+    /**
+     * Scope score rows to those applicable at the given ETA. $eta is either a
+     * Carbon instant or a raw SQL expression (for per-candidate ETAs computed
+     * in the query itself). Matching depends on the row's source:
+     *
+     * - metar/taf/vatsim/booking: the window must contain the ETA exactly —
+     *   except a METAR row also matches regardless of its window when the
+     *   airport has no scoreable TAF period covering the ETA, so a search
+     *   never silently returns zero weather scores (the metar_fallback case)
+     * - event/logon_estimate: inexact signals, matched when the window
+     *   overlaps [ETA-2h, ETA+2h]
+     */
+    #[Scope]
+    protected function coversEta(Builder $query, Carbon|string $eta): void
+    {
+        self::applyCoversEta($query, $eta);
+    }
+
+    /**
+     * Same conditions as the coversEta scope, but applicable to any query
+     * builder that has airport_scores in scope (e.g. a join on airports).
+     */
+    public static function applyCoversEta($query, Carbon|string $eta): void
+    {
+        [$etaSql, $bindings] = $eta instanceof Carbon ? ['?', [$eta->toDateTimeString()]] : [$eta, []];
+
+        $query->where(function ($query) use ($etaSql, $bindings) {
+            // Exact containment for sources with a precise window
+            $query->where(function ($query) use ($etaSql, $bindings) {
+                $query->whereIn('airport_scores.source', self::EXACT_MATCH_SOURCES)
+                    ->whereRaw("airport_scores.valid_from <= {$etaSql}", $bindings)
+                    ->whereRaw("airport_scores.valid_to >= {$etaSql}", $bindings);
+            });
+
+            // Interval overlap with a tolerance for the inexact signals
+            $query->orWhere(function ($query) use ($etaSql, $bindings) {
+                $query->whereIn('airport_scores.source', self::OVERLAP_MATCH_SOURCES)
+                    ->whereRaw("airport_scores.valid_from <= DATE_ADD({$etaSql}, INTERVAL " . self::OVERLAP_MATCH_HOURS . ' HOUR)', $bindings)
+                    ->whereRaw("airport_scores.valid_to >= DATE_SUB({$etaSql}, INTERVAL " . self::OVERLAP_MATCH_HOURS . ' HOUR)', $bindings);
+            });
+
+            // The current METAR is the fallback when no scoreable TAF period covers the ETA
+            $query->orWhere(function ($query) use ($etaSql, $bindings) {
+                $query->where('airport_scores.source', self::SOURCE_METAR)
+                    ->whereNotExists(function ($query) use ($etaSql, $bindings) {
+                        $query->from('tafs')
+                            ->whereColumn('tafs.airport_id', 'airport_scores.airport_id')
+                            ->whereRaw("tafs.valid_from <= {$etaSql}", $bindings)
+                            ->whereRaw("tafs.valid_to >= {$etaSql}", $bindings)
+                            ->where(function ($query) {
+                                // Mirrors Taf::isScoreable()
+                                $query->whereNotNull('tafs.probability')
+                                    ->orWhereNull('tafs.change_indicator')
+                                    ->orWhereIn('tafs.change_indicator', ['FM', 'BECMG']);
+                            });
+                    });
+            });
+        });
+    }
+
     public function isWeatherScore()
     {
         return str_starts_with($this->reason, 'METAR_');
@@ -62,8 +125,11 @@ class AirportScore extends Model
     public static function getTopAirports($continent = null, $whitelist = null, $limit = 30, $exclude = null)
     {
 
-        // Establish the return query
-        $returnQuery = AirportScore::select('airport_id', DB::raw('count(airport_scores.id) as id_count'))
+        // Establish the return query — counting distinct reasons so an airport with
+        // several sources predicting the same reason doesn't outrank a real signal,
+        // and only counting rows whose validity window applies right now
+        $returnQuery = AirportScore::select('airport_id', DB::raw('count(distinct airport_scores.reason) as id_count'))
+            ->coversEta(now())
             ->groupBy('airport_id')
             ->orderByDesc('id_count')
             ->join('airports', 'airport_scores.airport_id', '=', 'airports.id');
@@ -100,9 +166,10 @@ class AirportScore extends Model
             $returnQuery = $returnQuery->whereIn('airports.icao', $whitelist);
         }
 
-        // Filter airport type, relevant data and run the query
+        // Filter airport type, relevant data and run the query — the loaded scores
+        // are windowed the same way as the count, so the view renders what was ranked
         $result = $returnQuery->whereIn('airports.type', ['large_airport', 'medium_airport', 'seaplane_base', 'small_airport'])
-            ->with('airport', 'airport.metar', 'airport.runways', 'airport.scores')
+            ->with(['airport', 'airport.metar', 'airport.runways', 'airport.scores' => fn ($query) => $query->coversEta(now())])
             ->limit($limit)
             ->get();
 

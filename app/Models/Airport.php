@@ -573,8 +573,10 @@ class Airport extends Model
     protected function sortByScores(Builder $query, $filterByScores)
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
+            // Count distinct reasons — several sources can predict the same VATSIM_ATC
+            // reason, which shouldn't outrank an airport with a single real signal
             return $query->leftJoin('airport_scores', 'airports.id', '=', 'airport_scores.airport_id')
-                ->selectRaw('airports.*, COUNT(airport_scores.id) as score_count')
+                ->selectRaw('airports.*, COUNT(DISTINCT airport_scores.reason) as score_count')
                 ->where(function ($query) use ($filterByScores) {
                     $query->whereIn('airport_scores.reason', $filterByScores)
                         ->orWhereNull('airport_scores.reason');
