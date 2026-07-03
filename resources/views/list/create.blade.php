@@ -21,7 +21,7 @@
 
             <div class="mb-3">
                 <label for="simulator" class="form-label">Simulator</label>
-                <select class="form-select" id="simulator" name="simulator" required>
+                <select class="form-control form-select" id="simulator" name="simulator" required>
                     @foreach($simulators as $simulator)
                         <option value="{{ $simulator->id }}">{{ $simulator->name }}</option>
                     @endforeach

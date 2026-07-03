@@ -1,0 +1,10 @@
+{
+  "name": "run-where2fly",
+  "version": "1.0.0",
+  "description": "Playwright driver for the run-where2fly agent skill",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "playwright": "^1.61.1"
+  }
+}

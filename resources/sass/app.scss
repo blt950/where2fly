@@ -77,10 +77,6 @@ h2 {
     font-weight: normal;
 }
 
-.font-work-sans{
-    font-family: 'Work Sans', sans-serif;
-}
-
 header {
     height: $header-height;
     background: $secondary;
@@ -107,8 +103,8 @@ main, nav.sidebar{
     }
 
     .title{
-        padding: 1.5rem 1rem;
-        background: #202538;
+        padding: 1rem;
+        background: $secondary;
 
         h1{
             margin: 0;
@@ -147,10 +143,6 @@ main, nav.sidebar{
             width: calc(100vw - $sidebar-width-min);
         }
     }
-}
-
-nav.sidebar p{
-    font-family: $font-family-sans-serif;
 }
 
 @include media-breakpoint-down(md) {

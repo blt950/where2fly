@@ -85,48 +85,51 @@ function SceneryCard({ airportId }) {
                         {Object.keys(data).map((key) => (
                             <u-tabpanel id={key} key={key}>
                                 {data[key].map((item, index) => (
-                                    <div key={index} className="scenery-row" data-scenery-id={item.id}>
-                                        
-                                        <div className="title d-flex flex-row justify-content-between align-items-center">
-                                            <div className="d-flex align-items-center flex-wrap">
-                                                <span className="developer">{item.developer}</span>
-                                                {(item.fsac && item.ratingAverage > 0) && (
-                                                    <span className="star"><i className="fa-sharp fa-regular fa-star"></i>&nbsp;{parseFloat(item.ratingAverage).toFixed(1)}</span>
-                                                )}
+                                    <a href={item.link} target="_blank" key={index} className="scenery-row" data-scenery-id={item.id}>
+                                        <div>
+                                            <div className="title d-flex flex-row justify-content-between align-items-center">
+                                                <div className="d-flex align-items-center flex-wrap">
+                                                    <span className="developer">{item.developer}</span>
+                                                </div>
                                             </div>
+
+                                            {(item.fsac && item.cheapestPrice.EUR > 0) && (
+                                                <p className="mb-1" style={{marginTop: '-5px'}}>Starting at {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}</p>
+                                            )}
+
                                             {item.payware > 0 ? (
-                                                <span className="badge bg-info">Payware</span>
+                                                <span className="badge bg-info">Payware
+                                                    {(item.fsac && item.ratingAverage > 0) && (
+                                                        <>
+                                                        &nbsp;
+                                                        <span className="star"><i className="fa-sharp fa-star"></i>{parseFloat(item.ratingAverage).toFixed(1)}</span>
+                                                        </>
+                                                    )}
+                                                </span>
                                             ) : (
                                                 (item.payware == -1 ? (
-                                                    <span className="badge bg-danger">Included</span>
+                                                    <span className="badge bg-danger">Included in simulator</span>
                                                 ) : (
                                                     <span className="badge bg-success">Freeware</span>
                                                 ))
                                             )}
                                         </div>
-
-                                        {(item.fsac && item.cheapestPrice.EUR > 0) ? (
-                                            <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">See all prices <i className="fa-sharp fa-up-right-from-square"></i></a>
-                                        ) : (
-                                            (item.link == 'https://www.flightsimulator.com/') ? (
-                                                <i>Included in the simulator</i>
+                                        <div className="d-flex align-items-center">
+                                            {(item.fsac ? (
+                                                <>
+                                                See prices
+                                                <i className="fa-sharp fa-solid fa-chevron-right fs-5"></i>
+                                                </>
                                             ) : (
-                                                <a href={item.link} target="_blank" className="btn btn-outline-primary btn-sm me-2">{item.linkDomain} <i className="fa-sharp fa-up-right-from-square"></i></a>
-                                            )
-                                        )}
-
-                                        {(item.fsac && item.cheapestPrice.EUR > 0) && (
-                                            <a href={item.currencyLink?.[currency] || item.cheapestLink} target="_blank" className="btn btn-outline-light btn-sm"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-title="This link might be affiliated"
-                                                data-bs-placement="right"
-                                            >
-                                                Cheapest: {item.cheapestStore} {currencies.find(c => c.code === currency).symbol}{parseFloat(item.cheapestPrice[currency]).toFixed(2)}
-                                                <i className="fa-sharp fa-up-right-from-square ms-1"></i>
-                                            </a>
-                                        )}
-                                        
-                                    </div>
+                                                (item.payware != -1 && (
+                                                    <>
+                                                    { item.linkDomain }
+                                                    <i className="fa-sharp fa-solid fa-chevron-right fs-5"></i>
+                                                    </>
+                                                ))
+                                            ))}
+                                        </div>
+                                    </a>
                                 ))}
                             </u-tabpanel>
                         ))}
@@ -138,7 +141,7 @@ function SceneryCard({ airportId }) {
                     <span className="pb-1">
                         Prices are excl. tax.
                     </span>
-                    <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm font-work-sans mt-3" target="_blank">
+                    <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm mt-3" target="_blank">
                         <i className="fa-sharp fa-plus"></i> Add missing scenery
                     </a>
                 </div>

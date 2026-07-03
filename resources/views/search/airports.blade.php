@@ -35,31 +35,39 @@
             </div>
         @endif
 
-        @if($suggestedAirport)
-            <div class="d-flex flex-wrap justify-content-between">
-                <h2>{{ ucfirst($direction) }} suggestion</h2>
+        <div class="results-header">
+            @if($suggestedAirport)
+                <div class="d-flex flex-wrap justify-content-between">
+                    <h2 class="mb-0">
+                        <i class="fa-sharp fa-plane-{{ $direction }}"></i>
+                        {{ ucfirst($direction) }} suggestion
+                    </h2>
 
-                {{-- Add possibility to re-post the search query for a new random departure --}}
-                <form id="randomiseForm" method="GET" action="{{ route('search') }}">
-                    @foreach($_GET as $key => $value)
-                        @if($key != '_token')
-                            @if(is_array($value))
-                                @foreach($value as $subkey => $subvalue)
-                                    <input type="hidden" name="{{ $key }}[{{ $subkey }}]" value="{{ $subvalue }}">
-                                @endforeach
-                            @else
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    {{-- Add possibility to re-post the search query for a new random departure --}}
+                    <form id="randomiseForm" method="GET" action="{{ route('search') }}">
+                        @foreach($_GET as $key => $value)
+                            @if($key != '_token')
+                                @if(is_array($value))
+                                    @foreach($value as $subkey => $subvalue)
+                                        <input type="hidden" name="{{ $key }}[{{ $subkey }}]" value="{{ $subvalue }}">
+                                    @endforeach
+                                @else
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endif
                             @endif
-                        @endif
-                    @endforeach
+                        @endforeach
 
-                    <button id="randomiseBtn" type="submit" form="randomiseForm" class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;">Randomise <i class="fa-sharp fa-shuffle"></i></button>
-                </form>
+                        <button id="randomiseBtn" type="submit" form="randomiseForm" class="btn btn-sm btn-outline-warning">Randomise <i class="fa-sharp fa-shuffle"></i></button>
+                    </form>
 
-            </div>
-        @else
-            <h2>{{ ucfirst($direction) }}</h2>
-        @endif
+                </div>
+            @else
+                <h2 class="mb-0">
+                    <i class="fa-sharp fa-plane-{{ $direction }}"></i>
+                    {{ ucfirst($direction) }}
+                </h2>
+            @endif
+        </div>
         <div class="results-container">
             <dl>
                 <dt>Airport<dt>
@@ -106,7 +114,7 @@
                 <dd>
                     @if($primaryAirport->metar)
                         {{ \Carbon\Carbon::parse($primaryAirport->metar->last_update)->format('dHi\Z') }} {{ $primaryAirport->metar->metar }}
-                        <span class="d-block mt-2"><button class="d-block btn btn-outline-secondary btn-sm" data-airport-icao="{{ $primaryAirport->icao }}" data-taf-button="true">Fetch TAF</button></span>
+                        <span class="d-block mt-2"><button class="d-block btn btn-outline-light btn-sm" data-airport-icao="{{ $primaryAirport->icao }}" data-taf-button="true">Fetch TAF</button></span>
                     @else
                         <i class="fa-sharp fa-info-square"></i> No METAR available
                     @endif
@@ -114,7 +122,11 @@
             </dl>
         </div>
 
-        <h2>{{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>
+        <div class="results-header">
+            <h2 class="mb-0">
+                <i class="fa-sharp fa-plane-{{ ($direction == 'departure') ? 'arrival' : 'departure' }}"></i>
+                {{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover text-start sortable asc mb-0" data-detail-table="airport-results">
                 <thead>
@@ -127,7 +139,7 @@
                     </tr>
                     @if( !empty($sortByScores) && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
 
-                        <tr class="font-work-sans">
+                        <tr>
                             <th class="text-center text-info fw-normal pt-3 pb-3" colspan="9">
                                 <i class="fa-sharp fa-info-square"></i> None of the airports in your range has interesting weather or ATC
                             </th>
@@ -197,23 +209,23 @@
                                     <dt class="mt-3">Links</dt>
                                     <dd>
                                         @if($direction == 'departure')
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="{{ route('search.routes', ['departure' => $primaryAirport->icao, 'arrival' => $airport->icao, 'sort' => 'flight']) }}" target="_blank">
+                                            <a class="btn btn-outline-secondary btn-sm" href="{{ route('search.routes', ['departure' => $primaryAirport->icao, 'arrival' => $airport->icao, 'sort' => 'flight']) }}" target="_blank">
                                                 <span>Routes</span>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="https://dispatch.simbrief.com/options/custom?orig={{ $primaryAirport->icao }}&amp;dest={{ $airport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-secondary btn-sm" href="https://dispatch.simbrief.com/options/custom?orig={{ $primaryAirport->icao }}&amp;dest={{ $airport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
                                                 <span>SimBrief</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-secondary btn-sm" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
                                                 <span>Windy</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
                                         @else
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="{{ route('search.routes', ['departure' => $airport->icao, 'arrival' => $primaryAirport->icao, 'sort' => 'flight']) }}" target="_blank">
+                                            <a class="btn btn-outline-secondary btn-sm" href="{{ route('search.routes', ['departure' => $airport->icao, 'arrival' => $primaryAirport->icao, 'sort' => 'flight']) }}" target="_blank">
                                                 <span>Routes</span>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="https://dispatch.simbrief.com/options/custom?orig={{ $airport->icao }}&amp;dest={{ $primaryAirport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-secondary btn-sm" href="https://dispatch.simbrief.com/options/custom?orig={{ $airport->icao }}&amp;dest={{ $primaryAirport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
                                                 <span>SimBrief</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-secondary btn-sm" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
                                                 <span>Windy</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
                                         @endif
@@ -256,7 +268,7 @@
                     @elseif($count > 10)
                         <tr id="showMoreRow">
                             <th colspan="10" class="text-center text-danger">
-                                <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
+                                <button id="showMoreBtn" class="btn btn-outline-primary">Show more</button>
                             </th>
                         </tr>
                     @endif

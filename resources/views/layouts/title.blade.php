@@ -2,7 +2,7 @@
     <h1>{{ $title }}</h1>
 
     @isset($subtitle)
-        <h2>{{ $subtitle }}</h2>
+        <h2 class="mb-0">{{ $subtitle }}</h2>
     @endisset
 
     @isset($editLink)

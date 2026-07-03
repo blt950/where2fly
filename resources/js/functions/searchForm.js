@@ -166,9 +166,11 @@ function toggleFilters(goingBack = false){
 
 function contractFilters(){
     var filter = document.getElementById('filters');
+    var btn = document.getElementById('expandFilters');
 
     filter.classList.add('hide-filters');
-    document.getElementById('expandFilters').innerHTML = 'Show more filters';
+    btn.innerHTML = 'Show more filters <i class="fa-sharp fa-chevron-down expand-chevron"></i>';
+    btn.classList.remove('active');
     sessionStorage.setItem('filterExpanded', false);
 
     filterExpanded = false;
@@ -176,9 +178,11 @@ function contractFilters(){
 
 function expandFilters(filter){
     var filter = document.getElementById('filters');
+    var btn = document.getElementById('expandFilters');
 
     filter.classList.remove('hide-filters');
-    document.getElementById('expandFilters').innerHTML = 'Hide filters';
+    btn.innerHTML = 'Hide filters <i class="fa-sharp fa-chevron-down expand-chevron"></i>';
+    btn.classList.add('active');
     sessionStorage.setItem('filterExpanded', true);
 
     filterExpanded = true;

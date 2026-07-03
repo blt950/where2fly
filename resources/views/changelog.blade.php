@@ -15,9 +15,11 @@
             <h2 class="mb-0">v3.0.0</h2>
             <span class="badge ps-0 pb-2">2026-XX-XX</span>
             <ul>
+                <li>Added refreshed design with darker colors for input fields, results and other color tweaks. Scenery list is also simplified.</li>
                 <li>Added Navigraph charts link to airport cards</li>
+                <li>Fixed performance and clustering of maps with many airports.</li>
                 <li>Fixed options randomly disappearing when editing search</li>
-                <li>Fixed performance and clustering of maps with many airports</li>
+                <li>Fixed the menu breaking on tablet screens</li>
                 <li>A lot changes under the hood for stability and performance</li>
             </ul>
 

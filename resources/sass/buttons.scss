@@ -59,20 +59,22 @@ button {
 
         &.show{
             color: $white;
-            background: #202538;
-            border-color: #202538;
+            background: $tertiary;
+            border-color: $tertiary;
         }
     }
 }
 
 .dropdown{
     &-menu{
-        background-color: $table-bg;
+        background: $secondary;
     }
 
     &-item{
+        color: $offwhite;
+
         &:hover, &:active, &:focus{
-            background-color: #e2e2e2;
+            background: $offwhite;
             color: $black;
         }
     }

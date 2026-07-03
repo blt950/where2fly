@@ -33,7 +33,8 @@
 
 .leaflet-tooltip.airport {
 
-    font-family: 'Work Sans', sans-serif;
+    font-family: $font-family-sans-serif;
+    -webkit-font-smoothing: antialiased;
     background-color: transparent;
     border: transparent;
     box-shadow: none;
@@ -66,12 +67,17 @@
     background: $primary;
     border-radius: 50%;
 
-    font-family: 'Work Sans', sans-serif;
+    width: 40px;
+    height: 40px;
+
+    font-family: $font-family-sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-size: 1rem;
     text-align: center;
 
     &.inverted{
         color: white;
-        background: #202538;
+        background: $tertiary;
     }
 }
 

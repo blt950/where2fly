@@ -1,4 +1,7 @@
 #filters{
+
+    color: $bluewhite;
+
     .btn-group{
         border-radius: 2px;
 
@@ -37,7 +40,7 @@
 
             &-check.light:checked + .btn {
                 color: white;
-                background: var(--bs-btn-active-bg);
+                background: $tertiary;
             }
 
             &-check.green:checked + .btn {
@@ -83,7 +86,7 @@
 
     .button{
         background: none;
-        color: white;
+        color: $bluewhite;
         font-weight: 300;
 
         padding: 0.5rem 1rem;
@@ -91,6 +94,15 @@
 
         &:hover{
             border: 1px solid rgba($primary, 1);
+        }
+
+        .expand-chevron {
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+
+        &.active .expand-chevron {
+            transform: rotate(180deg);
         }
     }
 }

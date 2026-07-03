@@ -72,8 +72,6 @@ class SceneryHelper
             'developer' => $sceneryDeveloperData->developer,
             'link' => $apiData['link'] ?? $sceneryData->link,
             'linkDomain' => isset($apiData) ? null : parse_url($sceneryData->link, PHP_URL_HOST),
-            'currencyLink' => $apiData['currencyLink'] ?? null,
-            'cheapestLink' => $apiData['cheapestLink'] ?? $sceneryData->link,
             'cheapestStore' => $apiData['cheapestStore'] ?? $sceneryDeveloperData->developer,
             'cheapestPrice' => $apiData['cheapestPrice'] ?? null,
             'ratingAverage' => $apiData['ratingAverage'] ?? null,
@@ -108,8 +106,17 @@ class SceneryHelper
         foreach ($returnData as $simulator => $sceneries) {
             // First sort by developer name
             usort($sceneries, fn ($a, $b) => $a['developer'] <=> $b['developer']);
-            // Then sort by payware/free
-            usort($sceneries, fn ($a, $b) => $a['payware'] <=> $b['payware']);
+            // Then sort by payware/free: -1 (bundled) on top, then payware, then freeware
+            usort($sceneries, function ($a, $b) {
+                if ($a['payware'] === -1 && $b['payware'] !== -1) {
+                    return -1;
+                }
+                if ($a['payware'] !== -1 && $b['payware'] === -1) {
+                    return 1;
+                }
+
+                return $b['payware'] <=> $a['payware'];
+            });
             $returnData[$simulator] = $sceneries;
         }
     }

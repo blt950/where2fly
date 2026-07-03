@@ -1,3 +1,4 @@
+@use 'sass:color';
 
 table{
 
@@ -22,10 +23,8 @@ table{
     tr.pointer {
         cursor: pointer;
 
-        // Set th's under to color if .active is present
-
         &.active th, &.active td{
-            background-color: #e2e2e2;
+            background-color: color.adjust($tertiary, $lightness: -8%);
         }
 
         .expand-chevron {

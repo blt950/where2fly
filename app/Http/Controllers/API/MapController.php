@@ -293,8 +293,6 @@ class MapController extends Controller
                 // Add scenery to return data
                 $returnData[$supportedApiSimulators[$compatibleSimulator]->shortened_name][] = SceneryHelper::prepareSceneryData($sceneryDeveloperModel, $sceneryModel, [
                     'link' => $scenery->link,
-                    'currencyLink' => $cheapestStore->currencyLink,
-                    'cheapestLink' => $cheapestStore->link,
                     'cheapestStore' => $cheapestStore->store,
                     'cheapestPrice' => $cheapestStore->currencyPrice,
                     'ratingAverage' => $scenery->ratingAverage,
