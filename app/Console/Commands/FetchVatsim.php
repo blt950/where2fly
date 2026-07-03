@@ -75,23 +75,11 @@ class FetchVatsim extends Command
                     continue;
                 }
 
-                // Fetch callsign prefix
-                preg_match('/^([A-Z]*)_/', $controller->callsign, $matches);
+                // Resolve the position callsign to an airport ICAO
+                $callsign = AirportCallsignHelper::resolveIcao($controller->callsign);
 
-                if (! isset($matches[1])) {
+                if (! $callsign) {
                     continue;
-                }
-
-                // For callsigns with 3 letters or less
-                if (strlen($matches[1]) <= 3) {
-                    $australianCallsign = AirportCallsignHelper::returnAustralianAirport($matches[1]);
-                    if ($australianCallsign) {
-                        $callsign = $australianCallsign;
-                    } else {
-                        $callsign = AirportCallsignHelper::returnAmericanIcao($matches[1]);
-                    }
-                } else {
-                    $callsign = $matches[1];
                 }
 
                 if (isset($airportMap[$callsign])) {

@@ -1,0 +1,186 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Helpers\AviationWeatherHelper;
+use App\Helpers\WeatherScoreHelper;
+use App\Models\Airport;
+use App\Models\AirportScore;
+use App\Models\Taf;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
+
+class FetchTafs extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'fetch:tafs';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Fetch all current TAFs from the aviationweather.gov bulk cache and score their forecast periods';
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    public function handle()
+    {
+
+        $processTime = microtime(true);
+        $this->info("Starting fetching of TAF's");
+
+        $paths = AviationWeatherHelper::downloadCache('https://aviationweather.gov/data/cache/tafs.cache.xml.gz');
+
+        $tafDocuments = $this->parseTafDocuments($paths['xml']);
+
+        $airports = Airport::whereIn('icao', array_keys($tafDocuments))->get()->keyBy(fn ($airport) => strtoupper($airport->icao));
+
+        // Only reprocess airports whose TAF has actually been reissued/amended since
+        // the last run — TAFs only change every ~6 hours plus occasional amendments
+        $storedIssues = Taf::selectRaw('airport_id, MAX(issued_at) as latest_issue')->groupBy('airport_id')->pluck('latest_issue', 'airport_id');
+
+        $changedAirportIds = [];
+        $tafInsert = [];
+        $airportScoreInsert = [];
+        foreach ($tafDocuments as $icao => $document) {
+            $airport = $airports[$icao] ?? null;
+            if (! $airport) {
+                continue;
+            }
+
+            if (isset($storedIssues[$airport->id]) && Carbon::parse($storedIssues[$airport->id])->gte($document['issued_at'])) {
+                continue;
+            }
+
+            $changedAirportIds[] = $airport->id;
+            foreach ($document['periods'] as $period) {
+                $tafInsert[] = array_merge($period, [
+                    'airport_id' => $airport->id,
+                    'raw_text' => $document['raw_text'],
+                    'issued_at' => $document['issued_at'],
+                    'last_update' => now(),
+                    'sky_condition' => $period['sky_condition'] ? json_encode($period['sky_condition']) : null,
+                ]);
+
+                $taf = new Taf($period);
+                if (! $taf->isScoreable()) {
+                    continue;
+                }
+
+                $data = $period['probability'] !== null ? json_encode(['probability' => $period['probability']]) : null;
+                foreach (WeatherScoreHelper::reasons($taf) as $reason) {
+                    $airportScoreInsert[] = [
+                        'airport_id' => $airport->id,
+                        'reason' => $reason,
+                        'score' => 1,
+                        'data' => $data,
+                        'source' => AirportScore::SOURCE_TAF,
+                        'valid_from' => $period['valid_from'],
+                        'valid_to' => $period['valid_to'],
+                    ];
+                }
+            }
+        }
+
+        // Replace the period rows and TAF-sourced scores of the changed airports
+        foreach (array_chunk($changedAirportIds, 500) as $chunk) {
+            Taf::whereIn('airport_id', $chunk)->delete();
+            AirportScore::whereIn('airport_id', $chunk)->where('source', AirportScore::SOURCE_TAF)->delete();
+        }
+
+        foreach (array_chunk($tafInsert, 500) as $chunk) {
+            Taf::insert($chunk);
+        }
+
+        foreach (array_chunk($airportScoreInsert, 500) as $chunk) {
+            AirportScore::insert($chunk);
+        }
+
+        // Prune periods that have fully passed — expired forecasts can never cover an ETA
+        Taf::where('valid_to', '<', now())->delete();
+        AirportScore::where('source', AirportScore::SOURCE_TAF)->where('valid_to', '<', now())->delete();
+
+        AviationWeatherHelper::cleanup($paths);
+
+        $this->info('Fetching of ' . count($tafDocuments) . " TAF's (" . count($changedAirportIds) . ' changed) finished in ' . round(microtime(true) - $processTime) . ' seconds');
+
+    }
+
+    /**
+     * Parse the cache XML into one document per station, keeping only the newest
+     * issue per station and each document's forecast periods as column-ready arrays.
+     */
+    private function parseTafDocuments(string $xmlPath): array
+    {
+        $tafDocuments = [];
+        $xml = simplexml_load_file($xmlPath);
+
+        foreach ($xml->data->TAF as $taf) {
+            $icao = strtoupper((string) $taf->station_id);
+            if ($icao === '' || ! isset($taf->raw_text, $taf->issue_time)) {
+                continue;
+            }
+
+            // issue_time advances on amendments (TAF AMD) while bulletin_time doesn't,
+            // which is what makes the issued_at change-detection catch amendments
+            $issuedAt = Carbon::parse((string) $taf->issue_time);
+            if (isset($tafDocuments[$icao]) && $tafDocuments[$icao]['issued_at']->gte($issuedAt)) {
+                continue;
+            }
+
+            $periods = [];
+            foreach ($taf->forecast as $forecast) {
+                if (! isset($forecast->fcst_time_from, $forecast->fcst_time_to)) {
+                    continue;
+                }
+
+                // A period that has fully passed can never cover an ETA — inserting
+                // it would only churn against the expiry pruning below
+                if (Carbon::parse((string) $forecast->fcst_time_to)->isPast()) {
+                    continue;
+                }
+
+                $skyCondition = [];
+                foreach ($forecast->sky_condition as $layer) {
+                    $skyCondition[] = [
+                        'cover' => (string) $layer['sky_cover'],
+                        'base_ft_agl' => isset($layer['cloud_base_ft_agl']) ? (int) $layer['cloud_base_ft_agl'] : null,
+                    ];
+                }
+
+                $periods[] = [
+                    'change_indicator' => isset($forecast->change_indicator) ? (string) $forecast->change_indicator : null,
+                    'probability' => isset($forecast->probability) ? (int) $forecast->probability : null,
+                    'wind_dir_degrees' => isset($forecast->wind_dir_degrees) ? (string) $forecast->wind_dir_degrees : null,
+                    'wind_speed_kt' => isset($forecast->wind_speed_kt) ? (int) $forecast->wind_speed_kt : null,
+                    'wind_gust_kt' => isset($forecast->wind_gust_kt) ? (int) $forecast->wind_gust_kt : null,
+                    'visibility_statute_mi' => isset($forecast->visibility_statute_mi) ? (string) $forecast->visibility_statute_mi : null,
+                    'wx_string' => isset($forecast->wx_string) ? (string) $forecast->wx_string : null,
+                    'sky_condition' => $skyCondition ?: null,
+                    'valid_from' => Carbon::parse((string) $forecast->fcst_time_from),
+                    'valid_to' => Carbon::parse((string) $forecast->fcst_time_to),
+                ];
+            }
+
+            if (! count($periods)) {
+                continue;
+            }
+
+            $tafDocuments[$icao] = [
+                'issued_at' => $issuedAt,
+                'raw_text' => (string) $taf->raw_text,
+                'periods' => $periods,
+            ];
+        }
+
+        return $tafDocuments;
+    }
+}
