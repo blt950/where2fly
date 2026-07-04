@@ -188,7 +188,9 @@ class FetchTafs extends Command
             $tafDocuments[$icao] = [
                 'issued_at' => $issuedAt,
                 'bulletin_time' => isset($taf->bulletin_time) ? Carbon::parse((string) $taf->bulletin_time) : null,
-                'raw_text' => (string) $taf->raw_text,
+                // Strip the report-type tokens and station id so the stored TAF
+                // starts at its issue timestamp (e.g. "031653Z ..."), like METARs
+                'raw_text' => preg_replace('/^TAF (?:AMD |COR )?' . preg_quote($icao, '/') . ' /', '', (string) $taf->raw_text),
                 'valid_from' => isset($taf->valid_time_from) ? Carbon::parse((string) $taf->valid_time_from) : collect($periods)->min('valid_from'),
                 'valid_to' => isset($taf->valid_time_to) ? Carbon::parse((string) $taf->valid_time_to) : collect($periods)->max('valid_to'),
                 'periods' => $periods,

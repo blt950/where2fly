@@ -265,8 +265,22 @@ u-tab[aria-selected="true"] {
     color: black;
     background: $primary;
 }
+// Tooltips carry multi-line content (bookings, probabilities) — left-align, not centered
+.tooltip-inner {
+    text-align: left;
+}
+
 .score-icon {
     display: inline-block;
+
+    .score-probability-badge {
+        top: -6px;
+        right: -7px;
+        font-size: .55em;
+        color: $primary;
+        background-color: $secondary;
+        border-radius: 50%;
+    }
 
     // Booked-facility indicators: centered under the icon, growing outwards
     .score-facility-dots {

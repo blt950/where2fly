@@ -137,11 +137,36 @@ class Airport extends Model
      */
     public function atcBookedFacilities()
     {
+        return $this->sortFacilities(
+            $this->atcBookingScores()->map(fn ($score) => $score->data['facility'] ?? null)
+        );
+    }
+
+    /**
+     * The facility types online right now, from the live VATSIM_ATC score's
+     * station list — no logoff time is known for these.
+     */
+    public function atcOnlineFacilities()
+    {
+        $liveAtc = $this->scores->first(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_VATSIM);
+
+        return $this->sortFacilities(collect($liveAtc?->data['stations'] ?? []));
+    }
+
+    /**
+     * Every facility type either online or booked — the ATC icon's colored dots.
+     */
+    public function atcFacilities()
+    {
+        return $this->sortFacilities($this->atcOnlineFacilities()->merge($this->atcBookedFacilities()));
+    }
+
+    private function sortFacilities(Collection $facilities): Collection
+    {
         $referenceOrder = ['DEL', 'GND', 'TWR', 'APP'];
 
-        return $this->atcBookingScores()
-            ->map(fn ($score) => $score->data['facility'] ?? null)
-            ->filter()
+        return $facilities
+            ->filter(fn ($facility) => in_array($facility, $referenceOrder))
             ->unique()
             ->sortBy(fn ($facility) => array_search($facility, $referenceOrder))
             ->values();

@@ -145,6 +145,9 @@ class ScorePredictionTest extends TestCase
         $airport->load('scores');
 
         $this->assertSame(['DEL', 'APP'], $airport->atcBookedFacilities()->all());
+        $this->assertSame(['TWR'], $airport->atcOnlineFacilities()->all());
+        // The icon dots union online and booked facilities in ground-to-air order
+        $this->assertSame(['DEL', 'TWR', 'APP'], $airport->atcFacilities()->all());
         $this->assertCount(2, $airport->atcBookingScores());
         $this->assertStringContainsString('APP ', $airport->atcBookingScores()->first()->tooltipText());
     }
