@@ -60,14 +60,10 @@ class ScorePredictionTest extends TestCase
         // Bookings match exactly — no padding, even when the window starts 30 minutes after ETA
         $bookingNear = $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->addMinutes(30), 'valid_to' => $eta->copy()->addHours(2)]);
 
-        // A live VATSIM row only covers until the next poll, never a 5h-out ETA
-        $vatsimNow = $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_ATC', 'valid_from' => now(), 'valid_to' => now()->addMinutes(30)]);
-
         $matched = $this->matchedIds($eta);
         $this->assertContains($covering->id, $matched);
         $this->assertNotContains($ended->id, $matched);
         $this->assertNotContains($bookingNear->id, $matched);
-        $this->assertNotContains($vatsimNow->id, $matched);
     }
 
     // -------------------------------------------------------------------------
@@ -82,10 +78,40 @@ class ScorePredictionTest extends TestCase
         $eventFar = $this->makeScore(['source' => AirportScore::SOURCE_EVENT, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->addMinutes(90), 'valid_to' => $eta->copy()->addHours(4)]);
         $logonNear = $this->makeScore(['source' => AirportScore::SOURCE_LOGON_ESTIMATE, 'reason' => 'VATSIM_ATC', 'valid_from' => now(), 'valid_to' => $eta->copy()->subMinutes(45)]);
 
+        // The live VATSIM row is a "now-ish" signal: it reaches a short-haul ETA
+        // through the tolerance, never a 5h-out one
+        $vatsimNow = $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_ATC', 'valid_from' => now(), 'valid_to' => now()->addMinutes(30)]);
+
         $matched = $this->matchedIds($eta);
         $this->assertContains($eventNear->id, $matched);
         $this->assertNotContains($eventFar->id, $matched);
         $this->assertContains($logonNear->id, $matched);
+        $this->assertNotContains($vatsimNow->id, $matched);
+        $this->assertContains($vatsimNow->id, $this->matchedIds(now()->addMinutes(45)));
+    }
+
+    // -------------------------------------------------------------------------
+    // Departure candidates: METAR-only weather
+    // -------------------------------------------------------------------------
+
+    public function test_metar_only_weather_ignores_tafs_and_always_trusts_the_metar(): void
+    {
+        $eta = now();
+
+        $tafNow = $this->makeScore(['source' => AirportScore::SOURCE_TAF, 'valid_from' => now()->subHour(), 'valid_to' => now()->addHours(5)]);
+        $expiredMetar = $this->makeScore(['source' => AirportScore::SOURCE_METAR, 'reason' => 'METAR_GUSTS', 'valid_from' => now()->subHours(2), 'valid_to' => now()->subHour()]);
+        $this->makeTafPeriod(['change_indicator' => null, 'valid_from' => now()->subHour(), 'valid_to' => now()->addHours(5)]);
+
+        $matched = AirportScore::where('airport_id', $this->airports['KJFK']->id)->coversEta($eta, true)->pluck('id')->all();
+
+        // Even a TAF period covering right now is ignored, and the latest METAR
+        // always counts — it's the weather truth where the pilot departs from
+        $this->assertNotContains($tafNow->id, $matched);
+        $this->assertContains($expiredMetar->id, $matched);
+
+        // The PHP twin agrees
+        $this->assertFalse($tafNow->coversEtaAt($eta, true, true));
+        $this->assertTrue($expiredMetar->coversEtaAt($eta, true, true));
     }
 
     // -------------------------------------------------------------------------

@@ -19,7 +19,7 @@
         if ($onlineStations->count()) {
             $tooltipLines[] = '<b>Online</b>';
             foreach ($onlineStations as $station) {
-                $tooltipLines[] = e($station['facility'] . ' logged on ' . \Carbon\Carbon::parse($station['logon_time'])->diffForHumans(['parts' => 2, 'short' => true]));
+                $tooltipLines[] = e($station['facility'] . ' logged on ' . App\Models\AirportScore::loggedOnAgo($station['logon_time']));
             }
         }
         if ($bookingScores->count()) {

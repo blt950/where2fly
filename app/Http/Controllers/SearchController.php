@@ -219,9 +219,9 @@ class SearchController extends Controller
                 ->notInContinent($destinationExclusions)->notInCountry($destinationExclusions, $primaryAirport->iso_country)->notInState($destinationExclusions)
                 ->withinDistance($primaryAirport, $minDistance, $maxDistance, $primaryAirport->icao)->withinBearing($primaryAirport, $flightDirection, $minDistance, $maxDistance)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                 ->returnOnlyWhitelistedIcao($whitelist)
-                ->sortByScores($sortByScores, $eta)
+                ->sortByScores($sortByScores, $eta, $candidatesAreDepartures)
                 ->has('metar')
                 ->with([
                     'runways' => function ($query) {
@@ -270,8 +270,9 @@ class SearchController extends Controller
                     $airportCoordinates[$airport->icao]['color'] = 'grey';
                 }
 
-                // The primary airport is where the pilot is now — its scores are windowed at now
-                [$primaryScores] = $primaryAirport->scoresAtEta(now());
+                // The primary airport's scores are windowed at now; when it's the
+                // departure airport, the current METAR is its weather truth and TAFs are ignored
+                [$primaryScores] = $primaryAirport->scoresAtEta(now(), $direction == 'departure');
                 $primaryAirport->setRelation('scores', $primaryScores);
 
                 // To ensure bookmarks works, let's comapre the searchVersion

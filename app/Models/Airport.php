@@ -107,14 +107,14 @@ class Airport extends Model
      *
      * @return array{0: Collection, 1: bool}
      */
-    public function scoresAtEta(Carbon $eta): array
+    public function scoresAtEta(Carbon $eta, bool $metarOnlyWeather = false): array
     {
         $hasTafAtEta = (bool) $this->taf?->forecasts->contains(
             fn ($forecast) => $forecast->isScoreable() && $forecast->valid_from->lte($eta) && $forecast->valid_to->gte($eta)
         );
 
         return [
-            $this->scores->filter(fn ($score) => $score->coversEtaAt($eta, $hasTafAtEta))->values(),
+            $this->scores->filter(fn ($score) => $score->coversEtaAt($eta, $hasTafAtEta, $metarOnlyWeather))->values(),
             $hasTafAtEta,
         ];
     }
@@ -548,24 +548,24 @@ class Airport extends Model
      * rows whose validity window applies at that ETA count.
      */
     #[Scope]
-    protected function filterByScores(Builder $query, ?array $filterByScores = null, Carbon|string|null $eta = null): void
+    protected function filterByScores(Builder $query, ?array $filterByScores = null, Carbon|string|null $eta = null, bool $metarOnlyWeather = false): void
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
 
-            $query->where(function ($query) use ($filterByScores, $eta) {
+            $query->where(function ($query) use ($filterByScores, $eta, $metarOnlyWeather) {
                 foreach ($filterByScores as $score => $value) {
                     if ($value == 1) {
-                        $query->whereHas('scores', function ($query) use ($score, $eta) {
+                        $query->whereHas('scores', function ($query) use ($score, $eta, $metarOnlyWeather) {
                             $query->where('reason', $score);
                             if ($eta) {
-                                $query->coversEta($eta);
+                                $query->coversEta($eta, $metarOnlyWeather);
                             }
                         });
                     } elseif ($value == -1) {
-                        $query->whereDoesntHave('scores', function ($query) use ($score, $eta) {
+                        $query->whereDoesntHave('scores', function ($query) use ($score, $eta, $metarOnlyWeather) {
                             $query->where('reason', $score);
                             if ($eta) {
-                                $query->coversEta($eta);
+                                $query->coversEta($eta, $metarOnlyWeather);
                             }
                         });
                     }
@@ -682,14 +682,14 @@ class Airport extends Model
      * outrank an airport with a single real signal.
      */
     #[Scope]
-    protected function sortByScores(Builder $query, $filterByScores, Carbon|string|null $eta = null)
+    protected function sortByScores(Builder $query, $filterByScores, Carbon|string|null $eta = null, bool $metarOnlyWeather = false)
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
-            return $query->leftJoin('airport_scores', function ($join) use ($filterByScores, $eta) {
+            return $query->leftJoin('airport_scores', function ($join) use ($filterByScores, $eta, $metarOnlyWeather) {
                 $join->on('airports.id', '=', 'airport_scores.airport_id')
                     ->whereIn('airport_scores.reason', $filterByScores);
                 if ($eta) {
-                    AirportScore::applyCoversEta($join, $eta);
+                    AirportScore::applyCoversEta($join, $eta, $metarOnlyWeather);
                 }
             })
                 ->selectRaw('airports.*, COUNT(DISTINCT airport_scores.reason) as score_count')

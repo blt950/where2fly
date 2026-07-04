@@ -151,8 +151,9 @@ class CalcScores extends Command
             }
 
             // A controller online right now will probably stay for ~2 hours after
-            // logon (the estimated logoff is the row's valid_to) — facility and
-            // logon time drive the icon dots and the "logged on X ago" tooltip
+            // logon (the estimated logoff is the row's valid_to) — but never end
+            // the window in the past: a controller who has outlasted the estimate
+            // is demonstrably still online, so near-future ETAs should still match
             foreach ($airport->controllers as $controller) {
                 $airportScoreInsert[] = [
                     'airport_id' => $airport->id,
@@ -165,7 +166,7 @@ class CalcScores extends Command
                     ]),
                     'source' => AirportScore::SOURCE_LOGON_ESTIMATE,
                     'valid_from' => $runTime,
-                    'valid_to' => $controller->logon_time->copy()->addHours(self::LOGON_ESTIMATE_HOURS),
+                    'valid_to' => $controller->logon_time->copy()->addHours(self::LOGON_ESTIMATE_HOURS)->max($runTime),
                 ];
             }
 

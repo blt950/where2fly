@@ -26,10 +26,10 @@ class AirportScore extends Model
     public const SOURCE_LOGON_ESTIMATE = 'logon_estimate';
 
     /** Sources whose window must contain the ETA exactly */
-    public const EXACT_MATCH_SOURCES = [self::SOURCE_METAR, self::SOURCE_TAF, self::SOURCE_VATSIM, self::SOURCE_BOOKING];
+    public const EXACT_MATCH_SOURCES = [self::SOURCE_METAR, self::SOURCE_TAF, self::SOURCE_BOOKING];
 
-    /** Inexact sources, matched with a ±1h interval overlap against the ETA */
-    public const OVERLAP_MATCH_SOURCES = [self::SOURCE_EVENT, self::SOURCE_LOGON_ESTIMATE];
+    /** Inexact "now-ish" sources, matched with a ±1h interval overlap against the ETA */
+    public const OVERLAP_MATCH_SOURCES = [self::SOURCE_VATSIM, self::SOURCE_EVENT, self::SOURCE_LOGON_ESTIMATE];
 
     /** Hours of query-time tolerance applied to the inexact sources */
     public const OVERLAP_MATCH_HOURS = 1;
@@ -57,17 +57,21 @@ class AirportScore extends Model
      * Carbon instant or a raw SQL expression (for per-candidate ETAs computed
      * in the query itself). Matching depends on the row's source:
      *
-     * - metar/taf/vatsim/booking: the window must contain the ETA exactly —
-     *   except a METAR row also matches regardless of its window when the
-     *   airport has no scoreable TAF period covering the ETA, so a search
-     *   never silently returns zero weather scores (the metar_fallback case)
-     * - event/logon_estimate: inexact signals, matched when the window
-     *   overlaps [ETA-2h, ETA+2h]
+     * - metar/taf/booking: the window must contain the ETA exactly — except a
+     *   METAR row also matches regardless of its window when the airport has
+     *   no scoreable TAF period covering the ETA, so a search never silently
+     *   returns zero weather scores (the metar_fallback case)
+     * - vatsim/event/logon_estimate: inexact "now-ish" signals, matched when
+     *   the window overlaps [ETA-1h, ETA+1h]
+     *
+     * With $metarOnlyWeather (departure candidates — the pilot leaves soon),
+     * TAF rows never match and the current METAR always does: the latest
+     * observation is the weather truth there, not a forecast.
      */
     #[Scope]
-    protected function coversEta(Builder $query, Carbon|string $eta): void
+    protected function coversEta(Builder $query, Carbon|string $eta, bool $metarOnlyWeather = false): void
     {
-        self::applyCoversEta($query, $eta);
+        self::applyCoversEta($query, $eta, $metarOnlyWeather);
     }
 
     /**
@@ -76,11 +80,16 @@ class AirportScore extends Model
      * scoreable TAF period covering the ETA (the metar-fallback input), since
      * that spans the whole airport, not this row.
      */
-    public function coversEtaAt(Carbon $eta, bool $airportHasTafAtEta): bool
+    public function coversEtaAt(Carbon $eta, bool $airportHasTafAtEta, bool $metarOnlyWeather = false): bool
     {
         if (in_array($this->source, self::OVERLAP_MATCH_SOURCES)) {
             return $this->valid_from->lte($eta->copy()->addHours(self::OVERLAP_MATCH_HOURS))
                 && $this->valid_to->gte($eta->copy()->subHours(self::OVERLAP_MATCH_HOURS));
+        }
+
+        if ($metarOnlyWeather) {
+            return $this->source === self::SOURCE_METAR
+                || ($this->source === self::SOURCE_BOOKING && $this->valid_from->lte($eta) && $this->valid_to->gte($eta));
         }
 
         if ($this->source === self::SOURCE_METAR && ! $airportHasTafAtEta) {
@@ -94,14 +103,18 @@ class AirportScore extends Model
      * Same conditions as the coversEta scope, but applicable to any query
      * builder that has airport_scores in scope (e.g. a join on airports).
      */
-    public static function applyCoversEta($query, Carbon|string $eta): void
+    public static function applyCoversEta($query, Carbon|string $eta, bool $metarOnlyWeather = false): void
     {
         [$etaSql, $bindings] = $eta instanceof Carbon ? ['?', [$eta->toDateTimeString()]] : [$eta, []];
 
-        $query->where(function ($query) use ($etaSql, $bindings) {
+        $query->where(function ($query) use ($etaSql, $bindings, $metarOnlyWeather) {
             // Exact containment for sources with a precise window
-            $query->where(function ($query) use ($etaSql, $bindings) {
-                $query->whereIn('airport_scores.source', self::EXACT_MATCH_SOURCES)
+            $query->where(function ($query) use ($etaSql, $bindings, $metarOnlyWeather) {
+                $exactSources = $metarOnlyWeather
+                    ? array_diff(self::EXACT_MATCH_SOURCES, [self::SOURCE_METAR, self::SOURCE_TAF])
+                    : self::EXACT_MATCH_SOURCES;
+
+                $query->whereIn('airport_scores.source', $exactSources)
                     ->whereRaw("airport_scores.valid_from <= {$etaSql}", $bindings)
                     ->whereRaw("airport_scores.valid_to >= {$etaSql}", $bindings);
             });
@@ -112,6 +125,13 @@ class AirportScore extends Model
                     ->whereRaw("airport_scores.valid_from <= DATE_ADD({$etaSql}, INTERVAL " . self::OVERLAP_MATCH_HOURS . ' HOUR)', $bindings)
                     ->whereRaw("airport_scores.valid_to >= DATE_SUB({$etaSql}, INTERVAL " . self::OVERLAP_MATCH_HOURS . ' HOUR)', $bindings);
             });
+
+            if ($metarOnlyWeather) {
+                // Departure candidates: the current METAR is always the weather truth
+                $query->orWhere('airport_scores.source', self::SOURCE_METAR);
+
+                return;
+            }
 
             // The current METAR is the fallback when no scoreable TAF period covers the ETA
             $query->orWhere(function ($query) use ($etaSql, $bindings) {
@@ -153,7 +173,7 @@ class AirportScore extends Model
 
         // A controller online right now — we know when they logged on, not when they'll leave
         if (isset($this->data['logon_time'])) {
-            return ($this->data['facility'] ?? $this->data['position']) . ' logged on ' . Carbon::parse($this->data['logon_time'])->diffForHumans(['parts' => 2, 'short' => true]);
+            return ($this->data['facility'] ?? $this->data['position']) . ' logged on ' . self::loggedOnAgo($this->data['logon_time']);
         }
 
         if (isset($this->data['facility']) || isset($this->data['callsign'])) {
@@ -161,6 +181,15 @@ class AirportScore extends Model
         }
 
         return null;
+    }
+
+    /**
+     * How long ago a controller logged on, in hours and/or minutes — never
+     * seconds (e.g. "40m ago", "3h 48m ago").
+     */
+    public static function loggedOnAgo(Carbon|string $logonTime): string
+    {
+        return Carbon::parse($logonTime)->diffForHumans(['parts' => 2, 'short' => true, 'minimumUnit' => 'minute']);
     }
 
     public function isWeatherScore()

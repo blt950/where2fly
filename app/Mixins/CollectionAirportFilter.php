@@ -26,7 +26,7 @@ class CollectionAirportFilter
                     // is what matters, not a forecast)
                     if ($arrivalAirport->relationLoaded('scores')) {
                         $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEta($arrivalAirport->airtime);
-                        [$scores, $hasTafAtEta] = $arrivalAirport->scoresAtEta($eta);
+                        [$scores, $hasTafAtEta] = $arrivalAirport->scoresAtEta($eta, $candidatesAreDepartures);
                         $arrivalAirport->setRelation('scores', $scores);
                         $arrivalAirport->forecast_source = $candidatesAreDepartures ? 'metar' : ($hasTafAtEta ? 'taf' : 'metar_fallback');
                     }

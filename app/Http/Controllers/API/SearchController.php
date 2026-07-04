@@ -123,9 +123,9 @@ class SearchController extends Controller
             ->inContinent($destinations)->inCountry($destinations, $airport->iso_country)->inState($destinations)
             ->withinDistance($airport, $minDistance, $maxDistance, $airport->icao)
             ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-            ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta)
+            ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
-            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes(), $eta)
+            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes(), $eta, $candidatesAreDepartures)
             ->has('metar')->with('runways', 'scores', 'metar', 'taf.forecasts')
             ->get();
 
@@ -142,9 +142,9 @@ class SearchController extends Controller
 
         // Then in your main function
         if ($departure) {
-            [$airportData, $arrivalData] = $this->prepareAirportData($airport, $suggestedAirports);
+            [$airportData, $arrivalData] = $this->prepareAirportData($airport, $suggestedAirports, true);
         } else {
-            [$airportData, $departureData] = $this->prepareAirportData($airport, $suggestedAirports);
+            [$airportData, $departureData] = $this->prepareAirportData($airport, $suggestedAirports, false);
         }
 
         // Send the response
@@ -158,10 +158,11 @@ class SearchController extends Controller
 
     }
 
-    public function prepareAirportData($airport, $suggestedAirports)
+    public function prepareAirportData($airport, $suggestedAirports, bool $anchorIsDeparture = false)
     {
-        // The anchor airport is where the pilot is now — its scores are windowed at now
-        [$scores] = $airport->scoresAtEta(now());
+        // The anchor airport's scores are windowed at now; when it's the departure
+        // airport, the current METAR is its weather truth and TAFs are ignored
+        [$scores] = $airport->scoresAtEta(now(), $anchorIsDeparture);
         $airport->setRelation('scores', $scores);
 
         return [
