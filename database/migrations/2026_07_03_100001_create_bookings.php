@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('bookings', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('vatsim_booking_id')->unique();
+            // The bookings API's own id is the primary key — no local auto-increment
+            // to creep upwards across the half-hourly syncs, and duplicates are impossible
+            $table->unsignedBigInteger('vatsim_booking_id')->primary();
             $table->string('callsign');
             $table->foreignId('airport_id')->constrained('airports')->onDelete('cascade');
             $table->string('division')->nullable();

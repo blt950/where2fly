@@ -119,10 +119,11 @@ class CalcScores extends Command
                     continue;
                 }
 
+                // The event's start/end already live in valid_from/valid_to — only the name goes in data
                 $eventRow = [
                     'airport_id' => $airport->id,
                     'score' => 1,
-                    'data' => json_encode(['event' => $event->event, 'start' => $event->start_time, 'end' => $event->end_time]),
+                    'data' => json_encode(['event' => $event->event]),
                     'source' => AirportScore::SOURCE_EVENT,
                     'valid_from' => $event->start_time,
                     'valid_to' => $event->end_time,
@@ -132,13 +133,14 @@ class CalcScores extends Command
                 $airportScoreInsert[] = ['reason' => 'VATSIM_ATC'] + $eventRow;
             }
 
-            // Booked ATC positions predict coverage for their exact window
+            // Booked ATC positions predict coverage for their exact window — the
+            // facility type (DEL/GND/TWR/APP) drives the tooltip and icon dots
             foreach ($airport->bookings as $booking) {
                 $airportScoreInsert[] = [
                     'airport_id' => $airport->id,
                     'reason' => 'VATSIM_ATC',
                     'score' => 1,
-                    'data' => json_encode(['callsign' => $booking->callsign, 'division' => $booking->division, 'subdivision' => $booking->subdivision]),
+                    'data' => json_encode(['callsign' => $booking->callsign, 'facility' => substr(strrchr($booking->callsign, '_'), 1)]),
                     'source' => AirportScore::SOURCE_BOOKING,
                     'valid_from' => $booking->start,
                     'valid_to' => $booking->end,

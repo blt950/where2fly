@@ -3,19 +3,19 @@
 namespace App\Helpers;
 
 use App\Models\Metar;
-use App\Models\Taf;
+use App\Models\TafForecast;
 
 class WeatherScoreHelper
 {
     /**
      * Weather score reasons derivable from either a current observation (Metar)
-     * or a forecast period (Taf) — both expose the same condition methods. The
-     * runway-dependent reasons (METAR_RVR, METAR_CROSSWIND) stay in calc:scores:
-     * they need runway data, and RVR isn't forecast in TAFs at all.
+     * or a forecast period (TafForecast) — both expose the same condition
+     * methods. The runway-dependent reasons (METAR_RVR, METAR_CROSSWIND) stay
+     * in calc:scores: they need runway data, and RVR isn't forecast in TAFs at all.
      *
      * @return array<string>
      */
-    public static function reasons(Metar|Taf $weather): array
+    public static function reasons(Metar|TafForecast $weather): array
     {
         $reasons = [];
 

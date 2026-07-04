@@ -89,7 +89,7 @@
                     <dt>Forecast<dt>
                     <dd>
                     @foreach($primaryAirport->displayScores() as $score)
-                        @include('layouts.score-icon', ['score' => $score, 'highlighted' => isset($filteredScores) && in_array($score->reason, $filteredScores)])
+                        @include('layouts.score-icon', ['score' => $score, 'airport' => $primaryAirport, 'highlighted' => isset($filteredScores) && in_array($score->reason, $filteredScores)])
                     @endforeach
                     </dd>
                 </dl>
@@ -99,11 +99,11 @@
                 <dt>Weather<dt>
                 <dd>
                     @if($primaryAirport->metar)
-                        {{ \Carbon\Carbon::parse($primaryAirport->metar->last_update)->format('dHi\Z') }} {{ $primaryAirport->metar->metar }}
+                        {{ $primaryAirport->metar->metar }}
                         <span class="d-block mt-2">
-                            @if($primaryAirport->tafs->first())
+                            @if($primaryAirport->taf)
                                 <button class="d-block btn btn-outline-light btn-sm" data-taf-button="true">Show TAF</button>
-                                <span class="d-none" data-taf-text="true">{{ $primaryAirport->tafs->first()->raw_text }}</span>
+                                <span class="d-none" data-taf-text="true">{{ $primaryAirport->taf->raw_text }}</span>
                             @else
                                 <i class="fa-sharp fa-info-square"></i> No TAF available
                             @endif
@@ -162,7 +162,7 @@
                             <td data-sort="{{ $airport->airtime }}">{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
                             <td class="fs-5" data-sort={{ $airport->displayScores()->count() }}>
                                 @foreach($airport->displayScores() as $score)
-                                    @include('layouts.score-icon', ['score' => $score, 'highlighted' => isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1])
+                                    @include('layouts.score-icon', ['score' => $score, 'airport' => $airport, 'highlighted' => isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1])
                                 @endforeach
                             </td>
                         </tr>
@@ -182,9 +182,9 @@
 
                                     <dt class="mt-3">TAF</dt>
                                     <dd>
-                                        @if($airport->tafs->first())
+                                        @if($airport->taf)
                                             <button class="btn btn-outline-secondary btn-sm" data-taf-button="true">Show</button>
-                                            <span class="d-none" data-taf-text="true">{{ $airport->tafs->first()->raw_text }}</span>
+                                            <span class="d-none" data-taf-text="true">{{ $airport->taf->raw_text }}</span>
                                         @else
                                             No TAF available
                                         @endif

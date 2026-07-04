@@ -9,6 +9,11 @@ class Booking extends Model
 {
     use HasFactory;
 
+    /** The bookings API's own id is the primary key — not auto-incrementing locally */
+    protected $primaryKey = 'vatsim_booking_id';
+
+    public $incrementing = false;
+
     public $timestamps = false;
 
     protected $guarded = [];

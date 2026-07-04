@@ -69,7 +69,9 @@ class FetchMetars extends Command
 
             $airportsData[$icao] = [
                 'last_update' => $observationTime,
-                'metar' => (string) $node->raw_text,
+                // Strip the report-type token and station id so every stored METAR
+                // starts at its time group (e.g. "040720Z ...")
+                'metar' => preg_replace('/^(?:METAR |SPECI )?' . preg_quote($icao, '/') . ' /', '', (string) $node->raw_text),
                 'wind_direction' => $windDirection,
                 'wind_speed' => (int) $node->wind_speed_kt,
                 'wind_gusts' => (int) $node->wind_gust_kt,

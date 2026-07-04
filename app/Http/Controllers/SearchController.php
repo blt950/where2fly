@@ -225,7 +225,7 @@ class SearchController extends Controller
                     },
                     'scores',
                     'metar',
-                    'tafs',
+                    'taf.forecasts',
                     'sceneryDevelopers.sceneries' => function ($query) {
                         $query->where('published', true)->with('simulator');
                     },

@@ -37,9 +37,9 @@ class Airport extends Model
         return $this->hasOne(Metar::class);
     }
 
-    public function tafs()
+    public function taf()
     {
-        return $this->hasMany(Taf::class);
+        return $this->hasOne(Taf::class);
     }
 
     public function bookings()
@@ -109,14 +109,42 @@ class Airport extends Model
      */
     public function scoresAtEta(Carbon $eta): array
     {
-        $hasTafAtEta = $this->tafs->contains(
-            fn ($taf) => $taf->isScoreable() && $taf->valid_from->lte($eta) && $taf->valid_to->gte($eta)
+        $hasTafAtEta = (bool) $this->taf?->forecasts->contains(
+            fn ($forecast) => $forecast->isScoreable() && $forecast->valid_from->lte($eta) && $forecast->valid_to->gte($eta)
         );
 
         return [
             $this->scores->filter(fn ($score) => $score->coversEtaAt($eta, $hasTafAtEta))->values(),
             $hasTafAtEta,
         ];
+    }
+
+    /**
+     * The loaded, ETA-windowed booking-sourced VATSIM_ATC scores, ordered by
+     * start time — the tooltip and facility dots on the ATC icon render these.
+     */
+    public function atcBookingScores()
+    {
+        return $this->scores
+            ->filter(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_BOOKING)
+            ->sortBy('valid_from')
+            ->values();
+    }
+
+    /**
+     * The unique booked facility types (DEL/GND/TWR/APP) among those scores,
+     * in ground-to-air order.
+     */
+    public function atcBookedFacilities()
+    {
+        $referenceOrder = ['DEL', 'GND', 'TWR', 'APP'];
+
+        return $this->atcBookingScores()
+            ->map(fn ($score) => $score->data['facility'] ?? null)
+            ->filter()
+            ->unique()
+            ->sortBy(fn ($facility) => array_search($facility, $referenceOrder))
+            ->values();
     }
 
     /**

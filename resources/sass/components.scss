@@ -268,12 +268,26 @@ u-tab[aria-selected="true"] {
 .score-icon {
     display: inline-block;
 
-    .score-probability-badge {
-        top: -6px;
-        right: -7px;
-        font-size: .55em;
-        color: $primary;
-        background-color: $secondary;
-        border-radius: 50%;
+    // Booked-facility indicators: centered under the icon, growing outwards
+    .score-facility-dots {
+        position: absolute;
+        bottom: -3px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        justify-content: center;
+        gap: 2px;
+
+        span {
+            display: block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        .facility-dot--del { background-color: rgb(0, 136, 86); }
+        .facility-dot--gnd { background-color: rgb(0, 136, 86); }
+        .facility-dot--twr { background-color: rgb(184, 42, 20); }
+        .facility-dot--app { background-color: #007f7f; }
     }
 }

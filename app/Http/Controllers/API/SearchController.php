@@ -123,7 +123,7 @@ class SearchController extends Controller
             ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta)
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
             ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes(), $eta)
-            ->has('metar')->with('runways', 'scores', 'metar', 'tafs')
+            ->has('metar')->with('runways', 'scores', 'metar', 'taf.forecasts')
             ->get();
 
         // Shuffle and limit the results to 20

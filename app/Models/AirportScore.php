@@ -28,11 +28,11 @@ class AirportScore extends Model
     /** Sources whose window must contain the ETA exactly */
     public const EXACT_MATCH_SOURCES = [self::SOURCE_METAR, self::SOURCE_TAF, self::SOURCE_VATSIM, self::SOURCE_BOOKING];
 
-    /** Inexact sources, matched with a ±2h interval overlap against the ETA */
+    /** Inexact sources, matched with a ±1h interval overlap against the ETA */
     public const OVERLAP_MATCH_SOURCES = [self::SOURCE_EVENT, self::SOURCE_LOGON_ESTIMATE];
 
     /** Hours of query-time tolerance applied to the inexact sources */
-    public const OVERLAP_MATCH_HOURS = 2;
+    public const OVERLAP_MATCH_HOURS = 1;
 
     public $timestamps = false;
 
@@ -117,15 +117,16 @@ class AirportScore extends Model
             $query->orWhere(function ($query) use ($etaSql, $bindings) {
                 $query->where('airport_scores.source', self::SOURCE_METAR)
                     ->whereNotExists(function ($query) use ($etaSql, $bindings) {
-                        $query->from('tafs')
+                        $query->from('taf_forecasts')
+                            ->join('tafs', 'tafs.id', '=', 'taf_forecasts.taf_id')
                             ->whereColumn('tafs.airport_id', 'airport_scores.airport_id')
-                            ->whereRaw("tafs.valid_from <= {$etaSql}", $bindings)
-                            ->whereRaw("tafs.valid_to >= {$etaSql}", $bindings)
+                            ->whereRaw("taf_forecasts.valid_from <= {$etaSql}", $bindings)
+                            ->whereRaw("taf_forecasts.valid_to >= {$etaSql}", $bindings)
                             ->where(function ($query) {
-                                // Mirrors Taf::isScoreable()
-                                $query->whereNotNull('tafs.probability')
-                                    ->orWhereNull('tafs.change_indicator')
-                                    ->orWhereIn('tafs.change_indicator', ['FM', 'BECMG']);
+                                // Mirrors TafForecast::isScoreable()
+                                $query->whereNotNull('taf_forecasts.probability')
+                                    ->orWhereNull('taf_forecasts.change_indicator')
+                                    ->orWhereIn('taf_forecasts.change_indicator', ['FM', 'BECMG']);
                             });
                     });
             });
@@ -147,11 +148,11 @@ class AirportScore extends Model
         }
 
         if (isset($this->data['event'])) {
-            return $this->data['event'] . ' until ' . Carbon::parse($this->data['end'])->format('H:i\z');
+            return $this->data['event'] . ' until ' . $this->valid_to->format('H:i\z');
         }
 
-        if (isset($this->data['callsign'])) {
-            return 'Booked: ' . $this->data['callsign'] . ' ' . $this->valid_from->format('H:i\z') . '–' . $this->valid_to->format('H:i\z');
+        if (isset($this->data['facility']) || isset($this->data['callsign'])) {
+            return ($this->data['facility'] ?? $this->data['callsign']) . ' ' . $this->valid_from->format('H:i\z') . ' - ' . $this->valid_to->format('H:i\z');
         }
 
         if (isset($this->data['position'])) {

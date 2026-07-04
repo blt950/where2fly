@@ -55,7 +55,7 @@
                             </td>
                             <td class="fs-5" data-sort="{{ $airport->displayScores()->count() }}">
                                 @foreach($airport->displayScores() as $score)
-                                    @include('layouts.score-icon', ['score' => $score])
+                                    @include('layouts.score-icon', ['score' => $score, 'airport' => $airport])
                                 @endforeach
                             </td>
                         </tr>

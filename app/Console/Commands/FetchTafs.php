@@ -7,8 +7,10 @@ use App\Helpers\WeatherScoreHelper;
 use App\Models\Airport;
 use App\Models\AirportScore;
 use App\Models\Taf;
+use App\Models\TafForecast;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class FetchTafs extends Command
 {
@@ -45,11 +47,9 @@ class FetchTafs extends Command
 
         // Only reprocess airports whose TAF has actually been reissued/amended since
         // the last run — TAFs only change every ~6 hours plus occasional amendments
-        $storedIssues = Taf::selectRaw('airport_id, MAX(issued_at) as latest_issue')->groupBy('airport_id')->pluck('latest_issue', 'airport_id');
+        $storedIssues = Taf::pluck('issued_at', 'airport_id');
 
-        $changedAirportIds = [];
-        $tafInsert = [];
-        $airportScoreInsert = [];
+        $changedDocuments = [];
         foreach ($tafDocuments as $icao => $document) {
             $airport = $airports[$icao] ?? null;
             if (! $airport) {
@@ -60,25 +60,41 @@ class FetchTafs extends Command
                 continue;
             }
 
-            $changedAirportIds[] = $airport->id;
-            foreach ($document['periods'] as $period) {
-                $tafInsert[] = array_merge($period, [
-                    'airport_id' => $airport->id,
-                    'raw_text' => $document['raw_text'],
-                    'issued_at' => $document['issued_at'],
-                    'last_update' => now(),
-                    'sky_condition' => $period['sky_condition'] ? json_encode($period['sky_condition']) : null,
-                ]);
+            $changedDocuments[$airport->id] = $document;
+        }
 
-                $taf = new Taf($period);
-                if (! $taf->isScoreable()) {
+        // Replace the changed airports' TAF documents (periods cascade), their
+        // TAF-sourced scores, and reinsert the new documents with their periods
+        $forecastInsert = [];
+        $airportScoreInsert = [];
+        foreach (array_chunk(array_keys($changedDocuments), 500) as $chunk) {
+            Taf::whereIn('airport_id', $chunk)->delete();
+            AirportScore::whereIn('airport_id', $chunk)->where('source', AirportScore::SOURCE_TAF)->delete();
+        }
+
+        foreach ($changedDocuments as $airportId => $document) {
+            $tafId = DB::table('tafs')->insertGetId([
+                'airport_id' => $airportId,
+                'raw_text' => $document['raw_text'],
+                'issued_at' => $document['issued_at'],
+                'bulletin_time' => $document['bulletin_time'],
+                'valid_from' => $document['valid_from'],
+                'valid_to' => $document['valid_to'],
+                'last_update' => now(),
+            ]);
+
+            foreach ($document['periods'] as $period) {
+                $forecastInsert[] = array_merge($period, ['taf_id' => $tafId]);
+
+                $forecast = new TafForecast($period);
+                if (! $forecast->isScoreable()) {
                     continue;
                 }
 
                 $data = $period['probability'] !== null ? json_encode(['probability' => $period['probability']]) : null;
-                foreach (WeatherScoreHelper::reasons($taf) as $reason) {
+                foreach (WeatherScoreHelper::reasons($forecast) as $reason) {
                     $airportScoreInsert[] = [
-                        'airport_id' => $airport->id,
+                        'airport_id' => $airportId,
                         'reason' => $reason,
                         'score' => 1,
                         'data' => $data,
@@ -90,27 +106,22 @@ class FetchTafs extends Command
             }
         }
 
-        // Replace the period rows and TAF-sourced scores of the changed airports
-        foreach (array_chunk($changedAirportIds, 500) as $chunk) {
-            Taf::whereIn('airport_id', $chunk)->delete();
-            AirportScore::whereIn('airport_id', $chunk)->where('source', AirportScore::SOURCE_TAF)->delete();
-        }
-
-        foreach (array_chunk($tafInsert, 500) as $chunk) {
-            Taf::insert($chunk);
+        foreach (array_chunk($forecastInsert, 500) as $chunk) {
+            TafForecast::insert($chunk);
         }
 
         foreach (array_chunk($airportScoreInsert, 500) as $chunk) {
             AirportScore::insert($chunk);
         }
 
-        // Prune periods that have fully passed — expired forecasts can never cover an ETA
+        // Prune what has fully passed — expired forecasts can never cover an ETA
+        TafForecast::where('valid_to', '<', now())->delete();
         Taf::where('valid_to', '<', now())->delete();
         AirportScore::where('source', AirportScore::SOURCE_TAF)->where('valid_to', '<', now())->delete();
 
         AviationWeatherHelper::cleanup($paths);
 
-        $this->info('Fetching of ' . count($tafDocuments) . " TAF's (" . count($changedAirportIds) . ' changed) finished in ' . round(microtime(true) - $processTime) . ' seconds');
+        $this->info('Fetching of ' . count($tafDocuments) . " TAF's (" . count($changedDocuments) . ' changed) finished in ' . round(microtime(true) - $processTime) . ' seconds');
 
     }
 
@@ -143,7 +154,7 @@ class FetchTafs extends Command
                 }
 
                 // A period that has fully passed can never cover an ETA — inserting
-                // it would only churn against the expiry pruning below
+                // it would only churn against the expiry pruning
                 if (Carbon::parse((string) $forecast->fcst_time_to)->isPast()) {
                     continue;
                 }
@@ -164,7 +175,7 @@ class FetchTafs extends Command
                     'wind_gust_kt' => isset($forecast->wind_gust_kt) ? (int) $forecast->wind_gust_kt : null,
                     'visibility_statute_mi' => isset($forecast->visibility_statute_mi) ? (string) $forecast->visibility_statute_mi : null,
                     'wx_string' => isset($forecast->wx_string) ? (string) $forecast->wx_string : null,
-                    'sky_condition' => $skyCondition ?: null,
+                    'ceiling_ft_agl' => TafForecast::ceilingFromSkyCondition($skyCondition),
                     'valid_from' => Carbon::parse((string) $forecast->fcst_time_from),
                     'valid_to' => Carbon::parse((string) $forecast->fcst_time_to),
                 ];
@@ -176,7 +187,10 @@ class FetchTafs extends Command
 
             $tafDocuments[$icao] = [
                 'issued_at' => $issuedAt,
+                'bulletin_time' => isset($taf->bulletin_time) ? Carbon::parse((string) $taf->bulletin_time) : null,
                 'raw_text' => (string) $taf->raw_text,
+                'valid_from' => isset($taf->valid_time_from) ? Carbon::parse((string) $taf->valid_time_from) : collect($periods)->min('valid_from'),
+                'valid_to' => isset($taf->valid_time_to) ? Carbon::parse((string) $taf->valid_time_to) : collect($periods)->max('valid_to'),
                 'periods' => $periods,
             ];
         }

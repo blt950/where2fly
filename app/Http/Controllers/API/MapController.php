@@ -112,7 +112,7 @@ class MapController extends Controller
             $query->where('closed', false)->whereNotNull('length_ft');
         }])->where('id', $secondaryAirport)->first();
         $metar = isset($airport->metar) ? $airport->metar->metar : null;
-        $taf = optional($airport->tafs->first())->raw_text;
+        $taf = optional($airport->taf)->raw_text;
 
         // Add name of country
         $airport->country = getCountryName($airport->iso_country);
