@@ -150,10 +150,10 @@ class CalcScores extends Command
                 ];
             }
 
-            // A controller online right now will probably stay for ~2 hours after
-            // logon (the estimated logoff is the row's valid_to) — but never end
-            // the window in the past: a controller who has outlasted the estimate
-            // is demonstrably still online, so near-future ETAs should still match
+            // An unbooked controller is assumed to sit 2 hours from logon — an ETA
+            // past that cutoff no longer predicts them present (a session already
+            // past 2h yields a window that can never match, which is intended;
+            // "now" views still see them via the live vatsim row above)
             foreach ($airport->controllers as $controller) {
                 $airportScoreInsert[] = [
                     'airport_id' => $airport->id,
@@ -166,7 +166,7 @@ class CalcScores extends Command
                     ]),
                     'source' => AirportScore::SOURCE_LOGON_ESTIMATE,
                     'valid_from' => $runTime,
-                    'valid_to' => $controller->logon_time->copy()->addHours(self::LOGON_ESTIMATE_HOURS)->max($runTime),
+                    'valid_to' => $controller->logon_time->copy()->addHours(self::LOGON_ESTIMATE_HOURS),
                 ];
             }
 

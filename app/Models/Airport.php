@@ -143,16 +143,27 @@ class Airport extends Model
     }
 
     /**
-     * The stations online right now ({facility, logon_time} pairs from the live
-     * VATSIM_ATC score), in ground-to-air order — we know when each logged on,
-     * never when they'll leave.
+     * The stations online right now ({facility, logon_time} pairs), in
+     * ground-to-air order — we know when each logged on, never when they'll
+     * leave. Read from the live VATSIM_ATC score when it applies ("now" views),
+     * otherwise from the logon-estimate rows still predicting presence at the
+     * ETA, which carry the same fields.
      */
     public function atcOnlineStations()
     {
         $liveAtc = $this->scores->first(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_VATSIM);
         $referenceOrder = ['DEL', 'GND', 'TWR', 'APP'];
 
-        return collect($liveAtc?->data['stations'] ?? [])
+        $stations = collect($liveAtc?->data['stations'] ?? []);
+        if ($stations->isEmpty()) {
+            $stations = $this->scores
+                ->filter(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_LOGON_ESTIMATE)
+                ->map(fn ($score) => ['facility' => $score->data['facility'] ?? null, 'logon_time' => $score->data['logon_time'] ?? null])
+                ->filter(fn ($station) => $station['logon_time'] !== null)
+                ->unique('facility');
+        }
+
+        return $stations
             ->filter(fn ($station) => in_array($station['facility'] ?? null, $referenceOrder))
             ->sortBy(fn ($station) => array_search($station['facility'], $referenceOrder))
             ->values();

@@ -62,14 +62,23 @@ class ScorePredictionTest extends TestCase
         $this->assertNotContains($ended->id, $matched);
     }
 
-    public function test_online_controllers_always_show_while_online(): void
+    public function test_online_controllers_show_in_now_views_and_predict_two_hours_from_logon(): void
     {
-        // The live row only exists while a controller is online — it matches any
-        // ETA rather than being window-gated
+        // The live row covers "now" views for as long as the controller is online,
+        // regardless of session length — but doesn't reach forecast ETAs
         $vatsimNow = $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_ATC', 'valid_from' => now(), 'valid_to' => now()->addMinutes(30)]);
-
         $this->assertContains($vatsimNow->id, $this->matchedIds(now()));
-        $this->assertContains($vatsimNow->id, $this->matchedIds(now()->addHours(8)));
+        $this->assertNotContains($vatsimNow->id, $this->matchedIds(now()->addHours(8)));
+
+        // An unbooked controller is predicted present strictly until logon+2h —
+        // here they logged on 75 minutes ago, so the cutoff is 45 minutes out
+        $freshLogon = $this->makeScore(['source' => AirportScore::SOURCE_LOGON_ESTIMATE, 'reason' => 'VATSIM_ATC', 'valid_from' => now(), 'valid_to' => now()->addMinutes(45)]);
+        $this->assertContains($freshLogon->id, $this->matchedIds(now()->addMinutes(30)));
+        $this->assertNotContains($freshLogon->id, $this->matchedIds(now()->addHour()));
+
+        // A session already past 2h yields a window that can never match a forecast
+        $longSession = $this->makeScore(['source' => AirportScore::SOURCE_LOGON_ESTIMATE, 'reason' => 'VATSIM_ATC', 'valid_from' => now(), 'valid_to' => now()->subHour()]);
+        $this->assertNotContains($longSession->id, $this->matchedIds(now()->addMinutes(30)));
     }
 
     // -------------------------------------------------------------------------
@@ -82,7 +91,6 @@ class ScorePredictionTest extends TestCase
 
         $eventNear = $this->makeScore(['source' => AirportScore::SOURCE_EVENT, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->addMinutes(45), 'valid_to' => $eta->copy()->addHours(3)]);
         $eventFar = $this->makeScore(['source' => AirportScore::SOURCE_EVENT, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->addMinutes(90), 'valid_to' => $eta->copy()->addHours(4)]);
-        $logonNear = $this->makeScore(['source' => AirportScore::SOURCE_LOGON_ESTIMATE, 'reason' => 'VATSIM_ATC', 'valid_from' => now(), 'valid_to' => $eta->copy()->subMinutes(45)]);
 
         // A booking starting shortly after the ETA still shows, so the pilot can
         // adjust their flight time to catch it
@@ -92,7 +100,6 @@ class ScorePredictionTest extends TestCase
         $matched = $this->matchedIds($eta);
         $this->assertContains($eventNear->id, $matched);
         $this->assertNotContains($eventFar->id, $matched);
-        $this->assertContains($logonNear->id, $matched);
         $this->assertContains($bookingNear->id, $matched);
         $this->assertNotContains($bookingFar->id, $matched);
     }

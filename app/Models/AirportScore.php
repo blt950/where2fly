@@ -25,11 +25,11 @@ class AirportScore extends Model
 
     public const SOURCE_LOGON_ESTIMATE = 'logon_estimate';
 
-    /** Weather sources whose window must contain the ETA exactly */
-    public const EXACT_MATCH_SOURCES = [self::SOURCE_METAR, self::SOURCE_TAF];
+    /** Sources whose window must contain the ETA exactly */
+    public const EXACT_MATCH_SOURCES = [self::SOURCE_METAR, self::SOURCE_TAF, self::SOURCE_VATSIM, self::SOURCE_LOGON_ESTIMATE];
 
-    /** Predicted-presence sources, matched with a ±1h interval overlap against the ETA */
-    public const OVERLAP_MATCH_SOURCES = [self::SOURCE_BOOKING, self::SOURCE_EVENT, self::SOURCE_LOGON_ESTIMATE];
+    /** Scheduled-presence sources, matched with a ±1h interval overlap against the ETA */
+    public const OVERLAP_MATCH_SOURCES = [self::SOURCE_BOOKING, self::SOURCE_EVENT];
 
     /** Hours of query-time tolerance applied to the inexact sources */
     public const OVERLAP_MATCH_HOURS = 1;
@@ -57,15 +57,17 @@ class AirportScore extends Model
      * Carbon instant or a raw SQL expression (for per-candidate ETAs computed
      * in the query itself). Matching depends on the row's source:
      *
-     * - vatsim: always matches — a controller online right now shows as online
-     *   for as long as they're online, regardless of the ETA
-     * - metar/taf: the window must contain the ETA exactly — except a METAR
-     *   row also matches regardless of its window when the airport has no
-     *   scoreable TAF period covering the ETA, so a search never silently
-     *   returns zero weather scores (the metar_fallback case)
-     * - booking/event/logon_estimate: predicted presence, matched when the
-     *   window overlaps [ETA-1h, ETA+1h] — a booking starting shortly after
-     *   the ETA still shows, so the pilot can adjust their flight time to it
+     * - metar/taf/vatsim/logon_estimate: the window must contain the ETA
+     *   exactly. For online controllers that means: the live vatsim row covers
+     *   "now" views for as long as they're online, and the logon_estimate row
+     *   covers future ETAs strictly up to logon+2h — an unbooked controller
+     *   who will have sat more than two hours by arrival is no longer
+     *   predicted present. A METAR row also matches regardless of its window
+     *   when the airport has no scoreable TAF period covering the ETA, so a
+     *   search never silently returns zero weather scores (metar_fallback)
+     * - booking/event: scheduled presence, matched when the window overlaps
+     *   [ETA-1h, ETA+1h] — a booking starting shortly after the ETA still
+     *   shows, so the pilot can adjust their flight time to it
      *
      * With $metarOnlyWeather (departure candidates — the pilot leaves soon),
      * TAF rows never match and the current METAR always does: the latest
@@ -85,11 +87,6 @@ class AirportScore extends Model
      */
     public function coversEtaAt(Carbon $eta, bool $airportHasTafAtEta, bool $metarOnlyWeather = false): bool
     {
-        // A controller online right now shows as online, regardless of ETA
-        if ($this->source === self::SOURCE_VATSIM) {
-            return true;
-        }
-
         if (in_array($this->source, self::OVERLAP_MATCH_SOURCES)) {
             return $this->valid_from->lte($eta->copy()->addHours(self::OVERLAP_MATCH_HOURS))
                 && $this->valid_to->gte($eta->copy()->subHours(self::OVERLAP_MATCH_HOURS));
@@ -101,8 +98,11 @@ class AirportScore extends Model
                 || ($this->valid_from->lte($eta) && $this->valid_to->gte($eta));
         }
 
-        // TAF rows: never for departure candidates, otherwise exact containment
-        return ! $metarOnlyWeather && $this->valid_from->lte($eta) && $this->valid_to->gte($eta);
+        if ($this->source === self::SOURCE_TAF && $metarOnlyWeather) {
+            return false;
+        }
+
+        return $this->valid_from->lte($eta) && $this->valid_to->gte($eta);
     }
 
     /**
@@ -114,19 +114,18 @@ class AirportScore extends Model
         [$etaSql, $bindings] = $eta instanceof Carbon ? ['?', [$eta->toDateTimeString()]] : [$eta, []];
 
         $query->where(function ($query) use ($etaSql, $bindings, $metarOnlyWeather) {
-            // A controller online right now shows as online, regardless of ETA
-            $query->where('airport_scores.source', self::SOURCE_VATSIM);
+            // Exact containment for sources with a precise window
+            $query->where(function ($query) use ($etaSql, $bindings, $metarOnlyWeather) {
+                $exactSources = $metarOnlyWeather
+                    ? array_diff(self::EXACT_MATCH_SOURCES, [self::SOURCE_METAR, self::SOURCE_TAF])
+                    : self::EXACT_MATCH_SOURCES;
 
-            // Exact containment for the weather sources with a precise window
-            if (! $metarOnlyWeather) {
-                $query->orWhere(function ($query) use ($etaSql, $bindings) {
-                    $query->whereIn('airport_scores.source', self::EXACT_MATCH_SOURCES)
-                        ->whereRaw("airport_scores.valid_from <= {$etaSql}", $bindings)
-                        ->whereRaw("airport_scores.valid_to >= {$etaSql}", $bindings);
-                });
-            }
+                $query->whereIn('airport_scores.source', $exactSources)
+                    ->whereRaw("airport_scores.valid_from <= {$etaSql}", $bindings)
+                    ->whereRaw("airport_scores.valid_to >= {$etaSql}", $bindings);
+            });
 
-            // Interval overlap with a tolerance for the predicted-presence signals
+            // Interval overlap with a tolerance for the scheduled-presence signals
             $query->orWhere(function ($query) use ($etaSql, $bindings) {
                 $query->whereIn('airport_scores.source', self::OVERLAP_MATCH_SOURCES)
                     ->whereRaw("airport_scores.valid_from <= DATE_ADD({$etaSql}, INTERVAL " . self::OVERLAP_MATCH_HOURS . ' HOUR)', $bindings)
