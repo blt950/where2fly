@@ -277,7 +277,7 @@ u-tab[aria-selected="true"] {
         top: -2px;
         right: -5px;
         font-size: .55em;
-        color: $primary;
+        color: color.adjust($primary, $lightness: -15%);
         border-radius: 50%;
     }
 
