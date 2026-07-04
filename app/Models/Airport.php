@@ -208,12 +208,12 @@ class Airport extends Model
     public function displayScores()
     {
         $sourceOrder = array_flip([
-            AirportScore::SOURCE_METAR,
-            AirportScore::SOURCE_TAF,
             AirportScore::SOURCE_VATSIM,
             AirportScore::SOURCE_BOOKING,
             AirportScore::SOURCE_EVENT,
-            AirportScore::SOURCE_LOGON_ESTIMATE,
+            AirportScore::SOURCE_LOGON_ESTIMATE,    
+            AirportScore::SOURCE_METAR,
+            AirportScore::SOURCE_TAF,
         ]);
 
         return $this->scores
