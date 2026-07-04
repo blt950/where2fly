@@ -57,20 +57,26 @@ class ScorePredictionTest extends TestCase
         $covering = $this->makeScore(['source' => AirportScore::SOURCE_TAF, 'valid_from' => $eta->copy()->subHour(), 'valid_to' => $eta->copy()->addHour()]);
         $ended = $this->makeScore(['source' => AirportScore::SOURCE_TAF, 'valid_from' => now(), 'valid_to' => $eta->copy()->subHours(2)]);
 
-        // Bookings match exactly — no padding, even when the window starts 30 minutes after ETA
-        $bookingNear = $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->addMinutes(30), 'valid_to' => $eta->copy()->addHours(2)]);
-
         $matched = $this->matchedIds($eta);
         $this->assertContains($covering->id, $matched);
         $this->assertNotContains($ended->id, $matched);
-        $this->assertNotContains($bookingNear->id, $matched);
+    }
+
+    public function test_online_controllers_always_show_while_online(): void
+    {
+        // The live row only exists while a controller is online — it matches any
+        // ETA rather than being window-gated
+        $vatsimNow = $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_ATC', 'valid_from' => now(), 'valid_to' => now()->addMinutes(30)]);
+
+        $this->assertContains($vatsimNow->id, $this->matchedIds(now()));
+        $this->assertContains($vatsimNow->id, $this->matchedIds(now()->addHours(8)));
     }
 
     // -------------------------------------------------------------------------
     // Overlap sources (±1h tolerance)
     // -------------------------------------------------------------------------
 
-    public function test_inexact_sources_match_with_one_hour_overlap(): void
+    public function test_predicted_presence_matches_with_one_hour_overlap(): void
     {
         $eta = now()->addHours(5);
 
@@ -78,16 +84,17 @@ class ScorePredictionTest extends TestCase
         $eventFar = $this->makeScore(['source' => AirportScore::SOURCE_EVENT, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->addMinutes(90), 'valid_to' => $eta->copy()->addHours(4)]);
         $logonNear = $this->makeScore(['source' => AirportScore::SOURCE_LOGON_ESTIMATE, 'reason' => 'VATSIM_ATC', 'valid_from' => now(), 'valid_to' => $eta->copy()->subMinutes(45)]);
 
-        // The live VATSIM row is a "now-ish" signal: it reaches a short-haul ETA
-        // through the tolerance, never a 5h-out one
-        $vatsimNow = $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_ATC', 'valid_from' => now(), 'valid_to' => now()->addMinutes(30)]);
+        // A booking starting shortly after the ETA still shows, so the pilot can
+        // adjust their flight time to catch it
+        $bookingNear = $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->addMinutes(30), 'valid_to' => $eta->copy()->addHours(2)]);
+        $bookingFar = $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->addMinutes(90), 'valid_to' => $eta->copy()->addHours(3)]);
 
         $matched = $this->matchedIds($eta);
         $this->assertContains($eventNear->id, $matched);
         $this->assertNotContains($eventFar->id, $matched);
         $this->assertContains($logonNear->id, $matched);
-        $this->assertNotContains($vatsimNow->id, $matched);
-        $this->assertContains($vatsimNow->id, $this->matchedIds(now()->addMinutes(45)));
+        $this->assertContains($bookingNear->id, $matched);
+        $this->assertNotContains($bookingFar->id, $matched);
     }
 
     // -------------------------------------------------------------------------
