@@ -43,7 +43,7 @@
 >
     <i class="{{ ($highlighted ?? false) ? 'text-success ' : '' }}fa-sharp {{ $scoreType['icon'] }}"></i>
     @if(isset($score->data['probability']))
-        <i class="fa-sharp fa-circle-question position-absolute score-probability-badge" aria-hidden="true"></i>
+        <i class="fa-sharp fa-question position-absolute score-probability-badge" aria-hidden="true"></i>
     @endif
     @if($facilityDots->count())
         <span class="score-facility-dots" aria-hidden="true">
