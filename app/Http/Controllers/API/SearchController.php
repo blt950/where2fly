@@ -112,9 +112,12 @@ class SearchController extends Controller
             $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->first();
         }
 
-        // Score windows are matched against each candidate's ETA — internal only,
-        // it never changes the airtime returned in the response
-        $eta = CalculationHelper::forecastEtaSql($airport, $codeletter);
+        // Score windows are matched against the time the pilot is at each candidate:
+        // its distance-derived ETA when searching arrivals, now when the candidates
+        // are departure airports (you leave there soon — current METAR conditions
+        // apply, not a forecast). Internal only, never changes the returned airtime
+        $candidatesAreDepartures = (bool) $arrival;
+        $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEtaSql($airport, $codeletter);
 
         $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
             ->inContinent($destinations)->inCountry($destinations, $airport->iso_country)->inState($destinations)
@@ -131,7 +134,7 @@ class SearchController extends Controller
             return $group->shuffle();
         })->flatten(1)->take(20);
 
-        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax);
+        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax, $candidatesAreDepartures);
 
         /**
          *  Prepare the data for the response

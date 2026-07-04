@@ -77,26 +77,29 @@ class CalcScores extends Command
                 'valid_to' => $runTime->copy()->addMinutes(self::POLL_INTERVAL_MINUTES),
             ];
 
-            // Check VATSIM controllers
+            // Check VATSIM controllers — one station per facility, keeping the
+            // earliest logon so the tooltip reflects how long it has been staffed
             if ($airport->controllers->count()) {
 
                 $stations = collect();
-                foreach ($airport->controllers->pluck('callsign') as $cs) {
-                    $r = substr($cs, -3);
-                    if ($r != 'OBS') {
-                        $stations[$r] = true;
+                foreach ($airport->controllers as $controller) {
+                    $facility = substr(strrchr($controller->callsign, '_'), 1);
+                    if ($facility == 'OBS') {
+                        continue;
+                    }
+
+                    if (! isset($stations[$facility]) || $controller->logon_time->lt($stations[$facility])) {
+                        $stations[$facility] = $controller->logon_time;
                     }
                 }
 
                 $referenceOrder = ['DEL', 'GND', 'TWR', 'APP', 'CTR'];
-                $stations = $stations->keys()->sort(function ($a, $b) use ($referenceOrder) {
-                    $aSearch = array_search($a, $referenceOrder);
-                    $bSearch = array_search($b, $referenceOrder);
+                $stations = $stations
+                    ->map(fn ($logonTime, $facility) => ['facility' => $facility, 'logon_time' => $logonTime])
+                    ->sortBy(fn ($station) => ($order = array_search($station['facility'], $referenceOrder)) === false ? 99 : $order)
+                    ->values();
 
-                    return $aSearch - $bSearch;
-                });
-
-                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_ATC', 'score' => 1, 'data' => json_encode(['stations' => $stations->values()])] + $vatsimWindow;
+                $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_ATC', 'score' => 1, 'data' => json_encode(['stations' => $stations])] + $vatsimWindow;
             }
 
             // Check if many pilots are departing this airport
@@ -147,18 +150,22 @@ class CalcScores extends Command
                 ];
             }
 
-            // A controller online right now will probably stay for ~2 hours after logon
+            // A controller online right now will probably stay for ~2 hours after
+            // logon (the estimated logoff is the row's valid_to) — facility and
+            // logon time drive the icon dots and the "logged on X ago" tooltip
             foreach ($airport->controllers as $controller) {
-                $estimatedLogoff = $controller->logon_time->copy()->addHours(self::LOGON_ESTIMATE_HOURS);
-
                 $airportScoreInsert[] = [
                     'airport_id' => $airport->id,
                     'reason' => 'VATSIM_ATC',
                     'score' => 1,
-                    'data' => json_encode(['position' => $controller->callsign, 'estimated_logoff' => $estimatedLogoff]),
+                    'data' => json_encode([
+                        'position' => $controller->callsign,
+                        'facility' => substr(strrchr($controller->callsign, '_'), 1),
+                        'logon_time' => $controller->logon_time,
+                    ]),
                     'source' => AirportScore::SOURCE_LOGON_ESTIMATE,
                     'valid_from' => $runTime,
-                    'valid_to' => $estimatedLogoff,
+                    'valid_to' => $controller->logon_time->copy()->addHours(self::LOGON_ESTIMATE_HOURS),
                 ];
             }
 

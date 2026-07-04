@@ -206,8 +206,12 @@ class SearchController extends Controller
                 $suggestedAirport = true;
             }
 
-            // Score windows are matched against each candidate's ETA
-            $eta = CalculationHelper::forecastEtaSql($primaryAirport, $codeletter);
+            // Score windows are matched against the time the pilot is at each
+            // candidate: its distance-derived ETA when suggesting arrivals, now when
+            // suggesting departures (you leave there soon — current METAR conditions
+            // apply, not a forecast)
+            $candidatesAreDepartures = $direction == 'arrival';
+            $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEtaSql($primaryAirport, $codeletter);
 
             // Get airports according to filter
             $airports = Airport::airportOpen()->notIcao($primaryAirport->icao)->isAirportSize($destinationAirportSize)
@@ -238,7 +242,7 @@ class SearchController extends Controller
             })->flatten(1)->take(20);
 
             // Filter the eligible airports
-            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax);
+            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax, $candidatesAreDepartures);
 
             // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy
             $bearingWarning = false;

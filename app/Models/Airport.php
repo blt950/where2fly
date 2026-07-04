@@ -143,14 +143,27 @@ class Airport extends Model
     }
 
     /**
-     * The facility types online right now, from the live VATSIM_ATC score's
-     * station list — no logoff time is known for these.
+     * The stations online right now ({facility, logon_time} pairs from the live
+     * VATSIM_ATC score), in ground-to-air order — we know when each logged on,
+     * never when they'll leave.
+     */
+    public function atcOnlineStations()
+    {
+        $liveAtc = $this->scores->first(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_VATSIM);
+        $referenceOrder = ['DEL', 'GND', 'TWR', 'APP'];
+
+        return collect($liveAtc?->data['stations'] ?? [])
+            ->filter(fn ($station) => in_array($station['facility'] ?? null, $referenceOrder))
+            ->sortBy(fn ($station) => array_search($station['facility'], $referenceOrder))
+            ->values();
+    }
+
+    /**
+     * The facility types online right now.
      */
     public function atcOnlineFacilities()
     {
-        $liveAtc = $this->scores->first(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_VATSIM);
-
-        return $this->sortFacilities(collect($liveAtc?->data['stations'] ?? []));
+        return $this->sortFacilities($this->atcOnlineStations()->pluck('facility'));
     }
 
     /**

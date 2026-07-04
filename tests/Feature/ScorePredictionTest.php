@@ -140,15 +140,19 @@ class ScorePredictionTest extends TestCase
 
         $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'data' => ['callsign' => 'KJFK_APP', 'facility' => 'APP'], 'valid_from' => now(), 'valid_to' => now()->addHours(2)]);
         $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'data' => ['callsign' => 'KJFK_DEL', 'facility' => 'DEL'], 'valid_from' => now()->addHour(), 'valid_to' => now()->addHours(3)]);
-        $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_ATC', 'data' => ['stations' => ['TWR']], 'valid_from' => now(), 'valid_to' => now()->addMinutes(30)]);
+        $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_ATC', 'data' => ['stations' => [['facility' => 'TWR', 'logon_time' => now()->subMinutes(80)->toIso8601String()]]], 'valid_from' => now(), 'valid_to' => now()->addMinutes(30)]);
+        $logonEstimate = $this->makeScore(['source' => AirportScore::SOURCE_LOGON_ESTIMATE, 'reason' => 'VATSIM_ATC', 'data' => ['position' => 'KJFK_TWR', 'facility' => 'TWR', 'logon_time' => now()->subMinutes(80)->toIso8601String()], 'valid_from' => now(), 'valid_to' => now()->addMinutes(40)]);
 
         $airport->load('scores');
 
         $this->assertSame(['DEL', 'APP'], $airport->atcBookedFacilities()->all());
         $this->assertSame(['TWR'], $airport->atcOnlineFacilities()->all());
+        $this->assertSame('TWR', $airport->atcOnlineStations()->first()['facility']);
         // The icon dots union online and booked facilities in ground-to-air order
         $this->assertSame(['DEL', 'TWR', 'APP'], $airport->atcFacilities()->all());
         $this->assertCount(2, $airport->atcBookingScores());
         $this->assertStringContainsString('APP ', $airport->atcBookingScores()->first()->tooltipText());
+        // Online controllers show a relative logon time, never a logoff we don't know
+        $this->assertSame('TWR logged on 1h 20m ago', $logonEstimate->tooltipText());
     }
 }

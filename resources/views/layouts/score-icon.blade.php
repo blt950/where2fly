@@ -12,21 +12,23 @@
 
     $facilityDots = collect();
     if ($score->reason === 'VATSIM_ATC' && $airport) {
-        $onlineFacilities = $airport->atcOnlineFacilities();
+        $onlineStations = $airport->atcOnlineStations();
         $bookingScores = $airport->atcBookingScores();
         $facilityDots = $airport->atcFacilities();
 
-        if ($onlineFacilities->count()) {
+        if ($onlineStations->count()) {
             $tooltipLines[] = '<b>Online</b>';
-            $tooltipLines[] = e($onlineFacilities->join(', '));
+            foreach ($onlineStations as $station) {
+                $tooltipLines[] = e($station['facility'] . ' logged on ' . \Carbon\Carbon::parse($station['logon_time'])->diffForHumans(['parts' => 2, 'short' => true]));
+            }
         }
         if ($bookingScores->count()) {
-            $tooltipLines[] = '<b>Bookings</b>';
+            $tooltipLines[] = '<b>' . e($bookingsLabel ?? 'Bookings') . '</b>';
             foreach ($bookingScores as $bookingScore) {
                 $tooltipLines[] = e($bookingScore->tooltipText());
             }
         }
-        if ($onlineFacilities->isEmpty() && $bookingScores->isEmpty() && $score->tooltipText()) {
+        if ($onlineStations->isEmpty() && $bookingScores->isEmpty() && $score->tooltipText()) {
             $tooltipLines[] = e($score->tooltipText());
         }
     } elseif ($score->tooltipText()) {

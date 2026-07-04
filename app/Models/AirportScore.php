@@ -144,19 +144,20 @@ class AirportScore extends Model
         }
 
         if (isset($this->data['stations'])) {
-            return implode(', ', $this->data['stations']);
+            return collect($this->data['stations'])->map(fn ($station) => $station['facility'] ?? $station)->join(', ');
         }
 
         if (isset($this->data['event'])) {
             return $this->data['event'] . ' until ' . $this->valid_to->format('H:i\z');
         }
 
-        if (isset($this->data['facility']) || isset($this->data['callsign'])) {
-            return ($this->data['facility'] ?? $this->data['callsign']) . ' ' . $this->valid_from->format('H:i\z') . ' - ' . $this->valid_to->format('H:i\z');
+        // A controller online right now — we know when they logged on, not when they'll leave
+        if (isset($this->data['logon_time'])) {
+            return ($this->data['facility'] ?? $this->data['position']) . ' logged on ' . Carbon::parse($this->data['logon_time'])->diffForHumans(['parts' => 2, 'short' => true]);
         }
 
-        if (isset($this->data['position'])) {
-            return $this->data['position'] . ' online until ~' . Carbon::parse($this->data['estimated_logoff'])->format('H:i\z');
+        if (isset($this->data['facility']) || isset($this->data['callsign'])) {
+            return ($this->data['facility'] ?? $this->data['callsign']) . ' ' . $this->valid_from->format('H:i\z') . ' - ' . $this->valid_to->format('H:i\z');
         }
 
         return null;
