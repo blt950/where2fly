@@ -19,7 +19,7 @@ class AirportResource extends JsonResource
             'metar' => app()->isProduction() ? $this->metar->metar : 'TEST-DATA ' . $this->metar->metar,
             'taf' => optional($this->taf)->raw_text,
             'longestRwyFt' => $this->longestRunway(),
-            'scores' => $this->scores->pluck('reason')->unique()->values(),
+            'scores' => $this->displayScores()->pluck('reason'),
         ];
     }
 }

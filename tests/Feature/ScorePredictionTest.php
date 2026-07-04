@@ -171,6 +171,37 @@ class ScorePredictionTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // Display ordering and tooltips
+    // -------------------------------------------------------------------------
+
+    public function test_display_scores_serve_current_status_before_forecasts(): void
+    {
+        $airport = $this->airports['KJFK'];
+        $window = ['valid_from' => now()->subHour(), 'valid_to' => now()->addHour()];
+
+        $tafGusts = $this->makeScore(['source' => AirportScore::SOURCE_TAF, 'reason' => 'METAR_GUSTS'] + $window);
+        $tafWindy = $this->makeScore(['source' => AirportScore::SOURCE_TAF, 'reason' => 'METAR_WINDY'] + $window);
+        $metarWindy = $this->makeScore(['source' => AirportScore::SOURCE_METAR, 'reason' => 'METAR_WINDY'] + $window);
+        $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_ATC'] + $window);
+
+        $airport->load('scores');
+        $display = $airport->displayScores();
+
+        // METAR first, TAF-only reasons after, VATSIM signals last — and the
+        // duplicated WINDY reason is represented by its current METAR row
+        $this->assertSame([AirportScore::SOURCE_METAR, AirportScore::SOURCE_TAF, AirportScore::SOURCE_VATSIM], $display->pluck('source')->all());
+        $this->assertSame($metarWindy->id, $display->firstWhere('reason', 'METAR_WINDY')->id);
+        $this->assertSame($tafGusts->id, $display->firstWhere('reason', 'METAR_GUSTS')->id);
+    }
+
+    public function test_popular_tooltip_shows_the_movement_count(): void
+    {
+        $popular = $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_POPULAR', 'data' => ['movements' => 17], 'valid_from' => now(), 'valid_to' => now()->addMinutes(30)]);
+
+        $this->assertSame('17 aircraft within 5nm', $popular->tooltipText());
+    }
+
+    // -------------------------------------------------------------------------
     // ATC icon helpers
     // -------------------------------------------------------------------------
 

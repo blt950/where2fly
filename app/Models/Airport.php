@@ -197,14 +197,32 @@ class Airport extends Model
     }
 
     /**
-     * The loaded scores deduplicated to one row per reason for rendering —
-     * several sources can assert the same reason (e.g. a booking and an event
-     * both predicting VATSIM_ATC). The row starting latest wins, so the most
-     * recent forecast period speaks for overlapping windows.
+     * The loaded scores deduplicated to one row per reason for rendering,
+     * ordered so the user is served current status before predictions: the
+     * METAR-backed reasons come first, TAF forecasts after, then the VATSIM
+     * signals. Several sources can assert the same reason — the earliest
+     * source in that order wins the dedup (current beats forecast), and
+     * within a source the row starting latest wins, so the most recent
+     * forecast period speaks for overlapping windows.
      */
     public function displayScores()
     {
-        return $this->scores->sortByDesc('valid_from')->unique('reason')->values();
+        $sourceOrder = array_flip([
+            AirportScore::SOURCE_METAR,
+            AirportScore::SOURCE_TAF,
+            AirportScore::SOURCE_VATSIM,
+            AirportScore::SOURCE_BOOKING,
+            AirportScore::SOURCE_EVENT,
+            AirportScore::SOURCE_LOGON_ESTIMATE,
+        ]);
+
+        return $this->scores
+            ->sortBy([
+                fn ($a, $b) => ($sourceOrder[$a->source] ?? 99) <=> ($sourceOrder[$b->source] ?? 99),
+                fn ($a, $b) => $b->valid_from <=> $a->valid_from,
+            ])
+            ->unique('reason')
+            ->values();
     }
 
     public function hasWeatherScore()

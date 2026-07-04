@@ -112,7 +112,7 @@ class CalcScores extends Command
                 }
 
                 if ($movements >= 10) {
-                    $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_POPULAR', 'score' => 1, 'data' => null] + $vatsimWindow;
+                    $airportScoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_POPULAR', 'score' => 1, 'data' => json_encode(['movements' => $movements])] + $vatsimWindow;
                 }
             }
 

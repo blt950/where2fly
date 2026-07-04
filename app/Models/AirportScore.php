@@ -173,6 +173,10 @@ class AirportScore extends Model
             return collect($this->data['stations'])->map(fn ($station) => $station['facility'] ?? $station)->join(', ');
         }
 
+        if (isset($this->data['movements'])) {
+            return $this->data['movements'] . ' aircraft within 5nm';
+        }
+
         if (isset($this->data['event'])) {
             return $this->data['event'] . ' until ' . $this->valid_to->format('H:i\z');
         }
