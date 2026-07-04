@@ -174,7 +174,7 @@ class AirportScore extends Model
         }
 
         if (isset($this->data['movements'])) {
-            return $this->data['movements'] . ' aircraft within 5nm';
+            return $this->data['movements'] . ' aircraft in vicinity';
         }
 
         if (isset($this->data['event'])) {

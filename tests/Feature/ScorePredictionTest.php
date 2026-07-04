@@ -198,7 +198,7 @@ class ScorePredictionTest extends TestCase
     {
         $popular = $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_POPULAR', 'data' => ['movements' => 17], 'valid_from' => now(), 'valid_to' => now()->addMinutes(30)]);
 
-        $this->assertSame('17 aircraft within 5nm', $popular->tooltipText());
+        $this->assertSame('17 aircraft in vicinity', $popular->tooltipText());
     }
 
     // -------------------------------------------------------------------------
