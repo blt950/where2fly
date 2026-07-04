@@ -89,8 +89,8 @@ class ScorePredictionTest extends TestCase
     {
         $eta = now()->addHours(5);
 
-        $eventNear = $this->makeScore(['source' => AirportScore::SOURCE_EVENT, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->addMinutes(45), 'valid_to' => $eta->copy()->addHours(3)]);
-        $eventFar = $this->makeScore(['source' => AirportScore::SOURCE_EVENT, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->addMinutes(90), 'valid_to' => $eta->copy()->addHours(4)]);
+        $eventNear = $this->makeScore(['source' => AirportScore::SOURCE_EVENT, 'reason' => 'VATSIM_EVENT', 'valid_from' => $eta->copy()->addMinutes(45), 'valid_to' => $eta->copy()->addHours(3)]);
+        $eventFar = $this->makeScore(['source' => AirportScore::SOURCE_EVENT, 'reason' => 'VATSIM_EVENT', 'valid_from' => $eta->copy()->addMinutes(90), 'valid_to' => $eta->copy()->addHours(4)]);
 
         // A booking starting shortly after the ETA still shows, so the pilot can
         // adjust their flight time to catch it
@@ -187,9 +187,9 @@ class ScorePredictionTest extends TestCase
         $airport->load('scores');
         $display = $airport->displayScores();
 
-        // METAR first, TAF-only reasons after, VATSIM signals last — and the
-        // duplicated WINDY reason is represented by its current METAR row
-        $this->assertSame([AirportScore::SOURCE_METAR, AirportScore::SOURCE_TAF, AirportScore::SOURCE_VATSIM], $display->pluck('source')->all());
+        // VATSIM signals first, then current METAR weather, TAF-only forecasts
+        // last — and the duplicated WINDY reason is represented by its current METAR row
+        $this->assertSame([AirportScore::SOURCE_VATSIM, AirportScore::SOURCE_METAR, AirportScore::SOURCE_TAF], $display->pluck('source')->all());
         $this->assertSame($metarWindy->id, $display->firstWhere('reason', 'METAR_WINDY')->id);
         $this->assertSame($tafGusts->id, $display->firstWhere('reason', 'METAR_GUSTS')->id);
     }

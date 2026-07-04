@@ -197,13 +197,13 @@ class Airport extends Model
     }
 
     /**
-     * The loaded scores deduplicated to one row per reason for rendering,
-     * ordered so the user is served current status before predictions: the
-     * METAR-backed reasons come first, TAF forecasts after, then the VATSIM
-     * signals. Several sources can assert the same reason — the earliest
-     * source in that order wins the dedup (current beats forecast), and
-     * within a source the row starting latest wins, so the most recent
-     * forecast period speaks for overlapping windows.
+     * The loaded scores deduplicated to one row per reason for rendering:
+     * the VATSIM signals first, then weather with current status before
+     * predictions (METAR-backed reasons before TAF forecasts). Several
+     * sources can assert the same reason — the earliest source in that order
+     * wins the dedup (current beats forecast), and within a source the row
+     * starting latest wins, so the most recent forecast period speaks for
+     * overlapping windows.
      */
     public function displayScores()
     {
@@ -211,7 +211,7 @@ class Airport extends Model
             AirportScore::SOURCE_VATSIM,
             AirportScore::SOURCE_BOOKING,
             AirportScore::SOURCE_EVENT,
-            AirportScore::SOURCE_LOGON_ESTIMATE,    
+            AirportScore::SOURCE_LOGON_ESTIMATE,
             AirportScore::SOURCE_METAR,
             AirportScore::SOURCE_TAF,
         ]);

@@ -116,24 +116,23 @@ class CalcScores extends Command
                 }
             }
 
-            // VATSIM events carry their own window, and predict ATC coverage for it
+            // VATSIM events carry their own window — an event alone doesn't assert
+            // ATC presence, so the ATC icon comes only from live controllers,
+            // logon estimates and bookings. Start/end live in valid_from/valid_to
             foreach ($airport->events as $event) {
                 if ($runTime->gt($event->end_time)) {
                     continue;
                 }
 
-                // The event's start/end already live in valid_from/valid_to — only the name goes in data
-                $eventRow = [
+                $airportScoreInsert[] = [
                     'airport_id' => $airport->id,
+                    'reason' => 'VATSIM_EVENT',
                     'score' => 1,
                     'data' => json_encode(['event' => $event->event]),
                     'source' => AirportScore::SOURCE_EVENT,
                     'valid_from' => $event->start_time,
                     'valid_to' => $event->end_time,
                 ];
-
-                $airportScoreInsert[] = ['reason' => 'VATSIM_EVENT'] + $eventRow;
-                $airportScoreInsert[] = ['reason' => 'VATSIM_ATC'] + $eventRow;
             }
 
             // Booked ATC positions predict coverage for their exact window — the
