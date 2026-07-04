@@ -86,7 +86,7 @@
 
             @if($primaryAirport->scores->count() > 0)
                 <dl>
-                    <dt>Forecast<dt>
+                    <dt>Forecast</dt>
                     <dd>
                     @foreach($primaryAirport->displayScores() as $score)
                         @include('layouts.score-icon', ['score' => $score, 'airport' => $primaryAirport, 'bookingsLabel' => 'Bookings on ' . $direction, 'highlighted' => isset($filteredScores) && in_array($score->reason, $filteredScores)])
