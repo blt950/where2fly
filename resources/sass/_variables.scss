@@ -34,8 +34,6 @@ $border-radius: 0px;
 $border-radius-lg: 0px;
 $border-radius-sm: 0px;
 
-$tooltip-color: $offwhite;
-
 $header-height: 3.438rem;
 $sidebar-width: 31.25rem;
 $sidebar-width-min: 25rem;
@@ -46,6 +44,8 @@ $navbar-nav-link-padding-y: 1rem;
 
 $fa-font-path: "../fonts";
 
+$tooltip-color: $offwhite;
+$tooltip-bg: #060606;
 $tooltip-max-width: 500px;
 $tooltip-opacity: 1;
 
