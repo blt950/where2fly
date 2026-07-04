@@ -183,7 +183,7 @@ class AirportScore extends Model
 
         // A controller online right now — we know when they logged on, not when they'll leave
         if (isset($this->data['logon_time'])) {
-            return ($this->data['facility'] ?? $this->data['position']) . ' logged on ' . self::loggedOnAgo($this->data['logon_time']);
+            return ($this->data['facility'] ?? $this->data['position']) . ' online for ' . self::loggedOnAgo($this->data['logon_time']);
         }
 
         if (isset($this->data['facility']) || isset($this->data['callsign'])) {
@@ -199,7 +199,7 @@ class AirportScore extends Model
      */
     public static function loggedOnAgo(Carbon|string $logonTime): string
     {
-        return Carbon::parse($logonTime)->diffForHumans(['parts' => 2, 'short' => true, 'minimumUnit' => 'minute']);
+        return Carbon::parse($logonTime)->diffForHumans(['parts' => 2, 'short' => true, 'minimumUnit' => 'minute', 'syntax' => Carbon::DIFF_ABSOLUTE]);
     }
 
     public function isWeatherScore()

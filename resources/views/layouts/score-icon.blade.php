@@ -19,7 +19,7 @@
         if ($onlineStations->count()) {
             $tooltipLines[] = '<b>Online</b>';
             foreach ($onlineStations as $station) {
-                $tooltipLines[] = e($station['facility'] . ' logged on ' . App\Models\AirportScore::loggedOnAgo($station['logon_time']));
+                $tooltipLines[] = e($station['facility'] . ' online for ' . App\Models\AirportScore::loggedOnAgo($station['logon_time']));
             }
         }
         if ($bookingScores->count()) {
@@ -48,7 +48,7 @@
     @if($facilityDots->count())
         <span class="score-facility-dots" aria-hidden="true">
             @foreach($facilityDots as $facility)
-                <span class="facility-dot--{{ strtolower($facility) }}"></span>
+                <span class="facility-dot  {{ ($highlighted ?? false) ? 'bg-success ' : '' }}"></span>
             @endforeach
         </span>
     @endif
