@@ -42,7 +42,7 @@ class FetchTafs extends Command
         $paths = AviationWeatherHelper::downloadCache('https://aviationweather.gov/data/cache/tafs.cache.xml.gz');
         $tafDocuments = $this->parseTafDocuments($paths['xml']);
 
-        $airports = Airport::whereIn('icao', array_keys($tafDocuments))->get()->keyBy(fn ($airport) => strtoupper($airport->icao));
+        $airports = Airport::select('id', 'icao')->whereIn('icao', array_keys($tafDocuments))->get()->keyBy(fn ($airport) => strtoupper($airport->icao));
 
         // Only reprocess airports whose TAF has actually been reissued/amended since the last run. TAFs only change every ~6 hours plus occasional amendments
         $storedIssues = Taf::pluck('issued_at', 'airport_id');

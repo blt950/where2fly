@@ -87,7 +87,7 @@ class FetchMetars extends Command
 
         // Get the relevant airports
         $upsertData = [];
-        foreach (Airport::whereIn('icao', array_keys($airportsData))->get() as $airport) {
+        foreach (Airport::select('id', 'icao')->whereIn('icao', array_keys($airportsData))->get() as $airport) {
             $d = $airportsData[strtoupper($airport->icao)];
 
             // Check for missing data
