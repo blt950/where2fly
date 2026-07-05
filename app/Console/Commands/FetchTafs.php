@@ -85,13 +85,18 @@ class FetchTafs extends Command
             foreach ($document['periods'] as $period) {
                 $forecastInsert[] = array_merge($period, ['taf_id' => $tafId]);
 
-                $forecast = new TafForecast($period);
-                if (! $forecast->isScoreable()) {
-                    continue;
+                // TEMPO/PROB periods score like any other, flagged so the icon
+                // carries the uncertainty badge — with a percentage when given
+                $data = [];
+                if ($period['probability'] !== null) {
+                    $data['probability'] = $period['probability'];
                 }
+                if ($period['change_indicator'] === 'TEMPO') {
+                    $data['tempo'] = true;
+                }
+                $data = $data ? json_encode($data) : null;
 
-                $data = $period['probability'] !== null ? json_encode(['probability' => $period['probability']]) : null;
-                foreach (WeatherScoreHelper::reasons($forecast) as $reason) {
+                foreach (WeatherScoreHelper::reasons(new TafForecast($period)) as $reason) {
                     $airportScoreInsert[] = [
                         'airport_id' => $airportId,
                         'reason' => $reason,

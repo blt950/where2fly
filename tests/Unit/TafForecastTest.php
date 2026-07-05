@@ -73,19 +73,4 @@ class TafForecastTest extends TestCase
         $this->assertFalse($clear->heavySnow());
         $this->assertFalse($clear->thunderstorm());
     }
-
-    public function test_scoreable_periods(): void
-    {
-        // Base period, FM and BECMG are always scored
-        $this->assertTrue((new TafForecast(['change_indicator' => null]))->isScoreable());
-        $this->assertTrue((new TafForecast(['change_indicator' => 'FM']))->isScoreable());
-        $this->assertTrue((new TafForecast(['change_indicator' => 'BECMG']))->isScoreable());
-
-        // Both PROB shapes are scored — a bare PROBxx group and a combined PROBxx TEMPO
-        $this->assertTrue((new TafForecast(['change_indicator' => 'PROB', 'probability' => 30]))->isScoreable());
-        $this->assertTrue((new TafForecast(['change_indicator' => 'TEMPO', 'probability' => 40]))->isScoreable());
-
-        // A bare TEMPO has no percentage to show and was never asserted for its full window
-        $this->assertFalse((new TafForecast(['change_indicator' => 'TEMPO', 'probability' => null]))->isScoreable());
-    }
 }

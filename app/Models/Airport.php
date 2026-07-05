@@ -102,15 +102,15 @@ class Airport extends Model
 
     /**
      * The loaded scores applicable at the given ETA, plus whether the airport has
-     * a scoreable TAF period covering it (drives the metar-fallback matching and
-     * the forecastSource indicator).
+     * a TAF period covering it (drives the metar-fallback matching and the
+     * forecastSource indicator).
      *
      * @return array{0: Collection, 1: bool}
      */
     public function scoresAtEta(Carbon $eta, bool $metarOnlyWeather = false): array
     {
         $hasTafAtEta = (bool) $this->taf?->forecasts->contains(
-            fn ($forecast) => $forecast->isScoreable() && $forecast->valid_from->lte($eta) && $forecast->valid_to->gte($eta)
+            fn ($forecast) => $forecast->valid_from->lte($eta) && $forecast->valid_to->gte($eta)
         );
 
         return [

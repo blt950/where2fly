@@ -132,7 +132,7 @@ class ScorePredictionTest extends TestCase
     // METAR fallback
     // -------------------------------------------------------------------------
 
-    public function test_metar_falls_back_when_no_scoreable_taf_covers_eta(): void
+    public function test_metar_falls_back_when_no_taf_covers_eta(): void
     {
         $eta = now()->addHours(5);
         $expiredMetar = $this->makeScore(['source' => AirportScore::SOURCE_METAR, 'valid_from' => now()->subHour(), 'valid_to' => now()]);
@@ -140,12 +140,12 @@ class ScorePredictionTest extends TestCase
         // No TAF at all: the expired METAR row still matches
         $this->assertContains($expiredMetar->id, $this->matchedIds($eta));
 
-        // A bare TEMPO period covering the ETA isn't scoreable — fallback still applies
-        $this->makeTafPeriod(['change_indicator' => 'TEMPO', 'valid_from' => $eta->copy()->subHour(), 'valid_to' => $eta->copy()->addHour()]);
+        // A period covering a different time doesn't switch the fallback off
+        $this->makeTafPeriod(['change_indicator' => 'FM', 'valid_from' => $eta->copy()->addHours(2), 'valid_to' => $eta->copy()->addHours(4)]);
         $this->assertContains($expiredMetar->id, $this->matchedIds($eta));
 
-        // A scoreable period covering the ETA switches the METAR fallback off
-        $this->makeTafPeriod(['change_indicator' => 'FM', 'valid_from' => $eta->copy()->subHour(), 'valid_to' => $eta->copy()->addHour()]);
+        // Any period covering the ETA does — TEMPO included, they score too
+        $this->makeTafPeriod(['change_indicator' => 'TEMPO', 'valid_from' => $eta->copy()->subHour(), 'valid_to' => $eta->copy()->addHour()]);
         $this->assertNotContains($expiredMetar->id, $this->matchedIds($eta));
     }
 

@@ -49,21 +49,6 @@ class TafForecast extends Model
         return $ceiling;
     }
 
-    /**
-     * Whether this period should generate airport scores. Base, FM and BECMG
-     * periods are always scored. TEMPO/PROB periods are only scored when they
-     * carry a probability percentage to show the user — a bare TEMPO was never
-     * asserted as a forecast for its full window and has no percentage to attach.
-     */
-    public function isScoreable()
-    {
-        if ($this->probability !== null) {
-            return true;
-        }
-
-        return $this->change_indicator === null || in_array($this->change_indicator, ['FM', 'BECMG']);
-    }
-
     public function windAtAbove(int $knots)
     {
         if ($this->wind_speed_kt) {

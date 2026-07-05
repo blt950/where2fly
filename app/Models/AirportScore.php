@@ -70,8 +70,8 @@ class AirportScore extends Model
     /**
      * PHP-side twin of the coversEta scope, for filtering already-loaded score
      * collections per candidate. The caller supplies whether the airport has a
-     * scoreable TAF period covering the ETA (the metar-fallback input), since
-     * that spans the whole airport, not this row.
+     * TAF period covering the ETA (the metar-fallback input), since that spans
+     * the whole airport, not this row.
      */
     public function coversEtaAt(Carbon $eta, bool $airportHasTafAtEta, bool $metarOnlyWeather = false): bool
     {
@@ -127,7 +127,7 @@ class AirportScore extends Model
                 return;
             }
 
-            // The current METAR is the fallback when no scoreable TAF period covers the ETA
+            // The current METAR is the fallback when no TAF period covers the ETA
             $query->orWhere(function ($query) use ($etaSql, $bindings) {
                 $query->where('airport_scores.source', self::SOURCE_METAR)
                     ->whereNotExists(function ($query) use ($etaSql, $bindings) {
@@ -135,13 +135,7 @@ class AirportScore extends Model
                             ->join('tafs', 'tafs.id', '=', 'taf_forecasts.taf_id')
                             ->whereColumn('tafs.airport_id', 'airport_scores.airport_id')
                             ->whereRaw("taf_forecasts.valid_from <= {$etaSql}", $bindings)
-                            ->whereRaw("taf_forecasts.valid_to >= {$etaSql}", $bindings)
-                            ->where(function ($query) {
-                                // Mirrors TafForecast::isScoreable()
-                                $query->whereNotNull('taf_forecasts.probability')
-                                    ->orWhereNull('taf_forecasts.change_indicator')
-                                    ->orWhereIn('taf_forecasts.change_indicator', ['FM', 'BECMG']);
-                            });
+                            ->whereRaw("taf_forecasts.valid_to >= {$etaSql}", $bindings);
                     });
             });
         });
