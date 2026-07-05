@@ -165,7 +165,7 @@ class AirportScore extends Model
 
         // A controller online right now — we know when they logged on, not when they'll leave
         if (isset($this->data['logon_time'])) {
-            return ($this->data['facility'] ?? $this->data['position']) . ' online for ' . self::loggedOnAgo($this->data['logon_time']);
+            return self::onlineForText($this->data['facility'] ?? $this->data['position'], $this->data['logon_time']);
         }
 
         if (isset($this->data['facility']) || isset($this->data['callsign'])) {
@@ -173,6 +173,15 @@ class AirportScore extends Model
         }
 
         return null;
+    }
+
+    /**
+     * The single "TWR online for 1h 20m" formatter — every online-station line
+     * renders through here.
+     */
+    public static function onlineForText(string $facility, Carbon|string $logonTime): string
+    {
+        return $facility . ' online for ' . self::loggedOnAgo($logonTime);
     }
 
     /**

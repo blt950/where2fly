@@ -89,7 +89,7 @@
                     <dt>Forecast</dt>
                     <dd>
                     @foreach($primaryAirport->displayScores() as $score)
-                        @include('layouts.score-icon', ['score' => $score, 'airport' => $primaryAirport, 'bookingsLabel' => 'Bookings on ' . $direction, 'highlighted' => isset($filteredScores) && in_array($score->reason, $filteredScores)])
+                        <x-score-icon :score="$score" :airport="$primaryAirport" :bookings-label="'Bookings on ' . $direction" :highlighted="isset($filteredScores) && in_array($score->reason, $filteredScores)" />
                     @endforeach
                     </dd>
                 </dl>
@@ -162,7 +162,7 @@
                             <td data-sort="{{ $airport->airtime }}">{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
                             <td class="fs-5" data-sort={{ $airport->displayScores()->count() }}>
                                 @foreach($airport->displayScores() as $score)
-                                    @include('layouts.score-icon', ['score' => $score, 'airport' => $airport, 'bookingsLabel' => 'Bookings on ' . ($direction == 'departure' ? 'arrival' : 'departure'), 'highlighted' => isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1])
+                                    <x-score-icon :score="$score" :airport="$airport" :bookings-label="'Bookings on ' . ($direction == 'departure' ? 'arrival' : 'departure')" :highlighted="isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1" />
                                 @endforeach
                             </td>
                         </tr>
