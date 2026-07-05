@@ -104,8 +104,11 @@ setup, but this container already has PHP/MySQL/Node natively, so
 php artisan test
 ```
 
-108 tests / 215 assertions, ~10s, all passing against the
-`where2fly_test` database defined in `phpunit.xml`.
+~120 tests / ~265 assertions, ~10s, all passing against the
+`where2fly_test` database defined in `phpunit.xml`. If the suite
+suddenly takes ~15 minutes instead, the seeder is broken (every failing
+test re-runs `migrate:fresh`) — fix `TestAirportSeeder` first, don't
+debug individual tests.
 
 ## Gotchas
 
@@ -121,6 +124,25 @@ php artisan test
   `UMAMI_WEBSITE_ID_DEV` is a placeholder, not a real site ID. Ignore
   these; a real API/search error would show up as a different error or
   a visibly broken results page.
+- **`GET /api/user/authenticated` 400 is also expected noise** when
+  browsing logged-out — every page fires it. Same rule as the umami
+  errors: ignore it in `console --errors` unless the page itself is
+  visibly broken.
+- **Stopping the server: never `pkill -f "artisan serve"` inside a
+  compound command.** `pkill -f` matches the *full command line* of
+  every process — including the `bash -c` running the very command that
+  contains that string — so it kills your own shell mid-command (exit
+  code 144, later steps in the same command silently skipped). Use the
+  bracket trick `pkill -f "[a]rtisan serve"`, or run the pkill as its
+  own standalone command with nothing after it.
+- **Direct results URL beats driving the search form.** The web search
+  is a plain GET; to screenshot/verify the results page, navigate
+  straight to
+  `/search?icao=EGLL&direction=departure&codeletter=JM&airtimeMin=0&airtimeMax=8&metcondition=ANY&destinationWithRoutesOnly=0&destinationRunwayLights=0&destinationAirbases=0&flightDirection=0&temperatureMin=-60&temperatureMax=60&elevationMin=-2000&elevationMax=18000&rwyLengthMin=0&rwyLengthMax=17000`
+  (all listed params are required by validation) instead of filling the
+  multi-tab form. On any page with the map, `eval
+  window.setFocusAirport('KORD')` opens the React airport card directly
+  without hunting for Leaflet markers.
 - **Map tiles need a moment.** Right after `nav`, the Leaflet map pane
   renders solid black until tiles load — `sleep 2000-3000` (or
   `wait-for` a marker/selector you expect) before screenshotting if you

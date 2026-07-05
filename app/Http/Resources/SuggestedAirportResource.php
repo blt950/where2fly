@@ -13,6 +13,7 @@ class SuggestedAirportResource extends AirportResource
             'distanceNm' => $this->distance,
             'isAirforcebase' => $this->w2f_airforcebase,
             'hasAirlineService' => $this->w2f_scheduled_service,
+            'forecastSource' => $this->forecast_source,
         ]);
     }
 }

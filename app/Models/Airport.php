@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Helpers\CalculationHelper;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Location\Coordinate;
 use MatanYadaev\EloquentSpatial\Enums\Srid;
 use MatanYadaev\EloquentSpatial\Objects\LineString;
@@ -18,6 +20,9 @@ class Airport extends Model
 {
     use HasFactory;
     use HasSpatial;
+
+    /** The canonical ground-to-air facility ordering for ATC display (dots, tooltips, stored station lists) */
+    public const ATC_FACILITY_ORDER = ['DEL', 'GND', 'TWR', 'APP'];
 
     public $timestamps = false;
 
@@ -33,6 +38,16 @@ class Airport extends Model
     public function metar()
     {
         return $this->hasOne(Metar::class);
+    }
+
+    public function taf()
+    {
+        return $this->hasOne(Taf::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
     }
 
     public function runways()
@@ -86,6 +101,128 @@ class Airport extends Model
                 }
             });
         });
+    }
+
+    /**
+     * The loaded scores applicable at the given ETA, plus whether the airport has
+     * a TAF period covering it (drives the metar-fallback matching and the
+     * forecastSource indicator).
+     *
+     * @return array{0: Collection, 1: bool}
+     */
+    public function scoresAtEta(Carbon $eta, bool $metarOnlyWeather = false): array
+    {
+        $hasTafAtEta = (bool) $this->taf?->forecasts->contains(
+            fn ($forecast) => $forecast->valid_from->lte($eta) && $forecast->valid_to->gte($eta)
+        );
+
+        return [
+            $this->scores->filter(fn ($score) => $score->coversEtaAt($eta, $hasTafAtEta, $metarOnlyWeather))->values(),
+            $hasTafAtEta,
+        ];
+    }
+
+    /**
+     * The loaded, ETA-windowed booking-sourced VATSIM_ATC scores, ordered by
+     * start time — the tooltip and facility dots on the ATC icon render these.
+     */
+    public function atcBookingScores()
+    {
+        return $this->scores
+            ->filter(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_BOOKING)
+            ->sortBy('valid_from')
+            ->values();
+    }
+
+    /**
+     * The unique booked facility types (DEL/GND/TWR/APP) among those scores,
+     * in ground-to-air order.
+     */
+    public function atcBookedFacilities()
+    {
+        return $this->sortFacilities(
+            $this->atcBookingScores()->map(fn ($score) => $score->data['facility'] ?? null)
+        );
+    }
+
+    /**
+     * The stations online right now ({facility, logon_time} pairs), in
+     * ground-to-air order — we know when each logged on, never when they'll
+     * leave. Read from the live VATSIM_ATC score when it applies ("now" views),
+     * otherwise from the logon-estimate rows still predicting presence at the
+     * ETA, which carry the same fields.
+     */
+    public function atcOnlineStations()
+    {
+        $liveAtc = $this->scores->first(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_VATSIM);
+
+        $stations = collect($liveAtc?->data['stations'] ?? []);
+        if ($stations->isEmpty()) {
+            $stations = $this->scores
+                ->filter(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_LOGON_ESTIMATE)
+                ->map(fn ($score) => ['facility' => $score->data['facility'] ?? null, 'logon_time' => $score->data['logon_time'] ?? null])
+                ->filter(fn ($station) => $station['logon_time'] !== null)
+                ->unique('facility');
+        }
+
+        return $stations
+            ->filter(fn ($station) => in_array($station['facility'] ?? null, self::ATC_FACILITY_ORDER))
+            ->sortBy(fn ($station) => array_search($station['facility'], self::ATC_FACILITY_ORDER))
+            ->values();
+    }
+
+    /**
+     * The facility types online right now.
+     */
+    public function atcOnlineFacilities()
+    {
+        return $this->sortFacilities($this->atcOnlineStations()->pluck('facility'));
+    }
+
+    /**
+     * Every facility type either online or booked — the ATC icon's colored dots.
+     */
+    public function atcFacilities()
+    {
+        return $this->sortFacilities($this->atcOnlineFacilities()->merge($this->atcBookedFacilities()));
+    }
+
+    private function sortFacilities(Collection $facilities): Collection
+    {
+        return $facilities
+            ->filter(fn ($facility) => in_array($facility, self::ATC_FACILITY_ORDER))
+            ->unique()
+            ->sortBy(fn ($facility) => array_search($facility, self::ATC_FACILITY_ORDER))
+            ->values();
+    }
+
+    /**
+     * The loaded scores deduplicated to one row per reason for rendering:
+     * the VATSIM signals first, then weather with current status before
+     * predictions (METAR-backed reasons before TAF forecasts). Several
+     * sources can assert the same reason — the earliest source in that order
+     * wins the dedup (current beats forecast), and within a source the row
+     * starting latest wins, so the most recent forecast period speaks for
+     * overlapping windows.
+     */
+    public function displayScores()
+    {
+        $sourceOrder = array_flip([
+            AirportScore::SOURCE_VATSIM,
+            AirportScore::SOURCE_BOOKING,
+            AirportScore::SOURCE_EVENT,
+            AirportScore::SOURCE_LOGON_ESTIMATE,
+            AirportScore::SOURCE_METAR,
+            AirportScore::SOURCE_TAF,
+        ]);
+
+        return $this->scores
+            ->sortBy([
+                fn ($a, $b) => ($sourceOrder[$a->source] ?? 99) <=> ($sourceOrder[$b->source] ?? 99),
+                fn ($a, $b) => $b->valid_from <=> $a->valid_from,
+            ])
+            ->unique('reason')
+            ->values();
     }
 
     public function hasWeatherScore()
@@ -435,22 +572,30 @@ class Airport extends Model
     }
 
     /**
-     * Scope a query to only include airports that have scores
+     * Scope a query to only include airports that have scores. When an ETA is
+     * given (a Carbon instant or a per-candidate SQL expression), only score
+     * rows whose validity window applies at that ETA count.
      */
     #[Scope]
-    protected function filterByScores(Builder $query, ?array $filterByScores = null): void
+    protected function filterByScores(Builder $query, ?array $filterByScores = null, Carbon|string|null $eta = null, bool $metarOnlyWeather = false): void
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
 
-            $query->where(function ($query) use ($filterByScores) {
+            $query->where(function ($query) use ($filterByScores, $eta, $metarOnlyWeather) {
                 foreach ($filterByScores as $score => $value) {
                     if ($value == 1) {
-                        $query->whereHas('scores', function ($query) use ($score) {
+                        $query->whereHas('scores', function ($query) use ($score, $eta, $metarOnlyWeather) {
                             $query->where('reason', $score);
+                            if ($eta) {
+                                $query->coversEta($eta, $metarOnlyWeather);
+                            }
                         });
                     } elseif ($value == -1) {
-                        $query->whereDoesntHave('scores', function ($query) use ($score) {
+                        $query->whereDoesntHave('scores', function ($query) use ($score, $eta, $metarOnlyWeather) {
                             $query->where('reason', $score);
+                            if ($eta) {
+                                $query->coversEta($eta, $metarOnlyWeather);
+                            }
                         });
                     }
                 }
@@ -557,18 +702,26 @@ class Airport extends Model
     }
 
     /**
-     * Scope a query to only include airports that have the given scores
+     * Scope a query to sort airports by how many of the given scores they have,
+     * counting only rows valid at the ETA when one is given. The reason and
+     * window conditions live in the join clause, not the where clause, so an
+     * airport with no applicable scores still appears — with a count of zero —
+     * instead of dropping out of the results. Distinct reasons are counted:
+     * several sources can predict the same VATSIM_ATC reason, which shouldn't
+     * outrank an airport with a single real signal.
      */
     #[Scope]
-    protected function sortByScores(Builder $query, $filterByScores)
+    protected function sortByScores(Builder $query, $filterByScores, Carbon|string|null $eta = null, bool $metarOnlyWeather = false)
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
-            return $query->leftJoin('airport_scores', 'airports.id', '=', 'airport_scores.airport_id')
-                ->selectRaw('airports.*, COUNT(airport_scores.id) as score_count')
-                ->where(function ($query) use ($filterByScores) {
-                    $query->whereIn('airport_scores.reason', $filterByScores)
-                        ->orWhereNull('airport_scores.reason');
-                })
+            return $query->leftJoin('airport_scores', function ($join) use ($filterByScores, $eta, $metarOnlyWeather) {
+                $join->on('airports.id', '=', 'airport_scores.airport_id')
+                    ->whereIn('airport_scores.reason', $filterByScores);
+                if ($eta) {
+                    AirportScore::applyCoversEta($join, $eta, $metarOnlyWeather);
+                }
+            })
+                ->selectRaw('airports.*, COUNT(DISTINCT airport_scores.reason) as score_count')
                 ->groupBy('airports.id')
                 ->orderBy('score_count', 'desc');
         }

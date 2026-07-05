@@ -34,11 +34,11 @@ class UpdateData extends Command
         $this->info('>> fetch:metars running');
         $this->call('fetch:metars');
 
+        $this->info('>> fetch:tafs running');
+        $this->call('fetch:tafs');
+
         $this->info('>> fetch:vatsim running');
         $this->call('fetch:vatsim');
-
-        $this->info('>> calc:scores running');
-        $this->call('calc:scores');
 
         $this->info('> Done with all commands in ' . round(microtime(true) - $processTime) . ' seconds!');
 

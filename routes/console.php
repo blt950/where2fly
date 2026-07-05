@@ -8,9 +8,12 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Update data
-Schedule::command('update:data')->hourlyAt(15);
-Schedule::command('update:data')->hourlyAt(40);
+// Update METARs, TAFs, events, online controllers and calculate new scores.
+Schedule::command('update:data')->hourlyAt(5);
+Schedule::command('update:data')->hourlyAt(35);
+
+// Fetch ATC bookings
+Schedule::command('fetch:bookings')->everyThirtyMinutes();
 
 // Fetch flights
 Schedule::command('fetch:flights')->everyThirtyMinutes();

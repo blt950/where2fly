@@ -126,9 +126,16 @@ class TestAirportSeeder extends Seeder
             $airport = Airport::where('icao', $icao)->first();
             if ($airport) {
                 foreach ($reasons as $reason) {
+                    // Deliberately wide validity windows so any test search's ETA is
+                    // covered — tests exercising the windowing itself seed their own rows
                     AirportScore::firstOrCreate(
                         ['airport_id' => $airport->id, 'reason' => $reason],
-                        ['score' => 1]
+                        [
+                            'score' => 1,
+                            'source' => str_starts_with($reason, 'VATSIM_') ? AirportScore::SOURCE_VATSIM : AirportScore::SOURCE_METAR,
+                            'valid_from' => now()->subHour(),
+                            'valid_to' => now()->addHours(30),
+                        ]
                     );
                 }
             }

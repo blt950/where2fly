@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(graphify query *)"
+      "Bash(graphify query *)",
+      "Bash(php artisan *)"
     ]
   }
 }

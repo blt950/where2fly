@@ -112,14 +112,19 @@ class SearchController extends Controller
             $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->first();
         }
 
+        // Calculate the ETA for sorting
+        $candidatesAreDepartures = (bool) $arrival;
+        $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEtaSql($airport, $codeletter);
+
+        // Get airports according to filter
         $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
             ->inContinent($destinations)->inCountry($destinations, $airport->iso_country)->inState($destinations)
             ->withinDistance($airport, $minDistance, $maxDistance, $airport->icao)
             ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-            ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)
+            ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
-            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes())
-            ->has('metar')->with('runways', 'scores', 'metar')
+            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes(), $eta, $candidatesAreDepartures)
+            ->has('metar')->with('runways', 'scores', 'metar', 'taf.forecasts')
             ->get();
 
         // Shuffle and limit the results to 20
@@ -127,7 +132,7 @@ class SearchController extends Controller
             return $group->shuffle();
         })->flatten(1)->take(20);
 
-        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax);
+        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax, $candidatesAreDepartures);
 
         /**
          *  Prepare the data for the response
@@ -135,9 +140,9 @@ class SearchController extends Controller
 
         // Then in your main function
         if ($departure) {
-            [$airportData, $arrivalData] = $this->prepareAirportData($airport, $suggestedAirports);
+            [$airportData, $arrivalData] = $this->prepareAirportData($airport, $suggestedAirports, true);
         } else {
-            [$airportData, $departureData] = $this->prepareAirportData($airport, $suggestedAirports);
+            [$airportData, $departureData] = $this->prepareAirportData($airport, $suggestedAirports, false);
         }
 
         // Send the response
@@ -151,8 +156,11 @@ class SearchController extends Controller
 
     }
 
-    public function prepareAirportData($airport, $suggestedAirports)
+    public function prepareAirportData($airport, $suggestedAirports, bool $anchorIsDeparture = false)
     {
+        [$scores] = $airport->scoresAtEta(now(), $anchorIsDeparture);
+        $airport->setRelation('scores', $scores);
+
         return [
             new AirportResource($airport),
             SuggestedAirportResource::collection($suggestedAirports),
