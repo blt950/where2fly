@@ -16,6 +16,7 @@ class CalcScores extends Command
      * staleness cutoff has always assumed, VATSIM rows until the next poll.
      */
     private const METAR_VALIDITY_HOURS = 1;
+
     private const POLL_INTERVAL_MINUTES = 60;
 
     /**

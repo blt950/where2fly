@@ -39,7 +39,7 @@ class FetchVatsim extends Command
 
         $upsertEventsData = [];
         $upsertControllerData = [];
-        
+
         $airportMap = Airport::select('id', 'icao')->get()->keyBy('icao');
 
         $this->info('Fetching events...');

@@ -14,10 +14,15 @@ class AirportScore extends Model
     use HasFactory;
 
     public const SOURCE_METAR = 'metar';
+
     public const SOURCE_TAF = 'taf';
+
     public const SOURCE_VATSIM = 'vatsim';
+
     public const SOURCE_EVENT = 'event';
+
     public const SOURCE_BOOKING = 'booking';
+
     public const SOURCE_LOGON_ESTIMATE = 'logon_estimate';
 
     /** Sources whose window must contain the ETA exactly */
@@ -51,7 +56,7 @@ class AirportScore extends Model
      * Scope score rows to those applicable at the given ETA. $eta is either a
      * Carbon instant or a raw SQL expression (for per-candidate ETAs computed
      * in the query itself).
-     * 
+     *
      * With $metarOnlyWeather (departure candidates — the pilot leaves soon),
      * TAF rows never match and the current METAR always does: the latest
      * observation is the weather truth there, not a forecast.
