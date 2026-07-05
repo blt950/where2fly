@@ -11,7 +11,7 @@ class WeatherScoreHelper
      * Weather score reasons derivable from either a current observation (Metar)
      * or a forecast period (TafForecast) — both expose the same condition
      * methods. The runway-dependent reasons (METAR_RVR, METAR_CROSSWIND) stay
-     * in calc:scores: they need runway data, and RVR isn't forecast in TAFs at all.
+     * in fetch:metars: they need runway data, and RVR isn't forecast in TAFs at all.
      *
      * @return array<string>
      */

@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Helpers\AirportCallsignHelper;
 use App\Models\Airport;
+use App\Models\AirportScore;
 use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -92,7 +93,36 @@ class FetchBookings extends Command
         // Remove bookings that were cancelled upstream or have already ended
         Booking::whereNotIn('vatsim_booking_id', $seenBookingIds)->orWhere('end', '<', now())->delete();
 
-        $this->info('Fetching of ' . count($upsertData) . ' bookings finished in ' . round(microtime(true) - $processTime) . ' seconds');
+        $this->scoreBookings();
 
+        $this->info('Fetching and scoring of ' . count($upsertData) . ' bookings finished in ' . round(microtime(true) - $processTime) . ' seconds');
+
+    }
+
+    /**
+     * Rebuild the booking-sourced predicted VATSIM_ATC scores — this command
+     * owns the `booking` source.
+     */
+    private function scoreBookings(): void
+    {
+        $scoreInsert = [];
+        $bookings = Booking::whereHas('airport', fn ($query) => $query->where('type', '!=', 'closed')->whereHas('metar'))->get();
+
+        foreach ($bookings as $booking) {
+            $scoreInsert[] = [
+                'airport_id' => $booking->airport_id,
+                'reason' => 'VATSIM_ATC',
+                'score' => 1,
+                'data' => json_encode(['callsign' => $booking->callsign, 'facility' => substr(strrchr($booking->callsign, '_'), 1)]),
+                'source' => AirportScore::SOURCE_BOOKING,
+                'valid_from' => $booking->start,
+                'valid_to' => $booking->end,
+            ];
+        }
+
+        AirportScore::where('source', AirportScore::SOURCE_BOOKING)->delete();
+        foreach (array_chunk($scoreInsert, 500) as $chunk) {
+            AirportScore::insert($chunk);
+        }
     }
 }

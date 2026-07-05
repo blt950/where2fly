@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Helpers\AviationWeatherHelper;
+use App\Helpers\WeatherScoreHelper;
 use App\Models\Airport;
+use App\Models\AirportScore;
 use App\Models\Metar;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -12,6 +14,11 @@ use XMLReader;
 
 class FetchMetars extends Command
 {
+    /**
+     * How long an observation stays valid — also the staleness cutoff for scoring.
+     */
+    private const METAR_VALIDITY_HOURS = 1;
+
     /**
      * The name and signature of the console command.
      *
@@ -102,7 +109,104 @@ class FetchMetars extends Command
 
         AviationWeatherHelper::cleanup($paths);
 
-        $this->info('Fetching of ' . count($airportsData) . " METAR's finished in " . round(microtime(true) - $processTime) . ' seconds');
+        // Free the parsed cache before loading airport models — update:data runs
+        // every command in one 256MB process
+        $metarCount = count($airportsData);
+        $airportsData = $upsertData = [];
 
+        $this->scoreMetars();
+
+        $this->info('Fetching and scoring of ' . $metarCount . " METAR's finished in " . round(microtime(true) - $processTime) . ' seconds');
+
+    }
+
+    /**
+     * Rebuild the metar-sourced airport scores from the fresh observations.
+     * Each fetch command owns its own airport_scores sources — this one owns `metar`.
+     */
+    private function scoreMetars(): void
+    {
+        $scoreInsert = [];
+        foreach (Airport::where('type', '!=', 'closed')->has('metar')->with('metar', 'runways')->get() as $airport) {
+            // A stale observation scores nothing — its old rows drop out on the rebuild
+            if (now()->lte($airport->metar->last_update->copy()->addHours(self::METAR_VALIDITY_HOURS))) {
+                $scoreInsert = array_merge($scoreInsert, $this->metarScores($airport));
+            }
+        }
+
+        AirportScore::where('source', AirportScore::SOURCE_METAR)->delete();
+        foreach (array_chunk($scoreInsert, 500) as $chunk) {
+            AirportScore::insert($chunk);
+        }
+    }
+
+    /**
+     * Weather scores from the airport's current METAR, valid from the observation
+     * until the next one is expected.
+     *
+     * @return array<array>
+     */
+    private function metarScores(Airport $airport): array
+    {
+        $scores = [];
+        $metarArraySuffix = [
+            'source' => AirportScore::SOURCE_METAR,
+            'valid_from' => $airport->metar->last_update,
+            'valid_to' => $airport->metar->last_update->copy()->addHours(self::METAR_VALIDITY_HOURS),
+        ];
+
+        // Fill in scores from current METAR observation
+        foreach (WeatherScoreHelper::reasons($airport->metar) as $reason) {
+            $scores[] = ['airport_id' => $airport->id, 'reason' => $reason, 'score' => 1, 'data' => null] + $metarArraySuffix;
+        }
+
+        $activeRunwayComponents = ['headwind' => 0, 'crosswind' => 0];
+        $airportScoreRVRInserted = false;
+        foreach ($airport->runways->where('closed', false) as $runway) {
+            // Check RVR at runways
+            if (
+                $airportScoreRVRInserted == false &&
+                ((! empty($runway->le_ident) && $airport->metar->rvrAtBelow($runway->le_ident, 700)) ||
+                (! empty($runway->he_ident) && $airport->metar->rvrAtBelow($runway->he_ident, 700)))
+            ) {
+                $scores[] = ['airport_id' => $airport->id, 'reason' => 'METAR_RVR', 'score' => 1, 'data' => null] + $metarArraySuffix;
+                $airportScoreRVRInserted = true;
+            }
+
+            // Calculate headwind component on active runway
+            if (! empty($airport->metar->wind_direction)) {
+
+                // Fallback to varchar runway identifier if heading is not present in data, which is common.
+                if (empty($runway->le_heading) && ! empty($runway->le_ident)) {
+                    $runway->le_heading = rwyIdentToHeading($runway->le_ident);
+                }
+
+                if (empty($runway->he_heading) && ! empty($runway->he_ident)) {
+                    $runway->he_heading = rwyIdentToHeading($runway->he_ident);
+                }
+
+                // Set the components
+                $headwindComponentLe = abs($airport->metar->wind_speed * cos(deg2rad($airport->metar->wind_direction - $runway->le_heading)));
+                $crosswindComponentLe = abs($airport->metar->wind_speed * sin(deg2rad($airport->metar->wind_direction - $runway->le_heading)));
+
+                $headwindComponentHe = abs($airport->metar->wind_speed * cos(deg2rad($airport->metar->wind_direction - $runway->he_heading)));
+                $crosswindComponentHe = abs($airport->metar->wind_speed * sin(deg2rad($airport->metar->wind_direction - $runway->he_heading)));
+
+                if ($activeRunwayComponents['headwind'] < $headwindComponentLe) {
+                    $activeRunwayComponents['headwind'] = $headwindComponentLe;
+                    $activeRunwayComponents['crosswind'] = $crosswindComponentLe;
+                } elseif ($activeRunwayComponents['headwind'] < $headwindComponentHe) {
+                    $activeRunwayComponents['headwind'] = $headwindComponentHe;
+                    $activeRunwayComponents['crosswind'] = $crosswindComponentHe;
+                }
+            }
+        }
+
+        // Check if crosswind component is fun at active runway
+        if ($airport->metar->wind_speed >= 15 && $activeRunwayComponents['crosswind'] > 12) {
+            $scores[] = ['airport_id' => $airport->id, 'reason' => 'METAR_CROSSWIND', 'score' => 1, 'data' => null] + $metarArraySuffix;
+        }
+
+        return $scores;
     }
 }
