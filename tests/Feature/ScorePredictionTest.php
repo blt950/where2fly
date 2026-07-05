@@ -224,6 +224,6 @@ class ScorePredictionTest extends TestCase
         $this->assertCount(2, $airport->atcBookingScores());
         $this->assertStringContainsString('APP ', $airport->atcBookingScores()->first()->tooltipText());
         // Online controllers show a relative logon time, never a logoff we don't know
-        $this->assertSame('TWR logged on 1h 20m ago', $logonEstimate->tooltipText());
+        $this->assertSame('TWR online for 1h 20m', $logonEstimate->tooltipText());
     }
 }
