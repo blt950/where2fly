@@ -12,8 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // The table is rebuilt from scratch on every calc:scores run, so it's
-        // safe to empty it before changing column types and adding NOT NULL columns
         DB::table('airport_scores')->truncate();
 
         Schema::table('airport_scores', function (Blueprint $table) {

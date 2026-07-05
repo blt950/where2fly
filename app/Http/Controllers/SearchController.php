@@ -206,10 +206,7 @@ class SearchController extends Controller
                 $suggestedAirport = true;
             }
 
-            // Score windows are matched against the time the pilot is at each
-            // candidate: its distance-derived ETA when suggesting arrivals, now when
-            // suggesting departures (you leave there soon — current METAR conditions
-            // apply, not a forecast)
+            // Calculate the ETA for sorting
             $candidatesAreDepartures = $direction == 'arrival';
             $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEtaSql($primaryAirport, $codeletter);
 
@@ -270,7 +267,7 @@ class SearchController extends Controller
                     $airportCoordinates[$airport->icao]['color'] = 'grey';
                 }
 
-                // The primary airport's scores are windowed at now; when it's the
+                // The primary airport's scores are windowed at now(); when it's the
                 // departure airport, the current METAR is its weather truth and TAFs are ignored
                 [$primaryScores] = $primaryAirport->scoresAtEta(now(), $direction == 'departure');
                 $primaryAirport->setRelation('scores', $primaryScores);

@@ -13,9 +13,6 @@ class SuggestedAirportResource extends AirportResource
             'distanceNm' => $this->distance,
             'isAirforcebase' => $this->w2f_airforcebase,
             'hasAirlineService' => $this->w2f_scheduled_service,
-            // 'taf' when the scores are backed by a TAF period covering the ETA,
-            // 'metar_fallback' when they're the current METAR presented unconfirmed,
-            // 'metar' for departure suggestions (evaluated at now, not a forecast)
             'forecastSource' => $this->forecast_source,
         ]);
     }

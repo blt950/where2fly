@@ -112,13 +112,11 @@ class SearchController extends Controller
             $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->first();
         }
 
-        // Score windows are matched against the time the pilot is at each candidate:
-        // its distance-derived ETA when searching arrivals, now when the candidates
-        // are departure airports (you leave there soon — current METAR conditions
-        // apply, not a forecast). Internal only, never changes the returned airtime
+        // Calculate the ETA for sorting
         $candidatesAreDepartures = (bool) $arrival;
         $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEtaSql($airport, $codeletter);
 
+        // Get airports according to filter
         $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
             ->inContinent($destinations)->inCountry($destinations, $airport->iso_country)->inState($destinations)
             ->withinDistance($airport, $minDistance, $maxDistance, $airport->icao)
@@ -160,8 +158,6 @@ class SearchController extends Controller
 
     public function prepareAirportData($airport, $suggestedAirports, bool $anchorIsDeparture = false)
     {
-        // The anchor airport's scores are windowed at now; when it's the departure
-        // airport, the current METAR is its weather truth and TAFs are ignored
         [$scores] = $airport->scoresAtEta(now(), $anchorIsDeparture);
         $airport->setRelation('scores', $scores);
 

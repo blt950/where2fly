@@ -12,8 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // The column has always been written as (int) $airport->id, so all values are
-        // numeric strings. Remove rows orphaned by airport deletions before constraining
         DB::table('metars')
             ->whereNotIn('airport_id', DB::table('airports')->select('id'))
             ->delete();

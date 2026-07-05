@@ -33,8 +33,7 @@ class TafForecast extends Model
     }
 
     /**
-     * The lowest ceiling in a cache-XML sky_condition layer list, or null when
-     * no layer constitutes a ceiling. OVX is the cache's obscured-sky cover value.
+     * The lowest ceiling in a cache-XML sky_condition layer list
      *
      * @param  array<array{cover: ?string, base_ft_agl: ?int}>  $layers
      */

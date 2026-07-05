@@ -20,10 +20,7 @@ class CollectionAirportFilter
                     $airtime = ($distance / CalculationHelper::aircraftNmPerHour($codeletter)) + CalculationHelper::timeClimbDescend($codeletter);
                     $arrivalAirport->airtime = round($airtime, 1);
 
-                    // Narrow the loaded scores to those applicable when the pilot is
-                    // at this candidate: its ETA for arrival suggestions, now for
-                    // departure suggestions (you leave there soon — the current METAR
-                    // is what matters, not a forecast)
+                    // Narrow down loaded sources to those who are applicable at the time of arrival.
                     if ($arrivalAirport->relationLoaded('scores')) {
                         $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEta($arrivalAirport->airtime);
                         [$scores, $hasTafAtEta] = $arrivalAirport->scoresAtEta($eta, $candidatesAreDepartures);

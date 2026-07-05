@@ -61,7 +61,7 @@ class FetchBookings extends Command
                 continue;
             }
 
-            // A booking that can't be resolved to exactly one airport is dropped, never stored with a null FK
+            // A booking that can't be resolved to exactly one airport is dropped
             $icao = AirportCallsignHelper::resolveIcao($booking->callsign);
             $airport = $icao ? ($airportsByIcao[$icao] ?? $airportsByLocalCode[$icao] ?? null) : null;
             if (! $airport) {

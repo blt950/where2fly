@@ -8,12 +8,11 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Update data five minutes after each real-world half-hourly METAR issuance,
-// giving the upstream cache time to pick the new observations up
+// Update METARs, TAFs, events, online controllers and calculate new scores.
 Schedule::command('update:data')->hourlyAt(5);
 Schedule::command('update:data')->hourlyAt(35);
 
-// Fetch ATC bookings — an advisory schedule, doesn't need METAR-level freshness
+// Fetch ATC bookings
 Schedule::command('fetch:bookings')->everyThirtyMinutes();
 
 // Fetch flights

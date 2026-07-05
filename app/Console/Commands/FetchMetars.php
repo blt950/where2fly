@@ -61,7 +61,7 @@ class FetchMetars extends Command
                 continue;
             }
 
-            // Variable wind is reported as the literal string VRB — no usable direction, but the speed still is
+            // Variable wind is reported as the literal string VRB — no usable direction
             $windDirection = null;
             if (isset($node->wind_dir_degrees) && is_numeric((string) $node->wind_dir_degrees)) {
                 $windDirection = (int) $node->wind_dir_degrees;
@@ -69,8 +69,6 @@ class FetchMetars extends Command
 
             $airportsData[$icao] = [
                 'last_update' => $observationTime,
-                // Strip the report-type token and station id so every stored METAR
-                // starts at its time group (e.g. "040720Z ...")
                 'metar' => preg_replace('/^(?:METAR |SPECI )?' . preg_quote($icao, '/') . ' /', '', (string) $node->raw_text),
                 'wind_direction' => $windDirection,
                 'wind_speed' => (int) $node->wind_speed_kt,
@@ -93,7 +91,7 @@ class FetchMetars extends Command
             $upsertData[] = array_merge(['airport_id' => (int) $airport->id], $d);
         }
 
-        // Update the data in chunks to stay below MySQL's placeholder limit
+        // Update the data in chunks
         foreach (array_chunk($upsertData, 1000) as $chunk) {
             Metar::upsert(
                 $chunk,

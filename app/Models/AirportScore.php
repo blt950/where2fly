@@ -14,15 +14,10 @@ class AirportScore extends Model
     use HasFactory;
 
     public const SOURCE_METAR = 'metar';
-
     public const SOURCE_TAF = 'taf';
-
     public const SOURCE_VATSIM = 'vatsim';
-
     public const SOURCE_EVENT = 'event';
-
     public const SOURCE_BOOKING = 'booking';
-
     public const SOURCE_LOGON_ESTIMATE = 'logon_estimate';
 
     /** Sources whose window must contain the ETA exactly */
@@ -55,20 +50,8 @@ class AirportScore extends Model
     /**
      * Scope score rows to those applicable at the given ETA. $eta is either a
      * Carbon instant or a raw SQL expression (for per-candidate ETAs computed
-     * in the query itself). Matching depends on the row's source:
-     *
-     * - metar/taf/vatsim/logon_estimate: the window must contain the ETA
-     *   exactly. For online controllers that means: the live vatsim row covers
-     *   "now" views for as long as they're online, and the logon_estimate row
-     *   covers future ETAs strictly up to logon+2h — an unbooked controller
-     *   who will have sat more than two hours by arrival is no longer
-     *   predicted present. A METAR row also matches regardless of its window
-     *   when the airport has no scoreable TAF period covering the ETA, so a
-     *   search never silently returns zero weather scores (metar_fallback)
-     * - booking/event: scheduled presence, matched when the window overlaps
-     *   [ETA-1h, ETA+1h] — a booking starting shortly after the ETA still
-     *   shows, so the pilot can adjust their flight time to it
-     *
+     * in the query itself).
+     * 
      * With $metarOnlyWeather (departure candidates — the pilot leaves soon),
      * TAF rows never match and the current METAR always does: the latest
      * observation is the weather truth there, not a forecast.
@@ -178,7 +161,7 @@ class AirportScore extends Model
         }
 
         if (isset($this->data['event'])) {
-            return $this->data['event'] . ' until ' . $this->valid_to->format('H:i\z');
+            return $this->data['event'] . ' ' . $this->valid_to->format('H:i\z') . ' - ' . $this->valid_to->format('H:i\z');
         }
 
         // A controller online right now — we know when they logged on, not when they'll leave
@@ -194,8 +177,7 @@ class AirportScore extends Model
     }
 
     /**
-     * How long ago a controller logged on, in hours and/or minutes — never
-     * seconds (e.g. "40m ago", "3h 48m ago").
+     * How long ago a controller logged on, in hours and/or minutes
      */
     public static function loggedOnAgo(Carbon|string $logonTime): string
     {
@@ -215,9 +197,7 @@ class AirportScore extends Model
     public static function getTopAirports($continent = null, $whitelist = null, $limit = 30, $exclude = null)
     {
 
-        // Establish the return query — counting distinct reasons so an airport with
-        // several sources predicting the same reason doesn't outrank a real signal,
-        // and only counting rows whose validity window applies right now
+        // Establish the return query — counting distinct reasons
         $returnQuery = AirportScore::select('airport_id', DB::raw('count(distinct airport_scores.reason) as id_count'))
             ->coversEta(now())
             ->groupBy('airport_id')

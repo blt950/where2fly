@@ -40,13 +40,11 @@ class FetchTafs extends Command
         $this->info("Starting fetching of TAF's");
 
         $paths = AviationWeatherHelper::downloadCache('https://aviationweather.gov/data/cache/tafs.cache.xml.gz');
-
         $tafDocuments = $this->parseTafDocuments($paths['xml']);
 
         $airports = Airport::whereIn('icao', array_keys($tafDocuments))->get()->keyBy(fn ($airport) => strtoupper($airport->icao));
 
-        // Only reprocess airports whose TAF has actually been reissued/amended since
-        // the last run — TAFs only change every ~6 hours plus occasional amendments
+        // Only reprocess airports whose TAF has actually been reissued/amended since the last run. TAFs only change every ~6 hours plus occasional amendments
         $storedIssues = Taf::pluck('issued_at', 'airport_id');
 
         $changedDocuments = [];
@@ -63,15 +61,16 @@ class FetchTafs extends Command
             $changedDocuments[$airport->id] = $document;
         }
 
-        // Replace the changed airports' TAF documents (periods cascade), their
-        // TAF-sourced scores, and reinsert the new documents with their periods
         $forecastInsert = [];
         $airportScoreInsert = [];
+
+        // Cleanup the old TAFs and their periods
         foreach (array_chunk(array_keys($changedDocuments), 500) as $chunk) {
             Taf::whereIn('airport_id', $chunk)->delete();
             AirportScore::whereIn('airport_id', $chunk)->where('source', AirportScore::SOURCE_TAF)->delete();
         }
 
+        // Insert fresh TAF documents and their periods
         foreach ($changedDocuments as $airportId => $document) {
             $tafId = DB::table('tafs')->insertGetId([
                 'airport_id' => $airportId,
@@ -114,7 +113,7 @@ class FetchTafs extends Command
             AirportScore::insert($chunk);
         }
 
-        // Prune what has fully passed — expired forecasts can never cover an ETA
+        // Prune what has fully passed, expired forecasts can never cover an ETA
         TafForecast::where('valid_to', '<', now())->delete();
         Taf::where('valid_to', '<', now())->delete();
         AirportScore::where('source', AirportScore::SOURCE_TAF)->where('valid_to', '<', now())->delete();
@@ -153,8 +152,7 @@ class FetchTafs extends Command
                     continue;
                 }
 
-                // A period that has fully passed can never cover an ETA — inserting
-                // it would only churn against the expiry pruning
+                // A period that has fully passed can never cover an ETA. Inserting it would only churn against the expiry pruning
                 if (Carbon::parse((string) $forecast->fcst_time_to)->isPast()) {
                     continue;
                 }
@@ -188,8 +186,6 @@ class FetchTafs extends Command
             $tafDocuments[$icao] = [
                 'issued_at' => $issuedAt,
                 'bulletin_time' => isset($taf->bulletin_time) ? Carbon::parse((string) $taf->bulletin_time) : null,
-                // Strip the report-type tokens and station id so the stored TAF
-                // starts at its issue timestamp (e.g. "031653Z ..."), like METARs
                 'raw_text' => preg_replace('/^TAF (?:AMD |COR )?' . preg_quote($icao, '/') . ' /', '', (string) $taf->raw_text),
                 'valid_from' => isset($taf->valid_time_from) ? Carbon::parse((string) $taf->valid_time_from) : collect($periods)->min('valid_from'),
                 'valid_to' => isset($taf->valid_time_to) ? Carbon::parse((string) $taf->valid_time_to) : collect($periods)->max('valid_to'),

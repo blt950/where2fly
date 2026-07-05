@@ -39,9 +39,7 @@ class FetchVatsim extends Command
 
         $upsertEventsData = [];
         $upsertControllerData = [];
-
-        // Only the id is used from the map — loading full models for all ~80k
-        // airports costs more memory than the whole update:data run can afford
+        
         $airportMap = Airport::select('id', 'icao')->get()->keyBy('icao');
 
         $this->info('Fetching events...');
