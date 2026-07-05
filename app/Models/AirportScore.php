@@ -160,7 +160,7 @@ class AirportScore extends Model
         }
 
         if (isset($this->data['event'])) {
-            return $this->data['event'] . ' ' . $this->valid_to->format('H:i\z') . ' - ' . $this->valid_to->format('H:i\z');
+            return $this->data['event'] . ' ' . $this->valid_from->format('H:i\z') . ' - ' . $this->valid_to->format('H:i\z');
         }
 
         // A controller online right now — we know when they logged on, not when they'll leave

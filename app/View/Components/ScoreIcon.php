@@ -44,7 +44,7 @@ class ScoreIcon extends Component
         if (isset($this->score->data['probability'])) {
             $lines[] = e($this->score->data['probability'] . '% probability');
         } elseif (! empty($this->score->data['tempo'])) {
-            $lines[] = 'Temporary conditions';
+            $lines[] = 'Temporary condition';
         }
 
         if ($this->score->reason === 'VATSIM_ATC' && $this->airport) {
