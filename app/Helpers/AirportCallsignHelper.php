@@ -17,6 +17,17 @@ class AirportCallsignHelper
     }
 
     /**
+     * The facility type of a position callsign — its part after the last
+     * underscore (EGLL_TWR → TWR). Null when there's no underscore to split on.
+     */
+    public static function facility(string $callsign): ?string
+    {
+        $suffix = strrchr($callsign, '_');
+
+        return $suffix === false ? null : substr($suffix, 1);
+    }
+
+    /**
      * Resolve a position callsign (e.g. EGLL_TWR, JFK_GND) to an ICAO code,
      * using the same prefix algorithm fetch:vatsim applies to online controllers.
      * Returns null for positions that don't represent a single airport.

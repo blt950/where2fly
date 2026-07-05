@@ -21,6 +21,9 @@ class Airport extends Model
     use HasFactory;
     use HasSpatial;
 
+    /** The canonical ground-to-air facility ordering for ATC display (dots, tooltips, stored station lists) */
+    public const ATC_FACILITY_ORDER = ['DEL', 'GND', 'TWR', 'APP'];
+
     public $timestamps = false;
 
     protected $guarded = [];
@@ -152,7 +155,6 @@ class Airport extends Model
     public function atcOnlineStations()
     {
         $liveAtc = $this->scores->first(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_VATSIM);
-        $referenceOrder = ['DEL', 'GND', 'TWR', 'APP'];
 
         $stations = collect($liveAtc?->data['stations'] ?? []);
         if ($stations->isEmpty()) {
@@ -164,8 +166,8 @@ class Airport extends Model
         }
 
         return $stations
-            ->filter(fn ($station) => in_array($station['facility'] ?? null, $referenceOrder))
-            ->sortBy(fn ($station) => array_search($station['facility'], $referenceOrder))
+            ->filter(fn ($station) => in_array($station['facility'] ?? null, self::ATC_FACILITY_ORDER))
+            ->sortBy(fn ($station) => array_search($station['facility'], self::ATC_FACILITY_ORDER))
             ->values();
     }
 
@@ -187,12 +189,10 @@ class Airport extends Model
 
     private function sortFacilities(Collection $facilities): Collection
     {
-        $referenceOrder = ['DEL', 'GND', 'TWR', 'APP'];
-
         return $facilities
-            ->filter(fn ($facility) => in_array($facility, $referenceOrder))
+            ->filter(fn ($facility) => in_array($facility, self::ATC_FACILITY_ORDER))
             ->unique()
-            ->sortBy(fn ($facility) => array_search($facility, $referenceOrder))
+            ->sortBy(fn ($facility) => array_search($facility, self::ATC_FACILITY_ORDER))
             ->values();
     }
 

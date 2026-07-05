@@ -17,7 +17,7 @@ class CollectionAirportFilter
                     $distance = distance($departureAirport->latitude_deg, $departureAirport->longitude_deg, $arrivalAirport->latitude_deg, $arrivalAirport->longitude_deg, 'N');
                     $arrivalAirport->distance = round($distance);
 
-                    $airtime = ($distance / CalculationHelper::aircraftNmPerHour($codeletter)) + CalculationHelper::timeClimbDescend($codeletter);
+                    $airtime = CalculationHelper::airtimeHours($distance, $codeletter);
                     $arrivalAirport->airtime = round($airtime, 1);
 
                     // Narrow down loaded sources to those who are applicable at the time of arrival.

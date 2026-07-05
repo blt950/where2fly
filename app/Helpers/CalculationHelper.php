@@ -20,17 +20,26 @@ class CalculationHelper
     }
 
     /**
+     * The canonical airtime formula: distance at cruise speed plus a fixed
+     * climb/descend allowance. forecastEtaSql() mirrors this in SQL — keep
+     * the two in sync when changing the model.
+     */
+    public static function airtimeHours(float $distanceNm, string $codeletter): float
+    {
+        return $distanceNm / self::aircraftNmPerHour($codeletter) + self::timeClimbDescend($codeletter);
+    }
+
+    /**
      * The same ETA as forecastEta(), but as a SQL expression evaluated per
      * candidate airport row — the airtime part of the ETA depends on each
      * candidate's distance from the anchor airport, which only the database
-     * knows while filtering.
+     * knows while filtering. SQL twin of airtimeHours().
      */
     public static function forecastEtaSql(Airport $anchorAirport, string $codeletter): string
     {
         $connection = $anchorAirport->getConnection();
         $anchorPoint = $anchorAirport->coordinates->toSqlExpression($connection)->getValue($connection->getQueryGrammar());
 
-        // Same airtime formula the filterWithCriteria collection macro uses: nm / cruise speed + climb/descend time
         return sprintf(
             'DATE_ADD(NOW(), INTERVAL ((ST_DISTANCE_SPHERE(airports.coordinates, %s) / 1852 / %d + %F) * 3600) SECOND)',
             $anchorPoint,

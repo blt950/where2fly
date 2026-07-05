@@ -113,7 +113,7 @@ class FetchBookings extends Command
                 'airport_id' => $booking->airport_id,
                 'reason' => 'VATSIM_ATC',
                 'score' => 1,
-                'data' => json_encode(['callsign' => $booking->callsign, 'facility' => substr(strrchr($booking->callsign, '_'), 1)]),
+                'data' => json_encode(['callsign' => $booking->callsign, 'facility' => AirportCallsignHelper::facility($booking->callsign)]),
                 'source' => AirportScore::SOURCE_BOOKING,
                 'valid_from' => $booking->start,
                 'valid_to' => $booking->end,

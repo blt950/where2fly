@@ -156,8 +156,8 @@ class FetchVatsim extends Command
 
                 $stations = collect();
                 foreach ($airport->controllers as $controller) {
-                    $facility = substr(strrchr($controller->callsign, '_'), 1);
-                    if ($facility == 'OBS') {
+                    $facility = AirportCallsignHelper::facility($controller->callsign);
+                    if ($facility === null || $facility == 'OBS') {
                         continue;
                     }
 
@@ -166,10 +166,9 @@ class FetchVatsim extends Command
                     }
                 }
 
-                $referenceOrder = ['DEL', 'GND', 'TWR', 'APP', 'CTR'];
                 $stations = $stations
                     ->map(fn ($logonTime, $facility) => ['facility' => $facility, 'logon_time' => $logonTime])
-                    ->sortBy(fn ($station) => ($order = array_search($station['facility'], $referenceOrder)) === false ? 99 : $order)
+                    ->sortBy(fn ($station) => ($order = array_search($station['facility'], Airport::ATC_FACILITY_ORDER)) === false ? 99 : $order)
                     ->values();
 
                 $scoreInsert[] = ['airport_id' => $airport->id, 'reason' => 'VATSIM_ATC', 'score' => 1, 'data' => json_encode(['stations' => $stations])] + $vatsimArraySuffix;
@@ -183,7 +182,7 @@ class FetchVatsim extends Command
                     'score' => 1,
                     'data' => json_encode([
                         'position' => $controller->callsign,
-                        'facility' => substr(strrchr($controller->callsign, '_'), 1),
+                        'facility' => AirportCallsignHelper::facility($controller->callsign),
                         'logon_time' => $controller->logon_time,
                     ]),
                     'source' => AirportScore::SOURCE_LOGON_ESTIMATE,

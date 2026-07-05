@@ -8,6 +8,21 @@ use App\Models\TafForecast;
 class WeatherScoreHelper
 {
     /**
+     * The phenomenon classification rules, shared by Metar (matching raw METAR
+     * text) and TafForecast (matching the cache XML's wx_string) so the same
+     * weather always scores the same whether it's an observation or a forecast.
+     */
+    public const FOG_PATTERN = '/(FG|HZ)/';
+
+    public const HEAVY_RAIN_PATTERN = '/(\+RA|\+SHRA)/';
+
+    public const HEAVY_SNOW_PATTERN = '/(\+SN)/';
+
+    public const THUNDERSTORM_PATTERN = '/(TS|\+TSRA)/';
+
+    public const METERS_PER_STATUTE_MILE = 1609.344;
+
+    /**
      * Weather score reasons derivable from either a current observation (Metar)
      * or a forecast period (TafForecast) — both expose the same condition
      * methods. The runway-dependent reasons (METAR_RVR, METAR_CROSSWIND) stay

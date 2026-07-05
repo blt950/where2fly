@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\WeatherScoreHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -75,7 +76,7 @@ class TafForecast extends Model
             return null;
         }
 
-        return (float) rtrim($this->visibility_statute_mi, '+') * 1609.344;
+        return (float) rtrim($this->visibility_statute_mi, '+') * WeatherScoreHelper::METERS_PER_STATUTE_MILE;
     }
 
     public function sightAtAbove(int $meters)
@@ -100,21 +101,21 @@ class TafForecast extends Model
 
     public function foggy()
     {
-        return $this->wx_string !== null && preg_match('/(FG|HZ)/', $this->wx_string) === 1;
+        return $this->wx_string !== null && preg_match(WeatherScoreHelper::FOG_PATTERN, $this->wx_string) === 1;
     }
 
     public function heavyRain()
     {
-        return $this->wx_string !== null && preg_match('/(\+RA|\+SHRA)/', $this->wx_string) === 1;
+        return $this->wx_string !== null && preg_match(WeatherScoreHelper::HEAVY_RAIN_PATTERN, $this->wx_string) === 1;
     }
 
     public function heavySnow()
     {
-        return $this->wx_string !== null && preg_match('/(\+SN)/', $this->wx_string) === 1;
+        return $this->wx_string !== null && preg_match(WeatherScoreHelper::HEAVY_SNOW_PATTERN, $this->wx_string) === 1;
     }
 
     public function thunderstorm()
     {
-        return $this->wx_string !== null && preg_match('/(TS|\+TSRA)/', $this->wx_string) === 1;
+        return $this->wx_string !== null && preg_match(WeatherScoreHelper::THUNDERSTORM_PATTERN, $this->wx_string) === 1;
     }
 }

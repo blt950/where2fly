@@ -101,6 +101,10 @@ class AirportScore extends Model
     {
         [$etaSql, $bindings] = $eta instanceof Carbon ? ['?', [$eta->toDateTimeString()]] : [$eta, []];
 
+        // The ETA sits on the left of each BETWEEN so a per-candidate ETA
+        // expression (forecastEtaSql's ST_DISTANCE_SPHERE arithmetic) is
+        // evaluated once per comparison, not once per bound; the ±1h overlap
+        // tolerance is moved onto the window side for the same reason.
         $query->where(function ($query) use ($etaSql, $bindings, $metarOnlyWeather) {
             // Exact containment for sources with a precise window
             $query->where(function ($query) use ($etaSql, $bindings, $metarOnlyWeather) {
@@ -109,15 +113,15 @@ class AirportScore extends Model
                     : self::EXACT_MATCH_SOURCES;
 
                 $query->whereIn('airport_scores.source', $exactSources)
-                    ->whereRaw("airport_scores.valid_from <= {$etaSql}", $bindings)
-                    ->whereRaw("airport_scores.valid_to >= {$etaSql}", $bindings);
+                    ->whereRaw("{$etaSql} BETWEEN airport_scores.valid_from AND airport_scores.valid_to", $bindings);
             });
 
             // Interval overlap with a tolerance for the scheduled-presence signals
             $query->orWhere(function ($query) use ($etaSql, $bindings) {
+                $overlapHours = self::OVERLAP_MATCH_HOURS;
+
                 $query->whereIn('airport_scores.source', self::OVERLAP_MATCH_SOURCES)
-                    ->whereRaw("airport_scores.valid_from <= DATE_ADD({$etaSql}, INTERVAL " . self::OVERLAP_MATCH_HOURS . ' HOUR)', $bindings)
-                    ->whereRaw("airport_scores.valid_to >= DATE_SUB({$etaSql}, INTERVAL " . self::OVERLAP_MATCH_HOURS . ' HOUR)', $bindings);
+                    ->whereRaw("{$etaSql} BETWEEN DATE_SUB(airport_scores.valid_from, INTERVAL {$overlapHours} HOUR) AND DATE_ADD(airport_scores.valid_to, INTERVAL {$overlapHours} HOUR)", $bindings);
             });
 
             if ($metarOnlyWeather) {
@@ -134,8 +138,7 @@ class AirportScore extends Model
                         $query->from('taf_forecasts')
                             ->join('tafs', 'tafs.id', '=', 'taf_forecasts.taf_id')
                             ->whereColumn('tafs.airport_id', 'airport_scores.airport_id')
-                            ->whereRaw("taf_forecasts.valid_from <= {$etaSql}", $bindings)
-                            ->whereRaw("taf_forecasts.valid_to >= {$etaSql}", $bindings);
+                            ->whereRaw("{$etaSql} BETWEEN taf_forecasts.valid_from AND taf_forecasts.valid_to", $bindings);
                     });
             });
         });
@@ -151,28 +154,29 @@ class AirportScore extends Model
             return null;
         }
 
-        if (isset($this->data['stations'])) {
-            return collect($this->data['stations'])->map(fn ($station) => $station['facility'] ?? $station)->join(', ');
-        }
+        return match ($this->source) {
+            // Live rows carry either the aggregated station list (VATSIM_ATC)
+            // or a movement count (VATSIM_POPULAR)
+            self::SOURCE_VATSIM => match (true) {
+                isset($this->data['stations']) => collect($this->data['stations'])->map(fn ($station) => $station['facility'] ?? $station)->join(', '),
+                isset($this->data['movements']) => $this->data['movements'] . ' aircraft in vicinity',
+                default => null,
+            },
 
-        if (isset($this->data['movements'])) {
-            return $this->data['movements'] . ' aircraft in vicinity';
-        }
+            self::SOURCE_EVENT => $this->data['event'] . ' ' . $this->windowText(),
 
-        if (isset($this->data['event'])) {
-            return $this->data['event'] . ' ' . $this->valid_from->format('H:i\z') . ' - ' . $this->valid_to->format('H:i\z');
-        }
+            // A controller online right now — we know when they logged on, not when they'll leave
+            self::SOURCE_LOGON_ESTIMATE => self::onlineForText($this->data['facility'] ?? $this->data['position'], $this->data['logon_time']),
 
-        // A controller online right now — we know when they logged on, not when they'll leave
-        if (isset($this->data['logon_time'])) {
-            return self::onlineForText($this->data['facility'] ?? $this->data['position'], $this->data['logon_time']);
-        }
+            self::SOURCE_BOOKING => ($this->data['facility'] ?? $this->data['callsign']) . ' ' . $this->windowText(),
 
-        if (isset($this->data['facility']) || isset($this->data['callsign'])) {
-            return ($this->data['facility'] ?? $this->data['callsign']) . ' ' . $this->valid_from->format('H:i\z') . ' - ' . $this->valid_to->format('H:i\z');
-        }
+            default => null,
+        };
+    }
 
-        return null;
+    private function windowText(): string
+    {
+        return $this->valid_from->format('H:i\z') . ' - ' . $this->valid_to->format('H:i\z');
     }
 
     /**

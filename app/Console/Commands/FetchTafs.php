@@ -10,7 +10,6 @@ use App\Models\Taf;
 use App\Models\TafForecast;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class FetchTafs extends Command
 {
@@ -70,9 +69,13 @@ class FetchTafs extends Command
             AirportScore::whereIn('airport_id', $chunk)->where('source', AirportScore::SOURCE_TAF)->delete();
         }
 
-        // Insert fresh TAF documents and their periods
+        // Insert fresh TAF documents in bulk — on the ~6h reissue boundary nearly
+        // every station changes at once, so per-document inserts would be thousands
+        // of round-trips. The table is one row per airport, so the ids can be read
+        // back keyed by airport_id to attach the periods.
+        $documentInsert = [];
         foreach ($changedDocuments as $airportId => $document) {
-            $tafId = DB::table('tafs')->insertGetId([
+            $documentInsert[] = [
                 'airport_id' => $airportId,
                 'raw_text' => $document['raw_text'],
                 'issued_at' => $document['issued_at'],
@@ -80,10 +83,18 @@ class FetchTafs extends Command
                 'valid_from' => $document['valid_from'],
                 'valid_to' => $document['valid_to'],
                 'last_update' => now(),
-            ]);
+            ];
+        }
 
+        foreach (array_chunk($documentInsert, 500) as $chunk) {
+            Taf::insert($chunk);
+        }
+
+        $tafIds = Taf::whereIn('airport_id', array_keys($changedDocuments))->pluck('id', 'airport_id');
+
+        foreach ($changedDocuments as $airportId => $document) {
             foreach ($document['periods'] as $period) {
-                $forecastInsert[] = array_merge($period, ['taf_id' => $tafId]);
+                $forecastInsert[] = array_merge($period, ['taf_id' => $tafIds[$airportId]]);
 
                 // TEMPO/PROB periods score like any other, flagged so the icon
                 // carries the uncertainty badge — with a percentage when given
