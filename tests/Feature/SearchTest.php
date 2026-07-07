@@ -186,6 +186,19 @@ class SearchTest extends TestCase
         });
     }
 
+    public function test_search_returns_at_most_20_suggestions_ordered_by_score_count(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->validSearchParams));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            $counts = $airports->pluck('score_count');
+
+            return $airports->count() <= 20
+                && $counts->values()->all() === $counts->sortDesc()->values()->all();
+        });
+    }
+
     public function test_whitelist_restricts_results_to_whitelisted_airports(): void
     {
         $user = User::factory()->create();

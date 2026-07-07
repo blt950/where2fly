@@ -22,6 +22,28 @@ Affected files:
 Priorities are ordered by expected impact. P1–P3 are the fixes for the CPU lockups;
 P4–P6 are cheaper follow-ups.
 
+**Amended 2026-07-07 after code verification** (markers: **[amended]**):
+- **P1 found deeper than diagnosed:** the `coordinates` column had no SRID restriction
+  (`point NOT NULL`, no `SRID 4326` attribute) — MySQL's optimizer *ignores* SPATIAL
+  indexes on non-SRID-restricted columns entirely, so the index was unusable even for
+  sargable predicates (including `withinBearing`'s existing `whereWithin`). Fixed by
+  migration `2026_07_07_120000_add_srid_to_airport_coordinates` (drop index → modify
+  column to `SRID 4326` → rebuild index; all rows already carried SRID 4326). Took ~10s
+  on 80k rows. Verified: EXPLAIN went from `type=ALL, rows=80615` to
+  `type=range, key=airports_coordinates_spatialindex, rows=643` for a 500 nm search.
+- P1 box construction changed — destination-point math undersizes the longitude extent
+  at higher latitudes; use the spherical-cap formula, and pad latitude for geodesic edges.
+- P2.4 changed — `inRandomOrder()` is `ORDER BY RAND()`, the exact thing commit 66d1b70
+  ("moving costly random process to php", 2025-07-28) removed. Random pick stays in PHP.
+- P2 randomness note: phase 1 still fetches the *whole* candidate pool (thin rows) and
+  the PHP bucket-shuffle is untouched, so a refresh over N identically-scored airports
+  still yields a different subset — owner-confirmed requirement.
+- P2 correction: nothing reads `score_count` after the shuffle (resources list fields
+  explicitly, no blade/macro consumer) — copying it onto hydrated models is parity only.
+- P3.4 is stale — the migration's `down()` already targets `airport_scores`. Drop it.
+- Side observation (not perf, separate issue): API `sortByScores(array_flip($filterByScores))`
+  collapses reasons sharing the same value — two reasons with value 1 flip to one key.
+
 ---
 
 ## P1 — Spatial index is never used: add a bounding-box pre-filter to `withinDistance`
@@ -35,18 +57,24 @@ same non-indexed rows then feed the expensive score subqueries (P4).
 Fix (inside the `withinDistance` scope, keep both existing `whereDistanceSphere` calls
 as the precise check):
 
-1. Build a bounding polygon around the anchor at radius `maxDistance` (nm→m ×1852) plus
-   a small margin (~5%): use `CalculationHelper::calculateSphericalDestination()` (already
-   exists, used by `withinBearing`) to get N/E/S/W extremes, then construct a
-   `Polygon`/`LineString` of the 4 corners exactly like `withinBearing` already does
+1. **[amended]** Build the box in plain PHP with the standard spherical-cap bounds —
+   NOT with `calculateSphericalDestination()` E/W points: the extreme longitude of a
+   circle is *poleward* of the due-east point, so destination-point math undersizes the
+   box at higher latitudes and silently drops valid results (box is prune-only).
+   With `D = radius/R` in radians (radius = maxDistance ×1852 ×1.05 margin, R = 6371009):
+   `Δlat = D`, `Δlon = asin(sin(D) / cos(lat))`. Additionally pad *both* latitude bounds
+   by the geodesic edge bulge: MySQL treats SRID-4326 polygon edges as geodesics, which
+   sag poleward relative to a parallel — worst-case bulge ≈ `(lonSpanRad)²/8 × 0.5`.
+   Then construct a `Polygon`/`LineString` of the 4 corners exactly like `withinBearing`
    (`MatanYadaev\EloquentSpatial\Objects\*`, `Srid::WGS84`).
 2. Prepend `$query->whereWithin('coordinates', $polygon)` — the package scope; MBR
    functions DO use the spatial index. The `whereDistanceSphere` pair stays and trims
    the box corners.
-3. Guard rails — skip the pre-filter (fall through to current behaviour) when the box
-   is degenerate: `maxDistance > ~4000` nm, or the box crosses a pole or the antimeridian
-   (anchor latitude ± box extent beyond ±85°, or lon span ≥ 180°). Simple lat/lon checks
-   on the 4 corners are enough; correctness over cleverness.
+3. **[amended]** Guard rails — skip the pre-filter (fall through to current behaviour)
+   when: `maxDistance > ~4000` nm; the asin argument in Δlon is ≥ 1 (the circle wraps a
+   pole — this IS the pole guard); the padded box reaches beyond ±85° latitude; or the
+   lon bounds cross the antimeridian (west < −180 or east > 180). Correctness over
+   cleverness.
 4. Apply in the scope itself so **both** controllers and any future caller benefit.
 5. **[sample]** Also in this scope: skip the `whereDistanceSphere(..., '>=', min)` call
    entirely when `$minDistance <= 0`. The captured query computes `ST_DISTANCE_SPHERE >= '0'`
@@ -89,15 +117,25 @@ gets fetched:
 2. **Phase 2 (hydrate):** bucket-shuffle + `take(20)` on the pool exactly as today, then
    `Airport::with('runways','scores','metar','taf.forecasts')->findMany($ids)`, re-order to
    the shuffled order (`->sortBy(fn ($a) => array_search($a->id, $ids))->values()`), and
-   copy each airport's `score_count` from the pool rows (`filterWithCriteria`/views read it).
+   copy each airport's `score_count` from the pool rows. **[amended]** Verified: nothing
+   actually reads `score_count` after the shuffle (resources enumerate fields explicitly,
+   no blade/macro consumer) — the copy is attribute-parity with the old full-row select,
+   not a functional requirement.
 3. Apply to: API `SearchController::search`, web `SearchController::search` destination
-   query (which also eager-loads `sceneryDevelopers.sceneries.simulator`).
-4. Web **random-anchor** query (web controller ~L189–206): it never calls `sortByScores`,
-   so `score_count` is null for every row → the `groupBy('score_count')` bucket-shuffle
-   there is one bucket → it is plain "pick one random". Replace the whole
-   `->get()` + shuffle + `->random()` with `->inRandomOrder()->first()` on the same filtered
-   query **without eager loads**, then lazy/eager-load the anchor's relations for the one
-   row. This is behaviour-identical and removes a world-wide hydration.
+   query (which also eager-loads `sceneryDevelopers.sceneries.simulator`). Note the web
+   destination query calls `sortByScores` with an *empty* array when neither sort toggle
+   is on → the scope no-ops → pool rows carry no `score_count`; the phase-2 code must not
+   assume the attribute exists (the bucket shuffle already tolerates this today).
+4. **[amended — do NOT use `inRandomOrder()`]** Web **random-anchor** query (web
+   controller ~L189–206): it never calls `sortByScores`, so the bucket-shuffle there is
+   one bucket → plain "pick one uniformly at random". `inRandomOrder()` would be
+   `ORDER BY RAND()` — exactly what commit 66d1b70 moved out of MySQL after the 2025
+   lockups; do not reintroduce it. Instead: run the same filtered query as
+   `->pluck('airports.id')` (no eager loads, no hydration), pick `$ids->random()` in
+   **PHP**, then `Airport::with('runways','scores','metar')->find($id)`. Same uniform
+   distribution as today's shuffle+`->random()`. Fetch the id pool **once, before** the
+   20-attempt retry loop and re-draw per attempt — the pool is identical between attempts,
+   so this also delivers the random-anchor half of P5 for free.
 
 Tests: existing Feature search tests must pass unchanged; add an assertion that a search
 response still carries `score_count`-ordered results and ≤20 suggestions.
@@ -117,9 +155,9 @@ response still carries `score_count`-ordered results and ≤20 suggestions.
 3. **`taf_forecasts`**: only the `taf_id` FK index. The METAR-fallback `whereNotExists` in
    `applyCoversEta` runs per score row per candidate and ranges on `valid_from`/`valid_to`.
    Add `(taf_id, valid_from, valid_to)` (migration `index_taf_forecasts_window`).
-4. **BUG — `2025_04_20_091732_index_scores.php`:** its `down()` drops the index from
-   `runways` instead of `airport_scores`. Fix the down() (safe: file only matters on
-   rollback; note it in the commit message rather than a new migration).
+4. ~~**BUG — `2025_04_20_091732_index_scores.php`:** its `down()` drops the index from
+   `runways` instead of `airport_scores`.~~ **[amended — stale]** Verified 2026-07-07:
+   the file's `down()` already targets `airport_scores` correctly. Nothing to do.
 5. **Verify, don't assume:** `metars.airport_id` was created `string->unique()`, then
    `2026_07_03_100003` did `->change()` to unsignedBigInteger + FK. Confirm the unique
    index survived (`Schema::hasIndex`/`SHOW INDEX FROM metars` via tinker). `has('metar')`
@@ -167,10 +205,9 @@ attempts re-run an **identical** destination query 20× — pure DB load, same e
 filter set (see P3b) produces a guaranteed-empty result, and this loop then re-runs the
 on-disk-temp-table query (P2) twenty times back-to-back.
 Fix: if `isset($data['icao'])` (anchor fixed and query deterministic apart from the shuffle),
-run one attempt only — break/return after the first empty result. Keep retrying only the
-random-anchor path (where each attempt draws a new anchor), and move the anchor *pool*
-fetch outside the loop if P2.4's `inRandomOrder()->first()` proves hot under the retry loop
-(20 single-row queries is acceptable; measure first).
+run one attempt only — break/return after the first empty result. **[amended]** The
+random-anchor half is already delivered by the revised P2.4 (id pool fetched once outside
+the loop, one random draw per attempt) — only the fixed-icao early-exit remains for P5.
 
 ## P6 — `AirportScore::getTopAirports` (homepage/top lists): cache it
 

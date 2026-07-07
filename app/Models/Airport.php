@@ -424,8 +424,78 @@ class Airport extends Model
     protected function withinDistance(Builder $query, Airport $departureAirport, float $minDistance, float $maxDistance, string $departureIcao): void
     {
         if (isset($departureIcao)) {
-            $query->whereDistanceSphere('coordinates', $departureAirport->coordinates, '<=', $maxDistance * 1852)->whereDistanceSphere('coordinates', $departureAirport->coordinates, '>=', $minDistance * 1852);
+            $this->applyDistanceBoundingBox($query, $departureAirport, $maxDistance);
+
+            $query->whereDistanceSphere('coordinates', $departureAirport->coordinates, '<=', $maxDistance * 1852);
+            if ($minDistance > 0) {
+                $query->whereDistanceSphere('coordinates', $departureAirport->coordinates, '>=', $minDistance * 1852);
+            }
         }
+    }
+
+    /**
+     * Bounding-box pre-filter for withinDistance so the SPATIAL index prunes
+     * candidates before the exact — but non-sargable — ST_Distance_Sphere
+     * checks run. Prune-only: the box must contain the whole circle, the
+     * precise distance checks trim the corners.
+     *
+     * Spherical-cap bounds: Δlat = D, Δlon = asin(sin(D)/cos(lat)) — the
+     * circle's extreme longitude sits poleward of the due-east point, so
+     * destination-point math would undersize the box at high latitudes. Both
+     * latitude bounds are additionally padded for the geodesic sag of the
+     * box's east-west edges (MySQL treats SRID-4326 polygon edges as
+     * geodesics, which bulge poleward relative to a parallel).
+     *
+     * Skipped (falling back to the exact checks alone) whenever the box
+     * cannot be represented as a simple lat/lon rectangle: near-global radii,
+     * a circle wrapping a pole, or bounds crossing ±85° or the antimeridian.
+     */
+    private function applyDistanceBoundingBox(Builder $query, Airport $anchorAirport, float $maxDistanceNm): void
+    {
+        // Beyond this the box covers most of the planet and prunes nothing
+        if ($maxDistanceNm <= 0 || $maxDistanceNm > 4000) {
+            return;
+        }
+
+        $lat = $anchorAirport->coordinates->latitude;
+        $lon = $anchorAirport->coordinates->longitude;
+
+        // Radius as an angle at the Earth's center, with a 5% safety margin
+        $radiusRad = ($maxDistanceNm * 1852 * 1.05) / 6371009.0;
+
+        $sinRatio = sin($radiusRad) / cos(deg2rad($lat));
+        if (abs($sinRatio) >= 1) {
+            // The circle wraps a pole — no finite longitude bounds exist
+            return;
+        }
+
+        $deltaLat = rad2deg($radiusRad);
+        $deltaLon = rad2deg(asin($sinRatio));
+
+        // Worst-case poleward sag of the box's east-west edges (sin·cos ≤ 0.5)
+        $lonSpanRad = deg2rad($deltaLon) * 2;
+        $edgeSag = rad2deg($lonSpanRad ** 2 / 8 * 0.5);
+
+        $south = $lat - $deltaLat - $edgeSag;
+        $north = $lat + $deltaLat + $edgeSag;
+        $west = $lon - $deltaLon;
+        $east = $lon + $deltaLon;
+
+        if ($north > 85 || $south < -85 || $west < -180 || $east > 180) {
+            return;
+        }
+
+        $box = new Polygon([
+            new LineString([
+                new Point($south, $west),
+                new Point($north, $west),
+                new Point($north, $east),
+                new Point($south, $east),
+                new Point($south, $west),
+            ]),
+        ], Srid::WGS84);
+
+        $query->whereWithin('coordinates', $box);
     }
 
     /**
@@ -714,6 +784,13 @@ class Airport extends Model
     protected function sortByScores(Builder $query, $filterByScores, Carbon|string|null $eta = null, bool $metarOnlyWeather = false)
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
+            // Keep the historic airports.* select unless the caller already
+            // narrowed the columns (the search pool queries select only the id
+            // so the grouped temp table stays small and in memory)
+            if (is_null($query->getQuery()->columns)) {
+                $query->select('airports.*');
+            }
+
             return $query->leftJoin('airport_scores', function ($join) use ($filterByScores, $eta, $metarOnlyWeather) {
                 $join->on('airports.id', '=', 'airport_scores.airport_id')
                     ->whereIn('airport_scores.reason', $filterByScores);
@@ -721,7 +798,7 @@ class Airport extends Model
                     AirportScore::applyCoversEta($join, $eta, $metarOnlyWeather);
                 }
             })
-                ->selectRaw('airports.*, COUNT(DISTINCT airport_scores.reason) as score_count')
+                ->selectRaw('COUNT(DISTINCT airport_scores.reason) as score_count')
                 ->groupBy('airports.id')
                 ->orderBy('score_count', 'desc');
         }

@@ -116,21 +116,35 @@ class SearchController extends Controller
         $candidatesAreDepartures = (bool) $arrival;
         $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEtaSql($airport, $codeletter);
 
-        // Get airports according to filter
+        // Phase 1: fetch the full candidate pool as thin id + score_count rows.
+        // Selecting only the id keeps the grouped/sorted temp table in memory
+        // (airports.* drags the GEOMETRY column in, forcing it to disk), while
+        // the whole pool is still fetched so a refresh can shuffle up a
+        // different subset among equally-scored airports.
         $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
             ->inContinent($destinations)->inCountry($destinations, $airport->iso_country)->inState($destinations)
             ->withinDistance($airport, $minDistance, $maxDistance, $airport->icao)
             ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
             ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
+            ->select('airports.id')
             ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes(), $eta, $candidatesAreDepartures)
-            ->has('metar')->with('runways', 'scores', 'metar', 'taf.forecasts')
+            ->has('metar')
             ->get();
 
-        // Shuffle and limit the results to 20
+        // Shuffle within equal-score buckets and limit the results to 20
         $airports = $airports->groupBy('score_count')->map(function ($group) {
             return $group->shuffle();
         })->flatten(1)->take(20);
+
+        // Phase 2: hydrate only the picked airports, preserving the shuffled order
+        $airportIds = $airports->pluck('id')->all();
+        $scoreCounts = $airports->pluck('score_count', 'id');
+
+        $airports = Airport::with('runways', 'scores', 'metar', 'taf.forecasts')
+            ->findMany($airportIds)
+            ->sortBy(fn ($suggested) => array_search($suggested->id, $airportIds))->values()
+            ->each(fn ($suggested) => $suggested->score_count = $scoreCounts->get($suggested->id));
 
         $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax, $candidatesAreDepartures);
 
