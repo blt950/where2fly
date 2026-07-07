@@ -96,6 +96,14 @@ class AirportScore extends Model
     /**
      * Same conditions as the coversEta scope, but applicable to any query
      * builder that has airport_scores in scope (e.g. a join on airports).
+     *
+     * Cost warning: when $eta is a per-candidate SQL expression
+     * (forecastEtaSql's ST_DISTANCE_SPHERE arithmetic), it is inlined 3-4x
+     * here and re-evaluated per probed row — and search already applies this
+     * once per filtered reason plus in the sortByScores join. MySQL cannot
+     * reference a select alias from WHERE/JOIN, so it can't be computed once
+     * per row; don't add further coversEta call sites inside per-row
+     * subqueries.
      */
     public static function applyCoversEta($query, Carbon|string $eta, bool $metarOnlyWeather = false): void
     {
