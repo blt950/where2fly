@@ -194,7 +194,11 @@ class SearchController extends Controller
         }
 
         // Lets find an result with the given criteria. Give it a few attempts before we give up.
-        $maxAttempts = 20;
+        // With a fixed anchor the destination query is deterministic apart from the
+        // shuffle — an empty result stays empty, so retrying would only re-run the
+        // identical query. Retries only help the random-anchor path, where each
+        // attempt draws a new anchor.
+        $maxAttempts = isset($data['icao']) ? 1 : 20;
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
 
             // Use the supplied departure or draw a random anchor from the pool
