@@ -177,8 +177,7 @@ class SearchController extends Controller
          */
 
         // The random-anchor candidate pool is identical between retry attempts, so
-        // fetch the matching ids once — no hydration — and draw per attempt. The
-        // random pick stays in PHP: RAND() was deliberately moved out of MySQL (66d1b70).
+        // fetch the matching ids once — no hydration — and draw per attempt.
         $anchorIds = null;
         if (! isset($data['icao'])) {
             $anchorIds = Airport::airportOpen()->isAirportSize($destinationAirportSize)

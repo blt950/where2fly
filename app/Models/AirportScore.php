@@ -217,10 +217,7 @@ class AirportScore extends Model
 
     public static function getTopAirports($continent = null, $whitelist = null, $limit = 30, $exclude = null)
     {
-        // User-supplied whitelists are high-cardinality — compute those
-        // directly and cache only the shared variants. The underlying data
-        // only changes when the fetch commands run (every 30 min at :05/:35),
-        // so a 5 minute TTL stays fresh.
+        // Don't cache whitelists
         if ($whitelist) {
             return self::computeTopAirports($continent, $whitelist, $limit, $exclude);
         }
@@ -234,6 +231,7 @@ class AirportScore extends Model
             return unserialize(base64_decode($cached));
         }
 
+        // Compute and cache the result
         $result = self::computeTopAirports($continent, $whitelist, $limit, $exclude);
         Cache::put($cacheKey, base64_encode(serialize($result)), 300);
 
