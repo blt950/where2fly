@@ -1,6 +1,14 @@
 # speed.md — Search/MySQL performance fixes
 ## This doc has to be invoked by user, don't invoke it yourself.
 
+**STATUS 2026-07-07: all items implemented** (P1+P2, then P3/P3b/P4/P5/P6 as separate
+commits on `feat/optimize`). P3.4 was stale (nothing to do), P3.5 verified fine (no
+migration needed), P3.6 skipped as low-value. One extra gotcha found during P6 live
+verification: cached Eloquent airports embed raw GEOMETRY binary (`coordinates`), which
+the **database cache store's text `value` column rejects** (1366 Incorrect string value)
+— the payload is base64-wrapped in `getTopAirports`. phpunit runs on the array cache
+driver, so only a live run against the database store catches that class of bug.
+
 Context: production MySQL periodically pins at 100% CPU during searches until restarted.
 Root causes found by reading the search path. Constraints: **Eloquent/query-builder + standard
 Laravel only — no new `DB::raw` beyond what already exists.** Follow repo conventions:
