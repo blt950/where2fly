@@ -66,7 +66,18 @@ COPY --from=frontend --chown=www-data:www-data /app/public/ /app/public/
 WORKDIR /app
 
 RUN composer install --no-dev --no-interaction --prefer-dist
-RUN mkdir -p /app/storage/logs/
+
+# Normalise ownership/permissions of the writable trees before we drop into the service process.
+RUN mkdir -p \
+        /app/storage/logs \
+        /app/storage/app/tmp \
+        /app/storage/app/backup-temp \
+        /app/storage/framework/cache \
+        /app/storage/framework/sessions \
+        /app/storage/framework/views \
+        /app/bootstrap/cache && \
+    chown -R www-data:www-data /app/storage /app/bootstrap/cache && \
+    chmod -R g+w /app/storage /app/bootstrap/cache
 
 # Wrap around the default PHP entrypoint with a custom entrypoint
 COPY ./container/entrypoint.sh /usr/local/bin/service-entrypoint
