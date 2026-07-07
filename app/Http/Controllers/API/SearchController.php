@@ -10,6 +10,7 @@ use App\Http\Resources\SuggestedAirportResource;
 use App\Models\Airport;
 use App\Rules\AirportExists;
 use App\Rules\ValidDestinations;
+use App\Rules\ValidScores;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -27,7 +28,7 @@ class SearchController extends Controller
             'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
             'airtimeMin' => ['sometimes', 'numeric', 'between:0,24'],
             'airtimeMax' => ['sometimes', 'numeric', 'between:0,24'],
-            'scores' => ['sometimes', 'array'],
+            'scores' => ['sometimes', 'array', new ValidScores],
             'metcondition' => ['sometimes', 'in:IFR,VFR,ANY'],
             'destinationWithRoutesOnly' => ['sometimes', 'numeric', 'between:-1,1'],
             'destinationRunwayLights' => ['sometimes', 'numeric', 'between:-1,1'],

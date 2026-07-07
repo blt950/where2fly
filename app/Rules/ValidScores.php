@@ -16,15 +16,15 @@ class ValidScores implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        $whitelist = array_keys(ScoreController::$score_types);
 
-        $whitelist = [];
-        foreach (ScoreController::$score_types as $k => $score_type) {
-            $whitelist[] = $k;
-        }
-
-        foreach ($value as $score => $value) {
+        foreach ($value as $score => $scoreValue) {
             if (! in_array($score, $whitelist)) {
                 $fail('Not a valid parameter.');
+            }
+
+            if (! in_array((string) $scoreValue, ['-1', '0', '1'], true)) {
+                $fail('Score values must be -1, 0 or 1.');
             }
         }
     }
