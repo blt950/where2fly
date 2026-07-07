@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AirportScore extends Model
@@ -215,6 +216,31 @@ class AirportScore extends Model
     }
 
     public static function getTopAirports($continent = null, $whitelist = null, $limit = 30, $exclude = null)
+    {
+        // User-supplied whitelists are high-cardinality — compute those
+        // directly and cache only the shared variants. The underlying data
+        // only changes when the fetch commands run (every 30 min at :05/:35),
+        // so a 5 minute TTL stays fresh.
+        if ($whitelist) {
+            return self::computeTopAirports($continent, $whitelist, $limit, $exclude);
+        }
+
+        $cacheKey = 'top-airports:' . ($continent ?? 'all') . ':' . ($exclude ?? 'none') . ':' . $limit;
+
+        // The payload is base64-wrapped because the loaded airports embed raw
+        // GEOMETRY binary (coordinates), which the database cache store cannot
+        // put in its text value column
+        if ($cached = Cache::get($cacheKey)) {
+            return unserialize(base64_decode($cached));
+        }
+
+        $result = self::computeTopAirports($continent, $whitelist, $limit, $exclude);
+        Cache::put($cacheKey, base64_encode(serialize($result)), 300);
+
+        return $result;
+    }
+
+    private static function computeTopAirports($continent, $whitelist, $limit, $exclude)
     {
 
         // Establish the return query — counting distinct reasons
