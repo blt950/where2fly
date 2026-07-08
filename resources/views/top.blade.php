@@ -148,6 +148,12 @@
 
             const focusRow = document.querySelector(`tr[data-airport-icao="${focusAirport}"]`);
             focusRow.classList.add('active');
+
+            // Scroll the table to the selected airport, unless it's already in view
+            const rect = focusRow.getBoundingClientRect();
+            if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                focusRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         });
         
     </script>
