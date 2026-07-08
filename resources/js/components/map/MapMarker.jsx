@@ -25,6 +25,7 @@ const MapMarker = ({ airport, isFocused, isPrimary, setFocusAirport }) => {
             eventHandlers={eventHandlers}
         >
             <Tooltip
+                key={tooltipClass}
                 direction="left"
                 className={tooltipClass}
                 interactive={true}
