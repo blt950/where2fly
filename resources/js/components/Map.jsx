@@ -13,6 +13,7 @@ import MapBound from './map/MapBound';
 import MapDrawRoute from './map/MapDrawRoute';
 import MapMarkerGroup from './map/MapMarkerGroup';
 import MapPan from './map/MapPan';
+import MapPing from './map/MapPing';
 import MapSaveView from './map/MapSaveView';
 import MapTerminator from './map/MapTerminator';
 import MapTooltipZoom from './map/MapTooltipZoom';
@@ -73,6 +74,7 @@ function Map() {
     const [focusAirport, setFocusAirport] = useState(null);
     const [highlightedAircrafts, setHighlightedAircrafts] = useState([]);
     const [mapBounds, setMapBounds] = useState(null);
+    const [ping, setPing] = useState(null);
     const [primaryAirport, setPrimaryAirport] = useState(null);
     const [reverseDirection, setReverseDirection] = useState(null);
     const [showAirportIdCard, setShowAirportIdCard] = useState(null);
@@ -84,6 +86,7 @@ function Map() {
         window.setCluster = (boolean) => { setCluster(boolean) }
         window.setDrawRoute = (route) => { setDrawRoute(route) }
         window.setFocusAirport = (icao) => { setFocusAirport(icao) }
+        window.pingAirport = (icao) => { setPing({ icao, ts: Date.now() }) }
         window.setHighlightedAircrafts = (data) => { setHighlightedAircrafts(data) }
         window.setPrimaryAirport = (airport) => { setPrimaryAirport(airport) }
         window.setReverseDirection = (boolean) => { setReverseDirection(boolean) }
@@ -242,6 +245,7 @@ function Map() {
                 {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
                 <MapTerminator />
                 <MapTooltipZoom />
+                <MapPing ping={ping} />
             </MapContainer>
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>

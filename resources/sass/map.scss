@@ -62,6 +62,32 @@
     .leaflet-tooltip.airport--pinned { display: block; }
 }
 
+// One-shot radar blip shown when an airport is selected from the sidebar (MapPing)
+.radar-ping::before {
+    content: '';
+    position: absolute;
+    top: -24px;
+    left: -24px;
+    width: 48px;
+    height: 48px;
+
+    border: 2px solid $primary;
+    border-radius: 50%;
+
+    animation: radar-ping 1.6s ease-out 1 forwards;
+}
+
+@keyframes radar-ping {
+    from {
+        transform: scale(0.15);
+        opacity: 1;
+    }
+    to {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+}
+
 .leaflet-marker-icon.marker-cluster{
     color: black;
     background: $primary;

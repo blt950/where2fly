@@ -127,6 +127,11 @@
                         window.setFocusAirport(icao);
                     }
 
+                    // Radar blip on the map at the selected airport
+                    if (window.pingAirport) {
+                        window.pingAirport(icao);
+                    }
+
                     // Remove 'active' class from all rows and add to the clicked row
                     rows.forEach(r => r.classList.remove('active'));
                     this.classList.add('active');
