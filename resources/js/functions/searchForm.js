@@ -87,10 +87,7 @@ function submitFormMetrics(){
         });
     });
 
-    if(window.umami){
-        umami.track('Search', { props: props });
-
-        // For multiselects, also track each selected value separately for better filtering in umami.
+    if (window.umami) {
         var multiselectDefaults = {
             destinations: 'Anywhere',
             whitelists: 'None',
@@ -99,17 +96,18 @@ function submitFormMetrics(){
             aircrafts: 'Any',
         };
 
-        Object.entries(multiselectDefaults).forEach(function([key, fallback]){
+        var additions = {};
+        Object.entries(multiselectDefaults).forEach(function([key, fallback]) {
             var values = multiselect[key];
-            if(values && values.length > 0){
-                values.forEach(function(value){
-                    umami.track('Search', { ['props.' + key]: value });
-                });
+            if (values && values.length > 0) {
+                // Pass as array directly — v3.2.0 supports array event data
+                additions[key] = values;
             } else {
-                umami.track('Search', { ['props.' + key]: fallback });
+                additions[key] = fallback;
             }
         });
-
+        
+        umami.track('Search', { filter: { ...props, ...additions } });
     }
 }
 
@@ -127,7 +125,7 @@ submitButtons.forEach(function(button) {
             submitFormMetrics();
         }
 
-        document.getElementById('form').requestSubmit()
+        //document.getElementById('form').requestSubmit()
     });
 });
 
