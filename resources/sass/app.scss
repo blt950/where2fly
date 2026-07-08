@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 /*
 * Fonts
 */
@@ -131,6 +133,23 @@ main, nav.sidebar{
         &.action-text{
             padding: 0;
             height: 100%;
+        }
+
+        .card-title{
+            border: 0;
+        }
+
+        .card-body{
+            color: $bluewhite;
+        }
+
+        .card-footer{
+            color: $bluewhite;
+            border-top: 1px solid $secondary;
+
+            .author{
+                color: color.adjust($tertiary, $lightness: 45%);
+            }
         }
     }
 

@@ -25,7 +25,7 @@
                         <div class="d-flex align-items-center flex-wrap">
                             <img src="{{ $issue['user']['avatar_url'] }}" alt="" class="rounded-circle me-1">
                             <p class="card-text mb-0 me-2">{{ $issue['user']['login'] }}</p>
-                            <p class="card-text text-muted mb-0">{{ \Carbon\Carbon::parse($issue['created_at'])->diffForHumans() }}</p>
+                            <p class="card-text author mb-0">{{ \Carbon\Carbon::parse($issue['created_at'])->diffForHumans() }}</p>
                         </div>
                     </div>
                     <div class="upvotes d-flex flex-column align-items-center flex-shrink-0">
