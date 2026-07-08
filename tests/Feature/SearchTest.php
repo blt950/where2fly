@@ -246,6 +246,7 @@ class SearchTest extends TestCase
     public function test_search_distance_is_within_searched_bounds(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'icao' => 'ENGM',
             'distanceMin' => '300',
             'distanceMax' => '500',
         ])));
