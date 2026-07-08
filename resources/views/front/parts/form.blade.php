@@ -58,19 +58,14 @@
             @error('destinations')
             <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
             @enderror
-        </div>
+            </div>
         
         <div class="col-xs-12 text-start">
             <label for="codeletter">Aircraft Type <i class="fa-sharp fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Select the aircraft closest to what you want to fly. This is used to calculate airtime and find compatible airports"></i></label>
             <select class="form-control" id="codeletter" name="codeletter">
-                <option value="GA" {{ old('codeletter') == "GA" ? "selected" : "" }}>C172/PA28/C182 etc. - Light GA</option>
-                <option value="GAT" {{ old('codeletter') == "GAT" ? "selected" : "" }}>Bonanza/Baron/Caravan etc. - Turbo GA</option>
-                <option value="GTP" {{ old('codeletter') == "GTP" ? "selected" : "" }}>TBM/PC-12/King Air etc. - Heavy Turboprop</option>
-                <option value="JS" {{ old('codeletter') == "JS" ? "selected" : "" }}>CRJ/E145/PC-24 etc. - Regional Jet</option>
-                <option value="JM"  {{ old('codeletter') !== null ? (old('codeletter') == "JM" ? "selected" : "") : "selected" }}>B737/A320/E190 etc. - Narrow Body</option>
-                <option value="JML" {{ old('codeletter') == "JML" ? "selected" : "" }}>B757/B767 etc. - Mid Wide Body</option>
-                <option value="JL" {{ old('codeletter') == "JL" ? "selected" : "" }}>B777/B787/A350 etc. - Large Wide Body</option>
-                <option value="JXL" {{ old('codeletter') == "JXL" ? "selected" : "" }}>B747/A380 etc. - Super Heavy</option>
+                @foreach(\App\Helpers\AircraftHelper::TYPES as $code => $type)
+                    <option value="{{ $code }}" {{ (old('codeletter') ?? 'JM') == $code ? "selected" : "" }}>{{ $type['description'] }} - {{ $type['name'] }}</option>
+                @endforeach
             </select>
             @error('codeletter')
             <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
@@ -203,7 +198,6 @@
                 <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
-
             <div class="col-xs-12 text-start">
                 <label>Intended Distance</label>
                 <input type="hidden" id="distanceMin" name="distanceMin" value="0">

@@ -215,14 +215,14 @@ class AirportScore extends Model
         return str_starts_with($this->reason, 'VATSIM_');
     }
 
-    public static function getTopAirports($continent = null, $whitelist = null, $limit = 30, $exclude = null)
+    public static function getTopAirports($continent = null, $whitelist = null, $limit = 30, $exclude = null, $aircraft = null)
     {
         // Don't cache whitelists
         if ($whitelist) {
-            return self::computeTopAirports($continent, $whitelist, $limit, $exclude);
+            return self::computeTopAirports($continent, $whitelist, $limit, $exclude, $aircraft);
         }
 
-        $cacheKey = 'top-airports:' . ($continent ?? 'all') . ':' . ($exclude ?? 'none') . ':' . $limit;
+        $cacheKey = 'top-airports:' . ($continent ?? 'all') . ':' . ($exclude ?? 'none') . ':' . ($aircraft ?? 'any') . ':' . $limit;
 
         // The payload is base64-wrapped because the loaded airports embed raw
         // GEOMETRY binary (coordinates), which the database cache store cannot
@@ -232,13 +232,13 @@ class AirportScore extends Model
         }
 
         // Compute and cache the result
-        $result = self::computeTopAirports($continent, $whitelist, $limit, $exclude);
+        $result = self::computeTopAirports($continent, $whitelist, $limit, $exclude, $aircraft);
         Cache::put($cacheKey, base64_encode(serialize($result)), 300);
 
         return $result;
     }
 
-    private static function computeTopAirports($continent, $whitelist, $limit, $exclude)
+    private static function computeTopAirports($continent, $whitelist, $limit, $exclude, $aircraft = null)
     {
 
         // Establish the return query — counting distinct reasons
@@ -278,6 +278,11 @@ class AirportScore extends Model
 
         if ($whitelist && is_array($whitelist) && count($whitelist) > 0) {
             $returnQuery = $returnQuery->whereIn('airports.icao', $whitelist);
+        }
+
+        // Only airports with a runway long enough for the aircraft type
+        if ($aircraft) {
+            $returnQuery = $returnQuery->whereIn('airports.id', Airport::filterRunwayLengths(0, PHP_INT_MAX, $aircraft)->select('airports.id'));
         }
 
         // Filter airport type, relevant data and run the query — the loaded scores

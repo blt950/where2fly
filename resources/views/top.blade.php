@@ -15,21 +15,48 @@
     
     <div class="container">
 
-        <div class="filterbox">
-            <span class="m-0"><strong class="d-block">Filter</strong>
-                <a class="btn btn-sm {{ Route::is('top') ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('top') }}">All</a>
-                <a class="btn btn-sm {{ $continent == 'AF' ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('top.filtered', 'AF') }}">Africa</a>
-                <a class="btn btn-sm {{ $continent == 'AS' ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('top.filtered', 'AS') }}">Asia</a>
-                <a class="btn btn-sm {{ $continent == 'EU' ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('top.filtered', 'EU') }}">Europe</a>
-                <a class="btn btn-sm {{ $continent == 'NA' ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('top.filtered', 'NA') }}">North America</a>
-                <a class="btn btn-sm {{ $continent == 'OC' ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('top.filtered', 'OC') }}">Oceania</a>
-                <a class="btn btn-sm {{ $continent == 'SA' ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('top.filtered', 'SA') }}">South America</a>
-            </span>
+        @php
+            // Each dropdown links to a URL keeping the other two filters intact.
+            // JM is the default aircraft, so "no filter" must travel as an
+            // explicit aircraft=all rather than an absent param
+            $topRoute = fn ($params) => route(! empty($params['continent']) ? 'top.filtered' : 'top', array_filter($params));
+            $aircraftParam = $aircraft ?? 'all';
+        @endphp
 
-            <span><strong class="d-block">VATSIM Conditions</strong>
-                <a class="btn btn-sm {{ $exclude === null ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route(Route::currentRouteName(), $continent) }}">Include</a>
-                <a class="btn btn-sm {{ $exclude == 'vatsim' ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route(Route::currentRouteName(), $continent) }}?exclude=vatsim">Exclude</a>
-            </span>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Continent: {{ $continent ? \App\Http\Controllers\TopController::CONTINENTS[$continent] : 'All' }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item {{ $continent === null ? 'active' : '' }}" href="{{ $topRoute(['exclude' => $exclude, 'aircraft' => $aircraftParam]) }}">All</a></li>
+                    @foreach(\App\Http\Controllers\TopController::CONTINENTS as $code => $name)
+                        <li><a class="dropdown-item {{ $continent == $code ? 'active' : '' }}" href="{{ $topRoute(['continent' => $code, 'exclude' => $exclude, 'aircraft' => $aircraftParam]) }}">{{ $name }}</a></li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Aircraft Type: {{ $aircraft ? \App\Helpers\AircraftHelper::name($aircraft) : 'All' }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item {{ $aircraft === null ? 'active' : '' }}" href="{{ $topRoute(['continent' => $continent, 'exclude' => $exclude, 'aircraft' => 'all']) }}">All</a></li>
+                    @foreach(\App\Helpers\AircraftHelper::TYPES as $code => $type)
+                        <li><a class="dropdown-item {{ $aircraft == $code ? 'active' : '' }}" href="{{ $topRoute(['continent' => $continent, 'exclude' => $exclude, 'aircraft' => $code]) }}">{{ $type['name'] }}</a></li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    VATSIM: {{ $exclude == 'vatsim' ? 'Excluded' : 'Included' }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item {{ $exclude === null ? 'active' : '' }}" href="{{ $topRoute(['continent' => $continent, 'aircraft' => $aircraftParam]) }}">Included</a></li>
+                    <li><a class="dropdown-item {{ $exclude == 'vatsim' ? 'active' : '' }}" href="{{ $topRoute(['continent' => $continent, 'exclude' => 'vatsim', 'aircraft' => $aircraftParam]) }}">Excluded</a></li>
+                </ul>
+            </div> 
         </div>
             
         <div class="table-responsive">

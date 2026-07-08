@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Helpers\AircraftHelper;
 use App\Helpers\CalculationHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ScoreController;
@@ -25,7 +26,7 @@ class SearchController extends Controller
             'departure' => ['nullable', new AirportExists],
             'arrival' => ['nullable', new AirportExists],
             'destinations' => ['sometimes', 'array', new ValidDestinations],
-            'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
+            'codeletter' => ['required', 'string', 'in:' . implode(',', AircraftHelper::codes())],
             'airtimeMin' => ['sometimes', 'numeric', 'between:0,24'],
             'airtimeMax' => ['sometimes', 'numeric', 'between:0,24'],
             'distanceMin' => ['sometimes', 'numeric', 'min:0'],

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AircraftHelper;
 use App\Helpers\CalculationHelper;
 use App\Models\Aircraft;
 use App\Models\Airline;
@@ -90,7 +91,7 @@ class SearchController extends Controller
             'direction' => ['required', 'in:arrival,departure'],
             'destinations' => ['sometimes', 'array', new ValidDestinations],
             'destinationExclusions' => ['sometimes', 'array', new ValidDestinations],
-            'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
+            'codeletter' => ['required', 'string', 'in:' . implode(',', AircraftHelper::codes())],
             'airtimeMin' => ['required', 'numeric', 'between:0,12'],
             'airtimeMax' => ['required', 'numeric', 'between:0,12'],
             'distanceMin' => ['sometimes', 'numeric', 'between:0,6000'],
