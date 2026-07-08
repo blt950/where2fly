@@ -93,6 +93,8 @@ class SearchController extends Controller
             'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
             'airtimeMin' => ['required', 'numeric', 'between:0,12'],
             'airtimeMax' => ['required', 'numeric', 'between:0,12'],
+            'distanceMin' => ['sometimes', 'numeric', 'between:0,6000'],
+            'distanceMax' => ['sometimes', 'numeric', 'between:0,6000'],
             'sortByWeather' => ['in:0,1'],
             'sortByATC' => ['in:0,1'],
             'whitelists' => ['sometimes', 'array'],
@@ -139,6 +141,10 @@ class SearchController extends Controller
             $airtimeMax = 24;
         } // If airtime is 12+ hours, bump it
 
+        // Optional so pre-existing bookmarked searches keep validating
+        $distanceMin = (int) ($data['distanceMin'] ?? 0);
+        $distanceMax = (int) ($data['distanceMax'] ?? 6000);
+
         // Create a filter array based on input
         $sortByScores = [];
         isset($data['sortByWeather']) ? $sortByScores = array_merge($sortByScores, ScoreController::getWeatherTypes()) : null;
@@ -171,6 +177,13 @@ class SearchController extends Controller
         $filterByAircrafts = $data['aircrafts'] ?? null;
 
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
+
+        // Intersect the airtime-derived range with the distance slider; the
+        // slider's top position means 6000+, i.e. no upper bound
+        $minDistance = max($minDistance, $distanceMin);
+        if ($distanceMax < 6000) {
+            $maxDistance = min($maxDistance, $distanceMax);
+        }
 
         /**
          *  Fetch the requested data

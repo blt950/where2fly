@@ -203,7 +203,21 @@
                 <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
-            
+
+            <div class="col-xs-12 text-start">
+                <label>Intended Distance</label>
+                <input type="hidden" id="distanceMin" name="distanceMin" value="0">
+                <input type="hidden" id="distanceMax" name="distanceMax" value="6000">
+                <div id="slider-distance" class="mt-1 mb-1"></div>
+                <span id="slider-distance-text">0-6000+ NM</span>
+                @error('distanceMin')
+                <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
+                @error('distanceMax')
+                <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
+            </div>
+
             <div class="col-sm-12 text-start">
                 <label>Weather parameters</label>
                 

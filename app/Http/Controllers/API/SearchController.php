@@ -28,6 +28,8 @@ class SearchController extends Controller
             'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
             'airtimeMin' => ['sometimes', 'numeric', 'between:0,24'],
             'airtimeMax' => ['sometimes', 'numeric', 'between:0,24'],
+            'distanceMin' => ['sometimes', 'numeric', 'min:0'],
+            'distanceMax' => ['sometimes', 'numeric', 'min:0'],
             'scores' => ['sometimes', 'array', new ValidScores],
             'metcondition' => ['sometimes', 'in:IFR,VFR,ANY'],
             'destinationWithRoutesOnly' => ['sometimes', 'numeric', 'between:-1,1'],
@@ -66,6 +68,13 @@ class SearchController extends Controller
         $resultLimit = $data['limit'] ?? 10;
 
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
+
+        // Intersect the airtime-derived range with the explicit distance
+        // filter (NM); either bound is unbounded when absent
+        $minDistance = max($minDistance, $data['distanceMin'] ?? 0);
+        if (isset($data['distanceMax'])) {
+            $maxDistance = min($maxDistance, $data['distanceMax']);
+        }
 
         if (($arrival && $departure) || (! $arrival && ! $departure)) {
             // Dont allow this, return error json

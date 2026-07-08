@@ -19,6 +19,8 @@ class SearchTest extends TestCase
         'codeletter' => 'JM',
         'airtimeMin' => 0,
         'airtimeMax' => 5,
+        'distanceMin' => 0,
+        'distanceMax' => 6000,
         'sortByWeather' => 1,
         'sortByATC' => 1,
         'scores' => [
@@ -239,6 +241,29 @@ class SearchTest extends TestCase
             return $airports->isNotEmpty()
                 && $airports->every(fn ($a) => $a->airtime >= 0.0 && $a->airtime <= 2.0);
         });
+    }
+
+    public function test_search_distance_is_within_searched_bounds(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'distanceMin' => '300',
+            'distanceMax' => '500',
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->every(fn ($a) => $a->distance >= 300 && $a->distance <= 500);
+        });
+    }
+
+    public function test_search_fails_with_out_of_range_distance(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'distanceMax' => '9000',
+        ])));
+
+        $response->assertSessionHasErrors('distanceMax');
     }
 
     public function test_search_foggy_score_filter_returns_only_foggy_airports(): void

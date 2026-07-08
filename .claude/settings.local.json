@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(graphify query *)",
-      "Bash(php artisan *)"
+      "Bash(php artisan *)",
+      "Bash(node driver.mjs)"
     ]
   }
 }
