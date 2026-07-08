@@ -98,6 +98,15 @@ class SearchTest extends TestCase
         $response->assertSessionHasErrors('codeletter');
     }
 
+    public function test_search_fails_with_non_array_scores(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'scores' => 'foo',
+        ])));
+
+        $response->assertSessionHasErrors('scores');
+    }
+
     public function test_search_fails_with_invalid_metcondition(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
@@ -183,6 +192,19 @@ class SearchTest extends TestCase
         $response->assertOk();
         $response->assertViewHas('suggestedAirports', function ($airports) {
             return $airports->count() >= 3;
+        });
+    }
+
+    public function test_search_returns_at_most_20_suggestions_ordered_by_score_count(): void
+    {
+        $response = $this->get('/search?' . http_build_query($this->validSearchParams));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            $counts = $airports->pluck('score_count');
+
+            return $airports->count() <= 20
+                && $counts->values()->all() === $counts->sortDesc()->values()->all();
         });
     }
 

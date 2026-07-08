@@ -176,33 +176,36 @@ class SearchController extends Controller
          *  Fetch the requested data
          */
 
+        // The random-anchor candidate pool is identical between retry attempts, so
+        // fetch the matching ids once — no hydration — and draw per attempt.
+        $anchorIds = null;
+        if (! isset($data['icao'])) {
+            $anchorIds = Airport::airportOpen()->isAirportSize($destinationAirportSize)
+                ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
+                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, now())->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                ->returnOnlyWhitelistedIcao($whitelist)
+                ->has('metar')
+                ->pluck('airports.id');
+
+            if ($anchorIds->isEmpty()) {
+                return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
+            }
+        }
+
         // Lets find an result with the given criteria. Give it a few attempts before we give up.
-        $maxAttempts = 20;
+        // With a fixed anchor the destination query is deterministic apart from the
+        // shuffle — an empty result stays empty, so retrying would only re-run the
+        // identical query. Retries only help the random-anchor path, where each
+        // attempt draws a new anchor.
+        $maxAttempts = isset($data['icao']) ? 1 : 20;
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
 
-            // Use the supplied departure or select a random airport
+            // Use the supplied departure or draw a random anchor from the pool
             $suggestedAirport = false;
             if (isset($data['icao'])) {
                 $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->first();
             } else {
-                // Select primary airport based on the criteria
-                $primaryAirport = Airport::airportOpen()->isAirportSize($destinationAirportSize)
-                    ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-                    ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, now())->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
-                    ->returnOnlyWhitelistedIcao($whitelist)
-                    ->has('metar')->with('runways', 'scores', 'metar')
-                    ->get();
-
-                // Shuffle and limit the results to 20
-                $primaryAirport = $primaryAirport->groupBy('score_count')->map(function ($group) {
-                    return $group->shuffle();
-                })->flatten(1)->take(20);
-
-                if (! $primaryAirport || ! $primaryAirport->count()) {
-                    return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
-                }
-
-                $primaryAirport = $primaryAirport->random();
+                $primaryAirport = Airport::with('runways', 'scores', 'metar')->find($anchorIds->random());
                 $suggestedAirport = true;
             }
 
@@ -210,7 +213,11 @@ class SearchController extends Controller
             $candidatesAreDepartures = $direction == 'arrival';
             $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEtaSql($primaryAirport, $codeletter);
 
-            // Get airports according to filter
+            // Phase 1: fetch the full candidate pool as thin id (+ score_count) rows.
+            // Selecting only the id keeps the grouped/sorted temp table in memory
+            // (airports.* drags the GEOMETRY column in, forcing it to disk), while
+            // the whole pool is still fetched so a refresh can shuffle up a
+            // different subset among equally-scored airports.
             $airports = Airport::airportOpen()->notIcao($primaryAirport->icao)->isAirportSize($destinationAirportSize)
                 ->inContinent($destinations)->inCountry($destinations, $primaryAirport->iso_country)->inState($destinations)
                 ->notInContinent($destinationExclusions)->notInCountry($destinationExclusions, $primaryAirport->iso_country)->notInState($destinationExclusions)
@@ -218,25 +225,34 @@ class SearchController extends Controller
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                 ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                 ->returnOnlyWhitelistedIcao($whitelist)
+                ->select('airports.id')
                 ->sortByScores($sortByScores, $eta, $candidatesAreDepartures)
                 ->has('metar')
-                ->with([
-                    'runways' => function ($query) {
-                        $query->where('closed', false)->whereNotNull('length_ft');
-                    },
-                    'scores',
-                    'metar',
-                    'taf.forecasts',
-                    'sceneryDevelopers.sceneries' => function ($query) {
-                        $query->where('published', true)->with('simulator');
-                    },
-                ])
                 ->get();
 
-            // Shuffle and limit the results to 20
+            // Shuffle within equal-score buckets and limit the results to 20
             $airports = $airports->groupBy('score_count')->map(function ($group) {
                 return $group->shuffle();
             })->flatten(1)->take(20);
+
+            // Phase 2: hydrate only the picked airports, preserving the shuffled order
+            $airportIds = $airports->pluck('id')->all();
+            $scoreCounts = $airports->pluck('score_count', 'id');
+
+            $airports = Airport::with([
+                'runways' => function ($query) {
+                    $query->where('closed', false)->whereNotNull('length_ft');
+                },
+                'scores',
+                'metar',
+                'taf.forecasts',
+                'sceneryDevelopers.sceneries' => function ($query) {
+                    $query->where('published', true)->with('simulator');
+                },
+            ])
+                ->findMany($airportIds)
+                ->sortBy(fn ($airport) => array_search($airport->id, $airportIds))->values()
+                ->each(fn ($airport) => $airport->score_count = $scoreCounts->get($airport->id));
 
             // Filter the eligible airports
             $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax, $candidatesAreDepartures);

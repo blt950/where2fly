@@ -120,6 +120,60 @@ class ApiTest extends TestCase
         $response->assertStatus(422);
     }
 
+    public function test_api_search_rejects_unknown_score_reason(): void
+    {
+        $key = $this->createApiKey();
+
+        // An unknown reason makes every EXISTS chain unsatisfiable — it must
+        // fail validation instead of running a guaranteed-empty search
+        $response = $this->withToken($key->key)->postJson('/api/search', [
+            'codeletter' => 'JS',
+            'departure' => 'KLAX',
+            'scores' => ['METAR_VATSIM_ATC' => 1],
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_api_search_rejects_non_array_scores(): void
+    {
+        $key = $this->createApiKey();
+
+        $response = $this->withToken($key->key)->postJson('/api/search', [
+            'codeletter' => 'JS',
+            'departure' => 'KLAX',
+            'scores' => 'foo',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_api_search_rejects_out_of_range_score_value(): void
+    {
+        $key = $this->createApiKey();
+
+        $response = $this->withToken($key->key)->postJson('/api/search', [
+            'codeletter' => 'JS',
+            'departure' => 'KLAX',
+            'scores' => ['VATSIM_ATC' => 5],
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_api_search_accepts_valid_scores(): void
+    {
+        $key = $this->createApiKey();
+
+        $response = $this->withToken($key->key)->postJson('/api/search', [
+            'codeletter' => 'JS',
+            'departure' => 'KLAX',
+            'scores' => ['VATSIM_ATC' => 1, 'METAR_FOGGY' => -1],
+        ]);
+
+        $response->assertStatus(200);
+    }
+
     public function test_api_search_returns_error_when_both_arrival_and_departure_given(): void
     {
         $key = $this->createApiKey();

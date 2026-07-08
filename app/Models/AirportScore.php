@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AirportScore extends Model
@@ -96,6 +97,14 @@ class AirportScore extends Model
     /**
      * Same conditions as the coversEta scope, but applicable to any query
      * builder that has airport_scores in scope (e.g. a join on airports).
+     *
+     * Cost warning: when $eta is a per-candidate SQL expression
+     * (forecastEtaSql's ST_DISTANCE_SPHERE arithmetic), it is inlined 3-4x
+     * here and re-evaluated per probed row — and search already applies this
+     * once per filtered reason plus in the sortByScores join. MySQL cannot
+     * reference a select alias from WHERE/JOIN, so it can't be computed once
+     * per row; don't add further coversEta call sites inside per-row
+     * subqueries.
      */
     public static function applyCoversEta($query, Carbon|string $eta, bool $metarOnlyWeather = false): void
     {
@@ -207,6 +216,29 @@ class AirportScore extends Model
     }
 
     public static function getTopAirports($continent = null, $whitelist = null, $limit = 30, $exclude = null)
+    {
+        // Don't cache whitelists
+        if ($whitelist) {
+            return self::computeTopAirports($continent, $whitelist, $limit, $exclude);
+        }
+
+        $cacheKey = 'top-airports:' . ($continent ?? 'all') . ':' . ($exclude ?? 'none') . ':' . $limit;
+
+        // The payload is base64-wrapped because the loaded airports embed raw
+        // GEOMETRY binary (coordinates), which the database cache store cannot
+        // put in its text value column
+        if ($cached = Cache::get($cacheKey)) {
+            return unserialize(base64_decode($cached));
+        }
+
+        // Compute and cache the result
+        $result = self::computeTopAirports($continent, $whitelist, $limit, $exclude);
+        Cache::put($cacheKey, base64_encode(serialize($result)), 300);
+
+        return $result;
+    }
+
+    private static function computeTopAirports($continent, $whitelist, $limit, $exclude)
     {
 
         // Establish the return query — counting distinct reasons
