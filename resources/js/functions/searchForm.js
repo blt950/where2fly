@@ -30,6 +30,13 @@ function submitFormMetrics(){
         'destinationAirbases',
         'flightDirection'
     ]
+    var sliderRanges = {
+        hours: ['airtimeMin', 'airtimeMax'],
+        distance: ['distanceMin', 'distanceMax'],
+        temperature: ['temperatureMin', 'temperatureMax'],
+        elevation: ['elevationMin', 'elevationMax'],
+        rwyLength: ['rwyLengthMin', 'rwyLengthMax'],
+    };
     var props = {}
     var multiselect = {}
     Array.from(form.elements).forEach(function(element){
@@ -87,6 +94,7 @@ function submitFormMetrics(){
         });
     });
 
+    
     if (window.umami) {
         var multiselectDefaults = {
             destinations: 'Anywhere',
@@ -106,7 +114,15 @@ function submitFormMetrics(){
                 additions[key] = fallback;
             }
         });
-        
+
+        Object.entries(sliderRanges).forEach(function([key, [minName, maxName]]) {
+            var min = form.elements[minName];
+            var max = form.elements[maxName];
+            if (min && max) {
+                props[key] = min.value + '-' + max.value;
+            }
+        });
+
         umami.track('Search', { filter: { ...props, ...additions } });
     }
 }
