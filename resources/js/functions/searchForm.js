@@ -141,7 +141,7 @@ submitButtons.forEach(function(button) {
             submitFormMetrics();
         }
 
-        //document.getElementById('form').requestSubmit()
+        document.getElementById('form').requestSubmit()
     });
 });
 
