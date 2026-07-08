@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\AircraftHelper;
 use App\Helpers\CalculationHelper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -104,9 +105,8 @@ class Airport extends Model
     }
 
     /**
-     * The loaded scores applicable at the given ETA, plus whether the airport has
-     * a TAF period covering it (drives the metar-fallback matching and the
-     * forecastSource indicator).
+     * The loaded scores applicable at the given ETA, plus whether a TAF period
+     * covers it (drives the METAR fallback and the forecastSource indicator).
      *
      * @return array{0: Collection, 1: bool}
      */
@@ -147,10 +147,8 @@ class Airport extends Model
 
     /**
      * The stations online right now ({facility, logon_time} pairs), in
-     * ground-to-air order — we know when each logged on, never when they'll
-     * leave. Read from the live VATSIM_ATC score when it applies ("now" views),
-     * otherwise from the logon-estimate rows still predicting presence at the
-     * ETA, which carry the same fields.
+     * ground-to-air order. Read from the live VATSIM_ATC score when present,
+     * otherwise from the logon-estimate rows still predicting presence at the ETA.
      */
     public function atcOnlineStations()
     {
@@ -197,13 +195,10 @@ class Airport extends Model
     }
 
     /**
-     * The loaded scores deduplicated to one row per reason for rendering:
-     * the VATSIM signals first, then weather with current status before
-     * predictions (METAR-backed reasons before TAF forecasts). Several
-     * sources can assert the same reason — the earliest source in that order
-     * wins the dedup (current beats forecast), and within a source the row
-     * starting latest wins, so the most recent forecast period speaks for
-     * overlapping windows.
+     * The loaded scores deduplicated to one row per reason for rendering.
+     * Several sources can assert the same reason: current signals beat
+     * forecasts (source order below), and within a source the latest-starting
+     * row wins so the most recent forecast period speaks.
      */
     public function displayScores()
     {
@@ -434,21 +429,12 @@ class Airport extends Model
     }
 
     /**
-     * Bounding-box pre-filter for withinDistance so the SPATIAL index prunes
-     * candidates before the exact — but non-sargable — ST_Distance_Sphere
-     * checks run. Prune-only: the box must contain the whole circle, the
-     * precise distance checks trim the corners.
-     *
-     * Spherical-cap bounds: Δlat = D, Δlon = asin(sin(D)/cos(lat)) — the
-     * circle's extreme longitude sits poleward of the due-east point, so
-     * destination-point math would undersize the box at high latitudes. Both
-     * latitude bounds are additionally padded for the geodesic sag of the
-     * box's east-west edges (MySQL treats SRID-4326 polygon edges as
-     * geodesics, which bulge poleward relative to a parallel).
-     *
-     * Skipped (falling back to the exact checks alone) whenever the box
-     * cannot be represented as a simple lat/lon rectangle: near-global radii,
-     * a circle wrapping a pole, or bounds crossing ±85° or the antimeridian.
+     * Bounding-box pre-filter for withinDistance so the SPATIAL index can
+     * prune candidates before the exact (but slow) distance checks run.
+     * The box always contains the whole search circle — padded because
+     * "straight" east-west lines on a sphere bulge toward the poles — and is
+     * skipped whenever it can't be a simple lat/lon rectangle (huge radii,
+     * circles wrapping a pole, or crossing ±85°/the date line).
      */
     private function applyDistanceBoundingBox(Builder $query, Airport $anchorAirport, float $maxDistanceNm): void
     {
@@ -472,7 +458,7 @@ class Airport extends Model
         $deltaLat = rad2deg($radiusRad);
         $deltaLon = rad2deg(asin($sinRatio));
 
-        // Worst-case poleward sag of the box's east-west edges (sin·cos ≤ 0.5)
+        // Worst-case poleward bulge of the box's east-west edges
         $lonSpanRad = deg2rad($deltaLon) * 2;
         $edgeSag = rad2deg($lonSpanRad ** 2 / 8 * 0.5);
 
@@ -513,11 +499,8 @@ class Airport extends Model
         $airportLat = $departureAirport->coordinates->latitude;
         $airportLon = $departureAirport->coordinates->longitude;
 
-        // We calculate bearing in two ways, depending on the distance.
-        // First we calculate it within a polygon up to a certain limit
-        // Second we calculate just X/Y coordinates if it's outside the limit
-        // This is because the polygon gets very skewed after a certain distance
-
+        // Two strategies: a polygon wedge for near distances, plain lat/lon
+        // comparisons beyond 800nm where the polygon gets too skewed
         $airportCoordinate = new Coordinate($airportLat, $airportLon);
         $directions = [
             'N' => 0,
@@ -535,10 +518,9 @@ class Airport extends Model
         $highEnd = CalculationHelper::calculateSphericalDestination($airportCoordinate, $directions[$direction] + 45, $polygonDistance);
         $lowEnd = CalculationHelper::calculateSphericalDestination($airportCoordinate, $directions[$direction] - 45, $polygonDistance);
 
-        // If the distance is less than 800nm, we can use a polygon
         $query->where(function ($q) use ($airportLat, $airportLon, $highEnd, $lowEnd, $minDistance, $maxDistance, $direction) {
 
-            // >>> Step 1: Create a polygon from the origin, then the bearing + 45 degrees in each direction
+            // Polygon wedge from the origin, bearing ±45 degrees
             if ($minDistance <= 800) {
                 $polygon = new Polygon([
                     new LineString([
@@ -552,7 +534,7 @@ class Airport extends Model
                 $q->whereWithin('coordinates', $polygon);
             }
 
-            // >>> Step 2: Calculate the lat/long's for the max distance
+            // Beyond the wedge: plain lat/lon comparisons per direction
             if ($maxDistance > 800) {
 
                 switch ($direction) {
@@ -591,7 +573,7 @@ class Airport extends Model
     {
 
         // Set minimum according to aircraft code unless it's already higher
-        $codeMinimum = CalculationHelper::minimumRequiredRunwayLength($codeletter);
+        $codeMinimum = AircraftHelper::minimumRunwayFt($codeletter);
         if ($rwyLengthMin < $codeMinimum) {
             $rwyLengthMin = $codeMinimum;
         }
@@ -773,12 +755,10 @@ class Airport extends Model
 
     /**
      * Scope a query to sort airports by how many of the given scores they have,
-     * counting only rows valid at the ETA when one is given. The reason and
-     * window conditions live in the join clause, not the where clause, so an
-     * airport with no applicable scores still appears — with a count of zero —
-     * instead of dropping out of the results. Distinct reasons are counted:
-     * several sources can predict the same VATSIM_ATC reason, which shouldn't
-     * outrank an airport with a single real signal.
+     * counting only rows valid at the ETA when one is given. The conditions
+     * live in the join (not the where) so airports without scores still appear
+     * with a count of zero. Reasons are counted distinct — several sources
+     * predicting the same reason shouldn't outrank a single real signal.
      */
     #[Scope]
     protected function sortByScores(Builder $query, $filterByScores, Carbon|string|null $eta = null, bool $metarOnlyWeather = false)

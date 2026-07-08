@@ -4,9 +4,24 @@
     ***
 */
 
+// Expand the rows hidden behind the "Show more" fold
+var expanded = false
+function expandAllRows() {
+    if(!expanded && document.querySelector('#showMoreRow')) {
+        document.querySelectorAll('.showmore-hidden').forEach(function(element) {
+            element.classList.remove('showmore-hidden');
+        });
+        document.querySelector('#showMoreRow').remove();
+        expanded = true;
+    }
+}
+
+// Exposed so the map can unfold the results when a below-the-fold airport is clicked
+window.expandSearchResults = expandAllRows;
+
 var showMoreBtn = document.querySelector('#showMoreBtn')
 if(showMoreBtn){
-    document.querySelector('#showMoreBtn').addEventListener('click', function() {
+    showMoreBtn.addEventListener('click', function() {
         expandAllRows();
     });
 
@@ -16,18 +31,6 @@ if(showMoreBtn){
             expandAllRows();
         });
     });
-
-    // Function to expand all rows
-    var expanded = false
-    function expandAllRows() {
-        if(!expanded) {
-            document.querySelectorAll('.showmore-hidden').forEach(function(element) {
-                element.classList.remove('showmore-hidden');
-            });
-            document.querySelector('#showMoreRow').remove();
-            expanded = true;
-        }
-    }
 }
 
 // Sync detail rows with parent rows after sorting

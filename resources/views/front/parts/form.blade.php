@@ -215,7 +215,7 @@
             <div class="col-sm-12 text-start">
                 <label>Weather parameters</label>
                 
-                @foreach(\App\Http\Controllers\ScoreController::$score_types as $k => $s)
+                @foreach(\App\Helpers\ScoreHelper::TYPES as $k => $s)
                 @if(str_starts_with($k, 'METAR'))
                 <div class="mt-1">
                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
@@ -267,7 +267,7 @@
                 
                 <label class="pt-4">Network parameters</label>
                 
-                @foreach(\App\Http\Controllers\ScoreController::$score_types as $k => $s)
+                @foreach(\App\Helpers\ScoreHelper::TYPES as $k => $s)
                 @if(str_starts_with($k, 'VATSIM'))
                 <div class="mt-1">
                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">

@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Http\Controllers\ScoreController;
+use App\Helpers\ScoreHelper;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
@@ -21,7 +21,7 @@ class ValidScores implements ValidationRule
             return;
         }
 
-        $whitelist = array_keys(ScoreController::$score_types);
+        $whitelist = array_keys(ScoreHelper::TYPES);
 
         foreach ($value as $score => $scoreValue) {
             if (! in_array($score, $whitelist)) {

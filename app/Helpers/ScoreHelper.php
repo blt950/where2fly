@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Helpers;
 
-class ScoreController extends Controller
+class ScoreHelper
 {
-    public static $score_types = [
+    /** All score reasons with their display icon and description */
+    public const TYPES = [
         'METAR_WINDY' => ['icon' => 'fa-windsock', 'desc' => 'Windy'],
         'METAR_GUSTS' => ['icon' => 'fa-wind', 'desc' => 'Gusting Wind'],
         'METAR_CROSSWIND' => ['icon' => 'fa-arrows-cross', 'desc' => 'Crosswind'],
@@ -23,27 +24,18 @@ class ScoreController extends Controller
         'VATSIM_POPULAR' => ['icon' => 'fa-fire', 'desc' => 'VATSIM Popular Airport'],
     ];
 
-    // Get the score types that are weather related
-    public static function getWeatherTypes()
+    public static function weatherTypes(): array
     {
-        foreach (self::$score_types as $key => $value) {
-            if (str_starts_with($key, 'METAR_')) {
-                $returnArray[] = $key;
-            }
-        }
-
-        return $returnArray;
+        return self::typesWithPrefix('METAR_');
     }
 
-    // Get the score types that are VATSIM related
-    public static function getVatsimTypes()
+    public static function vatsimTypes(): array
     {
-        foreach (self::$score_types as $key => $value) {
-            if (str_starts_with($key, 'VATSIM_')) {
-                $returnArray[] = $key;
-            }
-        }
+        return self::typesWithPrefix('VATSIM_');
+    }
 
-        return $returnArray;
+    private static function typesWithPrefix(string $prefix): array
+    {
+        return array_values(array_filter(array_keys(self::TYPES), fn ($key) => str_starts_with($key, $prefix)));
     }
 }

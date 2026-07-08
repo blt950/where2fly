@@ -127,6 +127,11 @@
                         window.setFocusAirport(icao);
                     }
 
+                    // Radar blip on the map at the selected airport
+                    if (window.pingAirport) {
+                        window.pingAirport(icao);
+                    }
+
                     // Remove 'active' class from all rows and add to the clicked row
                     rows.forEach(r => r.classList.remove('active'));
                     this.classList.add('active');
@@ -143,6 +148,12 @@
 
             const focusRow = document.querySelector(`tr[data-airport-icao="${focusAirport}"]`);
             focusRow.classList.add('active');
+
+            // Scroll the table to the selected airport, unless it's already in view
+            const rect = focusRow.getBoundingClientRect();
+            if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                focusRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         });
         
     </script>

@@ -21,10 +21,13 @@
                 <li>Added refreshed design with darker colors for input fields, results and other color tweaks. Scenery list is also simplified.</li>
                 <li>Added Navigraph charts link to airport cards</li>
                 <li>Added a close button to the airport card</li>
+                <li>Added a ping animation when clicking on an airport on top list, making it easier to find the airport</li>
+                <li>Added automatic highlight and scroll in sidebar for airports you click on the map</li>
                 <li>Added aircraft filter on the top list</li>
                 <li>Fixed performance and clustering of maps with many airports.</li>
                 <li>Fixed options randomly disappearing when editing search</li>
                 <li>Fixed the menu breaking on tablet screens</li>
+                <li>Fixed airport ICAO not always displaying on the map when selecting an suggestion</li>
                 <li>A lot of changes under the hood for stability and performance. Searches are now up to 4x faster!</li>
                 <li>API: Added more data rich scores return with predictions</li>
             </ul>

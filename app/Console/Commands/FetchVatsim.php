@@ -212,7 +212,7 @@ class FetchVatsim extends Command
             if ($vatsimPilots) {
                 $movements = 0;
                 foreach ($vatsimPilots as $vp) {
-                    if (distance($airport->latitude_deg, $airport->longitude_deg, $vp->latitude, $vp->longitude, 'N') <= 5) {
+                    if (distance($airport->latitude_deg, $airport->longitude_deg, $vp->latitude, $vp->longitude) <= 5) {
                         $movements++;
                     }
                 }

@@ -1,12 +1,17 @@
-# Graph Report - /app  (2026-07-08)
+# Graph Report - .  (2026-07-08)
 
 ## Corpus Check
-- Large corpus: 2257 files · ~1,024,871 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder.
+- cluster-only mode — file stats not available
 
 ## Summary
 - 1219 nodes · 1838 edges · 227 communities (189 shown, 38 thin omitted)
 - Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 247 edges (avg confidence: 0.8)
-- Token cost: 43,914 input · 0 output
+- Token cost: 0 input · 0 output
+
+## Graph Freshness
+- Built from commit: `7904c0a0`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - [[_COMMUNITY_Community 0|Community 0]]

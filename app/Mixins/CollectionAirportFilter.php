@@ -14,7 +14,7 @@ class CollectionAirportFilter
             return $this
                 ->transform(function ($arrivalAirport) use ($departureAirport, $codeletter, $candidatesAreDepartures) {
                     // Insert the calculated distance and airtime into the collection
-                    $distance = distance($departureAirport->latitude_deg, $departureAirport->longitude_deg, $arrivalAirport->latitude_deg, $arrivalAirport->longitude_deg, 'N');
+                    $distance = distance($departureAirport->latitude_deg, $departureAirport->longitude_deg, $arrivalAirport->latitude_deg, $arrivalAirport->longitude_deg);
                     $arrivalAirport->distance = round($distance);
 
                     $airtime = CalculationHelper::airtimeHours($distance, $codeletter);

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useContext } from 'react';
 import { CardContext } from './context/CardContext';
 import { MapContext } from './context/MapContext';
-import moment from 'moment';
+import fromNow from './utils/RelativeTime';
 
 function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
 
@@ -107,7 +107,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                                         {flight.aircrafts.map(aircraft => aircraft.icao).join(', ')}
                                     </td>
                                     <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.last_seen_at}>
-                                        {moment(flight.last_seen_at).fromNow()}
+                                        {fromNow(flight.last_seen_at)}
                                     </td>
                                 </tr>
                             ))}

@@ -48,18 +48,7 @@ class UserListController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'name' => 'required|max:32',
-            'simulator' => 'required|exists:simulators,id',
-            'airports' => 'required|string',
-            'public' => 'boolean',
-        ]);
-
-        $request->public = (bool) $request->public;
-        if ($request->public) {
-            $this->authorize('public', UserList::class);
-        }
+        $this->validateList($request);
 
         [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports);
 
@@ -73,15 +62,9 @@ class UserListController extends Controller
             ]);
 
             $list->airports()->sync($airportIds);
-
-            return $list;
         });
 
-        if (count($notFoundAirports) > 0) {
-            return redirect()->route('list.index')->with('warning', 'List created successfully, however following airports could not be found: ' . $notFoundAirports->implode(', '));
-        }
-
-        return redirect()->route('list.index')->with('success', 'List created successfully');
+        return $this->listSavedRedirect('created', $notFoundAirports);
     }
 
     /**
@@ -106,6 +89,28 @@ class UserListController extends Controller
     public function update(Request $request, UserList $list)
     {
         $this->authorize('update', $list);
+        $this->validateList($request);
+
+        [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports);
+
+        DB::transaction(function () use ($request, $list, $airportIds) {
+            $list->color = $request->color;
+            $list->name = $request->name;
+            $list->simulator_id = $request->simulator;
+            $list->public = $request->boolean('public');
+            $list->save();
+
+            $list->airports()->sync($airportIds);
+        });
+
+        return $this->listSavedRedirect('updated', $notFoundAirports);
+    }
+
+    /**
+     * Shared store/update validation; going public needs its own permission
+     */
+    private function validateList(Request $request): void
+    {
         $request->validate([
             'color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'name' => 'required|max:32',
@@ -114,28 +119,18 @@ class UserListController extends Controller
             'public' => 'boolean',
         ]);
 
-        $request->public = (bool) $request->public;
-        if ($request->public) {
+        if ($request->boolean('public')) {
             $this->authorize('public', UserList::class);
         }
+    }
 
-        [$airportIds, $notFoundAirports] = $this->resolveAirports($request->airports);
-
-        DB::transaction(function () use ($request, $list, $airportIds) {
-            $list->color = $request->color;
-            $list->name = $request->name;
-            $list->simulator_id = $request->simulator;
-            $list->public = $request->public;
-            $list->save();
-
-            $list->airports()->sync($airportIds);
-        });
-
-        if (count($notFoundAirports) > 0) {
-            return redirect()->route('list.index')->with('warning', 'List updated successfully, however following airports could not be found: ' . $notFoundAirports->implode(', '));
+    private function listSavedRedirect(string $action, Collection $notFoundAirports)
+    {
+        if ($notFoundAirports->isNotEmpty()) {
+            return redirect()->route('list.index')->with('warning', "List {$action} successfully, however following airports could not be found: " . $notFoundAirports->implode(', '));
         }
 
-        return redirect()->route('list.index')->with('success', 'List updated successfully');
+        return redirect()->route('list.index')->with('success', "List {$action} successfully");
     }
 
     /**
