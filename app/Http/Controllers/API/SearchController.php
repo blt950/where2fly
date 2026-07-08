@@ -4,8 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Helpers\AircraftHelper;
 use App\Helpers\CalculationHelper;
+use App\Helpers\ScoreHelper;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\ScoreController;
 use App\Http\Resources\AirportResource;
 use App\Http\Resources\SuggestedAirportResource;
 use App\Models\Airport;
@@ -139,7 +139,7 @@ class SearchController extends Controller
             ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
             ->select('airports.id')
-            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes(), $eta, $candidatesAreDepartures)
+            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreHelper::weatherTypes(), $eta, $candidatesAreDepartures)
             ->has('metar')
             ->get();
 

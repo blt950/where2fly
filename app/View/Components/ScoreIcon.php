@@ -2,7 +2,7 @@
 
 namespace App\View\Components;
 
-use App\Http\Controllers\ScoreController;
+use App\Helpers\ScoreHelper;
 use App\Models\Airport;
 use App\Models\AirportScore;
 use Illuminate\Support\Collection;
@@ -26,7 +26,7 @@ class ScoreIcon extends Component
         public bool $highlighted = false,
         public string $bookingsLabel = 'Bookings',
     ) {
-        $this->scoreType = ScoreController::$score_types[$score->reason];
+        $this->scoreType = ScoreHelper::TYPES[$score->reason];
         $this->probabilityBadge = isset($score->data['probability']) || ! empty($score->data['tempo']);
         $this->facilityDots = $score->reason === 'VATSIM_ATC' && $airport ? $airport->atcFacilities() : collect();
         $this->tooltipLines = $this->buildTooltipLines();

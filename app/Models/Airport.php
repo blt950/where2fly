@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\AircraftHelper;
 use App\Helpers\CalculationHelper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -591,7 +592,7 @@ class Airport extends Model
     {
 
         // Set minimum according to aircraft code unless it's already higher
-        $codeMinimum = CalculationHelper::minimumRequiredRunwayLength($codeletter);
+        $codeMinimum = AircraftHelper::minimumRunwayFt($codeletter);
         if ($rwyLengthMin < $codeMinimum) {
             $rwyLengthMin = $codeMinimum;
         }

@@ -10,9 +10,8 @@ use Location\Coordinate;
 class CalculationHelper
 {
     /**
-     * The estimated arrival time for a flight of the given airtime, used only to
-     * time-scope forecast lookups — never returned to the client and never a
-     * replacement for the airtime value itself. No buffer: ETA = now + airtime.
+     * The ETA used to time-scope forecast lookups — never shown to the client.
+     * No buffer: ETA = now + airtime.
      */
     public static function forecastEta(float $airtimeHours): Carbon
     {
@@ -21,19 +20,16 @@ class CalculationHelper
 
     /**
      * The canonical airtime formula: distance at cruise speed plus a fixed
-     * climb/descend allowance. forecastEtaSql() mirrors this in SQL — keep
-     * the two in sync when changing the model.
+     * climb/descend allowance. Keep in sync with its SQL twin forecastEtaSql().
      */
     public static function airtimeHours(float $distanceNm, string $codeletter): float
     {
-        return $distanceNm / self::aircraftNmPerHour($codeletter) + self::timeClimbDescend($codeletter);
+        return $distanceNm / AircraftHelper::cruiseKts($codeletter) + AircraftHelper::climbDescendHours($codeletter);
     }
 
     /**
-     * The same ETA as forecastEta(), but as a SQL expression evaluated per
-     * candidate airport row — the airtime part of the ETA depends on each
-     * candidate's distance from the anchor airport, which only the database
-     * knows while filtering. SQL twin of airtimeHours().
+     * forecastEta() as a SQL expression, since the distance to each candidate
+     * airport is only known inside the query. SQL twin of airtimeHours().
      */
     public static function forecastEtaSql(Airport $anchorAirport, string $codeletter): string
     {
@@ -43,96 +39,23 @@ class CalculationHelper
         return sprintf(
             'DATE_ADD(NOW(), INTERVAL ((ST_DISTANCE_SPHERE(airports.coordinates, %s) / 1852 / %d + %F) * 3600) SECOND)',
             $anchorPoint,
-            self::aircraftNmPerHour($codeletter),
-            self::timeClimbDescend($codeletter)
+            AircraftHelper::cruiseKts($codeletter),
+            AircraftHelper::climbDescendHours($codeletter)
         );
     }
 
     /**
-     * Calculate the distance between two points
-     *
-     * $param string $code aircraft type code
-     *
-     * @return int Required runway length
-     */
-    public static function minimumRequiredRunwayLength(string $code)
-    {
-        return match ($code) {
-            'GA' => 100,
-            'GAT' => 2000,
-            'GTP' => 2500,
-            'JS' => 4000,
-            'JM' => 5000,
-            'JML' => 6000,
-            'JL' => 7000,
-            'JXL' => 8000,
-            default => 0,
-        };
-    }
-
-    /**
-     *  Calculate aircraft travel nautrical miles per hour
-     *
-     * @param  string  $actCode  Aircraft code
-     * @return int Cruice speed
-     */
-    public static function aircraftNmPerHour(string $actCode)
-    {
-
-        return match ($actCode) {
-            'GA' => 115,
-            'GAT' => 190,
-            'GTP' => 280,
-            'JS' => 340,
-            'JM' => 460,
-            'JML' => 480,
-            'JL' => 510,
-            'JXL' => 520,
-            default => 0,
-        };
-    }
-
-    /**
-     *  Calculate minute addition for climbing the aircraft
-     *
-     * @param  string  $actCode  Aircraft code
-     * @return int Additional minutes
-     */
-    public static function timeClimbDescend(string $actCode)
-    {
-
-        return match ($actCode) {
-            'GA' => 0.13,
-            'GAT' => 0.20,
-            'GTP' => 0.25,
-            'JS' => 0.33,
-            'JM' => 0.42,
-            'JML' => 0.47,
-            'JL' => 0.50,
-            'JXL' => 0.58,
-            default => 0,
-        };
-
-    }
-
-    /**
-     * Calculate the nautical miles the selected aircraft type will fly in an hour
-     *
-     * @param  string  $actCode  Aircraft code
-     * @param  int  $minHours  Minimum hours
-     * @param  int  $maxHours  Maximum hours
-     * @return int Nautical miles
+     * The distance range (NM) the aircraft covers within the given airtime range
      */
     public static function aircraftNmPerHourRange(string $actCode, int $minHours, int $maxHours)
     {
-        $speed = self::aircraftNmPerHour($actCode);
+        $speed = AircraftHelper::cruiseKts($actCode);
 
-        // Convert to nm and multiply by hours
         $minDistance = $speed * $minHours;
         $maxDistance = $speed * $maxHours;
 
         if ($minDistance !== 0) {
-            $minDistance += self::timeClimbDescend($actCode);
+            $minDistance += AircraftHelper::climbDescendHours($actCode);
         }
 
         return [$minDistance, $maxDistance];
