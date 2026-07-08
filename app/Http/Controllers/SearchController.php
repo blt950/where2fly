@@ -337,13 +337,6 @@ class SearchController extends Controller
             return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
         }
 
-        // Strip the stars from IATA codes for the logos to display correctly
-        $routes = $routes->map(function ($route) {
-            $route->airline->iata_code = str_replace('*', '', $route->airline->iata_code);
-
-            return $route;
-        });
-
         // Sort the routes based on the selected criteria
         switch ($data['sort']) {
             case 'flight':

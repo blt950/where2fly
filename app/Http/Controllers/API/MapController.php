@@ -102,10 +102,6 @@ class MapController extends Controller
                 }
             }
 
-            // Replace * with '' in all airline iata codes
-            foreach ($airlines as $airline) {
-                $airline->iata_code = str_replace('*', '', $airline->iata_code);
-            }
         }
 
         $airport = Airport::select('id', 'icao', 'name', 'iso_country')->with(['runways' => function ($query) {
@@ -165,8 +161,6 @@ class MapController extends Controller
                 }
             }
         }
-
-        $airline->iata_code = str_replace('*', '', $airline->iata_code);
 
         if (isset($flights)) {
             return response()->json(['message' => 'Success', 'data' => [

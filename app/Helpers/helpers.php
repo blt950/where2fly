@@ -1,6 +1,8 @@
 <?php
 
 use App\Helpers\CountryHelper;
+use Location\Coordinate;
+use Location\Distance\Haversine;
 
 if (! function_exists('correctHeading')) {
     function correctHeading(float $heading)
@@ -23,23 +25,12 @@ if (! function_exists('getCountryName')) {
 }
 
 if (! function_exists('distance')) {
-    function distance($lat1, $lon1, $lat2, $lon2, $unit)
+    /**
+     * Great-circle distance between two points in nautical miles
+     */
+    function distance(float $lat1, float $lon1, float $lat2, float $lon2): float
     {
-
-        $theta = $lon1 - $lon2;
-        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
-        $dist = acos($dist);
-        $dist = rad2deg($dist);
-        $miles = $dist * 60 * 1.1515;
-        $unit = strtoupper($unit);
-
-        if ($unit == 'K') {
-            return $miles * 1.609344;
-        } elseif ($unit == 'N') {
-            return $miles * 0.8684;
-        } else {
-            return $miles;
-        }
+        return (new Haversine)->getDistance(new Coordinate($lat1, $lon1), new Coordinate($lat2, $lon2)) / 1852;
     }
 }
 
