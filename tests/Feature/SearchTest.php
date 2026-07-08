@@ -98,6 +98,15 @@ class SearchTest extends TestCase
         $response->assertSessionHasErrors('codeletter');
     }
 
+    public function test_search_fails_with_non_array_scores(): void
+    {
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'scores' => 'foo',
+        ])));
+
+        $response->assertSessionHasErrors('scores');
+    }
+
     public function test_search_fails_with_invalid_metcondition(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [

@@ -135,6 +135,19 @@ class ApiTest extends TestCase
         $response->assertStatus(422);
     }
 
+    public function test_api_search_rejects_non_array_scores(): void
+    {
+        $key = $this->createApiKey();
+
+        $response = $this->withToken($key->key)->postJson('/api/search', [
+            'codeletter' => 'JS',
+            'departure' => 'KLAX',
+            'scores' => 'foo',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
     public function test_api_search_rejects_out_of_range_score_value(): void
     {
         $key = $this->createApiKey();

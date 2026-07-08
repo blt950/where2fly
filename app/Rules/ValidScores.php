@@ -16,6 +16,11 @@ class ValidScores implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        // The 'array' rule reports non-array input; nothing to validate here
+        if (! is_array($value)) {
+            return;
+        }
+
         $whitelist = array_keys(ScoreController::$score_types);
 
         foreach ($value as $score => $scoreValue) {
