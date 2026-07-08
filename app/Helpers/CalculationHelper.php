@@ -54,10 +54,6 @@ class CalculationHelper
         $minDistance = $speed * $minHours;
         $maxDistance = $speed * $maxHours;
 
-        if ($minDistance !== 0) {
-            $minDistance += AircraftHelper::climbDescendHours($actCode);
-        }
-
         return [$minDistance, $maxDistance];
     }
 
