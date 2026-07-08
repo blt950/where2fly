@@ -321,12 +321,28 @@
         // Event listener if user clicks on map dot, to mark active in table
         window.addEventListener('mapFocusAirport', function(event) {
             const focusAirport = event.detail.focusAirport;
-            
+
             const rows = document.querySelectorAll('tr[data-airport-icao]');
             rows.forEach(r => r.classList.remove('active'));
 
+            // The primary airport has no table row
             const focusRow = document.querySelector(`tr[data-airport-icao="${focusAirport}"]`);
+            if (!focusRow) {
+                return;
+            }
+
+            // Unfold the "Show more" section if the airport is hidden behind it
+            if (focusRow.classList.contains('showmore-hidden') && window.expandSearchResults) {
+                window.expandSearchResults();
+            }
+
             focusRow.classList.add('active');
+
+            // Scroll the table to the selected airport, unless it's already in view
+            const rect = focusRow.getBoundingClientRect();
+            if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                focusRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         });
         
     </script>
