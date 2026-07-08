@@ -16,9 +16,12 @@
             <span class="badge ps-0 pb-2">2026-XX-XX</span>
             <ul>
                 <li>Added predictions by using TAF, controller booking and event data for your search results</li>
+                <li>Added distance filter to search by nautical miles</li>
                 <li>Added dots below online ATC conditions to show amount of facilities online at a glance</li>
                 <li>Added refreshed design with darker colors for input fields, results and other color tweaks. Scenery list is also simplified.</li>
                 <li>Added Navigraph charts link to airport cards</li>
+                <li>Added a close button to the airport card</li>
+                <li>Added aircraft filter on the top list</li>
                 <li>Fixed performance and clustering of maps with many airports.</li>
                 <li>Fixed options randomly disappearing when editing search</li>
                 <li>Fixed the menu breaking on tablet screens</li>

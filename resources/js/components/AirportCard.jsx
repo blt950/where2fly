@@ -17,7 +17,14 @@ function AirportCard({ airportId }) {
     const [showSceneryIdCard, setShowSceneryIdCard] = useState(null);
     const [departureAirportId, setDepartureAirportId] = useState(null);
     const [arrivalAirportId, setArrivalAirportId] = useState(null);
-    const { airports, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts } = useContext(MapContext);
+    const { airports, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts, setFocusAirport, setShowAirportIdCard } = useContext(MapContext);
+
+    // Closing unmounts the card and its flights/scenery children; focusAirport
+    // is cleared too so clicking the same marker again reopens the card
+    const closeCard = () => {
+        setShowAirportIdCard(null);
+        setFocusAirport(null);
+    };
 
     useEffect(() => {
         window.setShowSceneryIdCard = (data) => { setShowSceneryIdCard(data) }
@@ -90,16 +97,19 @@ function AirportCard({ airportId }) {
             <div className="popup-card">
                 {data ? (
                     <>
-                        <div>
-                            <img 
-                                className="flag border-0" 
-                                src={`/img/flags/${ data.airport.iso_country.toLowerCase() }.svg`} 
-                                height="16" 
-                                data-bs-toggle="tooltip" 
-                                data-bs-title={ data.airport.country } 
-                                alt={`Flag of ${data.airport.country}`}
-                            />
-                            &nbsp;{data.airport.icao}
+                        <div className="d-flex justify-content-between">
+                            <div>
+                                <img
+                                    className="flag border-0"
+                                    src={`/img/flags/${ data.airport.iso_country.toLowerCase() }.svg`}
+                                    height="16"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-title={ data.airport.country }
+                                    alt={`Flag of ${data.airport.country}`}
+                                />
+                                &nbsp;{data.airport.icao}
+                            </div>
+                            <button className="btn-close" aria-label="Close airport card" onClick={closeCard}></button>
                         </div>
                         <h2>{data.airport.name}</h2>
 

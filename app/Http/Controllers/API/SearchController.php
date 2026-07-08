@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Helpers\AircraftHelper;
 use App\Helpers\CalculationHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ScoreController;
@@ -25,9 +26,11 @@ class SearchController extends Controller
             'departure' => ['nullable', new AirportExists],
             'arrival' => ['nullable', new AirportExists],
             'destinations' => ['sometimes', 'array', new ValidDestinations],
-            'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
+            'codeletter' => ['required', 'string', 'in:' . implode(',', AircraftHelper::codes())],
             'airtimeMin' => ['sometimes', 'numeric', 'between:0,24'],
             'airtimeMax' => ['sometimes', 'numeric', 'between:0,24'],
+            'distanceMin' => ['sometimes', 'numeric', 'min:0'],
+            'distanceMax' => ['sometimes', 'numeric', 'min:0'],
             'scores' => ['sometimes', 'array', new ValidScores],
             'metcondition' => ['sometimes', 'in:IFR,VFR,ANY'],
             'destinationWithRoutesOnly' => ['sometimes', 'numeric', 'between:-1,1'],
@@ -66,6 +69,13 @@ class SearchController extends Controller
         $resultLimit = $data['limit'] ?? 10;
 
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
+
+        // Intersect the airtime-derived range with the explicit distance
+        // filter (NM); either bound is unbounded when absent
+        $minDistance = max($minDistance, $data['distanceMin'] ?? 0);
+        if (isset($data['distanceMax'])) {
+            $maxDistance = min($maxDistance, $data['distanceMax']);
+        }
 
         if (($arrival && $departure) || (! $arrival && ! $departure)) {
             // Dont allow this, return error json

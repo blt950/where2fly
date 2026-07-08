@@ -174,6 +174,37 @@ class ApiTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_api_search_restricts_results_to_distance_bounds(): void
+    {
+        $key = $this->createApiKey();
+
+        $response = $this->withToken($key->key)->postJson('/api/search', [
+            'codeletter' => 'JM',
+            'departure' => 'ENGM',
+            'distanceMin' => 300,
+            'distanceMax' => 500,
+        ]);
+
+        $response->assertStatus(200);
+
+        $arrivals = collect($response->json('data.arrivals'));
+        $this->assertTrue($arrivals->isNotEmpty());
+        $this->assertTrue($arrivals->every(fn ($a) => $a['distanceNm'] >= 300 && $a['distanceNm'] <= 500));
+    }
+
+    public function test_api_search_rejects_negative_distance(): void
+    {
+        $key = $this->createApiKey();
+
+        $response = $this->withToken($key->key)->postJson('/api/search', [
+            'codeletter' => 'JM',
+            'departure' => 'ENGM',
+            'distanceMin' => -100,
+        ]);
+
+        $response->assertStatus(422);
+    }
+
     public function test_api_search_returns_error_when_both_arrival_and_departure_given(): void
     {
         $key = $this->createApiKey();
