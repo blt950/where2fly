@@ -167,7 +167,10 @@ function Map() {
                 window.dispatchEvent(new CustomEvent('mapFocusAirport', { detail: { focusAirport } }));
 
             }
-            
+
+        } else if (primaryAirport) {
+            setDrawRoute(null);
+            setCoordinates(null);
         }
     }, [focusAirport]);
 
