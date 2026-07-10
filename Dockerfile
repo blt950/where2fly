@@ -1,5 +1,5 @@
 # Intermediate build container for front-end resources
-FROM docker.io/library/node:25.8-alpine AS frontend
+FROM docker.io/library/node:26.5-alpine AS frontend
 # Easy to prune intermediary containers
 LABEL stage=build
 
@@ -11,7 +11,7 @@ RUN npm ci --omit dev && \
 
 ####################################################################################################
 # Primary container
-FROM docker.io/library/php:8.3.30-apache-trixie
+FROM docker.io/library/php:8.5.8-apache-trixie
 
 # Default container port for the apache configuration
 EXPOSE 80 443
@@ -34,7 +34,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Oracle MySQL Client
-ARG MYSQL_CLIENT_VERSION=8.4.2
+ARG MYSQL_CLIENT_VERSION=8.4.9
 RUN set -eux; \
     curl -fsSL "https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-${MYSQL_CLIENT_VERSION}-linux-glibc2.28-x86_64.tar.xz" -o /tmp/mysql-client.tar.xz; \
     tar -xf /tmp/mysql-client.tar.xz -C /usr/local; \
@@ -54,7 +54,7 @@ COPY ./container/configs/apache.conf /etc/apache2/apache2.conf
 COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install PHP extension(s)
-COPY --from=mlocati/php-extension-installer:2.10.6 /usr/bin/install-php-extensions /usr/local/bin/
+COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_mysql zip opcache intl
 
 # Install composer
