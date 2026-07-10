@@ -81,5 +81,6 @@ RUN mkdir -p \
 
 # Wrap around the default PHP entrypoint with a custom entrypoint
 COPY ./container/entrypoint.sh /usr/local/bin/service-entrypoint
+RUN chmod +x /usr/local/bin/service-entrypoint
 ENTRYPOINT [ "service-entrypoint" ]
 CMD ["apache2-foreground"]
