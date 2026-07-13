@@ -151,7 +151,57 @@
 
             <div class="col-xs-12 text-start">
 
-                <label for="destinationExclusions">
+                <label for="aircraft">
+                    Aircraft
+                </label>
+                <u-combobox id="aircraft" data-multiple>
+                    <select name="aircrafts[]" multiple></select>
+                    @if(old('aircrafts') !== null)
+                        @foreach(old('aircrafts') as $key)
+                            @foreach($aircrafts as $aircraft)
+                                @if($key == $aircraft)
+                                    <data value="{{ $key }}">{{ $key }}</data>
+                                @endif
+                            @endforeach
+                        @endforeach
+                    @endisset
+                    <input list="aircraft-list" placeholder="All aircraft">
+                    <u-datalist id="aircraft-list" tabindex="-1" hidden>
+                        @foreach($aircrafts as $aircraft)
+                            <u-option value="{{ $aircraft }}">{{ $aircraft }}</u-option>
+                        @endforeach
+                    </u-datalist>
+                </u-combobox>
+                @error('aircrafts')
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
+
+                <label for="airlines" class="pt-4">
+                    Airlines
+                </label>
+                <u-combobox id="airlines" data-multiple>
+                    <select name="airlines[]" multiple></select>
+                    @if(old('airlines') !== null)
+                        @foreach(old('airlines') as $key)
+                            @foreach($airlines as $airline)
+                                @if($key == $airline->icao_code)
+                                    <data value="{{ $key }}">{{ $airline->name }} ({{ $key }})</data>
+                                @endif
+                            @endforeach
+                        @endforeach
+                    @endisset
+                    <input list="airlines-list" placeholder="All airlines">
+                    <u-datalist id="airlines-list" tabindex="-1" hidden>
+                        @foreach($airlines as $airline)
+                            <u-option value="{{ $airline->icao_code }}">{{ $airline->name }} ({{ $airline->icao_code }})</u-option>
+                        @endforeach
+                    </u-datalist>
+                </u-combobox>
+                @error('airlines')
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
+                @enderror
+
+                <label for="destinationExclusions" class="pt-4">
                     {{ ucfirst($area) }} Exclusions
                 </label>
                 <u-combobox data-multiple id="destinationExclusions">
@@ -198,22 +248,29 @@
                 <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
             </div>
-            <div class="col-xs-12 text-start">
-                <label>Intended Distance</label>
-                <input type="hidden" id="distanceMin" name="distanceMin" value="0">
-                <input type="hidden" id="distanceMax" name="distanceMax" value="6000">
-                <div id="slider-distance" class="mt-1 mb-1"></div>
-                <span id="slider-distance-text">0-6000+ NM</span>
-                @error('distanceMin')
-                <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
-                @enderror
-                @error('distanceMax')
-                <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
-                @enderror
-            </div>
 
             <div class="col-sm-12 text-start">
-                <label>Weather parameters</label>
+                <label>Meteo Condition</label>
+                <div>
+                    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                        <input type="radio" class="btn-check light" name="metcondition" value="ANY" id="metcondition_all"  {{ (old('metcondition') == null || old('metcondition') == "ANY") ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_all">
+                            Any
+                        </label>
+                        
+                        <input type="radio" class="btn-check red" name="metcondition" value="IFR" id="metcondition_ifr" {{ old('metcondition') == "IFR" ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_ifr">
+                            IFR
+                        </label>
+                        
+                        <input type="radio" class="btn-check green" name="metcondition" value="VFR" id="metcondition_vfr" {{ old('metcondition') == "VFR" ? 'checked' : null }}>
+                        <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_vfr">
+                            VFR
+                        </label>
+                    </div>
+                </div>
+
+                <label class="pt-4">Weather parameters</label>
                 
                 @foreach(\App\Helpers\ScoreHelper::TYPES as $k => $s)
                 @if(str_starts_with($k, 'METAR'))
@@ -245,27 +302,7 @@
             
             <div class="col-sm-12 text-start">
                 
-                <label>Meteo Condition</label>
-                <div>
-                    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                        <input type="radio" class="btn-check light" name="metcondition" value="ANY" id="metcondition_all"  {{ (old('metcondition') == null || old('metcondition') == "ANY") ? 'checked' : null }}>
-                        <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_all">
-                            Any
-                        </label>
-                        
-                        <input type="radio" class="btn-check red" name="metcondition" value="IFR" id="metcondition_ifr" {{ old('metcondition') == "IFR" ? 'checked' : null }}>
-                        <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_ifr">
-                            IFR
-                        </label>
-                        
-                        <input type="radio" class="btn-check green" name="metcondition" value="VFR" id="metcondition_vfr" {{ old('metcondition') == "VFR" ? 'checked' : null }}>
-                        <label class="btn btn-sm btn-dark btn-filter-width-meteo" for="metcondition_vfr">
-                            VFR
-                        </label>
-                    </div>
-                </div>
-                
-                <label class="pt-4">Network parameters</label>
+                <label>Network parameters</label>
                 
                 @foreach(\App\Helpers\ScoreHelper::TYPES as $k => $s)
                 @if(str_starts_with($k, 'VATSIM'))
@@ -364,6 +401,46 @@
                     </div>
                     <i class="ms-2 fa-sharp fa-jet-fighter"></i>&nbsp;Airbases
                 </div>
+            </div>
+            
+            <div class="col-sm-12 text-start">
+                <div class="col-xs-12 text-start">
+                    <label>Intended Distance</label>
+                    <input type="hidden" id="distanceMin" name="distanceMin" value="0">
+                    <input type="hidden" id="distanceMax" name="distanceMax" value="6000">
+                    <div id="slider-distance" class="mt-1 mb-1"></div>
+                    <span id="slider-distance-text">0-6000+ NM</span>
+                    @error('distanceMin')
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
+                    @enderror
+                    @error('distanceMax')
+                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label class="pt-4">{{ ucfirst($icao) }} Temperature</label>
+                    <input type="hidden" id="temperatureMin" name="temperatureMin" value="-60">
+                    <input type="hidden" id="temperatureMax" name="temperatureMax" value="60">
+                    <div id="slider-temperature" class="mt-1 mb-1"></div>
+                    <span id="slider-temperature-text">-60.00 to 60.00C</span>
+                </div>
+
+                <div>
+                    <label class="pt-4">{{ ucfirst($icao) }} Elevation</label>
+                    <input type="hidden" id="elevationMin" name="elevationMin" value="0">
+                    <input type="hidden" id="elevationMax" name="elevationMax" value="18000">
+                    <div id="slider-elevation" class="mt-1 mb-1"></div>
+                    <span id="slider-elevation-text">0-18000ft</span>
+                </div>
+                
+                <div>
+                    <label class="pt-4">{{ ucfirst($icao) }} Runway Length</label>
+                    <input type="hidden" id="rwyLengthMin" name="rwyLengthMin" value="0">
+                    <input type="hidden" id="rwyLengthMax" name="rwyLengthMax" value="17000">
+                    <div id="slider-rwy" class="mt-1 mb-1"></div>
+                    <span id="slider-rwy-text">0-1000'</span>
+                </div>
                 
                 <label class="pt-4">Flight direction</label>
                 
@@ -422,11 +499,8 @@
                         </label>
                     </div>
                 </div>
-                
-            </div>
-            
-            <div class="col-sm-12 text-start">
-                <label class="d-block">Airport Size</label>
+
+                <label class="d-block pt-4">Airport Size</label>
                 <div>
                     <div class="form-check form-check-inline mb-0 me-reduced">
                         <input class="form-check-input" type="checkbox" value="small_airport" id="destinationAirportSizeSmall" name="destinationAirportSize[]" checked>
@@ -447,81 +521,6 @@
                         </label>
                     </div>
                 </div>
-                
-                <div>
-                    <label class="pt-4">{{ ucfirst($icao) }} Temperature</label>
-                    <input type="hidden" id="temperatureMin" name="temperatureMin" value="-60">
-                    <input type="hidden" id="temperatureMax" name="temperatureMax" value="60">
-                    <div id="slider-temperature" class="mt-1 mb-1"></div>
-                    <span id="slider-temperature-text">-60.00 to 60.00C</span>
-                </div>
-
-                <div>
-                    <label class="pt-4">{{ ucfirst($icao) }} Elevation</label>
-                    <input type="hidden" id="elevationMin" name="elevationMin" value="0">
-                    <input type="hidden" id="elevationMax" name="elevationMax" value="18000">
-                    <div id="slider-elevation" class="mt-1 mb-1"></div>
-                    <span id="slider-elevation-text">0-18000ft</span>
-                </div>
-                
-                <div>
-                    <label class="pt-4">{{ ucfirst($icao) }} Runway Length</label>
-                    <input type="hidden" id="rwyLengthMin" name="rwyLengthMin" value="0">
-                    <input type="hidden" id="rwyLengthMax" name="rwyLengthMax" value="17000">
-                    <div id="slider-rwy" class="mt-1 mb-1"></div>
-                    <span id="slider-rwy-text">0-1000'</span>
-                </div>
-
-                <label for="airlines" class="pt-4">
-                    Airlines
-                </label>
-                <u-combobox id="airlines" data-multiple>
-                    <select name="airlines[]" multiple></select>
-                    @if(old('airlines') !== null)
-                        @foreach(old('airlines') as $key)
-                            @foreach($airlines as $airline)
-                                @if($key == $airline->icao_code)
-                                    <data value="{{ $key }}">{{ $airline->name }} ({{ $key }})</data>
-                                @endif
-                            @endforeach
-                        @endforeach
-                    @endisset
-                    <input list="airlines-list" placeholder="All airlines">
-                    <u-datalist id="airlines-list" tabindex="-1" hidden>
-                        @foreach($airlines as $airline)
-                            <u-option value="{{ $airline->icao_code }}">{{ $airline->name }} ({{ $airline->icao_code }})</u-option>
-                        @endforeach
-                    </u-datalist>
-                </u-combobox>
-                @error('airlines')
-                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
-                @enderror
-                
-                <label for="aircraft" class="pt-4">
-                    Aircraft
-                </label>
-                <u-combobox id="aircraft" data-multiple>
-                    <select name="aircrafts[]" multiple></select>
-                    @if(old('aircrafts') !== null)
-                        @foreach(old('aircrafts') as $key)
-                            @foreach($aircrafts as $aircraft)
-                                @if($key == $aircraft)
-                                    <data value="{{ $key }}">{{ $key }}</data>
-                                @endif
-                            @endforeach
-                        @endforeach
-                    @endisset
-                    <input list="aircraft-list" placeholder="All aircraft">
-                    <u-datalist id="aircraft-list" tabindex="-1" hidden>
-                        @foreach($aircrafts as $aircraft)
-                            <u-option value="{{ $aircraft }}">{{ $aircraft }}</u-option>
-                        @endforeach
-                    </u-datalist>
-                </u-combobox>
-                @error('aircrafts')
-                    <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
-                @enderror
-        
             </div>
 
             <div class="col-sm-12 align-self-start">
