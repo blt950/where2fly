@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Airport;
 use App\Models\AirportScore;
 use App\Models\Taf;
 use App\Models\TafForecast;
@@ -171,6 +172,41 @@ class ScorePredictionTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // Weighted ranking
+    // -------------------------------------------------------------------------
+
+    public function test_ranking_sums_the_best_weight_per_reason(): void
+    {
+        $eta = now()->addHours(5);
+        $window = ['source' => AirportScore::SOURCE_TAF, 'valid_from' => $eta->copy()->subHour(), 'valid_to' => $eta->copy()->addHour()];
+
+        // KJFK: a certain row and a PROB30 row assert the same reason — the
+        // best weight speaks, the uncertain duplicate adds nothing
+        $this->makeScore(['score' => 1] + $window);
+        $this->makeScore(['score' => 0.3] + $window);
+
+        // KLAX: a single TEMPO
+        $this->makeScore(['airport_id' => $this->airports['KLAX']->id, 'score' => 0.7] + $window);
+
+        // KSFO: two distinct PROB30 reasons — together still below one TEMPO
+        $this->makeScore(['airport_id' => $this->airports['KSFO']->id, 'score' => 0.3] + $window);
+        $this->makeScore(['airport_id' => $this->airports['KSFO']->id, 'reason' => 'METAR_GUSTS', 'score' => 0.3] + $window);
+
+        $ids = collect(['KJFK', 'KLAX', 'KSFO'])->map(fn ($icao) => $this->airports[$icao]->id);
+
+        $ranked = Airport::whereIn('airports.id', $ids)
+            ->select('airports.id')
+            ->sortByScores(['METAR_WINDY', 'METAR_GUSTS'], $eta)
+            ->get();
+
+        $this->assertSame(
+            [$this->airports['KJFK']->id, $this->airports['KLAX']->id, $this->airports['KSFO']->id],
+            $ranked->pluck('id')->all()
+        );
+        $this->assertSame([1.0, 0.7, 0.6], $ranked->pluck('score_count')->map(fn ($count) => (float) $count)->all());
+    }
+
+    // -------------------------------------------------------------------------
     // Display ordering and tooltips
     // -------------------------------------------------------------------------
 
@@ -192,6 +228,23 @@ class ScorePredictionTest extends TestCase
         $this->assertSame([AirportScore::SOURCE_VATSIM, AirportScore::SOURCE_METAR, AirportScore::SOURCE_TAF], $display->pluck('source')->all());
         $this->assertSame($metarWindy->id, $display->firstWhere('reason', 'METAR_WINDY')->id);
         $this->assertSame($tafGusts->id, $display->firstWhere('reason', 'METAR_GUSTS')->id);
+    }
+
+    public function test_display_prefers_the_certain_row_over_a_later_uncertain_one(): void
+    {
+        $airport = $this->airports['KJFK'];
+
+        // The TEMPO starts later — the old "latest period speaks" rule would
+        // pick it, but a certain row asserting the same reason should render
+        // solid, matching the weight the ranking counted
+        $certain = $this->makeScore(['source' => AirportScore::SOURCE_TAF, 'score' => 1, 'valid_from' => now()->subHour(), 'valid_to' => now()->addHours(6)]);
+        $tempo = $this->makeScore(['source' => AirportScore::SOURCE_TAF, 'score' => 0.7, 'data' => ['tempo' => true], 'valid_from' => now(), 'valid_to' => now()->addHours(2)]);
+
+        $airport->load('scores');
+
+        $this->assertSame($certain->id, $airport->displayScores()->firstWhere('reason', 'METAR_WINDY')->id);
+        $this->assertFalse($certain->isUncertain());
+        $this->assertTrue($tempo->isUncertain());
     }
 
     public function test_popular_tooltip_shows_the_movement_count(): void

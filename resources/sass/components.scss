@@ -265,6 +265,7 @@ u-tab[aria-selected="true"] {
     color: black;
     background: $primary;
 }
+
 // Tooltips carry multi-line content (bookings, probabilities) — left-align, not centered
 .tooltip-inner {
     text-align: left;
@@ -273,32 +274,23 @@ u-tab[aria-selected="true"] {
 .score-icon {
     display: inline-block;
 
-    .score-probability-badge {
-        top: -2px;
-        right: -5px;
-        font-size: .55em;
-        color: color.adjust($primary, $lightness: -15%);
+    // Uncertain forecast (TEMPO/PROB) — faded to show it's not a firm prediction
+    &.score-uncertain {
+        opacity: 0.6;
+    }
+
+    .probability {
+        top: -5px;
+        right: -10px;
+        font-size: 1rem;
+        color: $primary;
         border-radius: 50%;
     }
 
-    .score-facility-dots {
-        position: absolute;
-        bottom: -2px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        justify-content: center;
-        gap: 2px;
-
-        span {
-            display: block;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-        }
-
-        .facility-dot{
-            background-color: $bluewhite;
-        }
+    .atc{
+        top: -1px;
+        right: -4px;
+        font-size: .55rem;
+        color: $bluewhite;
     }
 }

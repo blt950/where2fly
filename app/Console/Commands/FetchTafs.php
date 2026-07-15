@@ -96,8 +96,9 @@ class FetchTafs extends Command
             foreach ($document['periods'] as $period) {
                 $forecastInsert[] = array_merge($period, ['taf_id' => $tafIds[$airportId]]);
 
-                // TEMPO/PROB periods score like any other, flagged so the icon
-                // carries the uncertainty badge — with a percentage when given
+                // TEMPO/PROB periods score like any other but at reduced
+                // weight, flagged so the icon carries the uncertainty badge —
+                // with a percentage when given
                 $data = [];
                 if ($period['probability'] !== null) {
                     $data['probability'] = $period['probability'];
@@ -105,13 +106,14 @@ class FetchTafs extends Command
                 if ($period['change_indicator'] === 'TEMPO') {
                     $data['tempo'] = true;
                 }
+                $weight = AirportScore::forecastWeight($period['probability'], $period['change_indicator'] === 'TEMPO');
                 $data = $data ? json_encode($data) : null;
 
                 foreach (WeatherScoreHelper::reasons(new TafForecast($period)) as $reason) {
                     $airportScoreInsert[] = [
                         'airport_id' => $airportId,
                         'reason' => $reason,
-                        'score' => 1,
+                        'score' => $weight,
                         'data' => $data,
                         'source' => AirportScore::SOURCE_TAF,
                         'valid_from' => $period['valid_from'],

@@ -139,7 +139,7 @@ class SearchController extends Controller
             ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
             ->select('airports.id')
-            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreHelper::weatherTypes(), $eta, $candidatesAreDepartures)
+            ->sortByScores(($filterByScores) ? array_keys($filterByScores) : ScoreHelper::weatherTypes(), $eta, $candidatesAreDepartures)
             ->has('metar')
             ->get();
 

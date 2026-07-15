@@ -6,7 +6,9 @@
       "Bash(node driver.mjs)",
       "Bash(nohup php artisan serve --host=0.0.0.0 --port=8000)",
       "Bash(timeout 20 bash -c 'until curl -sf http://127.0.0.1:8000/ >/dev/null; do sleep 1; done')",
-      "Bash(curl -s http://127.0.0.1:8000/)"
+      "Bash(curl -s http://127.0.0.1:8000/)",
+      "Bash(npm run *)",
+      "Bash(php artisan tinker '--execute= *)"
     ]
   }
 }

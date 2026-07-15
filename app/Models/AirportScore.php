@@ -35,6 +35,15 @@ class AirportScore extends Model
     /** Hours of query-time tolerance applied to the inexact sources */
     public const OVERLAP_MATCH_HOURS = 1;
 
+    /** Ranking weight of a bare TEMPO period — intermittent but expected */
+    public const WEIGHT_TEMPO = 0.7;
+
+    /** Ranking weights for PROB periods, keyed by the stated probability */
+    public const WEIGHT_PROB = [40 => 0.5, 30 => 0.3];
+
+    /** Ranking weights for combined PROBnn TEMPO periods */
+    public const WEIGHT_PROB_TEMPO = [40 => 0.4, 30 => 0.25];
+
     public $timestamps = false;
 
     protected $guarded = [];
@@ -42,10 +51,37 @@ class AirportScore extends Model
     protected function casts(): array
     {
         return [
+            'score' => 'float',
             'data' => 'array',
             'valid_from' => 'datetime',
             'valid_to' => 'datetime',
         ];
+    }
+
+    /**
+     * The confidence weight a forecast period's score rows carry: certain
+     * periods (FM/BECMG — and every non-TAF source) weigh 1.0, uncertain ones
+     * less, so a PROB30 shower doesn't rank an airport like a firm forecast.
+     */
+    public static function forecastWeight(?int $probability, bool $tempo): float
+    {
+        if ($probability === null) {
+            return $tempo ? self::WEIGHT_TEMPO : 1.0;
+        }
+
+        $weights = $tempo ? self::WEIGHT_PROB_TEMPO : self::WEIGHT_PROB;
+
+        // TAFs only carry PROB30/PROB40, but don't crash on an oddball value
+        return $weights[$probability] ?? round($probability / 100, 2);
+    }
+
+    /**
+     * Whether this row is an uncertain forecast (TEMPO/PROB) — the icon
+     * renders faded to show the condition isn't a firm prediction.
+     */
+    public function isUncertain(): bool
+    {
+        return $this->score < 1;
     }
 
     public function airport()

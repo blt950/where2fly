@@ -197,8 +197,10 @@ class Airport extends Model
     /**
      * The loaded scores deduplicated to one row per reason for rendering.
      * Several sources can assert the same reason: current signals beat
-     * forecasts (source order below), and within a source the latest-starting
-     * row wins so the most recent forecast period speaks.
+     * forecasts (source order below), a certain row beats an uncertain
+     * TEMPO/PROB one (matching how the ranking takes each reason's best
+     * weight), and within a source the latest-starting row wins so the most
+     * recent forecast period speaks.
      */
     public function displayScores()
     {
@@ -214,6 +216,7 @@ class Airport extends Model
         return $this->scores
             ->sortBy([
                 fn ($a, $b) => ($sourceOrder[$a->source] ?? 99) <=> ($sourceOrder[$b->source] ?? 99),
+                fn ($a, $b) => $b->score <=> $a->score,
                 fn ($a, $b) => $b->valid_from <=> $a->valid_from,
             ])
             ->unique('reason')
@@ -754,11 +757,13 @@ class Airport extends Model
     }
 
     /**
-     * Scope a query to sort airports by how many of the given scores they have,
+     * Scope a query to sort airports by the summed weight of the given scores,
      * counting only rows valid at the ETA when one is given. The conditions
      * live in the join (not the where) so airports without scores still appear
-     * with a count of zero. Reasons are counted distinct — several sources
-     * predicting the same reason shouldn't outrank a single real signal.
+     * with a count of zero. Each reason contributes its single best weight
+     * (the MAX(CASE) pivot below) — several sources predicting the same reason
+     * shouldn't outrank a single real signal, and a certain row asserting a
+     * reason beats any uncertain TAF row asserting the same one.
      */
     #[Scope]
     protected function sortByScores(Builder $query, $filterByScores, Carbon|string|null $eta = null, bool $metarOnlyWeather = false)
@@ -771,14 +776,17 @@ class Airport extends Model
                 $query->select('airports.*');
             }
 
-            return $query->leftJoin('airport_scores', function ($join) use ($filterByScores, $eta, $metarOnlyWeather) {
+            $reasons = array_values($filterByScores);
+            $weightedSum = implode(' + ', array_fill(0, count($reasons), 'MAX(CASE WHEN airport_scores.reason = ? THEN airport_scores.score ELSE 0 END)'));
+
+            return $query->leftJoin('airport_scores', function ($join) use ($reasons, $eta, $metarOnlyWeather) {
                 $join->on('airports.id', '=', 'airport_scores.airport_id')
-                    ->whereIn('airport_scores.reason', $filterByScores);
+                    ->whereIn('airport_scores.reason', $reasons);
                 if ($eta) {
                     AirportScore::applyCoversEta($join, $eta, $metarOnlyWeather);
                 }
             })
-                ->selectRaw('COUNT(DISTINCT airport_scores.reason) as score_count')
+                ->selectRaw("{$weightedSum} as score_count", $reasons)
                 ->groupBy('airports.id')
                 ->orderBy('score_count', 'desc');
         }

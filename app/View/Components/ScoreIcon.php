@@ -18,6 +18,9 @@ class ScoreIcon extends Component
 
     public bool $probabilityBadge;
 
+    /** Uncertain forecast (TEMPO/PROB) — the whole icon renders faded */
+    public bool $uncertain;
+
     public Collection $facilityDots;
 
     public function __construct(
@@ -28,6 +31,7 @@ class ScoreIcon extends Component
     ) {
         $this->scoreType = ScoreHelper::TYPES[$score->reason];
         $this->probabilityBadge = isset($score->data['probability']) || ! empty($score->data['tempo']);
+        $this->uncertain = $score->isUncertain();
         $this->facilityDots = $score->reason === 'VATSIM_ATC' && $airport ? $airport->atcFacilities() : collect();
         $this->tooltipLines = $this->buildTooltipLines();
     }
