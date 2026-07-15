@@ -125,11 +125,15 @@ class Airport extends Model
     /**
      * The loaded, ETA-windowed booking-sourced VATSIM_ATC scores, ordered by
      * start time — the tooltip and facility dots on the ATC icon render these.
+     * A facility booked several times over the exact same window (e.g. two
+     * positions both resolving to APP) renders as one line; the same facility
+     * over a different window stays its own line.
      */
     public function atcBookingScores()
     {
         return $this->scores
             ->filter(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_BOOKING)
+            ->unique(fn ($score) => ($score->data['facility'] ?? $score->data['callsign'] ?? '') . '|' . $score->valid_from . '|' . $score->valid_to)
             ->sortBy('valid_from')
             ->values();
     }
