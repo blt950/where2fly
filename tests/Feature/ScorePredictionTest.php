@@ -264,6 +264,11 @@ class ScorePredictionTest extends TestCase
 
         $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'data' => ['callsign' => 'KJFK_APP', 'facility' => 'APP'], 'valid_from' => now(), 'valid_to' => now()->addHours(2)]);
         $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'data' => ['callsign' => 'KJFK_DEL', 'facility' => 'DEL'], 'valid_from' => now()->addHour(), 'valid_to' => now()->addHours(3)]);
+        // A second position resolving to the same facility over the exact same
+        // window (KJFK_F_APP alongside KJFK_APP) collapses to one tooltip line
+        $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'data' => ['callsign' => 'KJFK_F_APP', 'facility' => 'APP'], 'valid_from' => now(), 'valid_to' => now()->addHours(2)]);
+        // The same facility over a different window is a real separate booking
+        $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'data' => ['callsign' => 'KJFK_APP', 'facility' => 'APP'], 'valid_from' => now()->addHours(3), 'valid_to' => now()->addHours(5)]);
         $this->makeScore(['source' => AirportScore::SOURCE_VATSIM, 'reason' => 'VATSIM_ATC', 'data' => ['stations' => [['facility' => 'TWR', 'logon_time' => now()->subMinutes(80)->toIso8601String()]]], 'valid_from' => now(), 'valid_to' => now()->addMinutes(30)]);
         $logonEstimate = $this->makeScore(['source' => AirportScore::SOURCE_LOGON_ESTIMATE, 'reason' => 'VATSIM_ATC', 'data' => ['position' => 'KJFK_TWR', 'facility' => 'TWR', 'logon_time' => now()->subMinutes(80)->toIso8601String()], 'valid_from' => now(), 'valid_to' => now()->addMinutes(40)]);
 
@@ -274,7 +279,9 @@ class ScorePredictionTest extends TestCase
         $this->assertSame('TWR', $airport->atcOnlineStations()->first()['facility']);
         // The icon dots union online and booked facilities in ground-to-air order
         $this->assertSame(['DEL', 'TWR', 'APP'], $airport->atcFacilities()->all());
-        $this->assertCount(2, $airport->atcBookingScores());
+        // 4 booking rows collapse to 3 lines: the duplicate same-window APP is
+        // dropped, the later APP window stays
+        $this->assertCount(3, $airport->atcBookingScores());
         $this->assertStringContainsString('APP ', $airport->atcBookingScores()->first()->tooltipText());
         // Online controllers show a relative logon time, never a logoff we don't know
         $this->assertSame('TWR online for 1h 20m', $logonEstimate->tooltipText());
