@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\SceneryDeveloper;
+use App\Models\Simulator;
 
 class SceneryHelper
 {
@@ -119,6 +120,10 @@ class SceneryHelper
             });
             $returnData[$simulator] = $sceneries;
         }
+
+        // Finally, order the simulator groups themselves by the simulators table "order" column
+        $simulatorOrder = Simulator::pluck('order', 'shortened_name');
+        uksort($returnData, fn ($a, $b) => ($simulatorOrder[$a] ?? PHP_INT_MAX) <=> ($simulatorOrder[$b] ?? PHP_INT_MAX));
     }
 
     public static function getEmbeddedUrl($fullUrl)

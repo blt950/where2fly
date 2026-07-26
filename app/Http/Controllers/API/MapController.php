@@ -222,8 +222,8 @@ class MapController extends Controller
         // Prepare references
         $returnData = [];
         $supportedApiSimulators = [
-            'MSFS2020' => Simulator::find(1),
             'MSFS2024' => Simulator::find(11),
+            'MSFS2020' => Simulator::find(1),
         ];
 
         // Run through results and decide actions

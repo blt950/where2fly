@@ -30,6 +30,7 @@
                 <li>Fixed the menu breaking on tablet screens</li>
                 <li>Fixed airport ICAO not always displaying on the map when selecting an suggestion</li>
                 <li>Fixed stuck tooltips not disappearing when clicked on</li>
+                <li>Fixed scenery tabs order to show MSFS2024 first</li> 
                 <li>A lot of changes under the hood for stability and performance. Searches are now up to 4x faster!</li>
                 <li>API: Added more data rich scores return with predictions</li>
             </ul>
