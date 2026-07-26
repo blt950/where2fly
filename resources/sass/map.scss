@@ -171,6 +171,48 @@
             }
         }
 
+        .notable{
+            padding: 0.5rem;
+            margin-top: 1rem;
+            border-left: 2px solid $primary;
+            background: $tertiary;
+
+            h3{
+                color: $primary;
+
+                font-family: $font-family-sans-serif;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+            }
+
+            h4{
+                color: $bluewhite;
+                font-size: 1rem;
+
+                i{
+                    color: $primary;
+                }
+            }
+
+            p{
+                font-family: $font-family-sans-serif;
+                font-size: 0.75rem;
+                margin: 0;
+            }
+
+            a{
+                color: color.adjust($tertiary, $lightness: 45%);
+                
+                font-family: $font-family-sans-serif;
+                font-size: 0.75rem;
+                text-decoration: none;
+
+                &:hover{
+                    color: $bluewhite;
+                }
+            }
+        }
+
     }
 }
 

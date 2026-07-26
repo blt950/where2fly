@@ -117,6 +117,18 @@ function AirportCard({ airportId }) {
                             <span className="badge me-1" style={{ border: '1px solid ' + list.color, color: list.color }} key={list.id}><i className="fa-sharp fa-list"></i>&nbsp;{list.name}</span>
                         ))}
 
+                        <div class="notable">
+                            <h3>Notable airport</h3>
+                            <h4>
+                                <i className="fa-sharp fa-mountain"></i>
+                                &nbsp;Mountainous
+                            </h4>
+                            <p>The world's first purpose-built "ocean airport," constructed on an artificial island in Osaka Bay and engineered to operate 24/7 without disturbing the city, and to survive earthquakes and typhoons.</p>
+                            <a href="#" target="_blank">
+                                <i className="fa-sharp fa-link-simple"></i> wikipedia.org
+                            </a>
+                        </div>
+
                         <dl className="font-kanit">
                             <dt>Runways</dt>
                             {data.airport.runways.map(runway => (
