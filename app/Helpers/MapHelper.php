@@ -62,7 +62,7 @@ class MapHelper
     /**
      * Generate notable airport category tags
      *
-     * @return array
+     * @return array|null
      */
     public static function getNotableCategories(Collection $ids)
     {
