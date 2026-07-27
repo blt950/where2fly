@@ -104,9 +104,10 @@ class MapController extends Controller
 
         }
 
-        $airport = Airport::select('id', 'icao', 'name', 'iso_country')->with(['runways' => function ($query) {
-            $query->where('closed', false)->whereNotNull('length_ft');
-        }])->where('id', $secondaryAirport)->first();
+        $airport = Airport::select('id', 'icao', 'name', 'iso_country')
+            ->with(['runways' => fn ($q) => $q->where('closed', false)->whereNotNull('length_ft'),
+                'notableAirport', 'notableAirportTags'])
+            ->where('id', $secondaryAirport)->first();
         $metar = isset($airport->metar) ? $airport->metar->metar : null;
         $taf = optional($airport->taf)->raw_text;
 
@@ -118,6 +119,22 @@ class MapController extends Controller
             $query->where('airport_id', $secondaryAirport);
         })->get();
 
+        // Get notable airport data if applicable
+        $notable = null;
+        $notableAirport = $airport->notableAirport;
+        $notableTags = $airport->notableAirportTags;
+        if ($notableAirport && $notableTags->count() > 0) {
+            $notable = [
+                'description' => $notableAirport->description,
+                'source' => $notableAirport->source_url,
+                'source_tld' => parse_url($notableAirport->source_url, PHP_URL_HOST),
+                'tags' => MapHelper::getNotableCategories($notableTags->pluck('category')),
+            ];
+        }
+
+        // Don't leak the raw relations into the airport payload; they're exposed via `notable` above.
+        $airport->unsetRelation('notableAirport')->unsetRelation('notableAirportTags');
+
         if (isset($airport)) {
             return response()->json(['message' => 'Success', 'data' => [
                 'airport' => $airport->toArray(),
@@ -125,6 +142,7 @@ class MapController extends Controller
                 'taf' => $taf,
                 'airlines' => $airlines,
                 'lists' => $lists,
+                'notable' => $notable,
             ]], 200);
         } else {
             return response()->json(['message' => 'Airport not found'], 404);

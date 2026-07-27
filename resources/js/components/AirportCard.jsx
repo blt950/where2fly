@@ -117,6 +117,21 @@ function AirportCard({ airportId }) {
                             <span className="badge me-1" style={{ border: '1px solid ' + list.color, color: list.color }} key={list.id}><i className="fa-sharp fa-list"></i>&nbsp;{list.name}</span>
                         ))}
 
+                        {data.notable && (
+                            <div className="notable">
+                                <h3>Notable airport</h3>
+                                <div className="d-flex flex-row flex-wrap">
+                                    {data.notable.tags.map(tag => (
+                                        <span className="badge me-1" key={tag.name}><i className={`fa-sharp fa-regular ${tag.icon}`}></i>&nbsp;&nbsp;{tag.name}</span>
+                                    ))}
+                                </div>
+                                <p>{data.notable.description}</p>
+                                <a href={data.notable.source} target="_blank">
+                                    <i className="fa-sharp fa-link-simple"></i> {data.notable.source_tld}
+                                </a>
+                            </div>
+                        )}
+
                         <dl className="font-kanit">
                             <dt>Runways</dt>
                             {data.airport.runways.map(runway => (

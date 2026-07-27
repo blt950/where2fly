@@ -17,6 +17,7 @@
             <ul>
                 <li>Added predictions by using TAF, controller booking and event data for your search results</li>
                 <li>Added distance filter to search by nautical miles</li>
+                <li>Added 85 airports with descriptions notable for their mountains, coasts, hard approaches and more. New public whitelist available to find your next challenge or scenic approach.</li>
                 <li>Added a fillable circle icon for ATC conditions to show amount of facilities online at a glance</li>
                 <li>Added refreshed design with darker colors for input fields, results and other color tweaks. Scenery list is also simplified.</li>
                 <li>Added Navigraph charts link to airport cards</li>

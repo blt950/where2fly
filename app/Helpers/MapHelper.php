@@ -7,6 +7,16 @@ use Illuminate\Support\Collection;
 
 class MapHelper
 {
+    public const NOTABLETAGS = [
+        1 => ['icon' => 'fa-mountains', 'name' => 'Mountainous'],
+        2 => ['icon' => 'fa-water', 'name' => 'Coastal'],
+        3 => ['icon' => 'fa-route', 'name' => 'Hard Approach'],
+        4 => ['icon' => 'fa-gauge-max', 'name' => 'High Altitude'],
+        5 => ['icon' => 'fa-location-dot-slash', 'name' => 'Remote'],
+        6 => ['icon' => 'fa-arrows-left-right-to-line', 'name' => 'Short Runway'],
+        7 => ['icon' => 'fa-monument', 'name' => 'Legendary'],
+    ];
+
     /**
      * Generate airport map data from airports
      *
@@ -47,5 +57,25 @@ class MapHelper
         }
 
         return $airports;
+    }
+
+    /**
+     * Generate notable airport category tags
+     *
+     * @return array|null
+     */
+    public static function getNotableCategories(Collection $ids)
+    {
+        $result = null;
+
+        foreach (self::NOTABLETAGS as $tagId => $tag) {
+            foreach ($ids as $id) {
+                if ($tagId == $id) {
+                    $result[] = $tag;
+                }
+            }
+        }
+
+        return $result;
     }
 }
