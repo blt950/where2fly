@@ -122,10 +122,9 @@ class MapController extends Controller
         // Get notable airport data if applicable
         $notable = null;
         $notableAirport = $airport->notableAirport;
-
-        if (isset($notableAirport) && $notableAirport) {
+        if ($notableAirport) {
             $notableTags = $airport->notableAirportTags;
-            if (isset($notableTags) && $notableTags) {
+            if ($notableTags) {
                 $notable = [
                     'description' => $notableAirport->description,
                     'source' => $notableAirport->source_url,
@@ -134,6 +133,9 @@ class MapController extends Controller
                 ];
             }
         }
+
+        // Don't leak the raw relations into the airport payload; they're exposed via `notable` above.
+        $airport->unsetRelation('notableAirport')->unsetRelation('notableAirportTags');
 
         if (isset($airport)) {
             return response()->json(['message' => 'Success', 'data' => [
