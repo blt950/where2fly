@@ -123,9 +123,9 @@ class MapController extends Controller
         $notable = null;
         $notableAirport = $airport->notableAirport;
 
-        if (isset($notableAirport) && $notableAirport->count()) {
+        if (isset($notableAirport) && $notableAirport) {
             $notableTags = $airport->notableAirportTags;
-            if (isset($notableTags) && $notableTags->count() > 0) {
+            if (isset($notableTags) && $notableTags) {
                 $notable = [
                     'description' => $notableAirport->description,
                     'source' => $notableAirport->source_url,
