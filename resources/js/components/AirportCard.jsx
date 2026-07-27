@@ -122,7 +122,7 @@ function AirportCard({ airportId }) {
                                 <h3>Notable airport</h3>
                                 <div className="d-flex flex-row flex-wrap">
                                     {data.notable.tags.map(tag => (
-                                        <span className="badge me-1"><i className={`fa-sharp fa-regular ${tag.icon}`}></i>&nbsp;&nbsp;{tag.name}</span>
+                                        <span className="badge me-1" key={tag.name}><i className={`fa-sharp fa-regular ${tag.icon}`}></i>&nbsp;&nbsp;{tag.name}</span>
                                     ))}
                                 </div>
                                 <p>{data.notable.description}</p>
