@@ -117,21 +117,20 @@ function AirportCard({ airportId }) {
                             <span className="badge me-1" style={{ border: '1px solid ' + list.color, color: list.color }} key={list.id}><i className="fa-sharp fa-list"></i>&nbsp;{list.name}</span>
                         ))}
 
-                        <div class="notable">
-                            <div className="d-flex flex-row">
-                                <div className="icon d-flex align-items-center">
-                                    <i className="fa-sharp fa-eye"></i>
+                        {data.notable && (
+                            <div className="notable">
+                                <h3>Notable airport</h3>
+                                <div className="d-flex flex-row flex-wrap">
+                                    {data.notable.tags.map(tag => (
+                                        <span className="badge me-1"><i className={`fa-sharp fa-regular ${tag.icon}`}></i>&nbsp;&nbsp;{tag.name}</span>
+                                    ))}
                                 </div>
-                                <div className="d-flex justify-content-between flex-wrap flex-column">
-                                    <h3>Notable airport</h3>
-                                    <h4>Mountainous</h4>
-                                </div>
+                                <p>{data.notable.description}</p>
+                                <a href={data.notable.source} target="_blank">
+                                    <i className="fa-sharp fa-link-simple"></i> {data.notable.source_tld}
+                                </a>
                             </div>
-                            <p>The world's first purpose-built "ocean airport," constructed on an artificial island in Osaka Bay and engineered to operate 24/7 without disturbing the city, and to survive earthquakes and typhoons.</p>
-                            <a href="#" target="_blank">
-                                <i className="fa-sharp fa-link-simple"></i> wikipedia.org
-                            </a>
-                        </div>
+                        )}
 
                         <dl className="font-kanit">
                             <dt>Runways</dt>

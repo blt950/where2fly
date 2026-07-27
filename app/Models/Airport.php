@@ -91,6 +91,16 @@ class Airport extends Model
         return $this->hasMany(SceneryDeveloper::class);
     }
 
+    public function notableAirport()
+    {
+        return $this->hasOne(NotableAirport::class);
+    }
+
+    public function notableAirportTags()
+    {
+        return $this->hasMany(NotableAirportTag::class);
+    }
+
     #[Scope]
     protected function publishedSceneries(Builder $query, $published, $filterSimulatorId = null): void
     {

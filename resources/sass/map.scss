@@ -185,18 +185,6 @@
                 text-transform: uppercase;
             }
 
-            h4{
-                color: $bluewhite;
-                font-size: 1rem;
-                margin: 0;
-            }
-
-            .icon i{
-                font-size: 1.8rem;
-                color: $primary;
-                margin-right: 0.5rem;
-            }
-
             p{
                 font-family: $font-family-sans-serif;
                 font-size: 0.75rem;
@@ -214,6 +202,14 @@
                 &:hover{
                     color: $bluewhite;
                 }
+            }
+
+            .badge{
+                font-size: 0.75rem;
+                margin-top: 0.25rem;
+
+                color: $bluewhite;
+                background: $secondary;
             }
         }
 
