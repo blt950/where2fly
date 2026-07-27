@@ -122,16 +122,14 @@ class MapController extends Controller
         // Get notable airport data if applicable
         $notable = null;
         $notableAirport = $airport->notableAirport;
-        if ($notableAirport) {
-            $notableTags = $airport->notableAirportTags;
-            if ($notableTags) {
-                $notable = [
-                    'description' => $notableAirport->description,
-                    'source' => $notableAirport->source_url,
-                    'source_tld' => parse_url($notableAirport->source_url, PHP_URL_HOST),
-                    'tags' => MapHelper::getNotableCategories($notableTags->pluck('category')),
-                ];
-            }
+        $notableTags = $airport->notableAirportTags;
+        if ($notableAirport && $notableTags->count() > 0) {
+            $notable = [
+                'description' => $notableAirport->description,
+                'source' => $notableAirport->source_url,
+                'source_tld' => parse_url($notableAirport->source_url, PHP_URL_HOST),
+                'tags' => MapHelper::getNotableCategories($notableTags->pluck('category')),
+            ];
         }
 
         // Don't leak the raw relations into the airport payload; they're exposed via `notable` above.
