@@ -137,7 +137,7 @@ function SceneryCard({ airportId }) {
                     
                 )}
 
-                <div className="d-flex flex-row justify-content-between align-items-end">
+                <div className="d-flex flex-row justify-content-between align-items-end flex-wrap">
                     <span className="pb-1">
                         Prices are excl. tax.
                     </span>
