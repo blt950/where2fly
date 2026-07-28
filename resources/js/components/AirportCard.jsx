@@ -227,7 +227,7 @@ function AirportCard({ airportId }) {
                     <p className="mb-0"><i className="fa-sharp fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
                 )}
             </div>
-            {showFlightsIdCard && <FlightsCard airlineId={showFlightsIdCard} departureAirportId={departureAirportId} arrivalAirportId={arrivalAirportId} />}
+            {showFlightsIdCard && <FlightsCard airlineId={showFlightsIdCard} departureAirportId={departureAirportId} arrivalAirportId={arrivalAirportId} reverseDirection={reverseDirection} />}
             {showSceneryIdCard && <SceneryCard airportId={showSceneryIdCard} />}
         </CardContext.Provider>
     );

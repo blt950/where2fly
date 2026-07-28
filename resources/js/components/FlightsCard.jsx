@@ -3,7 +3,7 @@ import { CardContext } from './context/CardContext';
 import { MapContext } from './context/MapContext';
 import fromNow from './utils/RelativeTime';
 
-function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
+function FlightsCard({ airlineId, departureAirportId, arrivalAirportId, reverseDirection }) {
 
     const dataCache = useRef({});
     const [data, setData] = useState(null);
@@ -66,7 +66,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId }) {
                                                 <li>
                                                     <a
                                                         className="dropdown-item"
-                                                        href={`https://dispatch.simbrief.com/options/custom?orig=${airports[primaryAirport].icao}&dest=${airports[focusAirport].icao}&airline=${data.airline.icao_code}&fltnum=${flight.flight_number}&utm_campaign=where2fly.today`}
+                                                        href={`https://dispatch.simbrief.com/options/custom?orig=${airports[reverseDirection ? focusAirport : primaryAirport].icao}&dest=${airports[reverseDirection ? primaryAirport : focusAirport].icao}&airline=${data.airline.icao_code}&fltnum=${flight.flight_number}&utm_campaign=where2fly.today`}
                                                         target="_blank"
                                                         rel="noreferrer"
                                                     >
