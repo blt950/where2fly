@@ -1,7 +1,7 @@
 @use 'sass:color';
 
 .form-control{
-    height: 42px;
+    height: 2.625rem;
 
     color: $offwhite;
     border: none;
@@ -94,8 +94,10 @@ u-combobox{
     }
     
     .noUi-handle {
-        height: 26px;
-        top: -5px;
+        width: 2.125rem;
+        height: 1.625rem;
+        top: -0.313rem;
+        right: -1.063rem;
         border-radius: 2px;
         box-shadow: none;
 
@@ -103,8 +105,19 @@ u-combobox{
         border: 1px solid color.adjust($secondary, $lightness: 20%);
 
         &::before, &::after{
+            height: 0.875rem;
+            top: 0.375rem;
+            left: 1.063rem;
             background: $secondary;
         }
+
+        &::after{
+            left: 0.875rem;
+        }
+    }
+
+    &.noUi-horizontal{
+        height: 1.125rem;
     }
 }
 
@@ -113,6 +126,7 @@ u-combobox {
     flex-wrap: wrap;
     position: relative;
 
+    height: 2.625rem;
     min-height: 42px;
 
     padding: 0.375rem 0.75rem;
