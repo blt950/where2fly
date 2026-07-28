@@ -15,7 +15,7 @@ runs:
   - name: Set up PHP
     uses: shivammathur/setup-php@v2
     with:
-      php-version: '8.3.2'
+      php-version: '8.5.8'
 
   - name: Validate composer
     run: composer validate
@@ -37,7 +37,7 @@ runs:
     if: inputs.setup-node == 'true'
     uses: actions/setup-node@v4
     with:
-      node-version: '22'
+      node-version: '26'
       cache: 'npm'
       cache-dependency-path: ${{ inputs.path }}
 
