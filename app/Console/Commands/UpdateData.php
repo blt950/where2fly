@@ -40,6 +40,9 @@ class UpdateData extends Command
         $this->info('>> fetch:vatsim running');
         $this->call('fetch:vatsim');
 
+        $this->info('>> fetch:bookings running');
+        $this->call('fetch:bookings');
+
         $this->info('> Done with all commands in ' . round(microtime(true) - $processTime) . ' seconds!');
 
     }

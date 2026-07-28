@@ -12,9 +12,6 @@ Artisan::command('inspire', function () {
 Schedule::command('update:data')->hourlyAt(5);
 Schedule::command('update:data')->hourlyAt(35);
 
-// Fetch ATC bookings
-Schedule::command('fetch:bookings')->everyThirtyMinutes();
-
 // Fetch flights
 Schedule::command('fetch:flights')->everyThirtyMinutes();
 
