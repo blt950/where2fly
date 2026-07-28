@@ -37,7 +37,7 @@
 
         <div class="results-header">
             @if($suggestedAirport)
-                <div class="d-flex flex-wrap justify-content-between">
+                <div class="d-flex flex-wrap justify-content-between gap-2">
                     <h2 class="mb-0">
                         <i class="fa-sharp fa-plane-{{ $direction }}"></i>
                         {{ ucfirst($direction) }} suggestion
@@ -173,7 +173,7 @@
                                     <dt>Runways</dt>
                                     @foreach($airport->runways as $runway)
                                     <dd class="mb-0">
-                                        <strong>{{ $runway->le_ident }}/{{ $runway->he_ident }}:</strong> {{ number_format((int)$runway->length_ft, 0, '.', ',') }}ft <span class="text-black-50">({{ number_format(round((int)$runway->length_ft * .3048), 0, '.', ',') }}m)</span>  
+                                        <strong>{{ $runway->le_ident }}/{{ $runway->he_ident }}:</strong> {{ number_format((int)$runway->length_ft, 0, '.', ',') }}ft <span>({{ number_format(round((int)$runway->length_ft * .3048), 0, '.', ',') }}m)</span>  
                                     </dd>
                                     @endforeach
 
@@ -183,7 +183,7 @@
                                     <dt class="mt-3">TAF</dt>
                                     <dd>
                                         @if($airport->taf)
-                                            <button class="btn btn-outline-secondary btn-sm" data-taf-button="true">Show</button>
+                                            <button class="btn btn-outline-light btn-sm" data-taf-button="true">Show</button>
                                             <span class="d-none" data-taf-text="true">{{ $airport->taf->raw_text }}</span>
                                         @else
                                             No TAF available
@@ -193,23 +193,23 @@
                                     <dt class="mt-3">Links</dt>
                                     <dd>
                                         @if($direction == 'departure')
-                                            <a class="btn btn-outline-secondary btn-sm" href="{{ route('search.routes', ['departure' => $primaryAirport->icao, 'arrival' => $airport->icao, 'sort' => 'flight']) }}" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="{{ route('search.routes', ['departure' => $primaryAirport->icao, 'arrival' => $airport->icao, 'sort' => 'flight']) }}" target="_blank">
                                                 <span>Routes</span>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm" href="https://dispatch.simbrief.com/options/custom?orig={{ $primaryAirport->icao }}&amp;dest={{ $airport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="https://dispatch.simbrief.com/options/custom?orig={{ $primaryAirport->icao }}&amp;dest={{ $airport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
                                                 <span>SimBrief</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
                                                 <span>Windy</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
                                         @else
-                                            <a class="btn btn-outline-secondary btn-sm" href="{{ route('search.routes', ['departure' => $airport->icao, 'arrival' => $primaryAirport->icao, 'sort' => 'flight']) }}" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="{{ route('search.routes', ['departure' => $airport->icao, 'arrival' => $primaryAirport->icao, 'sort' => 'flight']) }}" target="_blank">
                                                 <span>Routes</span>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm" href="https://dispatch.simbrief.com/options/custom?orig={{ $airport->icao }}&amp;dest={{ $primaryAirport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="https://dispatch.simbrief.com/options/custom?orig={{ $airport->icao }}&amp;dest={{ $primaryAirport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
                                                 <span>SimBrief</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
                                                 <span>Windy</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
                                         @endif
