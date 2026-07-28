@@ -267,6 +267,55 @@ class SearchTest extends TestCase
         $response->assertSessionHasErrors('distanceMax');
     }
 
+    // -------------------------------------------------------------------------
+    // Random anchor (no ICAO given)
+    // -------------------------------------------------------------------------
+
+    public function test_random_search_returns_results(): void
+    {
+        $params = $this->validSearchParams;
+        unset($params['icao']);
+
+        $response = $this->get('/search?' . http_build_query($params));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirport', true);
+        $response->assertViewHas('suggestedAirports', fn ($airports) => $airports->isNotEmpty());
+    }
+
+    public function test_random_search_with_event_filter_reaches_the_event_airport(): void
+    {
+        $params = $this->validSearchParams;
+        unset($params['icao']);
+        $params['scores'] = array_merge($params['scores'], ['VATSIM_EVENT' => 1]);
+
+        $response = $this->get('/search?' . http_build_query($params));
+
+        // EDDM holds the only seeded event: the anchor is drawn within flying
+        // range of it and must not be required to carry the event itself
+        $response->assertOk();
+        $response->assertViewHas('primaryAirport', fn ($airport) => $airport->icao !== 'EDDM');
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'EDDM');
+        });
+    }
+
+    public function test_random_search_with_score_exclusion_returns_results(): void
+    {
+        $params = $this->validSearchParams;
+        unset($params['icao']);
+        $params['scores'] = array_merge($params['scores'], ['VATSIM_EVENT' => -1]);
+
+        $response = $this->get('/search?' . http_build_query($params));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->doesntContain('EDDM');
+        });
+    }
+
     public function test_search_foggy_score_filter_returns_only_foggy_airports(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [

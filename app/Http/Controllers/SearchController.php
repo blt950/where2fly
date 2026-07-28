@@ -188,18 +188,30 @@ class SearchController extends Controller
          *  Fetch the requested data
          */
 
-        // The random-anchor candidate pool is identical between retry attempts, so
-        // fetch the matching ids once — no hydration — and draw per attempt.
+        // Score filters describe the suggested airports, not the anchor. With
+        // presence filters (value 1) set, draw a matching target per attempt
+        // and pick an anchor within flying range of it.
         $anchorIds = null;
+        $scoreTargetIds = null;
         if (! isset($data['icao'])) {
-            $anchorIds = Airport::airportOpen()->isAirportSize($destinationAirportSize)
+            $anchorPool = fn () => Airport::airportOpen()->isAirportSize($destinationAirportSize)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, now())->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                ->filterAirbases($destinationAirbases)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                 ->returnOnlyWhitelistedIcao($whitelist)
-                ->has('metar')
-                ->pluck('airports.id');
+                ->has('metar');
 
-            if ($anchorIds->isEmpty()) {
+            $presenceScores = array_filter($filterByScores, fn ($value) => $value == 1);
+
+            if (! empty($presenceScores)) {
+                // Match targets by reason only — ETA windowing happens in the
+                // destination query, once an anchor is drawn
+                $scoreTargetIds = $anchorPool()->filterByScores($presenceScores)->pluck('airports.id');
+            } else {
+                // Pool is identical between attempts — fetch the ids once
+                $anchorIds = $anchorPool()->pluck('airports.id');
+            }
+
+            if (($scoreTargetIds ?? $anchorIds)->isEmpty()) {
                 return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
             }
         }
@@ -217,7 +229,22 @@ class SearchController extends Controller
             if (isset($data['icao'])) {
                 $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->first();
             } else {
-                $primaryAirport = Airport::with('runways', 'scores', 'metar')->find($anchorIds->random());
+                if ($scoreTargetIds !== null) {
+                    // Fresh target and in-range anchor each attempt
+                    $target = Airport::find($scoreTargetIds->random());
+                    $anchorId = $anchorPool()->notIcao($target->icao)
+                        ->withinDistance($target, $minDistance, $maxDistance, $target->icao)
+                        ->inRandomOrder()
+                        ->value('airports.id');
+
+                    if ($anchorId === null) {
+                        continue;
+                    }
+                } else {
+                    $anchorId = $anchorIds->random();
+                }
+
+                $primaryAirport = Airport::with('runways', 'scores', 'metar')->find($anchorId);
                 $suggestedAirport = true;
             }
 
