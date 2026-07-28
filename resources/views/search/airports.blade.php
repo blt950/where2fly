@@ -105,7 +105,7 @@
                                 <button class="d-block btn btn-outline-light btn-sm" data-taf-button="true">Show TAF</button>
                                 <span class="d-none" data-taf-text="true">{{ $primaryAirport->taf->raw_text }}</span>
                             @else
-                                <i class="fa-sharp fa-info-square"></i> No TAF available
+                                <i class="fa-sharp fa-cloud-xmark"></i> No TAF available
                             @endif
                         </span>
                     @else
