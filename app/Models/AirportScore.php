@@ -29,11 +29,18 @@ class AirportScore extends Model
     /** Sources whose window must contain the ETA exactly */
     public const EXACT_MATCH_SOURCES = [self::SOURCE_METAR, self::SOURCE_TAF, self::SOURCE_VATSIM, self::SOURCE_LOGON_ESTIMATE];
 
-    /** Scheduled-presence sources, matched with a ±1h interval overlap against the ETA */
+    /** Scheduled-presence sources, matched with an asymmetric interval overlap against the ETA */
     public const OVERLAP_MATCH_SOURCES = [self::SOURCE_BOOKING, self::SOURCE_EVENT];
 
-    /** Hours of query-time tolerance applied to the inexact sources */
-    public const OVERLAP_MATCH_HOURS = 1;
+    /**
+     * Tolerance applied to the scheduled-presence sources, in minutes. It is
+     * deliberately asymmetric: arriving before the window opens is something
+     * the pilot can fix (depart later, or hold), so it is generous — arriving
+     * after it closes is not, since the controller has already signed off.
+     */
+    public const OVERLAP_MATCH_EARLY_MINUTES = 60;
+
+    public const OVERLAP_MATCH_LATE_MINUTES = 15;
 
     /** Ranking weight of a bare TEMPO period — intermittent but expected */
     public const WEIGHT_TEMPO = 0.7;
@@ -113,8 +120,8 @@ class AirportScore extends Model
     public function coversEtaAt(Carbon $eta, bool $airportHasTafAtEta, bool $metarOnlyWeather = false): bool
     {
         if (in_array($this->source, self::OVERLAP_MATCH_SOURCES)) {
-            return $this->valid_from->lte($eta->copy()->addHours(self::OVERLAP_MATCH_HOURS))
-                && $this->valid_to->gte($eta->copy()->subHours(self::OVERLAP_MATCH_HOURS));
+            return $this->valid_from->lte($eta->copy()->addMinutes(self::OVERLAP_MATCH_EARLY_MINUTES))
+                && $this->valid_to->gte($eta->copy()->subMinutes(self::OVERLAP_MATCH_LATE_MINUTES));
         }
 
         if ($this->source === self::SOURCE_METAR) {
@@ -148,7 +155,7 @@ class AirportScore extends Model
 
         // The ETA sits on the left of each BETWEEN so a per-candidate ETA
         // expression (forecastEtaSql's ST_DISTANCE_SPHERE arithmetic) is
-        // evaluated once per comparison, not once per bound; the ±1h overlap
+        // evaluated once per comparison, not once per bound; the overlap
         // tolerance is moved onto the window side for the same reason.
         $query->where(function ($query) use ($etaSql, $bindings, $metarOnlyWeather) {
             // Exact containment for sources with a precise window
@@ -161,12 +168,13 @@ class AirportScore extends Model
                     ->whereRaw("{$etaSql} BETWEEN airport_scores.valid_from AND airport_scores.valid_to", $bindings);
             });
 
-            // Interval overlap with a tolerance for the scheduled-presence signals
+            // Interval overlap with an asymmetric tolerance for the scheduled-presence signals
             $query->orWhere(function ($query) use ($etaSql, $bindings) {
-                $overlapHours = self::OVERLAP_MATCH_HOURS;
+                $early = self::OVERLAP_MATCH_EARLY_MINUTES;
+                $late = self::OVERLAP_MATCH_LATE_MINUTES;
 
                 $query->whereIn('airport_scores.source', self::OVERLAP_MATCH_SOURCES)
-                    ->whereRaw("{$etaSql} BETWEEN DATE_SUB(airport_scores.valid_from, INTERVAL {$overlapHours} HOUR) AND DATE_ADD(airport_scores.valid_to, INTERVAL {$overlapHours} HOUR)", $bindings);
+                    ->whereRaw("{$etaSql} BETWEEN DATE_SUB(airport_scores.valid_from, INTERVAL {$early} MINUTE) AND DATE_ADD(airport_scores.valid_to, INTERVAL {$late} MINUTE)", $bindings);
             });
 
             if ($metarOnlyWeather) {

@@ -83,10 +83,10 @@ class ScorePredictionTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Overlap sources (±1h tolerance)
+    // Overlap sources (asymmetric tolerance: 1h early, 15min late)
     // -------------------------------------------------------------------------
 
-    public function test_predicted_presence_matches_with_one_hour_overlap(): void
+    public function test_predicted_presence_matches_up_to_an_hour_before_the_window_opens(): void
     {
         $eta = now()->addHours(5);
 
@@ -103,6 +103,31 @@ class ScorePredictionTest extends TestCase
         $this->assertNotContains($eventFar->id, $matched);
         $this->assertContains($bookingNear->id, $matched);
         $this->assertNotContains($bookingFar->id, $matched);
+
+        // The PHP twin agrees
+        $this->assertTrue($bookingNear->coversEtaAt($eta, false));
+        $this->assertFalse($bookingFar->coversEtaAt($eta, false));
+    }
+
+    public function test_predicted_presence_stops_matching_15_minutes_after_the_window_closes(): void
+    {
+        $eta = now()->addHours(5);
+
+        // Landing just after the controller signs off is still worth showing —
+        // landing well after is not, since there is nothing the pilot can do
+        $bookingJustEnded = $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->subHours(4), 'valid_to' => $eta->copy()->subMinutes(10)]);
+        $bookingLongEnded = $this->makeScore(['source' => AirportScore::SOURCE_BOOKING, 'reason' => 'VATSIM_ATC', 'valid_from' => $eta->copy()->subHours(4), 'valid_to' => $eta->copy()->subMinutes(45)]);
+        $eventLongEnded = $this->makeScore(['source' => AirportScore::SOURCE_EVENT, 'reason' => 'VATSIM_EVENT', 'valid_from' => $eta->copy()->subHours(4), 'valid_to' => $eta->copy()->subMinutes(45)]);
+
+        $matched = $this->matchedIds($eta);
+        $this->assertContains($bookingJustEnded->id, $matched);
+        $this->assertNotContains($bookingLongEnded->id, $matched);
+        $this->assertNotContains($eventLongEnded->id, $matched);
+
+        // The PHP twin agrees
+        $this->assertTrue($bookingJustEnded->coversEtaAt($eta, false));
+        $this->assertFalse($bookingLongEnded->coversEtaAt($eta, false));
+        $this->assertFalse($eventLongEnded->coversEtaAt($eta, false));
     }
 
     // -------------------------------------------------------------------------
