@@ -13,19 +13,19 @@
         <div class="text-start">
 
             <h2 class="mb-0">v3.0.0</h2>
-            <span class="badge ps-0 pb-2">2026-XX-XX</span>
+            <span class="badge ps-0 pb-2">2026-07-28</span>
             <ul>
                 <li>Added predictions by using TAF, controller booking and event data for your search results</li>
-                <li>Added distance filter to search by nautical miles</li>
                 <li>Added 85 airports with descriptions notable for their mountains, coasts, hard approaches and more. New public whitelist available to find your next challenge or scenic approach.</li>
-                <li>Added a fillable circle icon for ATC conditions to show amount of facilities online at a glance</li>
                 <li>Added refreshed design with darker colors for input fields, results and other color tweaks. Scenery list is also simplified.</li>
+                <li>Added a new order of expanded filters based on usage. The most used filters are now on top</li>
+                <li>Added distance filter to search by nautical miles</li>
+                <li>Added aircraft filter on the top list</li>
+                <li>Added a fillable circle icon for ATC conditions to show amount of facilities online at a glance</li>
                 <li>Added Navigraph charts link to airport cards</li>
                 <li>Added a close button to the airport card</li>
                 <li>Added a ping animation when clicking on an airport on top list, making it easier to find the airport</li>
                 <li>Added automatic highlight and scroll in sidebar for airports you click on the map</li>
-                <li>Added aircraft filter on the top list</li>
-                <li>Added a new order of expanded filters based on usage. The most used filters are now on top</li>
                 <li>Fixed performance and clustering of maps with many airports.</li>
                 <li>Fixed options randomly disappearing when editing search</li>
                 <li>Fixed the menu breaking on tablet screens</li>
