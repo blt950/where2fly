@@ -13,7 +13,7 @@
         <div class="text-start">
 
             <h2 class="mb-0">v3.0.0</h2>
-            <span class="badge ps-0 pb-2">2026-07-28</span>
+            <span class="badge ps-0 pb-2">2026-07-30</span>
             <ul>
                 <li>Added predictions by using TAF, controller booking and event data for your search results</li>
                 <li>Added 85 airports with descriptions notable for their mountains, coasts, hard approaches and more. New public whitelist available to find your next challenge or scenic approach.</li>
