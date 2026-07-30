@@ -97,11 +97,11 @@ function submitFormMetrics(){
     
     if (window.umami) {
         var multiselectDefaults = {
-            destinations: 'Anywhere',
-            whitelists: 'None',
-            destinationExclusions: 'None',
-            airlines: 'Any',
-            aircrafts: 'Any',
+            destinations: ['Anywhere'],
+            whitelists: ['None'],
+            destinationExclusions: ['None'],
+            airlines: ['Any'],
+            aircrafts: ['Any'],
         };
 
         var additions = {};
