@@ -22,8 +22,6 @@ For the full legal text, see the [LICENSE](LICENSE) file or visit
 ### MySQL Client
 The container image uses the Oracle MySQL Client (8.4.x) installed from the official generic Linux tarball instead of Debian's `default-mysql-client` (MariaDB). This ensures full compatibility with MySQL 8.4 features and protocol behavior. If you need to update the version, change the `MYSQL_CLIENT_VERSION` build argument in the `Dockerfile`.
 
-*You'll notice that React is only applied to the canvas of the map. The end goal is to have the whole application in React, since the current solution is sub-optimal and creates multiple page renders*
-
 ## Development Setup
 
 ### Docker
@@ -42,6 +40,7 @@ The container image uses the Oracle MySQL Client (8.4.x) installed from the offi
 | `APP_AIRLABS_KEY`          | The API key for [Airlabs](https://airlabs.co/) API       | Yes      |
 | `APP_FSADDONCOMPARE_KEY`   | The API key for [FSAddonCompare](https://fsaddoncompare.com/) API | Yes      |
 | `APP_DEBUG`                | Enable debug mode                                        | No       |
+| `APP_GITHUB_KEY`           | Key to fetch feedback page                               | No       |
 | `DEBUGBAR_ENABLED`         | Enable the debugbar                                      | No       |
 | `SENTRY_LARAVEL_DSN`       | Sentry DSN URL                                           | No       |
 | `SENTRY_TRACES_SAMPLE_RATE`| Sentry traces sample rate                                | No       |
@@ -100,9 +99,8 @@ This project uses the following data sources:
 - Airports & Runways: https://ourairports.com/
 - Air Traffic: https://airlabs.co/
 - Flags: https://flagicons.lipis.dev/
-- METAR: https://metar.vatsim.net/all
+- METAR/TAF: [https://metar.vatsim.net/all](https://aviationweather.gov/data/api/)
 - Sceneries: https://fsaddoncompare.com/
-- TAF: https://api.met.no/weatherapi/tafmetar/1.0/taf.txt?icao=ICAO
 
 ## API
 Read more about the [API here](API.md).
