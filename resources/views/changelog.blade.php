@@ -35,6 +35,7 @@
                 <li>Fixed some design breaking when using increased font size</li>
                 <li>A lot of changes under the hood for stability and performance. Searches are now up to 4x faster!</li>
                 <li>Updated airport and runway database to version 2026-07-29</li>
+                <li>Dropped support for unused and old simulators for sceneries and lists</li>
                 <li>API: Added more data rich scores return with predictions</li>
             </ul>
 
