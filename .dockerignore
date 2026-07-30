@@ -16,3 +16,4 @@ tests
 .phpunit.cache
 .phpunit.result.cache
 *.md
+!API.md
