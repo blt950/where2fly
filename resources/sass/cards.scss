@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 .card, .card-title {
     font-family: $font-family-sans-serif;
 
@@ -34,6 +36,7 @@
 
 .sidebar .card{
     &-body{
+        color: $bluewhite;
         background: $table-bg;
 
         img{
@@ -49,11 +52,7 @@
 
         &.active{
             border-left: 10px solid $primary;
-            background: white;
-
-            .card-title{
-                font-weight: bold;
-            }
+            background: color.adjust($tertiary, $lightness: 8%);
 
             .upvotes{
                 border-color: $primary;
@@ -61,11 +60,15 @@
         }
     }
 
+    &-text.author{
+        color: color.adjust($tertiary, $lightness: 45%);
+    }
+
     &-link{
         text-decoration: none;
 
         :hover{
-            background: #eeeeee;
+            background: color.adjust($tertiary, $lightness: -8%);
         }
     }
 }

@@ -88,20 +88,31 @@ const MapDrawRoute = ({ departure, arrival, reverseDirection = false }) => {
         }
         
         // Start drawing the path once map is done moving
-        map.once('moveend', function () {
+        const addPathToMap = function () {
             routePath.current.addTo(map);
-        });
-        
+        };
+        map.once('moveend', addPathToMap);
+
         // Redraw route path with canvas renderer to fix the line becoming dashes
-        setTimeout(() => {
+        const redrawTimeout = setTimeout(() => {
             routePath.current.remove();
-            
+
             pathOptions.renderer = L.canvas();
             pathOptions.animate = [];
-            
+
             routePath.current = L.curve(['M', latlng1, 'Q', midpointLatLng, latlng2], pathOptions).addTo(map);
-                
+
         }, 350 + duration);
+
+        // Remove the path when the route is cleared or redrawn
+        return () => {
+            clearTimeout(redrawTimeout);
+            map.off('moveend', addPathToMap);
+            if (routePath.current !== null) {
+                routePath.current.remove();
+                routePath.current = null;
+            }
+        };
     }, [airports, departure, arrival]);
             
     const calcMidpointLatLng = (latlng1, latlng2) => {

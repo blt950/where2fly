@@ -1,20 +1,31 @@
-// Body
-$body-bg: #f8fafc;
-$table-color: black;
-$table-bg: #fffdf7;
+@use 'sass:color';
+
+// Colors
+$primary: #ddb81c;
+$secondary: #161925;
+$tertiary: #2f3549;
+
+$gray: #6C757D;
+$offwhite: #fffdf7;
+$bluewhite: #e4f0ff;
+
+// Table
+$body-bg: $tertiary;
+$table-color: $bluewhite;
+$table-border-color: $secondary;
+$table-hover-bg: color.adjust($tertiary, $lightness: -3%);
+$table-bg: $tertiary;
 
 // Buttons
 $btn-close-color: #fff;
 
 // Typography
+$font-family: 'Work Sans', sans-serif;
 $font-family-sans-serif: 'Work Sans', sans-serif;
 $font-size-base: 0.875rem;
 $line-height-base: 1.6;
 
-$primary: #ddb81c;
-$secondary: #161925;
-$gray: #6C757D;
-
+// Misc
 $danger: #870F0C;
 $info: #487495;
 $dark: rgba(0,0,0,0.25);
@@ -33,6 +44,8 @@ $navbar-nav-link-padding-y: 1rem;
 
 $fa-font-path: "../fonts";
 
+$tooltip-color: $offwhite;
+$tooltip-bg: #060606;
 $tooltip-max-width: 500px;
 $tooltip-opacity: 1;
 

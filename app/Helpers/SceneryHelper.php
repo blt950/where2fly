@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\SceneryDeveloper;
+use App\Models\Simulator;
 
 class SceneryHelper
 {
@@ -53,10 +54,7 @@ class SceneryHelper
             }
 
             if (in_array($compatibleSimulator, $store->simulatorVersions)) {
-                if ($cheapestStore == null) {
-                    $cheapestStore = $store;
-                }
-                if ($store->currencyPrice->EUR < $cheapestStore->currencyPrice->EUR) {
+                if ($cheapestStore === null || $store->currencyPrice->EUR < $cheapestStore->currencyPrice->EUR) {
                     $cheapestStore = $store;
                 }
             }
@@ -75,8 +73,6 @@ class SceneryHelper
             'developer' => $sceneryDeveloperData->developer,
             'link' => $apiData['link'] ?? $sceneryData->link,
             'linkDomain' => isset($apiData) ? null : parse_url($sceneryData->link, PHP_URL_HOST),
-            'currencyLink' => $apiData['currencyLink'] ?? null,
-            'cheapestLink' => $apiData['cheapestLink'] ?? $sceneryData->link,
             'cheapestStore' => $apiData['cheapestStore'] ?? $sceneryDeveloperData->developer,
             'cheapestPrice' => $apiData['cheapestPrice'] ?? null,
             'ratingAverage' => $apiData['ratingAverage'] ?? null,
@@ -111,10 +107,23 @@ class SceneryHelper
         foreach ($returnData as $simulator => $sceneries) {
             // First sort by developer name
             usort($sceneries, fn ($a, $b) => $a['developer'] <=> $b['developer']);
-            // Then sort by payware/free
-            usort($sceneries, fn ($a, $b) => $a['payware'] <=> $b['payware']);
+            // Then sort by payware/free: -1 (bundled) on top, then payware, then freeware
+            usort($sceneries, function ($a, $b) {
+                if ($a['payware'] === -1 && $b['payware'] !== -1) {
+                    return -1;
+                }
+                if ($a['payware'] !== -1 && $b['payware'] === -1) {
+                    return 1;
+                }
+
+                return $b['payware'] <=> $a['payware'];
+            });
             $returnData[$simulator] = $sceneries;
         }
+
+        // Finally, order the simulator groups themselves by the simulators table "order" column
+        $simulatorOrder = Simulator::pluck('order', 'shortened_name');
+        uksort($returnData, fn ($a, $b) => ($simulatorOrder[$a] ?? PHP_INT_MAX) <=> ($simulatorOrder[$b] ?? PHP_INT_MAX));
     }
 
     public static function getEmbeddedUrl($fullUrl)
@@ -129,7 +138,7 @@ class SceneryHelper
         parse_str($urlComponents['query'], $queryParams);
 
         // Retrieve the 'url' parameter value
-        $embeddedUrl = isset($queryParams['url']) ? $queryParams['url'] : null;
+        $embeddedUrl = $queryParams['url'] ?? null;
 
         // Strip 'www.' and 'secure.' and addoncompare from the URL
         if ($embeddedUrl) {

@@ -110,5 +110,36 @@
             airtimeMinInput.value = Math.round(values[0])
             airtimeMaxInput.value = Math.round(values[1])
         });
+
+        var distanceSlider = document.getElementById('slider-distance');
+        noUiSlider.create(distanceSlider, {
+            start: [{{ old('distanceMin') ? old('distanceMin') : 0 }}, {{ old('distanceMax') ? old('distanceMax') : 6000 }}],
+            step: 100,
+            connect: true,
+            behaviour: 'drag',
+            range: {
+                'min': [0],
+                'max': [6000]
+            },
+            handleAttributes: [
+                { 'aria-label': 'lower' },
+                { 'aria-label': 'upper' },
+            ],
+        });
+
+        var distanceSliderText = document.getElementById('slider-distance-text');
+        var distanceMinInput = document.getElementById('distanceMin');
+        var distanceMaxInput = document.getElementById('distanceMax');
+        distanceSlider.noUiSlider.on('update', function (values) {
+
+            if(values[1] == 6000){
+                distanceSliderText.innerHTML = Math.round(values[0]).toLocaleString(userLocale) + '-' + Math.round(values[1]).toLocaleString(userLocale) + '+ NM';
+            } else {
+                distanceSliderText.innerHTML = Math.round(values[0]).toLocaleString(userLocale) + '-' + Math.round(values[1]).toLocaleString(userLocale) + ' NM';
+            }
+
+            distanceMinInput.value = Math.round(values[0])
+            distanceMaxInput.value = Math.round(values[1])
+        });
     }, false);
 </script>

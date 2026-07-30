@@ -37,6 +37,6 @@ class FetchGithubIssues extends Command
             $this->info("No new issues. Highest issue: #{$highestFetched}");
         }
 
-        $this->info('Fetched ' . count($data) . ' issues.');
+        $this->info('Fetched ' . $data->count() . ' issues.');
     }
 }

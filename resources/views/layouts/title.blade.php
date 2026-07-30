@@ -2,7 +2,7 @@
     <h1>{{ $title }}</h1>
 
     @isset($subtitle)
-        <h2>{{ $subtitle }}</h2>
+        <h2 class="mb-0">{{ $subtitle }}</h2>
     @endisset
 
     @isset($editLink)
@@ -18,11 +18,11 @@
                 @endif
             @endforeach
 
-            @if(!isset(request()->all()['sortByWeather']))
+            @if(!request()->has('sortByWeather'))
                 <input type="hidden" name="sortByWeather" value="0">
             @endif
             
-            @if(!isset(request()->all()['sortByATC']))
+            @if(!request()->has('sortByATC'))
                 <input type="hidden" name="sortByATC" value="0">
             @endif
 

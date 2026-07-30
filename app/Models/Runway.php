@@ -13,10 +13,13 @@ class Runway extends Model
 
     protected $guarded = [];
 
-    protected $casts = [
-        'lighted' => 'boolean',
-        'closed' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'lighted' => 'boolean',
+            'closed' => 'boolean',
+        ];
+    }
 
     public function airport()
     {

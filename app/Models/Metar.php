@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\WeatherScoreHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,9 +12,12 @@ class Metar extends Model
 
     public $timestamps = false;
 
-    protected $cats = [
-        'last_updated' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'last_update' => 'datetime',
+        ];
+    }
 
     protected $guarded = [];
 
@@ -45,7 +49,7 @@ class Metar extends Model
         // Check american sight. 10SM == 9999
         $results = [];
         if (preg_match('/\s(\d\d?)SM\s/', $this->metarWithoutRemarks(), $results)) {
-            if ((int) $results[1] * 1609.344 >= $meters) {
+            if ((int) $results[1] * WeatherScoreHelper::METERS_PER_STATUTE_MILE >= $meters) {
                 return true;
             }
         }
@@ -71,7 +75,7 @@ class Metar extends Model
         // Check american sight. 10SM == 9999
         $results = [];
         if (preg_match('/\s(\d\d?)SM\s/', $this->metarWithoutRemarks(), $results)) {
-            if ((int) $results[1] * 1609.344 < $meters) {
+            if ((int) $results[1] * WeatherScoreHelper::METERS_PER_STATUTE_MILE < $meters) {
                 return true;
             }
         }
@@ -112,42 +116,22 @@ class Metar extends Model
 
     public function foggy()
     {
-        $results = [];
-        if (preg_match('/(FG|HZ)/', $this->metarWithoutRemarks(), $results)) {
-            return true;
-        }
-
-        return false;
+        return preg_match(WeatherScoreHelper::FOG_PATTERN, $this->metarWithoutRemarks()) === 1;
     }
 
     public function heavyRain()
     {
-        $results = [];
-        if (preg_match('/(\+RA|\+SHRA)/', $this->metarWithoutRemarks(), $results)) {
-            return true;
-        }
-
-        return false;
+        return preg_match(WeatherScoreHelper::HEAVY_RAIN_PATTERN, $this->metarWithoutRemarks()) === 1;
     }
 
     public function heavySnow()
     {
-        $results = [];
-        if (preg_match('/(\+SN)/', $this->metarWithoutRemarks(), $results)) {
-            return true;
-        }
-
-        return false;
+        return preg_match(WeatherScoreHelper::HEAVY_SNOW_PATTERN, $this->metarWithoutRemarks()) === 1;
     }
 
     public function thunderstorm()
     {
-        $results = [];
-        if (preg_match('/(TS|\+TSRA)/', $this->metarWithoutRemarks(), $results)) {
-            return true;
-        }
-
-        return false;
+        return preg_match(WeatherScoreHelper::THUNDERSTORM_PATTERN, $this->metarWithoutRemarks()) === 1;
     }
 
     public function rvrAtBelow(string $rwy, int $meters)

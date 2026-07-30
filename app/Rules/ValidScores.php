@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Http\Controllers\ScoreController;
+use App\Helpers\ScoreHelper;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
@@ -16,15 +16,20 @@ class ValidScores implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-
-        $whitelist = [];
-        foreach (ScoreController::$score_types as $k => $score_type) {
-            $whitelist[] = $k;
+        // The 'array' rule reports non-array input; nothing to validate here
+        if (! is_array($value)) {
+            return;
         }
 
-        foreach ($value as $score => $value) {
+        $whitelist = array_keys(ScoreHelper::TYPES);
+
+        foreach ($value as $score => $scoreValue) {
             if (! in_array($score, $whitelist)) {
                 $fail('Not a valid parameter.');
+            }
+
+            if (! in_array((string) $scoreValue, ['-1', '0', '1'], true)) {
+                $fail('Score values must be -1, 0 or 1.');
             }
         }
     }

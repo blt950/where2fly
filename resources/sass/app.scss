@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 /*
 * Fonts
 */
@@ -77,10 +79,6 @@ h2 {
     font-weight: normal;
 }
 
-.font-work-sans{
-    font-family: 'Work Sans', sans-serif;
-}
-
 header {
     height: $header-height;
     background: $secondary;
@@ -107,8 +105,8 @@ main, nav.sidebar{
     }
 
     .title{
-        padding: 1.5rem 1rem;
-        background: #202538;
+        padding: 1rem;
+        background: $secondary;
 
         h1{
             margin: 0;
@@ -136,6 +134,23 @@ main, nav.sidebar{
             padding: 0;
             height: 100%;
         }
+
+        .card-title{
+            border: 0;
+        }
+
+        .card-body{
+            color: $bluewhite;
+        }
+
+        .card-footer{
+            color: $bluewhite;
+            border-top: 1px solid $secondary;
+
+            .author{
+                color: color.adjust($tertiary, $lightness: 45%);
+            }
+        }
     }
 
     &.nomap{
@@ -149,14 +164,10 @@ main, nav.sidebar{
     }
 }
 
-nav.sidebar p{
-    font-family: $font-family-sans-serif;
-}
-
 @include media-breakpoint-down(md) {
     
     /* Mobile specific styles fixing scroll behavour for browsers to hide UI */
-    /* @TODO Find a better solution for this, feel hacky. */
+    /* This fights a bit Bootstrap, but it works. */
     body.d-flex.h-100 {
         height: auto !important;
         min-height: 100dvh;
@@ -167,9 +178,10 @@ nav.sidebar p{
         min-height: 100dvh;
     }
 
-    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > main.mobile-focus,
-    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > nav.sidebar.mobile-focus,
-    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > main:not(.mobile-focus):not(.mobile-nofocus) {
+    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > :is(
+        :is(main, nav.sidebar).mobile-focus,
+        main:not(.mobile-focus, .mobile-nofocus)
+    ) {
         height: auto;
         min-height: calc(100dvh - $header-height);
         overflow-y: visible;

@@ -1,5 +1,5 @@
 <header class="mb-auto">
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-xl navbar-dark">
         <div class="d-flex d-row">
             <a href="{{ route('front') }}" class="d-block navbar-brand mb-0 logo">
                 Where2Fly
@@ -93,7 +93,7 @@
         <div id="menu-overlay" class="menu-overlay d-md-none"></div>
     </nav>
 </header>
-@if(Config::get('app.env') != "production")
+@if(!app()->isProduction())
 <span class="testbadge badge bg-danger  ms-2 mt-2" role="alert">
     TEST
 </span>

@@ -59,7 +59,7 @@
                 <div class="d-flex align-items-center">
                     <img src="{{ $issue['user']['avatar_url'] }}" alt="" class="rounded-circle me-1">
                     <p class="card-text mb-0 me-2">{{ $issue['user']['login'] }}</p>
-                    <p class="card-text text-muted mb-0">{{ \Carbon\Carbon::parse($issue['created_at'])->diffForHumans() }}</p>
+                    <p class="card-text author mb-0">{{ \Carbon\Carbon::parse($issue['created_at'])->diffForHumans() }}</p>
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@
                     <div class="d-flex align-items-center">
                         <img src="{{ $comment['user']['avatar_url'] }}" alt="" class="rounded-circle me-1">
                         <p class="card-text mb-0 me-2">{{ $comment['user']['login'] }}</p>
-                        <p class="card-text text-muted mb-0">{{ \Carbon\Carbon::parse($comment['created_at'])->diffForHumans() }}</p>
+                        <p class="card-text author mb-0">{{ \Carbon\Carbon::parse($comment['created_at'])->diffForHumans() }}</p>
                     </div>
                 </div>
             </div>

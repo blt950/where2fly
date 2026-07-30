@@ -1,5 +1,5 @@
 # Intermediate build container for front-end resources
-FROM docker.io/library/node:25.8-alpine AS frontend
+FROM docker.io/library/node:26.5-alpine AS frontend
 # Easy to prune intermediary containers
 LABEL stage=build
 
@@ -11,7 +11,7 @@ RUN npm ci --omit dev && \
 
 ####################################################################################################
 # Primary container
-FROM docker.io/library/php:8.3.30-apache-trixie
+FROM docker.io/library/php:8.5.8-apache-trixie
 
 # Default container port for the apache configuration
 EXPOSE 80 443
@@ -34,7 +34,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Oracle MySQL Client
-ARG MYSQL_CLIENT_VERSION=8.4.2
+ARG MYSQL_CLIENT_VERSION=8.4.9
 RUN set -eux; \
     curl -fsSL "https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-${MYSQL_CLIENT_VERSION}-linux-glibc2.28-x86_64.tar.xz" -o /tmp/mysql-client.tar.xz; \
     tar -xf /tmp/mysql-client.tar.xz -C /usr/local; \
@@ -54,8 +54,8 @@ COPY ./container/configs/apache.conf /etc/apache2/apache2.conf
 COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install PHP extension(s)
-COPY --from=mlocati/php-extension-installer:2.10.6 /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions pdo_mysql zip opcache
+COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions pdo_mysql zip opcache intl
 
 # Install composer
 COPY --from=docker.io/library/composer:latest /usr/bin/composer /usr/bin/composer
@@ -66,9 +66,21 @@ COPY --from=frontend --chown=www-data:www-data /app/public/ /app/public/
 WORKDIR /app
 
 RUN composer install --no-dev --no-interaction --prefer-dist
-RUN mkdir -p /app/storage/logs/
+
+# Normalise ownership/permissions of the writable trees before we drop into the service process.
+RUN mkdir -p \
+        /app/storage/logs \
+        /app/storage/app/tmp \
+        /app/storage/app/backup-temp \
+        /app/storage/framework/cache \
+        /app/storage/framework/sessions \
+        /app/storage/framework/views \
+        /app/bootstrap/cache && \
+    chown -R www-data:www-data /app/storage /app/bootstrap/cache && \
+    chmod -R g+w /app/storage /app/bootstrap/cache
 
 # Wrap around the default PHP entrypoint with a custom entrypoint
 COPY ./container/entrypoint.sh /usr/local/bin/service-entrypoint
+RUN chmod +x /usr/local/bin/service-entrypoint
 ENTRYPOINT [ "service-entrypoint" ]
 CMD ["apache2-foreground"]

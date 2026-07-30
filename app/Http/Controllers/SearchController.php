@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AircraftHelper;
 use App\Helpers\CalculationHelper;
+use App\Helpers\CountryHelper;
+use App\Helpers\ScoreHelper;
 use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
@@ -22,10 +25,6 @@ use Illuminate\View\View;
 
 class SearchController extends Controller
 {
-    public static $countries = ['AF' => 'Afghanistan', 'AL' => 'Albania', 'DZ' => 'Algeria', 'AS' => 'American Samoa', 'AD' => 'Andorra', 'AO' => 'Angola', 'AI' => 'Anguilla', 'AQ' => 'Antarctica', 'AG' => 'Antigua And Barbuda', 'AR' => 'Argentina', 'AM' => 'Armenia', 'AW' => 'Aruba', 'AU' => 'Australia', 'AT' => 'Austria', 'AZ' => 'Azerbaijan', 'BS' => 'Bahamas', 'BH' => 'Bahrain', 'BD' => 'Bangladesh', 'BB' => 'Barbados', 'BY' => 'Belarus', 'BE' => 'Belgium', 'BZ' => 'Belize', 'BJ' => 'Benin', 'BM' => 'Bermuda', 'BT' => 'Bhutan', 'BO' => 'Bolivia', 'BA' => 'Bosnia And Herzegovina', 'BW' => 'Botswana', 'BV' => 'Bouvet Island', 'BR' => 'Brazil', 'IO' => 'British Indian Ocean Territory', 'BN' => 'Brunei Darussalam', 'BG' => 'Bulgaria', 'BF' => 'Burkina Faso', 'BI' => 'Burundi', 'KH' => 'Cambodia', 'CM' => 'Cameroon', 'CA' => 'Canada', 'CV' => 'Cape Verde', 'KY' => 'Cayman Islands', 'CF' => 'Central African Republic', 'TD' => 'Chad', 'CL' => 'Chile', 'CN' => 'China', 'CX' => 'Christmas Island', 'CC' => 'Cocos (Keeling) Islands', 'CO' => 'Colombia', 'KM' => 'Comoros', 'CG' => 'Congo', 'CD' => 'Congo, Democratic Republic', 'CK' => 'Cook Islands', 'CR' => 'Costa Rica', 'CI' => 'Cote D\'Ivoire', 'HR' => 'Croatia', 'CU' => 'Cuba', 'CY' => 'Cyprus', 'CZ' => 'Czech Republic', 'DK' => 'Denmark', 'DJ' => 'Djibouti', 'DM' => 'Dominica', 'DO' => 'Dominican Republic', 'EC' => 'Ecuador', 'EG' => 'Egypt', 'SV' => 'El Salvador', 'GQ' => 'Equatorial Guinea', 'ER' => 'Eritrea', 'EE' => 'Estonia', 'ET' => 'Ethiopia', 'FK' => 'Falkland Islands (Malvinas)', 'FO' => 'Faroe Islands', 'FJ' => 'Fiji', 'FI' => 'Finland', 'FR' => 'France', 'GF' => 'French Guiana', 'PF' => 'French Polynesia', 'TF' => 'French Southern Territories', 'GA' => 'Gabon', 'GM' => 'Gambia', 'GE' => 'Georgia', 'DE' => 'Germany', 'GH' => 'Ghana', 'GI' => 'Gibraltar', 'GR' => 'Greece', 'GL' => 'Greenland', 'GD' => 'Grenada', 'GP' => 'Guadeloupe', 'GU' => 'Guam', 'GT' => 'Guatemala', 'GG' => 'Guernsey', 'GN' => 'Guinea', 'GW' => 'Guinea-Bissau', 'GY' => 'Guyana', 'HT' => 'Haiti', 'HM' => 'Heard Island & Mcdonald Islands', 'VA' => 'Holy See (Vatican City State)', 'HN' => 'Honduras', 'HK' => 'Hong Kong', 'HU' => 'Hungary', 'IS' => 'Iceland', 'IN' => 'India', 'ID' => 'Indonesia', 'IR' => 'Iran, Islamic Republic Of', 'IQ' => 'Iraq', 'IE' => 'Ireland', 'IM' => 'Isle Of Man', 'IL' => 'Israel', 'IT' => 'Italy', 'JM' => 'Jamaica', 'JP' => 'Japan', 'JE' => 'Jersey', 'JO' => 'Jordan', 'KZ' => 'Kazakhstan', 'KE' => 'Kenya', 'KI' => 'Kiribati', 'KR' => 'Korea', 'KW' => 'Kuwait', 'KG' => 'Kyrgyzstan', 'LA' => 'Lao People\'s Democratic Republic', 'LV' => 'Latvia', 'LB' => 'Lebanon', 'LS' => 'Lesotho', 'LR' => 'Liberia', 'LY' => 'Libyan Arab Jamahiriya', 'LI' => 'Liechtenstein', 'LT' => 'Lithuania', 'LU' => 'Luxembourg', 'MO' => 'Macao', 'MK' => 'Macedonia', 'MG' => 'Madagascar', 'MW' => 'Malawi', 'MY' => 'Malaysia', 'MV' => 'Maldives', 'ML' => 'Mali', 'MT' => 'Malta', 'MH' => 'Marshall Islands', 'MQ' => 'Martinique', 'MR' => 'Mauritania', 'MU' => 'Mauritius', 'YT' => 'Mayotte', 'MX' => 'Mexico', 'FM' => 'Micronesia, Federated States Of', 'MD' => 'Moldova', 'MC' => 'Monaco', 'MN' => 'Mongolia', 'ME' => 'Montenegro', 'MS' => 'Montserrat', 'MA' => 'Morocco', 'MZ' => 'Mozambique', 'MM' => 'Myanmar', 'NA' => 'Namibia', 'NR' => 'Nauru', 'NP' => 'Nepal', 'NL' => 'Netherlands', 'AN' => 'Netherlands Antilles', 'NC' => 'New Caledonia', 'NZ' => 'New Zealand', 'NI' => 'Nicaragua', 'NE' => 'Niger', 'NG' => 'Nigeria', 'NU' => 'Niue', 'NF' => 'Norfolk Island', 'MP' => 'Northern Mariana Islands', 'NO' => 'Norway', 'OM' => 'Oman', 'PK' => 'Pakistan', 'PW' => 'Palau', 'PS' => 'Palestinian Territory, Occupied', 'PA' => 'Panama', 'PG' => 'Papua New Guinea', 'PY' => 'Paraguay', 'PE' => 'Peru', 'PH' => 'Philippines', 'PN' => 'Pitcairn', 'PL' => 'Poland', 'PT' => 'Portugal', 'PR' => 'Puerto Rico', 'QA' => 'Qatar', 'RE' => 'Reunion', 'RO' => 'Romania', 'RU' => 'Russian Federation', 'RW' => 'Rwanda', 'BL' => 'Saint Barthelemy', 'SH' => 'Saint Helena', 'KN' => 'Saint Kitts And Nevis', 'LC' => 'Saint Lucia', 'MF' => 'Saint Martin', 'PM' => 'Saint Pierre And Miquelon', 'VC' => 'Saint Vincent And Grenadines', 'WS' => 'Samoa', 'SM' => 'San Marino', 'ST' => 'Sao Tome And Principe', 'SA' => 'Saudi Arabia', 'SN' => 'Senegal', 'RS' => 'Serbia', 'SC' => 'Seychelles', 'SL' => 'Sierra Leone', 'SG' => 'Singapore', 'SK' => 'Slovakia', 'SI' => 'Slovenia', 'SB' => 'Solomon Islands', 'SO' => 'Somalia', 'ZA' => 'South Africa', 'GS' => 'South Georgia And Sandwich Isl.', 'ES' => 'Spain', 'LK' => 'Sri Lanka', 'SD' => 'Sudan', 'SR' => 'Suriname', 'SJ' => 'Svalbard And Jan Mayen', 'SZ' => 'Swaziland', 'SE' => 'Sweden', 'CH' => 'Switzerland', 'SY' => 'Syrian Arab Republic', 'TW' => 'Taiwan', 'TJ' => 'Tajikistan', 'TZ' => 'Tanzania', 'TH' => 'Thailand', 'TL' => 'Timor-Leste', 'TG' => 'Togo', 'TK' => 'Tokelau', 'TO' => 'Tonga', 'TT' => 'Trinidad And Tobago', 'TN' => 'Tunisia', 'TR' => 'Turkey', 'TM' => 'Turkmenistan', 'TC' => 'Turks And Caicos Islands', 'TV' => 'Tuvalu', 'UG' => 'Uganda', 'UA' => 'Ukraine', 'AE' => 'United Arab Emirates', 'GB' => 'United Kingdom', 'US' => 'United States', 'UM' => 'United States Outlying Islands', 'UY' => 'Uruguay', 'UZ' => 'Uzbekistan', 'VU' => 'Vanuatu', 'VE' => 'Venezuela', 'VN' => 'Viet Nam', 'VG' => 'Virgin Islands, British', 'VI' => 'Virgin Islands, U.S.', 'WF' => 'Wallis And Futuna', 'EH' => 'Western Sahara', 'XK' => 'Kosovo', 'YE' => 'Yemen', 'ZM' => 'Zambia', 'ZW' => 'Zimbabwe'];
-
-    public static $usStates = ['AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas', 'CA' => 'California', 'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware', 'FL' => 'Florida', 'GA' => 'Georgia', 'HI' => 'Hawaii', 'ID' => 'Idaho', 'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 'Iowa', 'KS' => 'Kansas', 'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MD' => 'Maryland', 'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota', 'MS' => 'Mississippi', 'MO' => 'Missouri', 'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada', 'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 'NY' => 'New York', 'NC' => 'North Carolina', 'ND' => 'North Dakota', 'OH' => 'Ohio', 'OK' => 'Oklahoma', 'OR' => 'Oregon', 'PA' => 'Pennsylvania', 'RI' => 'Rhode Island', 'SC' => 'South Carolina', 'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah', 'VT' => 'Vermont', 'VA' => 'Virginia', 'WA' => 'Washington', 'WV' => 'West Virginia', 'WI' => 'Wisconsin', 'WY' => 'Wyoming'];
-
     /**
      * Display a listing of the resource.
      *
@@ -33,24 +32,7 @@ class SearchController extends Controller
      */
     public function indexArrivalSearch()
     {
-        $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
-        $aircrafts = Aircraft::all()->pluck('icao')->sort();
-        $prefilledIcao = request()->input('icao');
-        $destinationInputs = $this->getDestinationInputs();
-        $whitelistDatabase = null;
-
-        if (Auth::check()) {
-            $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
-        } else {
-            $lists = UserList::where('public', true)->get();
-        }
-
-        // Get whitelist table if present in old input
-        if (old('whitelists') !== null) {
-            $whitelistDatabase = $this->getWhitelistsFromInput(old('whitelists'));
-        }
-
-        return view('front.arrivals', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
+        return $this->buildSearchView('front.arrivals');
     }
 
     /**
@@ -58,23 +40,29 @@ class SearchController extends Controller
      */
     public function indexDepartureSearch()
     {
+        return $this->buildSearchView('front.departures');
+    }
+
+    /**
+     * Build the shared view data for the arrival/departure search forms.
+     */
+    private function buildSearchView(string $view): View
+    {
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
         $destinationInputs = $this->getDestinationInputs();
         $whitelistDatabase = null;
 
-        if (Auth::check()) {
-            $lists = UserList::where('user_id', Auth::id())->orWhere('public', true)->get();
-        } else {
-            $lists = UserList::where('public', true)->get();
-        }
+        $lists = UserList::where('public', true)
+            ->when(Auth::check(), fn ($q) => $q->orWhere('user_id', Auth::id()))
+            ->get();
 
         if (old('whitelists') !== null) {
             $whitelistDatabase = $this->getWhitelistsFromInput(old('whitelists'));
         }
 
-        return view('front.departures', compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
+        return view($view, compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
     }
 
     /**
@@ -101,9 +89,11 @@ class SearchController extends Controller
             'direction' => ['required', 'in:arrival,departure'],
             'destinations' => ['sometimes', 'array', new ValidDestinations],
             'destinationExclusions' => ['sometimes', 'array', new ValidDestinations],
-            'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
+            'codeletter' => ['required', 'string', 'in:' . implode(',', AircraftHelper::codes())],
             'airtimeMin' => ['required', 'numeric', 'between:0,12'],
             'airtimeMax' => ['required', 'numeric', 'between:0,12'],
+            'distanceMin' => ['sometimes', 'numeric', 'between:0,6000'],
+            'distanceMax' => ['sometimes', 'numeric', 'between:0,6000'],
             'sortByWeather' => ['in:0,1'],
             'sortByATC' => ['in:0,1'],
             'whitelists' => ['sometimes', 'array'],
@@ -150,10 +140,14 @@ class SearchController extends Controller
             $airtimeMax = 24;
         } // If airtime is 12+ hours, bump it
 
+        // Optional so pre-existing bookmarked searches keep validating
+        $distanceMin = (int) ($data['distanceMin'] ?? 0);
+        $distanceMax = (int) ($data['distanceMax'] ?? 6000);
+
         // Create a filter array based on input
         $sortByScores = [];
-        isset($data['sortByWeather']) ? $sortByScores = array_merge($sortByScores, ScoreController::getWeatherTypes()) : null;
-        isset($data['sortByATC']) ? $sortByScores = array_merge($sortByScores, ScoreController::getVatsimTypes()) : null;
+        isset($data['sortByWeather']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::weatherTypes()) : null;
+        isset($data['sortByATC']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::vatsimTypes()) : null;
 
         $whitelist = null;
         if (isset($data['whitelists'])) {
@@ -178,75 +172,129 @@ class SearchController extends Controller
         $rwyLengthMin = (int) $data['rwyLengthMin'];
         $rwyLengthMax = (int) $data['rwyLengthMax'];
 
-        isset($data['airlines']) ? $filterByAirlines = $data['airlines'] : $filterByAirlines = null;
-        isset($data['aircrafts']) ? $filterByAircrafts = $data['aircrafts'] : $filterByAircrafts = null;
+        $filterByAirlines = $data['airlines'] ?? null;
+        $filterByAircrafts = $data['aircrafts'] ?? null;
 
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
+
+        // Intersect the airtime-derived range with the distance slider; the
+        // slider's top position means 6000+, i.e. no upper bound
+        $minDistance = max($minDistance, $distanceMin);
+        if ($distanceMax < 6000) {
+            $maxDistance = min($maxDistance, $distanceMax);
+        }
 
         /**
          *  Fetch the requested data
          */
 
+        // Score filters describe the suggested airports, not the anchor. With
+        // presence filters (value 1) set, draw a matching target per attempt
+        // and pick an anchor within flying range of it.
+        $anchorIds = null;
+        $scoreTargetIds = null;
+        if (! isset($data['icao'])) {
+            $anchorPool = fn () => Airport::airportOpen()->isAirportSize($destinationAirportSize)
+                ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
+                ->filterAirbases($destinationAirbases)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                ->returnOnlyWhitelistedIcao($whitelist)
+                ->has('metar');
+
+            $presenceScores = array_filter($filterByScores, fn ($value) => $value == 1);
+
+            if (! empty($presenceScores)) {
+                // Match targets by reason only — ETA windowing happens in the
+                // destination query, once an anchor is drawn
+                $scoreTargetIds = $anchorPool()->filterByScores($presenceScores)->pluck('airports.id');
+            } else {
+                // Pool is identical between attempts — fetch the ids once
+                $anchorIds = $anchorPool()->pluck('airports.id');
+            }
+
+            if (($scoreTargetIds ?? $anchorIds)->isEmpty()) {
+                return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
+            }
+        }
+
         // Lets find an result with the given criteria. Give it a few attempts before we give up.
-        $maxAttempts = 20;
+        // With a fixed anchor the destination query is deterministic apart from the
+        // shuffle — an empty result stays empty, so retrying would only re-run the
+        // identical query. Retries only help the random-anchor path, where each
+        // attempt draws a new anchor.
+        $maxAttempts = isset($data['icao']) ? 1 : 20;
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
 
-            // Use the supplied departure or select a random airport
+            // Use the supplied departure or draw a random anchor from the pool
             $suggestedAirport = false;
             if (isset($data['icao'])) {
-                $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->get()->first();
+                $primaryAirport = Airport::where('icao', $data['icao'])->orWhere('local_code', $data['icao'])->first();
             } else {
-                // Select primary airport based on the criteria
-                $primaryAirport = Airport::airportOpen()->isAirportSize($destinationAirportSize)
-                    ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-                    ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
-                    ->returnOnlyWhitelistedIcao($whitelist)
-                    ->has('metar')->with('runways', 'scores', 'metar')
-                    ->get();
+                if ($scoreTargetIds !== null) {
+                    // Fresh target and in-range anchor each attempt
+                    $target = Airport::find($scoreTargetIds->random());
+                    $anchorId = $anchorPool()->notIcao($target->icao)
+                        ->withinDistance($target, $minDistance, $maxDistance, $target->icao)
+                        ->inRandomOrder()
+                        ->value('airports.id');
 
-                // Shuffle and limit the results to 20
-                $primaryAirport = $primaryAirport->groupBy('score_count')->map(function ($group) {
-                    return $group->shuffle();
-                })->flatten(1)->take(20);
-
-                if (! $primaryAirport || ! $primaryAirport->count()) {
-                    return back()->withErrors(['airportNotFound' => 'No suitable airport combination could be found with given criteria'])->withInput();
+                    if ($anchorId === null) {
+                        continue;
+                    }
+                } else {
+                    $anchorId = $anchorIds->random();
                 }
 
-                $primaryAirport = $primaryAirport->random();
+                $primaryAirport = Airport::with('runways', 'scores', 'metar')->find($anchorId);
                 $suggestedAirport = true;
             }
 
-            // Get airports according to filter
-            $airports = collect();
+            // Calculate the ETA for sorting
+            $candidatesAreDepartures = $direction == 'arrival';
+            $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEtaSql($primaryAirport, $codeletter);
+
+            // Phase 1: fetch the full candidate pool as thin id (+ score_count) rows.
+            // Selecting only the id keeps the grouped/sorted temp table in memory
+            // (airports.* drags the GEOMETRY column in, forcing it to disk), while
+            // the whole pool is still fetched so a refresh can shuffle up a
+            // different subset among equally-scored airports.
             $airports = Airport::airportOpen()->notIcao($primaryAirport->icao)->isAirportSize($destinationAirportSize)
                 ->inContinent($destinations)->inCountry($destinations, $primaryAirport->iso_country)->inState($destinations)
                 ->notInContinent($destinationExclusions)->notInCountry($destinationExclusions, $primaryAirport->iso_country)->notInState($destinationExclusions)
                 ->withinDistance($primaryAirport, $minDistance, $maxDistance, $primaryAirport->icao)->withinBearing($primaryAirport, $flightDirection, $minDistance, $maxDistance)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                 ->returnOnlyWhitelistedIcao($whitelist)
-                ->sortByScores($sortByScores)
+                ->select('airports.id')
+                ->sortByScores($sortByScores, $eta, $candidatesAreDepartures)
                 ->has('metar')
-                ->with([
-                    'runways' => function ($query) {
-                        $query->where('closed', false)->whereNotNull('length_ft');
-                    },
-                    'scores',
-                    'metar',
-                    'sceneryDevelopers.sceneries' => function ($query) {
-                        $query->where('published', true)->with('simulator');
-                    },
-                ])
                 ->get();
 
-            // Shuffle and limit the results to 20
+            // Shuffle within equal-score buckets and limit the results to 20
             $airports = $airports->groupBy('score_count')->map(function ($group) {
                 return $group->shuffle();
             })->flatten(1)->take(20);
 
+            // Phase 2: hydrate only the picked airports, preserving the shuffled order
+            $airportIds = $airports->pluck('id')->all();
+            $scoreCounts = $airports->pluck('score_count', 'id');
+
+            $airports = Airport::with([
+                'runways' => function ($query) {
+                    $query->where('closed', false)->whereNotNull('length_ft');
+                },
+                'scores',
+                'metar',
+                'taf.forecasts',
+                'sceneryDevelopers.sceneries' => function ($query) {
+                    $query->where('published', true)->with('simulator');
+                },
+            ])
+                ->findMany($airportIds)
+                ->sortBy(fn ($airport) => array_search($airport->id, $airportIds))->values()
+                ->each(fn ($airport) => $airport->score_count = $scoreCounts->get($airport->id));
+
             // Filter the eligible airports
-            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $temperatureMin, $temperatureMax, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+            $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax, $candidatesAreDepartures);
 
             // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy
             $bearingWarning = false;
@@ -274,6 +322,11 @@ class SearchController extends Controller
                     $airportCoordinates[$airport->icao]['color'] = 'grey';
                 }
 
+                // The primary airport's scores are windowed at now(); when it's the
+                // departure airport, the current METAR is its weather truth and TAFs are ignored
+                [$primaryScores] = $primaryAirport->scoresAtEta(now(), $direction == 'departure');
+                $primaryAirport->setRelation('scores', $primaryScores);
+
                 // To ensure bookmarks works, let's comapre the searchVersion
                 $searchVersionWarning = false;
                 if (isset($data['searchVersion']) && (int) $data['searchVersion'] != config('app.searchVersion')) {
@@ -285,11 +338,7 @@ class SearchController extends Controller
 
         }
 
-        if ($direction == 'departure') {
-            return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable arrival airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
-        } else {
-            return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable arrival airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
-        }
+        return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
     }
 
     /**
@@ -306,21 +355,14 @@ class SearchController extends Controller
             'sort' => ['required', 'in:flight,airline,timestamp'],
         ]);
 
-        $departure = Airport::where('icao', $data['departure'])->orWhere('local_code', $data['departure'])->get()->first();
-        $arrival = Airport::where('icao', $data['arrival'])->orWhere('local_code', $data['arrival'])->get()->first();
+        $departure = Airport::where('icao', $data['departure'])->orWhere('local_code', $data['departure'])->first();
+        $arrival = Airport::where('icao', $data['arrival'])->orWhere('local_code', $data['arrival'])->first();
 
         $routes = Flight::where('airport_dep_id', $departure->id)->where('airport_arr_id', $arrival->id)->whereHas('airline')->with('airline', 'aircrafts')->get();
 
         if ($routes->count() == 0) {
             return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
         }
-
-        // Strip the stars from IATA codes for the logos to display correctly
-        $routes = $routes->map(function ($route) {
-            $route->airline->iata_code = str_replace('*', '', $route->airline->iata_code);
-
-            return $route;
-        });
 
         // Sort the routes based on the selected criteria
         switch ($data['sort']) {
@@ -395,11 +437,9 @@ class SearchController extends Controller
                 'C-SA' => 'South America',
                 'C-OC' => 'Oceania',
             ],
-            'Countries' => [
-                ...$this::$countries,
-            ],
+            'Countries' => CountryHelper::names(),
             'US States' => [
-                ...array_combine(array_map(fn ($key) => 'US-' . $key, array_keys($this::$usStates)), $this::$usStates),
+                ...array_combine(array_map(fn ($key) => 'US-' . $key, array_keys(CountryHelper::US_STATES)), CountryHelper::US_STATES),
             ],
         ];
     }
@@ -427,9 +467,9 @@ class SearchController extends Controller
                     'countries' => 'Domestic',
                     'states' => null,
                 ];
-            } elseif (strpos($destination, 'C-') === 0) {
+            } elseif (str_starts_with($destination, 'C-')) {
                 $continents[] = substr($destination, 2);
-            } elseif (strpos($destination, 'US-') === 0) {
+            } elseif (str_starts_with($destination, 'US-')) {
                 $states[] = $destination;
             } else {
                 $countries[] = $destination;

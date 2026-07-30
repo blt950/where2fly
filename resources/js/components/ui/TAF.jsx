@@ -1,44 +1,27 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
-function TAF({ icao }) {
-    const [tafReport, setTafReport] = useState(null);
-    const tafRef = useRef({});
+function TAF({ taf }) {
+    const [revealed, setRevealed] = useState(false);
 
-    // Reset the tafReport when the ICAO code changes
+    // Hide the TAF again when the focused airport changes
     useEffect(() => {
-        // Load the saved TAF report from the ref or null
-        setTafReport(tafRef.current[icao] || null);
-    }, [icao]);
+        setRevealed(false);
+    }, [taf]);
 
     const handleClick = () => {
-        fetch('https://api.met.no/weatherapi/tafmetar/1.0/taf.txt?icao=' + icao)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("HTTP error " + response.status);
-                }
-                return response.text()
-            })
-            .then(text => {
-                if (text === "") {
-                    setTafReport('Not Available');
-                    tafRef.current[icao] = 'Not Available';
-                } else {
-                    var lines = text.match(/[^\r\n]+/g);
-                    setTafReport(lines[lines.length - 1]);
-                    tafRef.current[icao] = lines[lines.length - 1];
-                }
-            })
-            .catch(error => {
-                setTafReport('TAF Fetch failed');
-            });
+        if (window.umami) {
+            umami.track('Interactions', { interaction: 'Fetch TAF' });
+        }
+
+        setRevealed(true);
     };
 
     return (
         <>
-            {tafReport ? (
-                <>{tafReport}</>
+            {revealed ? (
+                <>{taf ? taf : 'Not Available'}</>
             ) : (
-                <button className="btn btn-outline-light btn-sm" onClick={handleClick}>Fetch</button>
+                <button className="btn btn-outline-light btn-sm" onClick={handleClick}>Show</button>
             )}
         </>
     );

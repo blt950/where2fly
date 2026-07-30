@@ -9,12 +9,12 @@
                 <div class="card-body {{ request()->route('id') == $issue['number'] ? 'active' : '' }} d-flex justify-content-between align-items-center gap-1">
                     <div>
                         @if(isset($userLastReadIssueNumber) && $userLastReadIssueNumber < $issue['number'])
-                            <span class="badge bg-primary text-black font-work-sans mb-2">
+                            <span class="badge bg-primary text-black mb-2">
                                 New!
                             </span>
                         @endif
                         @if(in_array($issue['number'], $userVotes ?? []))
-                            <span class="badge bg-success font-work-sans mb-2">
+                            <span class="badge bg-success mb-2">
                                 <i class="fa-sharp fa-check"></i>
                                 Voted
                             </span>
@@ -25,7 +25,7 @@
                         <div class="d-flex align-items-center flex-wrap">
                             <img src="{{ $issue['user']['avatar_url'] }}" alt="" class="rounded-circle me-1">
                             <p class="card-text mb-0 me-2">{{ $issue['user']['login'] }}</p>
-                            <p class="card-text text-muted mb-0">{{ \Carbon\Carbon::parse($issue['created_at'])->diffForHumans() }}</p>
+                            <p class="card-text author mb-0">{{ \Carbon\Carbon::parse($issue['created_at'])->diffForHumans() }}</p>
                         </div>
                     </div>
                     <div class="upvotes d-flex flex-column align-items-center flex-shrink-0">

@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Helpers\AircraftHelper;
 use App\Helpers\CalculationHelper;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Location\Coordinate;
 use MatanYadaev\EloquentSpatial\Enums\Srid;
 use MatanYadaev\EloquentSpatial\Objects\LineString;
@@ -18,17 +22,33 @@ class Airport extends Model
     use HasFactory;
     use HasSpatial;
 
+    /** The canonical ground-to-air facility ordering for ATC display (dots, tooltips, stored station lists) */
+    public const ATC_FACILITY_ORDER = ['DEL', 'GND', 'TWR', 'APP'];
+
     public $timestamps = false;
 
     protected $guarded = [];
 
-    protected $casts = [
-        'coordinates' => Point::class,
-    ];
+    protected function casts(): array
+    {
+        return [
+            'coordinates' => Point::class,
+        ];
+    }
 
     public function metar()
     {
         return $this->hasOne(Metar::class);
+    }
+
+    public function taf()
+    {
+        return $this->hasOne(Taf::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
     }
 
     public function runways()
@@ -71,9 +91,20 @@ class Airport extends Model
         return $this->hasMany(SceneryDeveloper::class);
     }
 
-    public static function whereHasPublishedSceneries($published, $filterSimulatorId = null)
+    public function notableAirport()
     {
-        return Airport::whereHas('sceneryDevelopers', function ($query) use ($published, $filterSimulatorId) {
+        return $this->hasOne(NotableAirport::class);
+    }
+
+    public function notableAirportTags()
+    {
+        return $this->hasMany(NotableAirportTag::class);
+    }
+
+    #[Scope]
+    protected function publishedSceneries(Builder $query, $published, $filterSimulatorId = null): void
+    {
+        $query->whereHas('sceneryDevelopers', function ($query) use ($published, $filterSimulatorId) {
             $query->whereHas('sceneries', function ($query) use ($published, $filterSimulatorId) {
                 $query->where('published', $published);
                 if ($filterSimulatorId) {
@@ -83,62 +114,152 @@ class Airport extends Model
         });
     }
 
-    public function hasWeatherScore()
+    /**
+     * The loaded scores applicable at the given ETA, plus whether a TAF period
+     * covers it (drives the METAR fallback and the forecastSource indicator).
+     *
+     * @return array{0: Collection, 1: bool}
+     */
+    public function scoresAtEta(Carbon $eta, bool $metarOnlyWeather = false): array
     {
-        foreach ($this->scores as $s) {
-            if ($s->isWeatherScore()) {
-                return true;
-            }
+        $hasTafAtEta = (bool) $this->taf?->forecasts->contains(
+            fn ($forecast) => $forecast->valid_from->lte($eta) && $forecast->valid_to->gte($eta)
+        );
+
+        return [
+            $this->scores->filter(fn ($score) => $score->coversEtaAt($eta, $hasTafAtEta, $metarOnlyWeather))->values(),
+            $hasTafAtEta,
+        ];
+    }
+
+    /**
+     * The loaded, ETA-windowed booking-sourced VATSIM_ATC scores, ordered by
+     * start time — the tooltip and facility dots on the ATC icon render these.
+     * A facility booked several times over the exact same window (e.g. two
+     * positions both resolving to APP) renders as one line; the same facility
+     * over a different window stays its own line.
+     */
+    public function atcBookingScores()
+    {
+        return $this->scores
+            ->filter(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_BOOKING)
+            ->unique(fn ($score) => ($score->data['facility'] ?? $score->data['callsign'] ?? '') . '|' . $score->valid_from . '|' . $score->valid_to)
+            ->sortBy('valid_from')
+            ->values();
+    }
+
+    /**
+     * The unique booked facility types (DEL/GND/TWR/APP) among those scores,
+     * in ground-to-air order.
+     */
+    public function atcBookedFacilities()
+    {
+        return $this->sortFacilities(
+            $this->atcBookingScores()->map(fn ($score) => $score->data['facility'] ?? null)
+        );
+    }
+
+    /**
+     * The stations online right now ({facility, logon_time} pairs), in
+     * ground-to-air order. Read from the live VATSIM_ATC score when present,
+     * otherwise from the logon-estimate rows still predicting presence at the ETA.
+     */
+    public function atcOnlineStations()
+    {
+        $liveAtc = $this->scores->first(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_VATSIM);
+
+        $stations = collect($liveAtc?->data['stations'] ?? []);
+        if ($stations->isEmpty()) {
+            $stations = $this->scores
+                ->filter(fn ($score) => $score->reason === 'VATSIM_ATC' && $score->source === AirportScore::SOURCE_LOGON_ESTIMATE)
+                ->map(fn ($score) => ['facility' => $score->data['facility'] ?? null, 'logon_time' => $score->data['logon_time'] ?? null])
+                ->filter(fn ($station) => $station['logon_time'] !== null)
+                ->unique('facility');
         }
 
-        return false;
+        return $stations
+            ->filter(fn ($station) => in_array($station['facility'] ?? null, self::ATC_FACILITY_ORDER))
+            ->sortBy(fn ($station) => array_search($station['facility'], self::ATC_FACILITY_ORDER))
+            ->values();
+    }
+
+    /**
+     * The facility types online right now.
+     */
+    public function atcOnlineFacilities()
+    {
+        return $this->sortFacilities($this->atcOnlineStations()->pluck('facility'));
+    }
+
+    /**
+     * Every facility type either online or booked — the ATC icon's colored dots.
+     */
+    public function atcFacilities()
+    {
+        return $this->sortFacilities($this->atcOnlineFacilities()->merge($this->atcBookedFacilities()));
+    }
+
+    private function sortFacilities(Collection $facilities): Collection
+    {
+        return $facilities
+            ->filter(fn ($facility) => in_array($facility, self::ATC_FACILITY_ORDER))
+            ->unique()
+            ->sortBy(fn ($facility) => array_search($facility, self::ATC_FACILITY_ORDER))
+            ->values();
+    }
+
+    /**
+     * The loaded scores deduplicated to one row per reason for rendering.
+     * Several sources can assert the same reason: current signals beat
+     * forecasts (source order below), a certain row beats an uncertain
+     * TEMPO/PROB one (matching how the ranking takes each reason's best
+     * weight), and within a source the latest-starting row wins so the most
+     * recent forecast period speaks.
+     */
+    public function displayScores()
+    {
+        $sourceOrder = array_flip([
+            AirportScore::SOURCE_VATSIM,
+            AirportScore::SOURCE_BOOKING,
+            AirportScore::SOURCE_EVENT,
+            AirportScore::SOURCE_LOGON_ESTIMATE,
+            AirportScore::SOURCE_METAR,
+            AirportScore::SOURCE_TAF,
+        ]);
+
+        return $this->scores
+            ->sortBy([
+                fn ($a, $b) => ($sourceOrder[$a->source] ?? 99) <=> ($sourceOrder[$b->source] ?? 99),
+                fn ($a, $b) => $b->score <=> $a->score,
+                fn ($a, $b) => $b->valid_from <=> $a->valid_from,
+            ])
+            ->unique('reason')
+            ->values();
+    }
+
+    public function hasWeatherScore()
+    {
+        return $this->scores->contains(fn ($s) => $s->isWeatherScore());
     }
 
     public function weatherScore()
     {
-        $score = 0;
-        foreach ($this->scores as $s) {
-            if ($s->isWeatherScore()) {
-                $score++;
-            }
-        }
-
-        return $score;
+        return $this->scores->filter(fn ($s) => $s->isWeatherScore())->count();
     }
 
     public function hasVatsimScore()
     {
-        foreach ($this->scores as $s) {
-            if ($s->isVatsimScore()) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->scores->contains(fn ($s) => $s->isVatsimScore());
     }
 
     public function vatsimScore()
     {
-        $score = 0;
-        foreach ($this->scores as $s) {
-            if ($s->isVatsimScore()) {
-                $score++;
-            }
-        }
-
-        return $score;
+        return $this->scores->filter(fn ($s) => $s->isVatsimScore())->count();
     }
 
     public function longestRunway()
     {
-        $length = 0;
-        foreach ($this->runways as $rwy) {
-            if ($rwy->closed == false && $rwy->length_ft > $length) {
-                $length = $rwy->length_ft;
-            }
-        }
-
-        return $length;
+        return $this->runways->where('closed', false)->max('length_ft') ?? 0;
     }
 
     public function hasVisualCondition()
@@ -155,7 +276,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports that are considered open and have open runways
      */
-    public function scopeAirportOpen(Builder $query)
+    #[Scope]
+    protected function airportOpen(Builder $query): void
     {
         $query->where('type', '!=', 'closed')->where('w2f_has_open_runway', true);
     }
@@ -163,7 +285,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports that are not the departure airport
      */
-    public function scopeNotIcao(Builder $query, ?string $icao = null)
+    #[Scope]
+    protected function notIcao(Builder $query, ?string $icao = null): void
     {
         if (isset($icao)) {
             $query->where('icao', '!=', $icao);
@@ -173,7 +296,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports that are of the given size
      */
-    public function scopeIsAirportSize(Builder $query, ?array $destinationAirportSize = null)
+    #[Scope]
+    protected function isAirportSize(Builder $query, ?array $destinationAirportSize = null): void
     {
         if (isset($destinationAirportSize)) {
             $query->whereIn('type', $destinationAirportSize);
@@ -185,7 +309,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports in the given continent
      */
-    public function scopeInContinent(Builder $query, array $destinations)
+    #[Scope]
+    protected function inContinent(Builder $query, array $destinations): void
     {
         if (isset($destinations['continents'])) {
             $continents = $destinations['continents'];
@@ -215,7 +340,8 @@ class Airport extends Model
     /**
      * Scope a query to exclude airports in the given continents
      */
-    public function scopeNotInContinent(Builder $query, array $destinations)
+    #[Scope]
+    protected function notInContinent(Builder $query, array $destinations): void
     {
         if (isset($destinations['continents'])) {
             $continents = $destinations['continents'];
@@ -245,7 +371,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports in the given country
      */
-    public function scopeInCountry(Builder $query, array $destinations, ?string $country = null)
+    #[Scope]
+    protected function inCountry(Builder $query, array $destinations, ?string $country = null): void
     {
 
         // If filter is domestic, that should override all other country filters
@@ -264,7 +391,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports not in the given country
      */
-    public function scopeNotInCountry(Builder $query, array $destinations, ?string $country = null)
+    #[Scope]
+    protected function notInCountry(Builder $query, array $destinations, ?string $country = null): void
     {
         // If filter is domestic, that should override all other country filters
         if (isset($destinations['countries']) && $destinations['countries'] == 'Domestic') {
@@ -282,7 +410,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports in the US state
      */
-    public function scopeInState(Builder $query, array $destinations)
+    #[Scope]
+    protected function inState(Builder $query, array $destinations): void
     {
         if (isset($destinations['states'])) {
             $query->whereIn('iso_region', $destinations['states']);
@@ -292,7 +421,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports not in the given US state
      */
-    public function scopeNotInState(Builder $query, array $destinations)
+    #[Scope]
+    protected function notInState(Builder $query, array $destinations): void
     {
         if (isset($destinations['states'])) {
             $query->whereNotIn('iso_region', $destinations['states']);
@@ -302,17 +432,80 @@ class Airport extends Model
     /**
      * Scope a query to only include airports within the given distance
      */
-    public function scopeWithinDistance(Builder $query, Airport $departureAirport, float $minDistance, float $maxDistance, string $departureIcao)
+    #[Scope]
+    protected function withinDistance(Builder $query, Airport $departureAirport, float $minDistance, float $maxDistance, string $departureIcao): void
     {
         if (isset($departureIcao)) {
-            $query->whereDistanceSphere('coordinates', $departureAirport->coordinates, '<=', $maxDistance * 1852)->whereDistanceSphere('coordinates', $departureAirport->coordinates, '>=', $minDistance * 1852);
+            $this->applyDistanceBoundingBox($query, $departureAirport, $maxDistance);
+
+            $query->whereDistanceSphere('coordinates', $departureAirport->coordinates, '<=', $maxDistance * 1852);
+            if ($minDistance > 0) {
+                $query->whereDistanceSphere('coordinates', $departureAirport->coordinates, '>=', $minDistance * 1852);
+            }
         }
+    }
+
+    /**
+     * Bounding-box pre-filter for withinDistance so the SPATIAL index can
+     * prune candidates before the exact (but slow) distance checks run.
+     * The box always contains the whole search circle — padded because
+     * "straight" east-west lines on a sphere bulge toward the poles — and is
+     * skipped whenever it can't be a simple lat/lon rectangle (huge radii,
+     * circles wrapping a pole, or crossing ±85°/the date line).
+     */
+    private function applyDistanceBoundingBox(Builder $query, Airport $anchorAirport, float $maxDistanceNm): void
+    {
+        // Beyond this the box covers most of the planet and prunes nothing
+        if ($maxDistanceNm <= 0 || $maxDistanceNm > 4000) {
+            return;
+        }
+
+        $lat = $anchorAirport->coordinates->latitude;
+        $lon = $anchorAirport->coordinates->longitude;
+
+        // Radius as an angle at the Earth's center, with a 5% safety margin
+        $radiusRad = ($maxDistanceNm * 1852 * 1.05) / 6371009.0;
+
+        $sinRatio = sin($radiusRad) / cos(deg2rad($lat));
+        if (abs($sinRatio) >= 1) {
+            // The circle wraps a pole — no finite longitude bounds exist
+            return;
+        }
+
+        $deltaLat = rad2deg($radiusRad);
+        $deltaLon = rad2deg(asin($sinRatio));
+
+        // Worst-case poleward bulge of the box's east-west edges
+        $lonSpanRad = deg2rad($deltaLon) * 2;
+        $edgeSag = rad2deg($lonSpanRad ** 2 / 8 * 0.5);
+
+        $south = $lat - $deltaLat - $edgeSag;
+        $north = $lat + $deltaLat + $edgeSag;
+        $west = $lon - $deltaLon;
+        $east = $lon + $deltaLon;
+
+        if ($north > 85 || $south < -85 || $west < -180 || $east > 180) {
+            return;
+        }
+
+        $box = new Polygon([
+            new LineString([
+                new Point($south, $west),
+                new Point($north, $west),
+                new Point($north, $east),
+                new Point($south, $east),
+                new Point($south, $west),
+            ]),
+        ], Srid::WGS84);
+
+        $query->whereWithin('coordinates', $box);
     }
 
     /**
      * Scope a query to only include airports that are in the given direction
      */
-    public function scopeWithinBearing(Builder $query, Airport $departureAirport, ?string $direction, float $minDistance, float $maxDistance)
+    #[Scope]
+    protected function withinBearing(Builder $query, Airport $departureAirport, ?string $direction, float $minDistance, float $maxDistance): void
     {
 
         // Ignore this scope if direction is not set
@@ -323,11 +516,8 @@ class Airport extends Model
         $airportLat = $departureAirport->coordinates->latitude;
         $airportLon = $departureAirport->coordinates->longitude;
 
-        // We calculate bearing in two ways, depending on the distance.
-        // First we calculate it within a polygon up to a certain limit
-        // Second we calculate just X/Y coordinates if it's outside the limit
-        // This is because the polygon gets very skewed after a certain distance
-
+        // Two strategies: a polygon wedge for near distances, plain lat/lon
+        // comparisons beyond 800nm where the polygon gets too skewed
         $airportCoordinate = new Coordinate($airportLat, $airportLon);
         $directions = [
             'N' => 0,
@@ -345,10 +535,9 @@ class Airport extends Model
         $highEnd = CalculationHelper::calculateSphericalDestination($airportCoordinate, $directions[$direction] + 45, $polygonDistance);
         $lowEnd = CalculationHelper::calculateSphericalDestination($airportCoordinate, $directions[$direction] - 45, $polygonDistance);
 
-        // If the distance is less than 800nm, we can use a polygon
         $query->where(function ($q) use ($airportLat, $airportLon, $highEnd, $lowEnd, $minDistance, $maxDistance, $direction) {
 
-            // >>> Step 1: Create a polygon from the origin, then the bearing + 45 degrees in each direction
+            // Polygon wedge from the origin, bearing ±45 degrees
             if ($minDistance <= 800) {
                 $polygon = new Polygon([
                     new LineString([
@@ -362,7 +551,7 @@ class Airport extends Model
                 $q->whereWithin('coordinates', $polygon);
             }
 
-            // >>> Step 2: Calculate the lat/long's for the max distance
+            // Beyond the wedge: plain lat/lon comparisons per direction
             if ($maxDistance > 800) {
 
                 switch ($direction) {
@@ -396,11 +585,12 @@ class Airport extends Model
         });
     }
 
-    public function scopeFilterRunwayLengths(Builder $query, int $rwyLengthMin, int $rwyLengthMax, string $codeletter)
+    #[Scope]
+    protected function filterRunwayLengths(Builder $query, int $rwyLengthMin, int $rwyLengthMax, string $codeletter): void
     {
 
         // Set minimum according to aircraft code unless it's already higher
-        $codeMinimum = CalculationHelper::minimumRequiredRunwayLength($codeletter);
+        $codeMinimum = AircraftHelper::minimumRunwayFt($codeletter);
         if ($rwyLengthMin < $codeMinimum) {
             $rwyLengthMin = $codeMinimum;
         }
@@ -415,7 +605,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports that have runways with lights
      */
-    public function scopeFilterRunwayLights(Builder $query, ?int $destinationRunwayLights = null)
+    #[Scope]
+    protected function filterRunwayLights(Builder $query, ?int $destinationRunwayLights = null): void
     {
         if (isset($destinationRunwayLights) && $destinationRunwayLights !== 0) {
 
@@ -435,7 +626,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports that are airbases
      */
-    public function scopeFilterAirbases(Builder $query, ?int $destinationAirbases = null)
+    #[Scope]
+    protected function filterAirbases(Builder $query, ?int $destinationAirbases = null): void
     {
         if (isset($destinationAirbases) && $destinationAirbases !== 0) {
 
@@ -449,21 +641,30 @@ class Airport extends Model
     }
 
     /**
-     * Scope a query to only include airports that have scores
+     * Scope a query to only include airports that have scores. When an ETA is
+     * given (a Carbon instant or a per-candidate SQL expression), only score
+     * rows whose validity window applies at that ETA count.
      */
-    public function scopeFilterByScores(Builder $query, ?array $filterByScores = null)
+    #[Scope]
+    protected function filterByScores(Builder $query, ?array $filterByScores = null, Carbon|string|null $eta = null, bool $metarOnlyWeather = false): void
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
 
-            $query->where(function ($query) use ($filterByScores) {
+            $query->where(function ($query) use ($filterByScores, $eta, $metarOnlyWeather) {
                 foreach ($filterByScores as $score => $value) {
                     if ($value == 1) {
-                        $query->whereHas('scores', function ($query) use ($score) {
+                        $query->whereHas('scores', function ($query) use ($score, $eta, $metarOnlyWeather) {
                             $query->where('reason', $score);
+                            if ($eta) {
+                                $query->coversEta($eta, $metarOnlyWeather);
+                            }
                         });
                     } elseif ($value == -1) {
-                        $query->whereDoesntHave('scores', function ($query) use ($score) {
+                        $query->whereDoesntHave('scores', function ($query) use ($score, $eta, $metarOnlyWeather) {
                             $query->where('reason', $score);
+                            if ($eta) {
+                                $query->coversEta($eta, $metarOnlyWeather);
+                            }
                         });
                     }
                 }
@@ -475,7 +676,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports that have routes and airlines
      */
-    public function scopeFilterRoutesAndAirlines(Builder $query, ?string $departureIcao = null, ?array $filterByAirlines = null, ?array $filterByAircrafts = null, ?int $destinationWithRoutesOnly = null, string $flightDirection = 'arrivalFlights')
+    #[Scope]
+    protected function filterRoutesAndAirlines(Builder $query, ?string $departureIcao = null, ?array $filterByAirlines = null, ?array $filterByAircrafts = null, ?int $destinationWithRoutesOnly = null, string $flightDirection = 'arrivalFlights'): void
     {
         if (isset($destinationWithRoutesOnly) && $destinationWithRoutesOnly !== 0) {
 
@@ -560,7 +762,8 @@ class Airport extends Model
     /**
      * Scope a query to only include airports that have the given scores
      */
-    public function scopeReturnOnlyWhitelistedIcao(Builder $query, ?array $whitelistedArrivals = null)
+    #[Scope]
+    protected function returnOnlyWhitelistedIcao(Builder $query, ?array $whitelistedArrivals = null): void
     {
         if (isset($whitelistedArrivals)) {
             $query->whereIn('icao', $whitelistedArrivals);
@@ -568,17 +771,36 @@ class Airport extends Model
     }
 
     /**
-     * Scope a query to only include airports that have the given scores
+     * Scope a query to sort airports by the summed weight of the given scores,
+     * counting only rows valid at the ETA when one is given. The conditions
+     * live in the join (not the where) so airports without scores still appear
+     * with a count of zero. Each reason contributes its single best weight
+     * (the MAX(CASE) pivot below) — several sources predicting the same reason
+     * shouldn't outrank a single real signal, and a certain row asserting a
+     * reason beats any uncertain TAF row asserting the same one.
      */
-    public function scopeSortByScores(Builder $query, $filterByScores)
+    #[Scope]
+    protected function sortByScores(Builder $query, $filterByScores, Carbon|string|null $eta = null, bool $metarOnlyWeather = false)
     {
         if (isset($filterByScores) && ! empty($filterByScores)) {
-            return $query->leftJoin('airport_scores', 'airports.id', '=', 'airport_scores.airport_id')
-                ->selectRaw('airports.*, COUNT(airport_scores.id) as score_count')
-                ->where(function ($query) use ($filterByScores) {
-                    $query->whereIn('airport_scores.reason', $filterByScores)
-                        ->orWhereNull('airport_scores.reason');
-                })
+            // Keep the historic airports.* select unless the caller already
+            // narrowed the columns (the search pool queries select only the id
+            // so the grouped temp table stays small and in memory)
+            if (is_null($query->getQuery()->columns)) {
+                $query->select('airports.*');
+            }
+
+            $reasons = array_values($filterByScores);
+            $weightedSum = implode(' + ', array_fill(0, count($reasons), 'MAX(CASE WHEN airport_scores.reason = ? THEN airport_scores.score ELSE 0 END)'));
+
+            return $query->leftJoin('airport_scores', function ($join) use ($reasons, $eta, $metarOnlyWeather) {
+                $join->on('airports.id', '=', 'airport_scores.airport_id')
+                    ->whereIn('airport_scores.reason', $reasons);
+                if ($eta) {
+                    AirportScore::applyCoversEta($join, $eta, $metarOnlyWeather);
+                }
+            })
+                ->selectRaw("{$weightedSum} as score_count", $reasons)
                 ->groupBy('airports.id')
                 ->orderBy('score_count', 'desc');
         }

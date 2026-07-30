@@ -1,12 +1,27 @@
-.form-control{
-    height: 42px;
+@use 'sass:color';
 
-    color: black;
+.form-control{
+    height: 2.625rem;
+
+    color: $offwhite;
+    border: none;
+
+    &::placeholder{
+        color: rgb(200, 200, 200);
+    }
+
+    &:active, &:focus, &:focus-within, &:focus-visible{
+        color: $offwhite;
+    }
 
     // Set font size to 16px on mobile
     @include media-breakpoint-down(sm) {
         font-size: 1rem;
     }
+}
+
+label{
+    color: $bluewhite;
 }
 
 u-combobox{
@@ -27,6 +42,9 @@ u-combobox{
 
 /* Make checkbox dark checkmark */ 
 .form-check-input{
+
+    border: 1px solid $tertiary;
+
     &:checked[type=checkbox]{
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
     }
@@ -63,39 +81,73 @@ u-combobox{
 }
 
 /* Make slider handles more visible */
-#slider-airtime, #slider-rwy, #slider-elevation, #slider-temperature {
+#slider-airtime, #slider-rwy, #slider-elevation, #slider-temperature, #slider-distance {
     padding: 0 1rem;
+    background: $tertiary;
+
+    box-shadow: none;
+    border-radius: 2px;
+    border: 1px solid color.adjust($secondary, $lightness: 20%);
     
     .noUi-connect {
         background: $secondary;
     }
     
     .noUi-handle {
-        height: 26px;
-        top: -5px;
-        border-radius: 3px;
+        width: 2.125rem;
+        height: 1.625rem;
+        top: -0.313rem;
+        right: -1.063rem;
+        border-radius: 2px;
         box-shadow: none;
+
+        background: $bluewhite;
+        border: 1px solid color.adjust($secondary, $lightness: 20%);
+
+        &::before, &::after{
+            height: 0.875rem;
+            top: 0.375rem;
+            left: 1.063rem;
+            background: $secondary;
+        }
+
+        &::after{
+            left: 0.875rem;
+        }
+    }
+
+    &.noUi-horizontal{
+        height: 1.125rem;
     }
 }
 
 u-combobox {
     display: flex;
     flex-wrap: wrap;
-    gap: .5rem;
     position: relative;
 
+    height: 2.625rem;
     min-height: 42px;
 
     padding: 0.375rem 0.75rem;
     background-color: var(--bs-body-bg);
+
+    &::part(items) {
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
+
+    &:has(data)::part(items) {
+        margin-inline-end: .5rem;
+    }
 
     select{
         display: none;
     }
 
     data{
-        color: black;
-        background: $gray-400;
+        color: $bluewhite;
+        background: $secondary;
         padding: 0.25rem 0.5rem;
 
         &:focus::after{
@@ -110,15 +162,21 @@ u-combobox {
     }
 
     input{
+        min-height: 32px;
         border: none;
         background-color: var(--bs-body-bg);
+        color: rgb(200, 200, 200);
 
         &::placeholder{
-            color: rgb(109, 109, 109);
+            color: rgb(200, 200, 200);
         }
 
         &:focus{
             outline: none;
+        }
+
+        &:active, &:focus, &:focus-within, &:focus-visible{
+            color: $offwhite;
         }
     }
 }
@@ -129,11 +187,11 @@ u-option{
 
     &:focus{
         outline: none;
-        background: $gray-400;
+        background: color.adjust($tertiary, $lightness: -5%);
     }
 
     &:hover{
-        background: $gray-400;
+        background: color.adjust($tertiary, $lightness: -5%);
     }
 
     &::before{
@@ -155,11 +213,11 @@ u-option{
 
 u-datalist {
     position: absolute;
-    inset: 100% -1px auto;
-    border: 1px solid;
+    inset: 100% 0px auto;
+    border: 1px solid $tertiary;
 
-    color: black;
-    background: white;
+    color: $bluewhite;
+    background: $tertiary;
 
     z-index: 100;
 
@@ -172,6 +230,6 @@ u-datalist {
 
     .divider{
         padding: 0.375rem 0.75rem;
-        background: $gray-200;        
+        background: $secondary;     
     }
 }

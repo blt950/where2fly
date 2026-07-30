@@ -35,31 +35,39 @@
             </div>
         @endif
 
-        @if($suggestedAirport)
-            <div class="d-flex flex-wrap justify-content-between">
-                <h2>{{ ucfirst($direction) }} suggestion</h2>
+        <div class="results-header">
+            @if($suggestedAirport)
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+                    <h2 class="mb-0">
+                        <i class="fa-sharp fa-plane-{{ $direction }}"></i>
+                        {{ ucfirst($direction) }} suggestion
+                    </h2>
 
-                {{-- Add possibility to re-post the search query for a new random departure --}}
-                <form id="randomiseForm" method="GET" action="{{ route('search') }}">
-                    @foreach($_GET as $key => $value)
-                        @if($key != '_token')
-                            @if(is_array($value))
-                                @foreach($value as $subkey => $subvalue)
-                                    <input type="hidden" name="{{ $key }}[{{ $subkey }}]" value="{{ $subvalue }}">
-                                @endforeach
-                            @else
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    {{-- Add possibility to re-post the search query for a new random departure --}}
+                    <form id="randomiseForm" method="GET" action="{{ route('search') }}">
+                        @foreach($_GET as $key => $value)
+                            @if($key != '_token')
+                                @if(is_array($value))
+                                    @foreach($value as $subkey => $subvalue)
+                                        <input type="hidden" name="{{ $key }}[{{ $subkey }}]" value="{{ $subvalue }}">
+                                    @endforeach
+                                @else
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endif
                             @endif
-                        @endif
-                    @endforeach
+                        @endforeach
 
-                    <button id="randomiseBtn" type="submit" form="randomiseForm" class="btn btn-sm btn-warning mb-1" style="font-size: 1rem;">Randomise <i class="fa-sharp fa-shuffle"></i></button>
-                </form>
+                        <button id="randomiseBtn" type="submit" form="randomiseForm" class="btn btn-sm btn-outline-warning">Randomise <i class="fa-sharp fa-shuffle"></i></button>
+                    </form>
 
-            </div>
-        @else
-            <h2>{{ ucfirst($direction) }}</h2>
-        @endif
+                </div>
+            @else
+                <h2 class="mb-0">
+                    <i class="fa-sharp fa-plane-{{ $direction }}"></i>
+                    {{ ucfirst($direction) }}
+                </h2>
+            @endif
+        </div>
         <div class="results-container">
             <dl>
                 <dt>Airport<dt>
@@ -78,24 +86,10 @@
 
             @if($primaryAirport->scores->count() > 0)
                 <dl>
-                    <dt>Conditions<dt>
+                    <dt>Forecast</dt>
                     <dd>
-                    @foreach($primaryAirport->scores as $score)
-                        @if(isset($filteredScores) && in_array($score->reason, $filteredScores))
-                            <i 
-                                class="text-success fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                data-bs-html="true"
-                                data-bs-toggle="tooltip"
-                                data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                            ></i>
-                        @else
-                            <i 
-                                class="fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                data-bs-html="true"
-                                data-bs-toggle="tooltip"
-                                data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                            ></i>
-                        @endif
+                    @foreach($primaryAirport->displayScores() as $score)
+                        <x-score-icon :score="$score" :airport="$primaryAirport" :bookings-label="'Bookings on ' . $direction" :highlighted="isset($filteredScores) && in_array($score->reason, $filteredScores)" />
                     @endforeach
                     </dd>
                 </dl>
@@ -105,8 +99,15 @@
                 <dt>Weather<dt>
                 <dd>
                     @if($primaryAirport->metar)
-                        {{ \Carbon\Carbon::parse($primaryAirport->metar->last_update)->format('dHi\Z') }} {{ $primaryAirport->metar->metar }}
-                        <span class="d-block mt-2"><button class="d-block btn btn-outline-secondary btn-sm" data-airport-icao="{{ $primaryAirport->icao }}" data-taf-button="true">Fetch TAF</button></span>
+                        {{ $primaryAirport->metar->metar }}
+                        <span class="d-block mt-2">
+                            @if($primaryAirport->taf)
+                                <button class="d-block btn btn-outline-light btn-sm" data-taf-button="true">Show TAF</button>
+                                <span class="d-none" data-taf-text="true">{{ $primaryAirport->taf->raw_text }}</span>
+                            @else
+                                <i class="fa-sharp fa-cloud-xmark"></i> No TAF available
+                            @endif
+                        </span>
                     @else
                         <i class="fa-sharp fa-info-square"></i> No METAR available
                     @endif
@@ -114,7 +115,11 @@
             </dl>
         </div>
 
-        <h2>{{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>
+        <div class="results-header">
+            <h2 class="mb-0">
+                <i class="fa-sharp fa-plane-{{ ($direction == 'departure') ? 'arrival' : 'departure' }}"></i>
+                {{ ($direction == 'departure') ? 'Arrival' : 'Departure' }} suggestions</h2>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover text-start sortable asc mb-0" data-detail-table="airport-results">
                 <thead>
@@ -123,11 +128,11 @@
                         <th scope="col">Airport</th>
                         <th scope="col">Distance</th>
                         <th scope="col">Time</th>
-                        <th scope="col">Conditions</th>
+                        <th scope="col">Forecast</th>
                     </tr>
                     @if( !empty($sortByScores) && isset($suggestedAirports->first()->scores) && $suggestedAirports->first()->scores->count() == 0 )
 
-                        <tr class="font-work-sans">
+                        <tr>
                             <th class="text-center text-info fw-normal pt-3 pb-3" colspan="9">
                                 <i class="fa-sharp fa-info-square"></i> None of the airports in your range has interesting weather or ATC
                             </th>
@@ -155,23 +160,9 @@
                             </td>
                             <td data-sort="{{ $airport->distance }}">{{ $airport->distance }}nm</td>
                             <td data-sort="{{ $airport->airtime }}">{{ gmdate('G:i', floor($airport->airtime * 3600)) }}h</td>
-                            <td class="fs-5" data-sort={{ $airport->scores->count() }}>
-                                @foreach($airport->scores as $score)
-                                    @if(isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1)
-                                        <i 
-                                            class="text-success fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                            data-bs-html="true"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                                        ></i>
-                                    @else
-                                        <i 
-                                            class="fa-sharp {{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['icon'] }}"
-                                            data-bs-html="true"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-title="{{ App\Http\Controllers\ScoreController::$score_types[$score->reason]['desc'] }}<br>{{ $score->data }}"
-                                        ></i>
-                                    @endif
+                            <td class="fs-5" data-sort={{ $airport->displayScores()->count() }}>
+                                @foreach($airport->displayScores() as $score)
+                                    <x-score-icon :score="$score" :airport="$airport" :bookings-label="'Bookings on ' . ($direction == 'departure' ? 'arrival' : 'departure')" :highlighted="isset($filterByScores) && isset($filterByScores[$score->reason]) && $filterByScores[$score->reason] === 1" />
                                 @endforeach
                             </td>
                         </tr>
@@ -182,7 +173,7 @@
                                     <dt>Runways</dt>
                                     @foreach($airport->runways as $runway)
                                     <dd class="mb-0">
-                                        <strong>{{ $runway->le_ident }}/{{ $runway->he_ident }}:</strong> {{ number_format((int)$runway->length_ft, 0, '.', ',') }}ft <span class="text-black-50">({{ number_format(round((int)$runway->length_ft * .3048), 0, '.', ',') }}m)</span>  
+                                        <strong>{{ $runway->le_ident }}/{{ $runway->he_ident }}:</strong> {{ number_format((int)$runway->length_ft, 0, '.', ',') }}ft <span>({{ number_format(round((int)$runway->length_ft * .3048), 0, '.', ',') }}m)</span>  
                                     </dd>
                                     @endforeach
 
@@ -191,29 +182,34 @@
 
                                     <dt class="mt-3">TAF</dt>
                                     <dd>
-                                        <button class="btn btn-outline-secondary btn-sm" data-airport-icao="{{ $airport->icao }}" data-taf-button="true">Fetch</button>
+                                        @if($airport->taf)
+                                            <button class="btn btn-outline-light btn-sm" data-taf-button="true">Show</button>
+                                            <span class="d-none" data-taf-text="true">{{ $airport->taf->raw_text }}</span>
+                                        @else
+                                            No TAF available
+                                        @endif
                                     </dd>
 
                                     <dt class="mt-3">Links</dt>
                                     <dd>
                                         @if($direction == 'departure')
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="{{ route('search.routes', ['departure' => $primaryAirport->icao, 'arrival' => $airport->icao, 'sort' => 'flight']) }}" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="{{ route('search.routes', ['departure' => $primaryAirport->icao, 'arrival' => $airport->icao, 'sort' => 'flight']) }}" target="_blank">
                                                 <span>Routes</span>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="https://dispatch.simbrief.com/options/custom?orig={{ $primaryAirport->icao }}&amp;dest={{ $airport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="https://dispatch.simbrief.com/options/custom?orig={{ $primaryAirport->icao }}&amp;dest={{ $airport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
                                                 <span>SimBrief</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
                                                 <span>Windy</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
                                         @else
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="{{ route('search.routes', ['departure' => $airport->icao, 'arrival' => $primaryAirport->icao, 'sort' => 'flight']) }}" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="{{ route('search.routes', ['departure' => $airport->icao, 'arrival' => $primaryAirport->icao, 'sort' => 'flight']) }}" target="_blank">
                                                 <span>Routes</span>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="https://dispatch.simbrief.com/options/custom?orig={{ $airport->icao }}&amp;dest={{ $primaryAirport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="https://dispatch.simbrief.com/options/custom?orig={{ $airport->icao }}&amp;dest={{ $primaryAirport->icao }}&amp;utm_campaign=where2fly.today" target="_blank">
                                                 <span>SimBrief</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
-                                            <a class="btn btn-outline-secondary btn-sm font-work-sans" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
+                                            <a class="btn btn-outline-light btn-sm" href="https://windy.com/{{ $airport->icao }}?utm_campaign=where2fly.today" target="_blank">
                                                 <span>Windy</span> <i class="fa-sharp fa-up-right-from-square"></i>
                                             </a>
                                         @endif
@@ -256,7 +252,7 @@
                     @elseif($count > 10)
                         <tr id="showMoreRow">
                             <th colspan="10" class="text-center text-danger">
-                                <button id="showMoreBtn" class="btn btn-secondary">Show more</button>
+                                <button id="showMoreBtn" class="btn btn-outline-primary">Show more</button>
                             </th>
                         </tr>
                     @endif
@@ -325,12 +321,28 @@
         // Event listener if user clicks on map dot, to mark active in table
         window.addEventListener('mapFocusAirport', function(event) {
             const focusAirport = event.detail.focusAirport;
-            
+
             const rows = document.querySelectorAll('tr[data-airport-icao]');
             rows.forEach(r => r.classList.remove('active'));
 
+            // The primary airport has no table row
             const focusRow = document.querySelector(`tr[data-airport-icao="${focusAirport}"]`);
+            if (!focusRow) {
+                return;
+            }
+
+            // Unfold the "Show more" section if the airport is hidden behind it
+            if (focusRow.classList.contains('showmore-hidden') && window.expandSearchResults) {
+                window.expandSearchResults();
+            }
+
             focusRow.classList.add('active');
+
+            // Scroll the table to the selected airport, unless it's already in view
+            const rect = focusRow.getBoundingClientRect();
+            if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                focusRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         });
         
     </script>

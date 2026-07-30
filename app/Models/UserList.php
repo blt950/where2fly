@@ -9,6 +9,15 @@ class UserList extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'color',
+        'simulator_id',
+        'user_id',
+        'public',
+        'hidden',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

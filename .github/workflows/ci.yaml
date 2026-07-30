@@ -5,20 +5,87 @@ on:
   push:
     paths-ignore:
       - "**.md"
+  pull_request:
+    paths-ignore:
+      - "**.md"
 
 env:
   IMAGE_NAME: blt950/where2fly
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          path: "."
+
+      - name: Check formatting
+        run: ./vendor/bin/pint --test
+
+  tests:
+    name: PHPUnit
+    runs-on: ubuntu-latest
+    needs: lint
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: where2fly_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          path: "."
+          setup-node: "true"
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Copy environment file
+        run: cp .env.example .env
+
+      - name: Generate app key
+        run: php artisan key:generate
+
+      - name: Run tests
+        run: php artisan test
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: where2fly_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
+
   build-container:
     name: Build Container
     runs-on: ubuntu-latest
+    needs: tests
+    if: github.event_name == 'push'
     steps:
       - name: configure docker buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: login to github container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -26,7 +93,7 @@ jobs:
 
       - name: setup container metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ghcr.io/${{ env.IMAGE_NAME }}
@@ -38,12 +105,12 @@ jobs:
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
 
       - name: Checkout open repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           repository: blt950/where2fly
 
       - name: Checkout private fonts repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           repository: blt950/where2fly-fonts
           token: ${{ secrets.FONTS_REPO_TOKEN }}
@@ -56,7 +123,7 @@ jobs:
           ls -la resources/fonts
 
       - name: build & push container image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: "."
           push: true

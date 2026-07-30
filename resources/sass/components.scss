@@ -1,10 +1,18 @@
+@use 'sass:color';
+
+.results-header{
+    padding: .75rem 1rem;
+    background: $tertiary;
+    border-bottom: 2px solid $secondary;
+}
+
 .results-container{
     padding: 1rem;
     margin-bottom: 2rem;
     
-    color: black;
-    background: #fffdf7;
-    
+    color: $bluewhite;
+    background: $tertiary;
+
     display: flex;
     justify-content: space-between;
     flex-direction: row;
@@ -106,7 +114,9 @@
 }
 
 .badge{
+    font-size: 0.75rem;
     font-weight: 400;
+    border-radius: 2px;
 }
 
 .bt{
@@ -115,10 +125,6 @@
 
 .bg-blue{
     background: #00356d;
-}
-
-img.flag{
-    border: 1px solid #efefef;
 }
 
 /*
@@ -171,12 +177,7 @@ img.flag{
 }
 
 .btn-group{
-    .dropdown-menu{
-        li .dropdown-item:hover{
-            color: black;
-            background: $primary;
-        }
-        
+    .dropdown-menu{        
         &.show{
             --bs-dropdown-min-width: 0rem;
         }
@@ -189,24 +190,31 @@ img.flag{
 }
 
 .scenery-row{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+
+    color: inherit;
+    text-decoration: none;
+
     margin: 0;
     padding: 0.75rem 1rem 1rem 1rem;
     
-    border-bottom: 1px solid $primary;
-    background: $secondary;
-    
-    &:nth-child(odd){
-        background: #202538;
+    border-bottom: 1px solid $secondary;
+    background: $tertiary;
+
+    &:hover{
+        text-decoration: none;
+        background-color: color.adjust($tertiary, $lightness: -8%);
     }
-    
+
     &:first-of-type{
-        margin-top: 0;
-        border-top: 2px solid $primary;
+        margin-top: -1px;
+        border-top: 1px solid $primary;
     }
     
     &:last-of-type{
         margin-bottom: 0;
-        border-bottom: none;
     }
     
     .title{
@@ -215,18 +223,12 @@ img.flag{
             font-size: 1.25rem;
             margin-right: 0.5rem;
         }
-        
-        .star{
-            color: $primary;
-            font-size: 1rem;
-            
-            .far{
-                padding-right: 0.25rem;
-            }
-        }
-        
-        .badge{
-            font-size: .75rem;
+    }
+
+    .star{
+        i.fa-star{
+            font-size: 0.7rem;
+            margin-right: 1px;
         }
     }
     
@@ -262,4 +264,33 @@ u-tab {
 u-tab[aria-selected="true"] {
     color: black;
     background: $primary;
+}
+
+// Tooltips carry multi-line content (bookings, probabilities) — left-align, not centered
+.tooltip-inner {
+    text-align: left;
+}
+
+.score-icon {
+    display: inline-block;
+
+    // Uncertain forecast (TEMPO/PROB) — faded to show it's not a firm prediction
+    &.score-uncertain {
+        opacity: 0.6;
+    }
+
+    .probability {
+        top: -5px;
+        right: -10px;
+        font-size: 1rem;
+        color: $primary;
+        border-radius: 50%;
+    }
+
+    .atc{
+        top: -1px;
+        right: -4px;
+        font-size: .55rem;
+        color: $bluewhite;
+    }
 }

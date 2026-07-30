@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Helpers\AircraftHelper;
 use App\Helpers\CalculationHelper;
+use App\Helpers\ScoreHelper;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\ScoreController;
+use App\Http\Resources\AirportResource;
+use App\Http\Resources\SuggestedAirportResource;
 use App\Models\Airport;
 use App\Rules\AirportExists;
 use App\Rules\ValidDestinations;
+use App\Rules\ValidScores;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -22,10 +26,12 @@ class SearchController extends Controller
             'departure' => ['nullable', new AirportExists],
             'arrival' => ['nullable', new AirportExists],
             'destinations' => ['sometimes', 'array', new ValidDestinations],
-            'codeletter' => ['required', 'string', 'in:GA,GAT,GTP,JS,JM,JML,JL,JXL'],
+            'codeletter' => ['required', 'string', 'in:' . implode(',', AircraftHelper::codes())],
             'airtimeMin' => ['sometimes', 'numeric', 'between:0,24'],
             'airtimeMax' => ['sometimes', 'numeric', 'between:0,24'],
-            'scores' => ['sometimes', 'array'],
+            'distanceMin' => ['sometimes', 'numeric', 'min:0'],
+            'distanceMax' => ['sometimes', 'numeric', 'min:0'],
+            'scores' => ['sometimes', 'array', new ValidScores],
             'metcondition' => ['sometimes', 'in:IFR,VFR,ANY'],
             'destinationWithRoutesOnly' => ['sometimes', 'numeric', 'between:-1,1'],
             'destinationRunwayLights' => ['sometimes', 'numeric', 'between:-1,1'],
@@ -42,28 +48,34 @@ class SearchController extends Controller
             'limit' => ['sometimes', 'integer', 'between:1,30'],
         ]);
 
-        isset($data['departure']) ? $departure = $data['departure'] : $departure = null;
-        isset($data['arrival']) ? $arrival = $data['arrival'] : $arrival = null;
-        isset($data['destinations']) ? $destinations = $data['destinations'] : $destinations = ['continents' => null, 'countries' => null, 'states' => null];
+        $departure = $data['departure'] ?? null;
+        $arrival = $data['arrival'] ?? null;
+        $destinations = $data['destinations'] ?? ['continents' => null, 'countries' => null, 'states' => null];
         $codeletter = $data['codeletter'];
-        isset($data['airtimeMin']) ? $airtimeMin = $data['airtimeMin'] : $airtimeMin = 0;
-        isset($data['airtimeMax']) ? $airtimeMax = $data['airtimeMax'] : $airtimeMax = 24;
-        isset($data['scores']) ? $filterByScores = array_map('intval', $data['scores']) : $filterByScores = null;
-        isset($data['metcondition']) ? $metcon = $data['metcondition'] : $metcon = null;
-        isset($data['destinationRunwayLights']) ? $destinationRunwayLights = (int) $data['destinationRunwayLights'] : $destinationRunwayLights = 0;
-        isset($data['destinationAirbases']) ? $destinationAirbases = (int) $data['destinationAirbases'] : $destinationAirbases = -1;
-        (isset($data['destinationAirportSize']) && ! empty($data['destinationAirportSize'])) ? $destinationAirportSize = $data['destinationAirportSize'] : $destinationAirportSize = ['small_airport', 'medium_airport', 'large_airport'];
-        isset($data['temperatureMin']) ? $temperatureMin = $data['temperatureMin'] : $temperatureMin = -60;
-        isset($data['temperatureMax']) ? $temperatureMax = $data['temperatureMax'] : $temperatureMax = 60;
-        isset($data['elevationMin']) ? $elevationMin = $data['elevationMin'] : $elevationMin = -2000;
-        isset($data['elevationMax']) ? $elevationMax = $data['elevationMax'] : $elevationMax = 18000;
-        isset($data['rwyLengthMin']) ? $rwyLengthMin = $data['rwyLengthMin'] : $rwyLengthMin = 0;
-        isset($data['rwyLengthMax']) ? $rwyLengthMax = $data['rwyLengthMax'] : $rwyLengthMax = 17000;
-
-        isset($data['arrivalWhitelist']) ? $arrivalWhitelist = $data['arrivalWhitelist'] : $arrivalWhitelist = null;
-        isset($data['limit']) ? $resultLimit = $data['limit'] : $resultLimit = 10;
+        $airtimeMin = $data['airtimeMin'] ?? 0;
+        $airtimeMax = $data['airtimeMax'] ?? 24;
+        $filterByScores = isset($data['scores']) ? array_map('intval', $data['scores']) : null;
+        $metcon = $data['metcondition'] ?? null;
+        $destinationRunwayLights = (int) ($data['destinationRunwayLights'] ?? 0);
+        $destinationAirbases = (int) ($data['destinationAirbases'] ?? -1);
+        $destinationAirportSize = ! empty($data['destinationAirportSize'] ?? []) ? $data['destinationAirportSize'] : ['small_airport', 'medium_airport', 'large_airport'];
+        $temperatureMin = $data['temperatureMin'] ?? -60;
+        $temperatureMax = $data['temperatureMax'] ?? 60;
+        $elevationMin = $data['elevationMin'] ?? -2000;
+        $elevationMax = $data['elevationMax'] ?? 18000;
+        $rwyLengthMin = $data['rwyLengthMin'] ?? 0;
+        $rwyLengthMax = $data['rwyLengthMax'] ?? 17000;
+        $arrivalWhitelist = $data['arrivalWhitelist'] ?? null;
+        $resultLimit = $data['limit'] ?? 10;
 
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
+
+        // Intersect the airtime-derived range with the explicit distance
+        // filter (NM); either bound is unbounded when absent
+        $minDistance = max($minDistance, $data['distanceMin'] ?? 0);
+        if (isset($data['distanceMax'])) {
+            $maxDistance = min($maxDistance, $data['distanceMax']);
+        }
 
         if (($arrival && $departure) || (! $arrival && ! $departure)) {
             // Dont allow this, return error json
@@ -106,28 +118,46 @@ class SearchController extends Controller
          *  Fetch the requested data
          */
         if ($departure) {
-            $airport = Airport::where('icao', $departure)->orWhere('local_code', $departure)->get()->first();
+            $airport = Airport::where('icao', $departure)->orWhere('local_code', $departure)->first();
         } else {
-            $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->get()->first();
+            $airport = Airport::where('icao', $arrival)->orWhere('local_code', $arrival)->first();
         }
 
-        $airports = collect();
+        // Calculate the ETA for sorting
+        $candidatesAreDepartures = (bool) $arrival;
+        $eta = $candidatesAreDepartures ? now() : CalculationHelper::forecastEtaSql($airport, $codeletter);
+
+        // Phase 1: fetch the full candidate pool as thin id + score_count rows.
+        // Selecting only the id keeps the grouped/sorted temp table in memory
+        // (airports.* drags the GEOMETRY column in, forcing it to disk), while
+        // the whole pool is still fetched so a refresh can shuffle up a
+        // different subset among equally-scored airports.
         $airports = Airport::airportOpen()->notIcao($airport->icao)->isAirportSize($destinationAirportSize)
             ->inContinent($destinations)->inCountry($destinations, $airport->iso_country)->inState($destinations)
             ->withinDistance($airport, $minDistance, $maxDistance, $airport->icao)
             ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-            ->filterAirbases($destinationAirbases)->filterByScores($filterByScores)
+            ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)
             ->returnOnlyWhitelistedIcao($arrivalWhitelist)
-            ->sortByScores(($filterByScores) ? array_flip($filterByScores) : ScoreController::getWeatherTypes())
-            ->has('metar')->with('runways', 'scores', 'metar')
+            ->select('airports.id')
+            ->sortByScores(($filterByScores) ? array_keys($filterByScores) : ScoreHelper::weatherTypes(), $eta, $candidatesAreDepartures)
+            ->has('metar')
             ->get();
 
-        // Shuffle and limit the results to 20
+        // Shuffle within equal-score buckets and limit the results to 20
         $airports = $airports->groupBy('score_count')->map(function ($group) {
             return $group->shuffle();
         })->flatten(1)->take(20);
 
-        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $airtimeMin, $airtimeMax, $metcon, $temperatureMin, $temperatureMax, $rwyLengthMin, $rwyLengthMax, $elevationMin, $elevationMax);
+        // Phase 2: hydrate only the picked airports, preserving the shuffled order
+        $airportIds = $airports->pluck('id')->all();
+        $scoreCounts = $airports->pluck('score_count', 'id');
+
+        $airports = Airport::with('runways', 'scores', 'metar', 'taf.forecasts')
+            ->findMany($airportIds)
+            ->sortBy(fn ($suggested) => array_search($suggested->id, $airportIds))->values()
+            ->each(fn ($suggested) => $suggested->score_count = $scoreCounts->get($suggested->id));
+
+        $suggestedAirports = $airports->filterWithCriteria($airport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax, $candidatesAreDepartures);
 
         /**
          *  Prepare the data for the response
@@ -135,9 +165,9 @@ class SearchController extends Controller
 
         // Then in your main function
         if ($departure) {
-            [$airportData, $arrivalData] = $this->prepareAirportData($airport, $suggestedAirports);
+            [$airportData, $arrivalData] = $this->prepareAirportData($airport, $suggestedAirports, true);
         } else {
-            [$airportData, $departureData] = $this->prepareAirportData($airport, $suggestedAirports);
+            [$airportData, $departureData] = $this->prepareAirportData($airport, $suggestedAirports, false);
         }
 
         // Send the response
@@ -151,40 +181,14 @@ class SearchController extends Controller
 
     }
 
-    public function prepareAirportData($airport, $suggestedAirports)
+    public function prepareAirportData($airport, $suggestedAirports, bool $anchorIsDeparture = false)
     {
-        $airportData = [
-            'name' => $airport->name,
-            'icao' => $airport->icao,
-            'iata' => $airport->iata_code ? $airport->iata_code : null,
-            'contient' => $airport->continent,
-            'country' => $airport->iso_country,
-            'region' => $airport->iso_region,
-            'metar' => (config('app.env') == 'production') ? $airport->metar->metar : 'TEST-DATA ' . $airport->metar->metar,
-            'longestRwyFt' => $airport->longestRunway(),
-            'scores' => $airport->scores->pluck('reason'),
+        [$scores] = $airport->scoresAtEta(now(), $anchorIsDeparture);
+        $airport->setRelation('scores', $scores);
+
+        return [
+            new AirportResource($airport),
+            SuggestedAirportResource::collection($suggestedAirports),
         ];
-
-        $suggestedData = collect();
-        foreach ($suggestedAirports as $suggestedAirport) {
-            $scores = $suggestedAirport->scores->pluck('reason');
-            $suggestedData->push([
-                'name' => $suggestedAirport->name,
-                'icao' => $suggestedAirport->icao,
-                'iata' => $suggestedAirport->iata_code ? $suggestedAirport->iata_code : null,
-                'contient' => $suggestedAirport->continent,
-                'country' => $suggestedAirport->iso_country,
-                'region' => $suggestedAirport->iso_region,
-                'metar' => (config('app.env') == 'production') ? $suggestedAirport->metar->metar : 'TEST-DATA ' . $suggestedAirport->metar->metar,
-                'longestRwyFt' => $suggestedAirport->longestRunway(),
-                'scores' => $scores,
-                'airtime' => $suggestedAirport->airtime,
-                'distanceNm' => $suggestedAirport->distance,
-                'isAirforcebase' => $suggestedAirport->w2f_airforcebase,
-                'hasAirlineService' => $suggestedAirport->w2f_scheduled_service,
-            ]);
-        }
-
-        return [$airportData, $suggestedData];
     }
 }

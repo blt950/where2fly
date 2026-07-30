@@ -25,49 +25,21 @@ placeholderConfigs.forEach(config => {
     });
 });
 
-// @TODO Cleanup this hack. The issue is that the u-combobox component doesn't update the underlying select element's options 
-// to reflect the current chips, which causes issues when the form is submitted. 
-// This code ensures that the select element's options are always in sync with the visible chips before the form is submitted.
-document.addEventListener('submit', (event) => {
-    const form = event.target;
-    if(!(form instanceof HTMLFormElement)){
-        return;
-    }
-
-    Array.from(form.querySelectorAll('u-combobox')).forEach((combobox) => {
-        const select = combobox.querySelector('select[name]');
-        if(!select){
-            return;
-        }
-
-        const chips = Array.from(combobox.querySelectorAll('data'));
-        select.replaceChildren();
-
-        chips.forEach((chip) => {
-            const value = (chip.getAttribute('value') || chip.textContent || '').trim();
-            const label = (chip.textContent || value).trim();
-
-            if(value){
-                select.appendChild(new Option(label, value, true, true));
-            }
-        });
-
-        if(combobox.hasAttribute('data-multiple')){
-            select.setAttribute('multiple', '');
-        }
-    });
-}, true);
-
-// Clean input field and close the box upon selection
 document.querySelectorAll('u-combobox').forEach(element => {
     const input = element.querySelector('input');
-    const datalist = element.querySelector('u-datalist');
+    if (!input) return;
 
-    if(input){
-        element.addEventListener('comboboxafterselect', (event) => {
-            input.value = null;
-            input.focus();
-            datalist.hidden = true;
+    // Open the combobox when clicking on the element itself (not just the input)
+    element.addEventListener('click', (event) => {
+        if (event.target === element) input.click();
+    });
+
+    // Clear input and close the combobox when an option is selected
+    element.addEventListener('comboboxafterselect', (event) => {
+        input.value = null;
+        input.focus();
+        setTimeout(() => {
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
         });
-    }
-})
+    });
+});

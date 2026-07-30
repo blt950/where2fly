@@ -2,147 +2,57 @@
 
 namespace App\Helpers;
 
+use App\Models\Airport;
+use Carbon\Carbon;
 use InvalidArgumentException;
 use Location\Coordinate;
 
 class CalculationHelper
 {
     /**
-     * Calculate the distance between two points
-     *
-     * $param string $code aircraft type code
-     *
-     * @return int Required runway length
+     * The ETA used to time-scope forecast lookups — never shown to the client.
+     * No buffer: ETA = now + airtime.
      */
-    public static function minimumRequiredRunwayLength(string $code)
+    public static function forecastEta(float $airtimeHours): Carbon
     {
-        switch ($code) {
-            case 'GA':
-                return 100;
-            case 'GAT':
-                return 2000;
-            case 'GTP':
-                return 2500;
-            case 'JS':
-                return 4000;
-            case 'JM':
-                return 5000;
-            case 'JML':
-                return 6000;
-            case 'JL':
-                return 7000;
-            case 'JXL':
-                return 8000;
-            default:
-                return 0;
-        }
+        return now()->addSeconds((int) round($airtimeHours * 3600));
     }
 
     /**
-     *  Calculate aircraft travel nautrical miles per hour
-     *
-     * @param  string  $actCode  Aircraft code
-     * @return int Cruice speed
+     * The canonical airtime formula: distance at cruise speed plus a fixed
+     * climb/descend allowance. Keep in sync with its SQL twin forecastEtaSql().
      */
-    public static function aircraftNmPerHour(string $actCode)
+    public static function airtimeHours(float $distanceNm, string $codeletter): float
     {
-
-        $crzSpeed = 0;
-        switch ($actCode) {
-            case 'GA':
-                $crzSpeed = 115;
-                break;
-            case 'GAT':
-                $crzSpeed = 190;
-                break;
-            case 'GTP':
-                $crzSpeed = 280;
-                break;
-            case 'JS':
-                $crzSpeed = 340;
-                break;
-            case 'JM':
-                $crzSpeed = 460;
-                break;
-            case 'JML':
-                $crzSpeed = 480;
-                break;
-            case 'JL':
-                $crzSpeed = 510;
-                break;
-            case 'JXL':
-                $crzSpeed = 520;
-                break;
-            default:
-                $crzSpeed = 0;
-        }
-
-        return $crzSpeed;
+        return $distanceNm / AircraftHelper::cruiseKts($codeletter) + AircraftHelper::climbDescendHours($codeletter);
     }
 
     /**
-     *  Calculate minute addition for climbing the aircraft
-     *
-     * @param  string  $actCode  Aircraft code
-     * @return int Additional minutes
+     * forecastEta() as a SQL expression, since the distance to each candidate
+     * airport is only known inside the query. SQL twin of airtimeHours().
      */
-    public static function timeClimbDescend(string $actCode)
+    public static function forecastEtaSql(Airport $anchorAirport, string $codeletter): string
     {
+        $connection = $anchorAirport->getConnection();
+        $anchorPoint = $anchorAirport->coordinates->toSqlExpression($connection)->getValue($connection->getQueryGrammar());
 
-        $addMinutes = 0;
-        switch ($actCode) {
-            case 'GA':
-                $addMinutes = 0.13;
-                break;
-            case 'GAT':
-                $addMinutes = 0.20;
-                break;
-            case 'GTP':
-                $addMinutes = 0.25;
-                break;
-            case 'JS':
-                $addMinutes = 0.33;
-                break;
-            case 'JM':
-                $addMinutes = 0.42;
-                break;
-            case 'JML':
-                $addMinutes = 0.47;
-                break;
-            case 'JL':
-                $addMinutes = 0.50;
-                break;
-            case 'JXL':
-                $addMinutes = 0.58;
-                break;
-            default:
-                $addMinutes = 0;
-        }
-
-        return $addMinutes;
-
+        return sprintf(
+            'DATE_ADD(NOW(), INTERVAL ((ST_DISTANCE_SPHERE(airports.coordinates, %s) / 1852 / %d + %F) * 3600) SECOND)',
+            $anchorPoint,
+            AircraftHelper::cruiseKts($codeletter),
+            AircraftHelper::climbDescendHours($codeletter)
+        );
     }
 
     /**
-     * Calculate the nautical miles the selected aircraft type will fly in an hour
-     *
-     * @param  string  $actCode  Aircraft code
-     * @param  int  $minHours  Minimum hours
-     * @param  int  $maxHours  Maximum hours
-     * @return int Nautical miles
+     * The distance range (NM) the aircraft covers within the given airtime range
      */
     public static function aircraftNmPerHourRange(string $actCode, int $minHours, int $maxHours)
     {
-        $minDistance = self::aircraftNmPerHour($actCode);
-        $maxDistance = self::aircraftNmPerHour($actCode);
+        $speed = AircraftHelper::cruiseKts($actCode);
 
-        // Convert to nm and multiply by hours
-        $minDistance = ($minDistance) * $minHours;
-        $maxDistance = ($maxDistance) * $maxHours;
-
-        if ($minDistance !== 0) {
-            $minDistance += self::timeClimbDescend($actCode);
-        }
+        $minDistance = $speed * $minHours;
+        $maxDistance = $speed * $maxHours;
 
         return [$minDistance, $maxDistance];
     }
@@ -169,19 +79,8 @@ class CalculationHelper
         $Φ = rad2deg($Φ);
         $Λ = rad2deg($Λ);
 
-        if ($Φ > 90) {
-            $Φ = 90;
-        }
-        if ($Φ < -90) {
-            $Φ = -90;
-        }
-
-        if ($Λ > 180) {
-            $Λ = 180;
-        }
-        if ($Λ < -180) {
-            $Λ = -180;
-        }
+        $Φ = max(-90.0, min(90.0, $Φ));
+        $Λ = max(-180.0, min(180.0, $Λ));
 
         return new Coordinate($Φ, $Λ);
     }

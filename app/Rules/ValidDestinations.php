@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Http\Controllers\SearchController;
+use App\Helpers\CountryHelper;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
@@ -17,18 +17,11 @@ class ValidDestinations implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
 
-        $whitelist = ['Anywhere', 'Domestic', 'C-AF', 'C-AS', 'C-EU', 'C-NA', 'C-OC', 'C-SA'];
-
-        $countries = SearchController::$countries;
-        $usStates = SearchController::$usStates;
-
-        foreach ($countries as $iso => $country) {
-            $whitelist[] = $iso;
-        }
-
-        foreach ($usStates as $iso => $state) {
-            $whitelist[] = 'US-' . $iso;
-        }
+        $whitelist = [
+            'Anywhere', 'Domestic', 'C-AF', 'C-AS', 'C-EU', 'C-NA', 'C-OC', 'C-SA',
+            ...array_keys(CountryHelper::names()),
+            ...array_map(fn ($iso) => 'US-' . $iso, array_keys(CountryHelper::US_STATES)),
+        ];
 
         $exists = ! in_array($value, $whitelist);
 

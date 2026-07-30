@@ -59,7 +59,7 @@
 
             <div class="mb-3">
                 <label class="form-label" for="payware">Payware</label>
-                <select class="form-select" id="payware" name="payware" required>
+                <select class="form-control form-select" id="payware" name="payware" required>
                     <option disabled selected>Select</option>
                     <option value="1">Payware</option>
                     <option value="0">Freeware</option>

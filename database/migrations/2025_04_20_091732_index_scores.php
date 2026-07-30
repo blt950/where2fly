@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('runways', function (Blueprint $table) {
+        Schema::table('airport_scores', function (Blueprint $table) {
             $table->dropIndex(['airport_id', 'reason']);
         });
     }

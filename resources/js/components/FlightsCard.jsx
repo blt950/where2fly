@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useContext } from 'react';
 import { CardContext } from './context/CardContext';
 import { MapContext } from './context/MapContext';
-import moment from 'moment';
+import fromNow from './utils/RelativeTime';
 
 function FlightsCard({ airlineId, departureAirportId, arrivalAirportId, reverseDirection }) {
 
@@ -60,8 +60,8 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId, reverseD
                             {data.flights.map(flight => (
                                 <tr key={flight.id}>
                                     <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.flight_icao}>
-                                        <div className="dropdown fs-6 text-info link-underline-info link-underline-opacity-25-hover font-work-sans ps-0">
-                                            <button className="btn btn-xs btn-xs-light dropdown-toggle font-work-sans" type="button" data-bs-toggle="dropdown" aria-expanded="false">{flight.flight_icao}</button>
+                                        <div className="dropdown fs-6 text-info link-underline-info link-underline-opacity-25-hover ps-0">
+                                            <button className="btn btn-xs btn-xs-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{flight.flight_icao}</button>
                                             <ul className="dropdown-menu">
                                                 <li>
                                                     <a
@@ -107,7 +107,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId, reverseD
                                         {flight.aircrafts.map(aircraft => aircraft.icao).join(', ')}
                                     </td>
                                     <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.last_seen_at}>
-                                        {moment(flight.last_seen_at).fromNow()}
+                                        {fromNow(flight.last_seen_at)}
                                     </td>
                                 </tr>
                             ))}

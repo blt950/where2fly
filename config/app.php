@@ -1,33 +1,5 @@
 <?php
 
-use App\Providers\AppServiceProvider;
-use App\Providers\EventServiceProvider;
-use App\Providers\RouteServiceProvider;
-use GrahamCampbell\Markdown\MarkdownServiceProvider;
-use Illuminate\Auth\AuthServiceProvider;
-use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
-use Illuminate\Broadcasting\BroadcastServiceProvider;
-use Illuminate\Bus\BusServiceProvider;
-use Illuminate\Cache\CacheServiceProvider;
-use Illuminate\Cookie\CookieServiceProvider;
-use Illuminate\Database\DatabaseServiceProvider;
-use Illuminate\Encryption\EncryptionServiceProvider;
-use Illuminate\Filesystem\FilesystemServiceProvider;
-use Illuminate\Foundation\Providers\ConsoleSupportServiceProvider;
-use Illuminate\Foundation\Providers\FoundationServiceProvider;
-use Illuminate\Hashing\HashServiceProvider;
-use Illuminate\Mail\MailServiceProvider;
-use Illuminate\Notifications\NotificationServiceProvider;
-use Illuminate\Pagination\PaginationServiceProvider;
-use Illuminate\Pipeline\PipelineServiceProvider;
-use Illuminate\Queue\QueueServiceProvider;
-use Illuminate\Redis\RedisServiceProvider;
-use Illuminate\Session\SessionServiceProvider;
-use Illuminate\Support\Facades\Facade;
-use Illuminate\Translation\TranslationServiceProvider;
-use Illuminate\Validation\ValidationServiceProvider;
-use Illuminate\View\ViewServiceProvider;
-
 return [
 
     /*
@@ -42,7 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Where2Fly'),
-    'version' => 'v2.8.3',
+    'version' => 'v3.0.0',
     'searchVersion' => 2,
 
     /*
@@ -201,76 +173,5 @@ return [
         'driver' => 'file',
         // 'store'  => 'redis',
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Autoloaded Service Providers
-    |--------------------------------------------------------------------------
-    |
-    | The service providers listed here will be automatically loaded on the
-    | request to your application. Feel free to add your own services to
-    | this array to grant expanded functionality to your applications.
-    |
-    */
-
-    'providers' => [
-
-        /*
-         * Laravel Framework Service Providers...
-         */
-        AuthServiceProvider::class,
-        BroadcastServiceProvider::class,
-        BusServiceProvider::class,
-        CacheServiceProvider::class,
-        ConsoleSupportServiceProvider::class,
-        CookieServiceProvider::class,
-        DatabaseServiceProvider::class,
-        EncryptionServiceProvider::class,
-        FilesystemServiceProvider::class,
-        FoundationServiceProvider::class,
-        HashServiceProvider::class,
-        MailServiceProvider::class,
-        NotificationServiceProvider::class,
-        PaginationServiceProvider::class,
-        PipelineServiceProvider::class,
-        QueueServiceProvider::class,
-        RedisServiceProvider::class,
-        PasswordResetServiceProvider::class,
-        SessionServiceProvider::class,
-        TranslationServiceProvider::class,
-        ValidationServiceProvider::class,
-        ViewServiceProvider::class,
-
-        /*
-         * Package Service Providers...
-         */
-
-        /*
-         * Application Service Providers...
-         */
-        AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
-        EventServiceProvider::class,
-        RouteServiceProvider::class,
-
-        MarkdownServiceProvider::class,
-
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Class Aliases
-    |--------------------------------------------------------------------------
-    |
-    | This array of class aliases will be registered when this application
-    | is started. However, feel free to register as many as you wish as
-    | the aliases are "lazy" loaded so they don't hinder performance.
-    |
-    */
-
-    'aliases' => Facade::defaultAliases()->merge([
-        // 'ExampleClass' => App\Example\ExampleClass::class,
-    ])->toArray(),
 
 ];

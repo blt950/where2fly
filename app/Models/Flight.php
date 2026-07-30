@@ -11,10 +11,13 @@ class Flight extends Model
 
     public $timestamps = false;
 
-    protected $casts = [
-        'last_seen_at' => 'datetime',
-        'first_seen_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'last_seen_at' => 'datetime',
+            'first_seen_at' => 'datetime',
+        ];
+    }
 
     public function departureAirport()
     {

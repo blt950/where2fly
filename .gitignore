@@ -16,6 +16,11 @@ yarn-error.log
 /.vscode
 apache/*
 .DS_Store
+graphify-out/cache
+graphify-out/graph.html
+graphify-out/manifest.json
+graphify-out/.*
+graphify-out/cost.json
 
 /resources/fonts/fa-brands-400.ttf
 /resources/fonts/fa-brands-400.woff2
@@ -53,3 +58,5 @@ apache/*
 /resources/fonts/fa-sharp-thin-100.woff2
 /resources/fonts/fa-v4compatibility.ttf
 /resources/fonts/fa-v4compatibility.woff2
+.phpunit.cache/test-results
+.abacusai/config.json

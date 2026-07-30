@@ -17,7 +17,14 @@ function AirportCard({ airportId }) {
     const [showSceneryIdCard, setShowSceneryIdCard] = useState(null);
     const [departureAirportId, setDepartureAirportId] = useState(null);
     const [arrivalAirportId, setArrivalAirportId] = useState(null);
-    const { airports, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts } = useContext(MapContext);
+    const { airports, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts, setFocusAirport, setShowAirportIdCard } = useContext(MapContext);
+
+    // Closing unmounts the card and its flights/scenery children; focusAirport
+    // is cleared too so clicking the same marker again reopens the card
+    const closeCard = () => {
+        setShowAirportIdCard(null);
+        setFocusAirport(null);
+    };
 
     useEffect(() => {
         window.setShowSceneryIdCard = (data) => { setShowSceneryIdCard(data) }
@@ -90,22 +97,40 @@ function AirportCard({ airportId }) {
             <div className="popup-card">
                 {data ? (
                     <>
-                        <div>
-                            <img 
-                                className="flag border-0" 
-                                src={`/img/flags/${ data.airport.iso_country.toLowerCase() }.svg`} 
-                                height="16" 
-                                data-bs-toggle="tooltip" 
-                                data-bs-title={ data.airport.country } 
-                                alt={`Flag of ${data.airport.country}`}
-                            />
-                            &nbsp;{data.airport.icao}
+                        <div className="d-flex justify-content-between">
+                            <div>
+                                <img
+                                    className="flag border-0"
+                                    src={`/img/flags/${ data.airport.iso_country.toLowerCase() }.svg`}
+                                    height="16"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-title={ data.airport.country }
+                                    alt={`Flag of ${data.airport.country}`}
+                                />
+                                &nbsp;{data.airport.icao}
+                            </div>
+                            <button className="btn-close" aria-label="Close airport card" onClick={closeCard}></button>
                         </div>
                         <h2>{data.airport.name}</h2>
 
                         {data.lists.map(list => (
                             <span className="badge me-1" style={{ border: '1px solid ' + list.color, color: list.color }} key={list.id}><i className="fa-sharp fa-list"></i>&nbsp;{list.name}</span>
                         ))}
+
+                        {data.notable && (
+                            <div className="notable">
+                                <h3>Notable airport</h3>
+                                <div className="d-flex flex-row flex-wrap">
+                                    {data.notable.tags.map(tag => (
+                                        <span className="badge me-1" key={tag.name}><i className={`fa-sharp fa-regular ${tag.icon}`}></i>&nbsp;&nbsp;{tag.name}</span>
+                                    ))}
+                                </div>
+                                <p>{data.notable.description}</p>
+                                <a href={data.notable.source} target="_blank">
+                                    <i className="fa-sharp fa-link-simple"></i> {data.notable.source_tld}
+                                </a>
+                            </div>
+                        )}
 
                         <dl className="font-kanit">
                             <dt>Runways</dt>
@@ -121,7 +146,7 @@ function AirportCard({ airportId }) {
 
                             <dt>TAF</dt>
                             <dd>
-                                <TAF icao={data.airport.icao}/>
+                                <TAF taf={data.taf}/>
                             </dd>
 
                             {data.airlines && data.airlines.length > 0 && (
@@ -150,17 +175,17 @@ function AirportCard({ airportId }) {
                         </dl>
 
                         <div className="d-flex flex-wrap gap-2">
-                            <button className="btn btn-outline-primary btn-sm font-work-sans" onClick={() => setShowSceneryIdCard(data.airport.icao)}>
+                            <button className="btn btn-outline-primary btn-sm" onClick={() => setShowSceneryIdCard(data.airport.icao)}>
                                 <i className="fa-sharp fa-map"></i> Scenery
                             </button>
 
                             {(primaryAirport === undefined || primaryAirport === null) && (
                                 <>
-                                    <a className="btn btn-outline-primary btn-sm font-work-sans" href={route('front', {icao: data.airport.icao})}>
+                                    <a className="btn btn-outline-primary btn-sm" href={route('front', {icao: data.airport.icao})}>
                                     <i className="fa-sharp fa-search"></i> <span>Arrival</span>
                                     </a>
                             
-                                    <a className="btn btn-outline-primary btn-sm font-work-sans" href={route('front.departures', {icao: data.airport.icao})}>
+                                    <a className="btn btn-outline-primary btn-sm" href={route('front.departures', {icao: data.airport.icao})}>
                                         <i className="fa-sharp fa-search"></i> <span>Departure</span>
                                     </a>
                                 </>
@@ -168,7 +193,7 @@ function AirportCard({ airportId }) {
 
                             {(primaryAirport !== undefined && primaryAirport !== null) && (
                                 <>
-                                    <button className="btn btn-outline-primary btn-sm font-work-sans" onClick={() => {
+                                    <button className="btn btn-outline-primary btn-sm" onClick={() => {
                                         const params = new URLSearchParams(window.location.search);
                                         params.set('icao', data.airport.icao);
                                         window.location.href = `${window.location.pathname}?${params.toString()}`;
@@ -182,12 +207,16 @@ function AirportCard({ airportId }) {
                                 </>    
                             )}
 
-                            <a className="btn btn-outline-light btn-sm font-work-sans" href={`https://windy.com/${data.airport.icao}?utm_campaign=where2fly.today`} target="_blank">
+                            <a className="btn btn-outline-light btn-sm" href={`https://windy.com/${data.airport.icao}?utm_campaign=where2fly.today`} target="_blank">
                                 Windy <i className="fa-sharp fa-up-right-from-square"></i>
                             </a>
 
+                            <a className="btn btn-outline-light btn-sm" href={`https://charts.navigraph.com/airport/${data.airport.icao}?chartCategory=APP&informationSection=General&section=Charts&utm_campaign=where2fly.today`} target="_blank">
+                                Navigraph <i className="fa-sharp fa-up-right-from-square"></i>
+                            </a>
+
                             <SimbriefLink 
-                                className="btn btn-outline-primary btn-sm font-work-sans"
+                                className="btn btn-outline-primary btn-sm"
                                 direction={reverseDirection}
                                 primaryIcao={primaryAirport}
                                 secondaryIcao={focusAirport}
