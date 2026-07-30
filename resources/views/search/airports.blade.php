@@ -245,13 +245,13 @@
 
                     @if($count == 1)
                         <tr>
-                            <th colspan="9" class="text-center text-danger">
+                            <th colspan="9" class="text-center text-warning">
                                 <i class="fa-sharp fa-exclamation-triangle"></i> No results matched your criteria
                             </th>
                         </tr>
                     @elseif($count > 10)
                         <tr id="showMoreRow">
-                            <th colspan="10" class="text-center text-danger">
+                            <th colspan="10" class="text-center">
                                 <button id="showMoreBtn" class="btn btn-outline-primary">Show more</button>
                             </th>
                         </tr>
