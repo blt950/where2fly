@@ -63,11 +63,16 @@ For development, consider turning `validate_timestamps` to `1` in the `php.ini` 
 ## Configuration
 
 ### Updating Airport Database
-Last update in production: 2024-10-19
+Last update in production: 2026-07-29
 
 - Download the latest [Airports & Runways data from OurAirports](https://ourairports.com/data/) as CSV
-- Temporary drop the spatial index
-- Make the `coordinates` column nullable
+- Temporarily drop the spatial index and make the `coordinates` column nullable
+    ```sql
+    ALTER TABLE `where2fly`.`airports`
+    DROP INDEX `airports_coordinates_spatialindex`;
+    ALTER TABLE `where2fly`.`airports`
+    MODIFY `coordinates` POINT SRID 4326 NULL;
+    ```
 - Truncate and then import the new CSV. Remember using the id provided in the CSV
 - Run the `php artisan enrich:airports` command
 - Run this SQL command to add coordinates to the airports
@@ -79,14 +84,13 @@ Last update in production: 2024-10-19
         ), 4326
     );
     ```
-- Re-add the spatial index
+- Make the `coordinates` column not nullable again and re-add the spatial index
     ```sql
     ALTER TABLE `where2fly`.`airports`
-    MODIFY `coordinates` POINT NOT NULL;
+    MODIFY `coordinates` POINT NOT NULL SRID 4326;
     ALTER TABLE `where2fly`.`airports`
     ADD SPATIAL INDEX `airports_coordinates_spatialindex` (`coordinates`);
     ```
-- Make the `coordinates` column not nullable again
 - Update the `runways` by truncating the data and then importing the CSV.
 
 ## Data Sources
