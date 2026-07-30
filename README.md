@@ -99,7 +99,7 @@ This project uses the following data sources:
 - Airports & Runways: https://ourairports.com/
 - Air Traffic: https://airlabs.co/
 - Flags: https://flagicons.lipis.dev/
-- METAR/TAF: [https://metar.vatsim.net/all](https://aviationweather.gov/data/api/)
+- METAR/TAF: https://aviationweather.gov/data/api/
 - Sceneries: https://fsaddoncompare.com/
 
 ## API
