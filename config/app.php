@@ -14,7 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Where2Fly'),
-    'version' => 'v3.0.0',
+    'version' => 'v3.0.1',
     'searchVersion' => 2,
 
     /*

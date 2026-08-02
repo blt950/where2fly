@@ -216,6 +216,12 @@ class SearchController extends Controller
             }
         }
 
+        // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy.
+        $bearingWarning = false;
+        if ($maxDistance > 2300 && isset($flightDirection)) {
+            $bearingWarning = 'Use the destination region filter instead of flight direction for longer hauls, this avoids false positives, skewed or no results.';
+        }
+
         // Lets find an result with the given criteria. Give it a few attempts before we give up.
         // With a fixed anchor the destination query is deterministic apart from the
         // shuffle — an empty result stays empty, so retrying would only re-run the
@@ -295,12 +301,6 @@ class SearchController extends Controller
 
             // Filter the eligible airports
             $suggestedAirports = $airports->filterWithCriteria($primaryAirport, $codeletter, $metcon, $temperatureMin, $temperatureMax, $elevationMin, $elevationMax, $candidatesAreDepartures);
-
-            // If max distance is over 1600 and bearing is enabled -> give user warning about inaccuracy
-            $bearingWarning = false;
-            if ($maxDistance > 2300 && isset($flightDirection)) {
-                $bearingWarning = 'Use the destination region filter instead of flight direction for longer hauls, this avoids false positives, skewed or no results.';
-            }
 
             if ($suggestedAirports->count()) {
 
