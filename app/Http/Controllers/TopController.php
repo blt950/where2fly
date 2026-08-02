@@ -25,6 +25,9 @@ class TopController extends Controller
     public function index(Request $request, ?string $continent = null): View
     {
         $exclude = $request->input('exclude');
+        if(isset($continent)){
+            $continent = strtoupper($continent);
+        }
 
         // Defaults to JM; 'all' explicitly disables the aircraft filter
         $aircraft = $request->input('aircraft', 'JM');

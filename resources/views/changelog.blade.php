@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v3.0.1</h2>
+            <span class="badge ps-0 pb-2">2026-08-02</span>
+            <ul>
+                <li>Fixed an issue with lowercase url breaking top list</li>
+            </ul>
+
             <h2 class="mb-0">v3.0.0</h2>
             <span class="badge ps-0 pb-2">2026-07-30</span>
             <ul>
