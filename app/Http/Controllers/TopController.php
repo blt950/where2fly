@@ -25,7 +25,7 @@ class TopController extends Controller
     public function index(Request $request, ?string $continent = null): View
     {
         $exclude = $request->input('exclude');
-        if(isset($continent)){
+        if (isset($continent)) {
             $continent = strtoupper($continent);
         }
 
