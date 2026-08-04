@@ -12,8 +12,14 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v3.0.2</h2>
+            <span class="badge ps-0 pb-2">2026-08-XX</span>
+            <ul>
+                <li>Fixed a rare issue of register form crashing</li>
+            </ul>
+
             <h2 class="mb-0">v3.0.1</h2>
-            <span class="badge ps-0 pb-2">2026-08-02</span>
+            <span class="badge ps-0 pb-2">2026-08-03</span>
             <ul>
                 <li>Fixed an issue with lowercase url breaking top list</li>
             </ul>

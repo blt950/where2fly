@@ -43,6 +43,7 @@ export default defineConfig({
                 'resources/js/functions/tooltip.js',
                 'resources/js/functions/taf.js',
                 'resources/js/functions/combobox.js',
+                'resources/js/functions/formSubmit.js',
             ],
             refresh: true,
         }),

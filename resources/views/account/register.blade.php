@@ -34,7 +34,7 @@
         </div>
         <div>
             <h2 class="mb-3">Registration</h2>
-            <form method="POST" action="{{ route('user.register') }}">
+            <form method="POST" action="{{ route('user.register') }}" data-submit-once>
                 @csrf
                 <div class="mb-3">
                     <label for="username">Username</label>
@@ -92,4 +92,8 @@
             </form>
         </div>
     </div>
+@endsection
+
+@section('js')
+    @vite('resources/js/functions/formSubmit.js')
 @endsection

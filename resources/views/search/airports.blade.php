@@ -44,7 +44,7 @@
                     </h2>
 
                     {{-- Add possibility to re-post the search query for a new random departure --}}
-                    <form id="randomiseForm" method="GET" action="{{ route('search') }}">
+                    <form id="randomiseForm" method="GET" action="{{ route('search') }}" data-submit-once>
                         @foreach($_GET as $key => $value)
                             @if($key != '_token')
                                 @if(is_array($value))
@@ -269,6 +269,7 @@
 @section('js')
     @vite('resources/js/functions/tooltip.js')
     @vite('resources/js/functions/searchResults.js')
+    @vite('resources/js/functions/formSubmit.js')
     @vite('resources/js/functions/taf.js')
     <script>
         var airportMapData = {!! isset($airportCoordinates) ? json_encode($airportCoordinates) : '[]' !!}
