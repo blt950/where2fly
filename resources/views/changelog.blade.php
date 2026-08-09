@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2026-08-09</span>
             <ul>
                 <li>Fixed destination and other multi-select fields design breaking with multiple options</li>
+                <li>Fixed airport cards sometimes showing runways that don't exist</li>
                 <li>Fixed a rare issue of registration form crashing</li>
             </ul>
 

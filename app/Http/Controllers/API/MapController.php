@@ -105,8 +105,12 @@ class MapController extends Controller
         }
 
         $airport = Airport::select('id', 'icao', 'name', 'iso_country')
-            ->with(['runways' => fn ($q) => $q->where('closed', false)->whereNotNull('length_ft'),
-                'notableAirport', 'notableAirportTags'])
+            ->with([
+                'runways' => fn ($q) => $q->where('closed', false)
+                    ->whereNotNull('length_ft')
+                    ->whereNot('le_ident', '')->whereNot('he_ident', ''), // runway must have both idents
+                'notableAirport', 'notableAirportTags',
+            ])
             ->where('id', $secondaryAirport)->first();
         $metar = isset($airport->metar) ? $airport->metar->metar : null;
         $taf = optional($airport->taf)->raw_text;
