@@ -7,7 +7,9 @@ import TooltipRefresh from './utils/TooltipRefresh';
 
 function SceneryCard({ airportId }) {
     const dataCache = useRef({});
+    const tabsRef = useRef(null);
     const [data, setData] = useState(null);
+    const [selectedSimulator, setSelectedSimulator] = useState(null);
     const [currency, setCurrency] = useState(localStorage.getItem('currency') || 'EUR');
     const { setShowSceneryIdCard } = useContext(CardContext);
 
@@ -54,6 +56,14 @@ function SceneryCard({ airportId }) {
         TooltipRefresh();
     }, [data]);
 
+    // Keep the chosen simulator selected between airports.
+    useEffect(() => {
+        if (!data || !selectedSimulator || !tabsRef.current) return;
+
+        const index = Object.keys(data).indexOf(selectedSimulator);
+        if (index >= 0) tabsRef.current.selectedIndex = index;
+    }, [data, selectedSimulator]);
+
     useEffect(() => {
         localStorage.setItem('currency', currency);
     }, [currency]);
@@ -70,12 +80,11 @@ function SceneryCard({ airportId }) {
                 {!data ? (
                     <p>No scenery available</p>
                 ) : (
-
-                    <u-tabs>
+                    <u-tabs ref={tabsRef} key={Object.keys(data).join('|')}>
                         <div className="d-flex flex-row justify-content-between">
                             <u-tablist>
                                 {Object.keys(data).map((key, index) => (
-                                    <u-tab key={key} aria-selected={index === 0 ? "true" : "false"} aria-controls={key}>{key}</u-tab>
+                                    <u-tab key={key} aria-selected={index === 0 ? "true" : "false"} aria-controls={key} onClick={() => setSelectedSimulator(key)}>{key}</u-tab>
                                 ))}
                             </u-tablist>
 

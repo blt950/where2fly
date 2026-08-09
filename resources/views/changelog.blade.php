@@ -13,8 +13,10 @@
         <div class="text-start">
 
             <h2 class="mb-0">v3.0.2</h2>
-            <span class="badge ps-0 pb-2">2026-08-09</span>
+            <span class="badge ps-0 pb-2">2026-08-10</span>
             <ul>
+                <li>Fixed scenery card sometimes showing multiple simulators at once</li>
+                <li>Fixed selected simulator in scenery card not persisting when clicking on other airports</li>
                 <li>Fixed destination and other multi-select fields design breaking with multiple options</li>
                 <li>Fixed airport cards sometimes showing runways that don't exist</li>
                 <li>Fixed a rare issue of registration form crashing</li>
