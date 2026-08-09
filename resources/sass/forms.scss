@@ -126,7 +126,6 @@ u-combobox {
     flex-wrap: wrap;
     position: relative;
 
-    height: 2.625rem;
     min-height: 42px;
 
     padding: 0.375rem 0.75rem;
@@ -162,7 +161,7 @@ u-combobox {
     }
 
     input{
-        min-height: 32px;
+        min-height: 30px;
         border: none;
         background-color: var(--bs-body-bg);
         color: rgb(200, 200, 200);
