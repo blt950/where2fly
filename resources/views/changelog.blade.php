@@ -15,6 +15,7 @@
             <h2 class="mb-0">v3.0.2</h2>
             <span class="badge ps-0 pb-2">2026-08-10</span>
             <ul>
+                <li>Fixed "Anywhere" and "Domestic only" destinations allowed more options which broke the search</li>
                 <li>Fixed scenery card sometimes showing multiple simulators at once</li>
                 <li>Fixed selected simulator in scenery card not persisting when clicking on other airports</li>
                 <li>Fixed destination and other multi-select fields design breaking with multiple options</li>

@@ -25,6 +25,33 @@ placeholderConfigs.forEach(config => {
     });
 });
 
+// "Anywhere" and "Domestic Only" override any other area filter server side, so they stand alone
+const exclusiveDestinations = ['Anywhere', 'Domestic'];
+const destination = document.getElementById('destination');
+const destinationList = document.getElementById('destination-list');
+
+if(destination && destinationList){
+    const syncDestinationExclusivity = () => {
+        const selected = Array.from(destination.querySelectorAll('data')).map(item => item.value);
+        const exclusiveSelected = selected.some(value => exclusiveDestinations.includes(value));
+        const otherSelected = selected.some(value => !exclusiveDestinations.includes(value));
+
+        destinationList.querySelectorAll('u-option').forEach(option => {
+            option.disabled = exclusiveSelected
+                ? !selected.includes(option.value)
+                : otherSelected && exclusiveDestinations.includes(option.value);
+        });
+
+        // A disabled option is hidden by u-datalist, so its group heading would be left dangling
+        destinationList.querySelectorAll('.divider').forEach(divider => {
+            divider.hidden = exclusiveSelected;
+        });
+    };
+
+    syncDestinationExclusivity();
+    destination.addEventListener('comboboxafterselect', syncDestinationExclusivity);
+}
+
 document.querySelectorAll('u-combobox').forEach(element => {
     const input = element.querySelector('input');
     if (!input) return;
