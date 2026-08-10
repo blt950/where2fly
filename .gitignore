@@ -21,6 +21,7 @@ graphify-out/graph.html
 graphify-out/manifest.json
 graphify-out/.*
 graphify-out/cost.json
+.mcp.json
 
 /resources/fonts/fa-brands-400.ttf
 /resources/fonts/fa-brands-400.woff2

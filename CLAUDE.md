@@ -44,6 +44,7 @@ Most domain logic lives as query scopes on `Airport` (large file) plus `Calculat
 ## Code style
 
 - Formatter is Laravel Pint (`pint.json`, `laravel` preset + a few custom rules). Run `./vendor/bin/pint` (or via the dev container) before committing PHP changes — don't hand-format to match the preset from memory.
+- Comments: max 2 lines, no restating what the code already says. Explain the *why* (the non-obvious constraint, gotcha, or measurement) and cut the rest — that includes docblocks on tests and helpers.
 
 ## Migrations
 
