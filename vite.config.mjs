@@ -26,6 +26,7 @@ export default defineConfig({
                     groups: [
                         { name: 'leaflet', test: /node_modules\/.*leaflet/ },
                         { name: 'react', test: /node_modules\/(react|react-dom|scheduler)\// },
+                        { name: 'sentry', test: /node_modules\/@sentry/ },
                         { name: 'vendor', test: /node_modules/ },
                     ],
                 },
@@ -36,6 +37,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/js/app.js',
+                'resources/js/bugReport.js',
                 'resources/js/nouislider.js',
                 'resources/js/sortable.js',
                 'resources/js/functions/searchResults.js',

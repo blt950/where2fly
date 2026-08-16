@@ -1,4 +1,17 @@
 <div class="container">
+    
+    @if(config('sentry.dsn'))
+        <button type="button" id="report-bug" class="btn btn-outline-primary w-100 mb-2"
+                data-dsn="{{ config('sentry.dsn') }}"
+                @auth data-user-id="{{ auth()->id() }}" @endauth>
+            Report a bug <i class="fa-sharp fa-bug"></i>
+        </button>
+
+        @include('feedback.bugModal')
+
+        @vite('resources/js/bugReport.js')
+    @endif
+
     <a href="https://github.com/blt950/where2fly/issues" class="btn btn-outline-success w-100 mb-3" target="_blank">
         Add your new idea on Github <i class="fa-sharp fa-up-right-from-square"></i>
     </a>
