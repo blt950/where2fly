@@ -4,12 +4,17 @@ FROM docker.io/library/node:26.7-alpine AS frontend
 LABEL stage=build
 
 WORKDIR /app
+
+# Lockfile first so the install layer caches independently of app source changes
+COPY package.json package-lock.json /app/
+RUN npm ci --omit dev
+
 COPY ./ /app/
 
+# SENTRY_RELEASE is read from config/app.php, so this must stay after the full COPY
 RUN --mount=type=secret,id=sentry_auth_token \
     export SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token 2>/dev/null || true)"; \
     export SENTRY_RELEASE="$(sed -n "s/.*'version' *=> *'\([^']*\)'.*/\1/p" config/app.php)"; \
-    npm ci --omit dev && \
     npx vite build
 
 ####################################################################################################
@@ -19,33 +24,27 @@ FROM docker.io/library/php:8.5.9-apache-trixie
 # Default container port for the apache configuration
 EXPOSE 80 443
 
-# Install base dependencies
+# Install base dependencies (git is composer's fallback source driver)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl xz-utils git unzip vim nano ca-certificates && \
+    apt-get install -y --no-install-recommends curl git unzip vim nano ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install runtime libs required by Oracle MySQL client
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        libncurses6 \
-        libtinfo6 \
-        libzstd1 \
-        zlib1g \
-        libssl3 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Oracle MySQL Client
+# Install Oracle MySQL Client from Oracle's own .debs — apt resolves the runtime libs, and
+# MYSQL_CLIENT_DISTRO must track the base image's Debian release (the URL 404s on mismatch).
 ARG MYSQL_CLIENT_VERSION=8.4.9
+ARG MYSQL_CLIENT_DISTRO=debian13
 RUN set -eux; \
-    curl -fsSL "https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-${MYSQL_CLIENT_VERSION}-linux-glibc2.28-x86_64.tar.xz" -o /tmp/mysql-client.tar.xz; \
-    tar -xf /tmp/mysql-client.tar.xz -C /usr/local; \
-    mv "/usr/local/mysql-${MYSQL_CLIENT_VERSION}-linux-glibc2.28-x86_64" /usr/local/mysql; \
-    ln -s /usr/local/mysql/bin/mysql /usr/local/bin/mysql; \
-    ln -s /usr/local/mysql/bin/mysqldump /usr/local/bin/mysqldump; \
+    cd /tmp; \
+    for p in mysql-common mysql-community-client-plugins mysql-community-client-core; do \
+        curl -fsSL "https://cdn.mysql.com/Downloads/MySQL-8.4/${p}_${MYSQL_CLIENT_VERSION}-1${MYSQL_CLIENT_DISTRO}_amd64.deb" -O; \
+    done; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends /tmp/mysql-*.deb; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/* /tmp/mysql-*.deb; \
     mysql --version; \
-    rm /tmp/mysql-client.tar.xz
+    mysqldump --version
 
 # Enable required Apache modules
 RUN a2enmod rewrite ssl remoteip
@@ -64,13 +63,18 @@ COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install composer
 COPY --from=docker.io/library/composer:latest /usr/bin/composer /usr/bin/composer
-# Copy over the application, static files, plus the ones built/transpiled by Mix in the frontend stage further up
-COPY --chown=www-data:www-data ./ /app/
-COPY --from=frontend --chown=www-data:www-data /app/public/ /app/public/
-
 WORKDIR /app
 
-RUN composer install --no-dev --no-interaction --prefer-dist
+# Deps layer: no scripts (artisan isn't copied yet), no autoloader (dumped after the app COPY)
+COPY composer.json composer.lock /app/
+RUN composer install --no-dev --no-interaction --prefer-dist --no-scripts --no-autoloader
+
+# Copy over the application, static files, plus the ones built/transpiled by Vite in the frontend stage further up
+COPY --chown=www-data:www-data ./ /app/
+COPY --from=frontend --chown=www-data:www-data /app/public/build/ /app/public/build/
+
+# Fires post-autoload-dump → package:discover, so no --no-scripts here
+RUN composer dump-autoload --optimize --no-dev
 
 # Normalise ownership/permissions of the writable trees before we drop into the service process.
 RUN mkdir -p \
