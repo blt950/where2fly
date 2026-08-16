@@ -12,6 +12,14 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v3.0.4</h2>
+            <span class="badge ps-0 pb-2">2026-08-17</span>
+            <ul>
+                <li>Fixed map crashing on select route searches</li>
+                <li>Fixed missing error when searching for scenery with invalid icao</li>
+                <li>Fixed misc filter errors</li>
+            </ul>
+
             <h2 class="mb-0">v3.0.3</h2>
             <span class="badge ps-0 pb-2">2026-08-16</span>
             <ul>
