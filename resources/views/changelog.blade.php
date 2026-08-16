@@ -12,6 +12,14 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v3.0.3</h2>
+            <span class="badge ps-0 pb-2">2026-08-16</span>
+            <ul>
+                <li>Fixed and improved error and feedback handling</li>
+                <li>Fixed darkmode for error pages</li>
+                <li>Security updates</li>
+            </ul>
+
             <h2 class="mb-0">v3.0.2</h2>
             <span class="badge ps-0 pb-2">2026-08-10</span>
             <ul>
