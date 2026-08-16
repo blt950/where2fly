@@ -38,6 +38,6 @@ jobs:
         if: env.SENTRY_AUTH_TOKEN != ''
         uses: getsentry/action-release@v3
         with:
-          version: ${{ github.event.release.tag_name }}
+          release: ${{ github.event.release.tag_name }}
           environment: production
           set_commits: auto
