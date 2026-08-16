@@ -37,7 +37,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Oracle MySQL Client
-ARG MYSQL_CLIENT_VERSION=8.4.9
+ARG MYSQL_CLIENT_VERSION=8.4.11
 RUN set -eux; \
     curl -fsSL "https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-${MYSQL_CLIENT_VERSION}-linux-glibc2.28-x86_64.tar.xz" -o /tmp/mysql-client.tar.xz; \
     tar -xf /tmp/mysql-client.tar.xz -C /usr/local; \
