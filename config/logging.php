@@ -70,6 +70,11 @@ return [
             'days' => 14,
         ],
 
+        'sentry_logs' => [
+            'driver' => 'sentry_logs',
+            'level' => env('LOG_LEVEL', 'info'),
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

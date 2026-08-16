@@ -1,0 +1,43 @@
+---
+name: "Sentry Release"
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  sentry-release:
+    name: Create Sentry release
+    runs-on: ubuntu-latest
+
+    env:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: blt950
+      SENTRY_PROJECT: where2fly
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # Commit association needs the full history to find the previous release's head commit.
+          fetch-depth: 0
+
+      - name: Verify app version matches the release tag
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          APP_VERSION=$(grep -oP "'version'\s*=>\s*'\K[^']+" config/app.php)
+          if [ "$APP_VERSION" != "$TAG" ]; then
+            echo "::error::config/app.php version ($APP_VERSION) does not match release tag ($TAG)."
+            echo "Errors would report release $APP_VERSION while Sentry has commits under $TAG."
+            exit 1
+          fi
+          echo "Release: $TAG"
+
+      - name: Create Sentry release
+        if: env.SENTRY_AUTH_TOKEN != ''
+        uses: getsentry/action-release@v3
+        with:
+          version: ${{ github.event.release.tag_name }}
+          environment: production
+          set_commits: auto

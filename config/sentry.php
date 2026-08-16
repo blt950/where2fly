@@ -5,9 +5,9 @@ return [
     // @see https://docs.sentry.io/product/sentry-basics/dsn-explainer/
     'dsn' => env('SENTRY_LARAVEL_DSN', env('SENTRY_DSN')),
 
-    // The release version of your application
-    // Example with dynamic git hash: trim(exec('git --git-dir ' . base_path('.git') . ' log --pretty="%h" -n1 HEAD'))
-    'release' => env('SENTRY_RELEASE'),
+    // Falls back to the version shown in the footer, which is bumped in lockstep with the git tag.
+    // Set SENTRY_RELEASE to override when deploying code that is ahead of the last version bump.
+    'release' => env('SENTRY_RELEASE') ?: config('app.version'),
 
     // When left empty or `null` the Laravel environment will be used
     'environment' => env('SENTRY_ENVIRONMENT'),

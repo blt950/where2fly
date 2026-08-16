@@ -10,5 +10,8 @@
       "Bash(npm run *)",
       "Bash(php artisan tinker '--execute= *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "sentry"
+  ]
 }

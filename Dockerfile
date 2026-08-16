@@ -50,12 +50,14 @@ RUN a2enmod rewrite ssl remoteip
 # Custom Apache2 configuration based on defaults; fairly straightforward
 COPY ./container/configs/000-default.conf /etc/apache2/sites-available/000-default.conf
 COPY ./container/configs/apache.conf /etc/apache2/apache2.conf
+
+# Install PHP extension(s) before the custom php.ini lands: excimer comes from PECL, and
+# PEAR's OS_Guess needs popen(), which our php.ini adds to disable_functions.
+COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions pdo_mysql zip opcache intl excimer
+
 # Custom PHP configuration based on $PHP_INI_DIR/php.ini-production
 COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
-
-# Install PHP extension(s)
-COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions pdo_mysql zip opcache intl
 
 # Install composer
 COPY --from=docker.io/library/composer:latest /usr/bin/composer /usr/bin/composer
