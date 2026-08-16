@@ -150,12 +150,22 @@ function Map() {
                     },
                     body: JSON.stringify({ icao: focusAirport })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    setAirports({ ...airports, [focusAirport]: data.data[focusAirport] });
+                .then(response => response.json().then(body => ({ ok: response.ok, body })))
+                .then(({ ok, body }) => {
+                    const airport = ok ? body.data?.[focusAirport] : undefined;
+
+                    // The scenery search box takes free text, so an unknown ICAO is a
+                    // 422 without a data key — expected, and not worth reporting
+                    if (airport === undefined) {
+                        setFocusAirport(null);
+                        window.dispatchEvent(new CustomEvent('mapAirportNotFound', { detail: { icao: focusAirport } }));
+                        return;
+                    }
+
+                    setAirports({ ...airports, [focusAirport]: airport });
                     // Use the temporary data as setAirports is async
-                    setCoordinates([data.data[focusAirport].lat, data.data[focusAirport].lon]);
-                    setShowAirportIdCard(data.data[focusAirport].id);
+                    setCoordinates([airport.lat, airport.lon]);
+                    setShowAirportIdCard(airport.id);
                 })
                 .catch(error => {
                     captureException(error);
