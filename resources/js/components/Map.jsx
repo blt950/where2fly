@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
+import { captureException, ErrorBoundary } from '@sentry/react';
 
 import { MapContext } from './context/MapContext';
 
@@ -102,7 +103,10 @@ function Map() {
         fetch(route('api.user.authenticated'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
             .then(response => response.json())
             .then(data => setUserAuthenticated(data.data))
-            .catch(error => console.error(error.message));
+            .catch(error => {
+                captureException(error);
+                console.error(error.message);
+            });
     
         // Dispatch a custom event when the map is ready
         window.dispatchEvent(new Event('mapReady'));
@@ -118,7 +122,10 @@ function Map() {
                     localStorage.setItem('userListAirportsCache', JSON.stringify(data.data));
                     setAirports(data.data);
                 })
-                .catch(error => console.error(error.message));
+                .catch(error => {
+                    captureException(error);
+                    console.error(error.message);
+                });
         } else if(isDefaultView() && userAuthenticated == false) {
             setAirports([]);
             localStorage.removeItem('userListAirportsCache');
@@ -150,7 +157,10 @@ function Map() {
                     setCoordinates([data.data[focusAirport].lat, data.data[focusAirport].lon]);
                     setShowAirportIdCard(data.data[focusAirport].id);
                 })
-                .catch(error => console.error(error.message));
+                .catch(error => {
+                    captureException(error);
+                    console.error(error.message);
+                });
 
             } else {
 
@@ -257,10 +267,28 @@ function Map() {
 
 export default Map;
 
+// #map is an empty <aside>: the .map class that gives it size lives on MapContainer, so the
+// fallback has to carry it too or it collapses to nothing when the tree never renders.
+function MapFallback() {
+    return (
+        <div className="map map-error d-flex flex-column align-items-center justify-content-center text-center p-4">
+            <p className="mb-1">
+                <i className="fa-sharp fa-triangle-exclamation" aria-hidden="true"></i> The map could not be loaded
+            </p>
+            <p className="mb-3">We have been notified about it. Reloading the page usually sorts it.</p>
+            <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
+                Reload page
+            </button>
+        </div>
+    );
+}
+
 const mapElement = document.getElementById('map');
 if (mapElement) {
     const root = ReactDOM.createRoot(mapElement);
     root.render(
-        <Map />
+        <ErrorBoundary fallback={<MapFallback />}>
+            <Map />
+        </ErrorBoundary>
     );
 }

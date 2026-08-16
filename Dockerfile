@@ -6,7 +6,10 @@ LABEL stage=build
 WORKDIR /app
 COPY ./ /app/
 
-RUN npm ci --omit dev && \
+RUN --mount=type=secret,id=sentry_auth_token \
+    export SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token 2>/dev/null || true)"; \
+    export SENTRY_RELEASE="$(sed -n "s/.*'version' *=> *'\([^']*\)'.*/\1/p" config/app.php)"; \
+    npm ci --omit dev && \
     npx vite build
 
 ####################################################################################################

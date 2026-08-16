@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useContext } from 'react';
+import { captureException } from '@sentry/react';
 import { CardContext } from './context/CardContext';
 import { MapContext } from './context/MapContext';
 import fromNow from './utils/RelativeTime';
@@ -31,7 +32,10 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId, reverseD
                     dataCache.current[airlineId] = data.data;
                     setData(data.data);
                 })
-                .catch(error => console.error(error.message));
+                .catch(error => {
+                    captureException(error);
+                    console.error(error.message);
+                });
         }
     }, [airlineId]);
 

@@ -5,6 +5,13 @@
 <meta name="author" content="Blt950 / Daniel (1352906)">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
+@if(config('sentry.dsn'))
+    <meta name="sentry-dsn" content="{{ config('sentry.dsn') }}">
+    <meta name="sentry-release" content="{{ config('sentry.release') }}">
+    <meta name="sentry-environment" content="{{ config('sentry.environment') ?: config('app.env') }}">
+    @auth<meta name="sentry-user-id" content="{{ auth()->id() }}">@endauth
+@endif
+
 @hasSection('title')
     <title>{{ config('app.name') }} | @yield('title', 'Home')</title>
 @else
