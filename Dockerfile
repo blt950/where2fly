@@ -63,7 +63,7 @@ RUN install-php-extensions pdo_mysql zip opcache intl excimer
 COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install composer
-COPY --from=docker.io/library/composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=docker.io/library/composer:2.10.2 /usr/bin/composer /usr/bin/composer
 # Copy over the application, static files, plus the ones built/transpiled by Mix in the frontend stage further up
 COPY --chown=www-data:www-data ./ /app/
 COPY --from=frontend --chown=www-data:www-data /app/public/ /app/public/
