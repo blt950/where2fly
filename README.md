@@ -20,7 +20,7 @@ For the full legal text, see the [LICENSE](LICENSE) file or visit
 **Backend:** PHP/Laravel with MySQL
 
 ### MySQL Client
-The container image uses the Oracle MySQL Client (8.4.x) installed from the official generic Linux tarball instead of Debian's `default-mysql-client` (MariaDB). This ensures full compatibility with MySQL 8.4 features and protocol behavior. If you need to update the version, change the `MYSQL_CLIENT_VERSION` build argument in the `Dockerfile`.
+The container image uses the Oracle MySQL Client (8.4.x) installed from Oracle's official Debian packages instead of Debian's `default-mysql-client` (MariaDB). This ensures full compatibility with MySQL 8.4 features and protocol behavior. If you need to update the version, change the `MYSQL_CLIENT_VERSION` build argument in the `Dockerfile`.
 
 ## Development Setup
 
