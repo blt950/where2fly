@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "include-v-in-tag": true,
+      "extra-files": [
+        "config/app.php"
+      ]
+    }
+  }
+}

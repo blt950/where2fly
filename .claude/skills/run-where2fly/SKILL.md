@@ -124,10 +124,10 @@ debug individual tests.
   `UMAMI_WEBSITE_ID_DEV` is a placeholder, not a real site ID. Ignore
   these; a real API/search error would show up as a different error or
   a visibly broken results page.
-- **`GET /api/user/authenticated` 400 is also expected noise** when
-  browsing logged-out — every page fires it. Same rule as the umami
-  errors: ignore it in `console --errors` unless the page itself is
-  visibly broken.
+- **Auth state comes from a meta tag, not an API call.** The map reads
+  `<meta name="user-authenticated">` synchronously; there is no
+  per-page-load `GET /api/user/authenticated` any more. If you see one
+  in `performance.getEntriesByType('resource')`, the build is stale.
 - **Stopping the server: never `pkill -f "artisan serve"` inside a
   compound command.** `pkill -f` matches the *full command line* of
   every process — including the `bash -c` running the very command that

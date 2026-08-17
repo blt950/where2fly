@@ -32,7 +32,7 @@ RUN apt-get update && \
 
 # Install Oracle MySQL Client from Oracle's own .debs — apt resolves the runtime libs, and
 # MYSQL_CLIENT_DISTRO must track the base image's Debian release (the URL 404s on mismatch).
-ARG MYSQL_CLIENT_VERSION=8.4.9
+ARG MYSQL_CLIENT_VERSION=8.4.11
 ARG MYSQL_CLIENT_DISTRO=debian13
 RUN set -eux; \
     cd /tmp; \
@@ -62,7 +62,7 @@ RUN install-php-extensions pdo_mysql zip opcache intl excimer
 COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install composer
-COPY --from=docker.io/library/composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=docker.io/library/composer:2.10.2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 
 # Deps layer: no scripts (artisan isn't copied yet), no autoloader (dumped after the app COPY)

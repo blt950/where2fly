@@ -1,0 +1,59 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Playwright driver for the run-where2fly agent skill: not shipped, not run by CI",
+      "matchFileNames": [".claude/**"],
+      "enabled": false
+    },
+    {
+      "description": "Prod is MySQL 8.4 LTS - applies to both the CI service image and the client ARG",
+      "matchDepNames": ["mysql"],
+      "allowedVersions": "/^8\\.4\\./"
+    },
+    {
+      "description": "PHP and Node must move in lockstep, or the container and CI drift apart again",
+      "groupName": "php",
+      "matchDepNames": ["php"]
+    },
+    {
+      "groupName": "node",
+      "matchDepNames": ["node"]
+    },
+    {
+      "description": "composer.json's php is a floor constraint, not a pin - widen it by hand",
+      "matchManagers": ["composer"],
+      "matchDepNames": ["php"],
+      "enabled": false
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "Oracle MySQL client version, feeds a hand-built download URL",
+      "customType": "regex",
+      "managerFilePatterns": ["/^Dockerfile$/"],
+      "matchStrings": ["ARG MYSQL_CLIENT_VERSION=(?<currentValue>[\\d.]+)"],
+      "depNameTemplate": "mysql",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "description": "NodeSource major used by the theme build script",
+      "customType": "regex",
+      "managerFilePatterns": ["/^container/install-npm\\.sh$/"],
+      "matchStrings": ["NODE_MAJOR=(?<currentValue>\\d+)"],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version",
+      "extractVersionTemplate": "^v?(?<version>\\d+)"
+    },
+    {
+      "description": "CI PHP version - shivammathur/setup-php is not one of the community actions Renovate reads natively, unlike actions/setup-node",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/actions/setup-dependencies/action\\.yaml$/"],
+      "matchStrings": ["php-version: '(?<currentValue>[\\d.]+)'"],
+      "depNameTemplate": "php",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}

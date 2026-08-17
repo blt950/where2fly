@@ -38,6 +38,7 @@
                         <input type="text" class="form-control" id="airport" name="airport" required oninput="this.value = this.value.toUpperCase()" maxlength="4">
                         <button class="btn btn-primary ms-2" type="submit">Search</button>
                     </div>
+                    <div id="airportNotFound" class="text-warning mt-2 d-none"><i class="fa-sharp fa-exclamation-triangle"></i> No results for that ICAO. Check the code and try again.</div>
                 </form>
             </div>
     
@@ -63,9 +64,14 @@
         // When form is submitted, ask `api/airport/icao` for id and set the airport
         document.querySelector('form').addEventListener('submit', function(event) {
             event.preventDefault();
-            
+
             var icao = document.querySelector('#airport').value;
+            document.querySelector('#airportNotFound').classList.add('d-none');
             setFocusAirport(icao);
+        });
+
+        window.addEventListener('mapAirportNotFound', function() {
+            document.querySelector('#airportNotFound').classList.remove('d-none');
         });
 
     </script>

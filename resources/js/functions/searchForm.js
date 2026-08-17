@@ -154,7 +154,7 @@ addEventListener('pageshow', (event) => {
 
     // Expand filters if they were expanded prior to page navigation
     if(sessionStorage.getItem('filterExpanded') == 'true'){
-        expandFilters(true)
+        expandFilters()
     }
 });
 
@@ -182,6 +182,9 @@ function contractFilters(){
     var filter = document.getElementById('filters');
     var btn = document.getElementById('expandFilters');
 
+    // Shared with /routes, which loads this script but has no filter panel
+    if(filter === null || btn === null) return;
+
     filter.classList.add('hide-filters');
     btn.innerHTML = 'Show more filters <i class="fa-sharp fa-chevron-down expand-chevron"></i>';
     btn.classList.remove('active');
@@ -190,9 +193,12 @@ function contractFilters(){
     filterExpanded = false;
 }
 
-function expandFilters(filter){
+function expandFilters(){
     var filter = document.getElementById('filters');
     var btn = document.getElementById('expandFilters');
+
+    // Shared with /routes, which loads this script but has no filter panel
+    if(filter === null || btn === null) return;
 
     filter.classList.remove('hide-filters');
     btn.innerHTML = 'Hide filters <i class="fa-sharp fa-chevron-down expand-chevron"></i>';

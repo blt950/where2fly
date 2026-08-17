@@ -4,6 +4,7 @@
 @yield('meta-description')
 <meta name="author" content="Blt950 / Daniel (1352906)">
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="user-authenticated" content="{{ auth()->check() ? '1' : '0' }}">
 
 @if(config('sentry.dsn'))
     <meta name="sentry-dsn" content="{{ config('sentry.dsn') }}">
