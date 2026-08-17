@@ -81,29 +81,13 @@
         </div>
         
         <div class="col-xs-12 text-start">
-            <label for="whitelist">
-                Whitelist
-            </label>
-            <u-combobox data-multiple id="whitelist">
-
-                @if($whitelistDatabase !== null)
-                    @foreach($whitelistDatabase as $whitelistDatabaseList)
-                        @foreach(old('whitelists') as $key)
-                            @if($key == $whitelistDatabaseList["id"])
-                                <data value="{{ $key }}">{{ $whitelistDatabaseList["name"] }}</data>
-                            @endif
-                        @endforeach
-                    @endforeach
-                @endif
-
-                <input list="whitelist-list" placeholder="Restrict your search">
-                <u-datalist id="whitelist-list" tabindex="-1" hidden>
-                    <select name="whitelists[]" multiple></select>
-                    @foreach($lists as $list)
-                        <u-option value="{{ $list->id }}">{{ $list->name }}</u-option>
-                    @endforeach
-                </u-datalist>
-            </u-combobox>
+            @include('front.parts.whitelist', [
+                'id' => 'whitelist',
+                'inputName' => $suggestionSide . 'Whitelists',
+                'label' => ucfirst($suggestionSide) . ' Whitelist',
+                'placeholder' => 'Restrict your search',
+                'selected' => old($suggestionSide . 'Whitelists', old('whitelists', [])),
+            ])
         </div>
     
         <div class="col-xs-12 text-start">
@@ -247,6 +231,21 @@
                 @error('destinationExclusions')
                 <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
+
+                <div id="anchorWhitelistGroup">
+                    @include('front.parts.whitelist', [
+                        'id' => 'anchorWhitelist',
+                        'inputName' => $icao . 'Whitelists',
+                        'label' => ucfirst($icao) . ' Whitelist',
+                        'labelClass' => 'pt-4',
+                        'placeholder' => 'Anywhere',
+                        'selected' => old($icao . 'Whitelists', []),
+                        'locked' => filled($prefilledIcao ?? old('icao')),
+                    ])
+                    <p id="anchorWhitelistLocked" class="filter-hint {{ filled($prefilledIcao ?? old('icao')) ? '' : 'd-none' }}">
+                        Clear the ICAO field to enable
+                    </p>
+                </div>
             </div>
 
             <div class="col-sm-12 text-start">

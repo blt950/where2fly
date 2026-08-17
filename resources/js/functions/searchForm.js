@@ -62,9 +62,9 @@ function submitFormMetrics(){
             multiselect.destinations = selected;
         }
 
-        if(element.name == 'whitelists[]'){
-            var selected = Array.from(element.selectedOptions).map(option => option.value);
-            multiselect.whitelists = selected;
+        if(element.name == 'arrivalWhitelists[]' || element.name == 'departureWhitelists[]'){
+            var selected = element.disabled ? [] : Array.from(element.selectedOptions).map(option => option.value);
+            multiselect[element.name.replace('[]', '')] = selected;
         }
 
         if(element.name == 'destinationExclusions[]'){
@@ -98,7 +98,8 @@ function submitFormMetrics(){
     if (window.umami) {
         var multiselectDefaults = {
             destinations: ['Anywhere'],
-            whitelists: ['None'],
+            arrivalWhitelists: ['None'],
+            departureWhitelists: ['None'],
             destinationExclusions: ['None'],
             airlines: ['Any'],
             aircrafts: ['Any'],
@@ -157,6 +158,36 @@ addEventListener('pageshow', (event) => {
         expandFilters()
     }
 });
+
+//
+// Whitelists
+//
+
+// The anchor whitelist only narrows which random airport gets drawn, so it has
+// nothing left to filter once a specific ICAO is typed
+var anchorWhitelist = document.getElementById('anchorWhitelist');
+var icaoInput = document.getElementById('icao');
+
+if(anchorWhitelist && icaoInput){
+    var anchorWhitelistLocked = document.getElementById('anchorWhitelistLocked');
+    var anchorWhitelistLockIcon = document.getElementById('anchorWhitelistLockIcon');
+
+    function toggleAnchorWhitelist(){
+        var locked = icaoInput.value.trim().length > 0;
+
+        // Kept disabled while hidden so a stale selection is neither submitted nor
+        // counted as used in the metrics
+        anchorWhitelist.querySelectorAll('input, select').forEach(function(element){
+            element.disabled = locked;
+        });
+        anchorWhitelist.classList.toggle('d-none', locked);
+        anchorWhitelistLocked.classList.toggle('d-none', !locked);
+        anchorWhitelistLockIcon.classList.toggle('d-none', !locked);
+    }
+
+    icaoInput.addEventListener('input', toggleAnchorWhitelist);
+    toggleAnchorWhitelist();
+}
 
 //
 // Filters
