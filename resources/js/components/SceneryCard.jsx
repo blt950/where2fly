@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useContext } from 'react';
+import { captureException } from '@sentry/react';
 import { CardContext } from './context/CardContext';
 import CurrencyDropdown from './ui/CurrencyDropdown';
 
@@ -43,10 +44,8 @@ function SceneryCard({ airportId }) {
                     setData(data.data);
                 })
                 .catch(error => {
+                    captureException(error);
                     console.error(error.message)
-                    if(error.response.status === 404) {
-                        setData(undefined);
-                    }
                 });
         }
     }, [airportId]);

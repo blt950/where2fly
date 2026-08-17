@@ -1,0 +1,22 @@
+---
+name: "Release Please"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # A PAT rather than GITHUB_TOKEN: releases made with the default token don't
+      # trigger other workflows, which would leave sentry-release.yaml never firing.
+      - name: release-please-action
+        uses: googleapis/release-please-action@v5.0.0
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}

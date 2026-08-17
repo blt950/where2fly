@@ -26,29 +26,19 @@ const MapDrawRoute = ({ departure, arrival, reverseDirection = false }) => {
         
         // Adjust for shortest path across the International Date Line
         if (Math.abs(latlng2[1] - latlng1[1]) > 180) {
-            if (latlng1[1] > 0) {
-                latlng1[1] -= 360;
+            const shiftedIcao = reverseDirection ? arrival : departure;
+            const offset = latlng1[1] > 0 ? -360 : 360;
 
-                // Update the lon value in a way that triggers a render
-                setAirports(prevAirports => ({
-                    ...prevAirports,
-                    [primaryAirport]: {
-                        ...prevAirports[primaryAirport],
-                        lon: prevAirports[primaryAirport].lon -= 360
-                    }
-                }));
-            } else {
-                latlng1[1] += 360;
+            latlng1[1] += offset;
 
-                // Update the lon value in a way that triggers a render
-                setAirports(prevAirports => ({
-                    ...prevAirports,
-                    [primaryAirport]: {
-                        ...prevAirports[primaryAirport],
-                        lon: prevAirports[primaryAirport].lon += 360
-                    }
-                }));
-            }
+            // Move the marker along with the curve, in a way that triggers a render
+            setAirports(prevAirports => ({
+                ...prevAirports,
+                [shiftedIcao]: {
+                    ...prevAirports[shiftedIcao],
+                    lon: prevAirports[shiftedIcao].lon + offset
+                }
+            }));
         }
         
         // Path color and weight
@@ -113,7 +103,7 @@ const MapDrawRoute = ({ departure, arrival, reverseDirection = false }) => {
                 routePath.current = null;
             }
         };
-    }, [airports, departure, arrival]);
+    }, [airports, departure, arrival, reverseDirection]);
             
     const calcMidpointLatLng = (latlng1, latlng2) => {
         const offsetX = latlng2[1] - latlng1[1];

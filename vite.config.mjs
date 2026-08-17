@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 export default defineConfig({
     server: {
@@ -20,6 +21,7 @@ export default defineConfig({
         },
     },
     build: {
+        sourcemap: process.env.SENTRY_AUTH_TOKEN ? 'hidden' : false,
         rolldownOptions: {
             output: {
                 codeSplitting: {
@@ -50,5 +52,15 @@ export default defineConfig({
             refresh: true,
         }),
         react(),
+        sentryVitePlugin({
+            org: 'blt950',
+            project: 'where2fly',
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            disable: !process.env.SENTRY_AUTH_TOKEN,
+            release: { name: process.env.SENTRY_RELEASE },
+            sourcemaps: {
+                filesToDeleteAfterUpload: ['public/build/**/*.map'],
+            },
+        }),
     ],
 });

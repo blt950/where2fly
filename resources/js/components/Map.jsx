@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
+import { captureException, ErrorBoundary } from '@sentry/react';
 
 import { MapContext } from './context/MapContext';
 
@@ -17,6 +18,8 @@ import MapPing from './map/MapPing';
 import MapSaveView from './map/MapSaveView';
 import MapTerminator from './map/MapTerminator';
 import MapTooltipZoom from './map/MapTooltipZoom';
+
+const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
 
 // Check if the current route is the default view
 const isDefaultView = () => {
@@ -78,7 +81,6 @@ function Map() {
     const [primaryAirport, setPrimaryAirport] = useState(null);
     const [reverseDirection, setReverseDirection] = useState(null);
     const [showAirportIdCard, setShowAirportIdCard] = useState(null);
-    const [userAuthenticated, setUserAuthenticated] = useState(null);
 
     // On initial load
     useEffect(() => {
@@ -98,12 +100,6 @@ function Map() {
             setAirports(JSON.parse(cachedAirports));
         }
 
-        // Check if user is authenticated
-        fetch(route('api.user.authenticated'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
-            .then(response => response.json())
-            .then(data => setUserAuthenticated(data.data))
-            .catch(error => console.error(error.message));
-    
         // Dispatch a custom event when the map is ready
         window.dispatchEvent(new Event('mapReady'));
 
@@ -118,12 +114,15 @@ function Map() {
                     localStorage.setItem('userListAirportsCache', JSON.stringify(data.data));
                     setAirports(data.data);
                 })
-                .catch(error => console.error(error.message));
-        } else if(isDefaultView() && userAuthenticated == false) {
+                .catch(error => {
+                    captureException(error);
+                    console.error(error.message);
+                });
+        } else if(isDefaultView()) {
             setAirports([]);
             localStorage.removeItem('userListAirportsCache');
         }
-    }, [userAuthenticated]);
+    }, []);
 
     // When focusAirport changes, pan to the airport and show the card.
     useEffect(() => {
@@ -143,14 +142,27 @@ function Map() {
                     },
                     body: JSON.stringify({ icao: focusAirport })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    setAirports({ ...airports, [focusAirport]: data.data[focusAirport] });
+                .then(response => response.json().then(body => ({ ok: response.ok, body })))
+                .then(({ ok, body }) => {
+                    const airport = ok ? body.data?.[focusAirport] : undefined;
+
+                    // The scenery search box takes free text, so an unknown ICAO is a
+                    // 422 without a data key — expected, and not worth reporting
+                    if (airport === undefined) {
+                        setFocusAirport(null);
+                        window.dispatchEvent(new CustomEvent('mapAirportNotFound', { detail: { icao: focusAirport } }));
+                        return;
+                    }
+
+                    setAirports({ ...airports, [focusAirport]: airport });
                     // Use the temporary data as setAirports is async
-                    setCoordinates([data.data[focusAirport].lat, data.data[focusAirport].lon]);
-                    setShowAirportIdCard(data.data[focusAirport].id);
+                    setCoordinates([airport.lat, airport.lon]);
+                    setShowAirportIdCard(airport.id);
                 })
-                .catch(error => console.error(error.message));
+                .catch(error => {
+                    captureException(error);
+                    console.error(error.message);
+                });
 
             } else {
 
@@ -212,7 +224,7 @@ function Map() {
         setFocusAirport,
         setShowAirportIdCard,
         userAuthenticated,
-    }), [airports, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection, userAuthenticated]);
+    }), [airports, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection]);
 
     return (
         <MapContext.Provider value={mapContextValue}>
@@ -257,10 +269,28 @@ function Map() {
 
 export default Map;
 
+// #map is an empty <aside>: the .map class that gives it size lives on MapContainer, so the
+// fallback has to carry it too or it collapses to nothing when the tree never renders.
+function MapFallback() {
+    return (
+        <div className="map map-error d-flex flex-column align-items-center justify-content-center text-center p-4">
+            <p className="mb-1">
+                <i className="fa-sharp fa-triangle-exclamation" aria-hidden="true"></i> The map could not be loaded
+            </p>
+            <p className="mb-3">We have been notified about it. Reloading the page usually sorts it.</p>
+            <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
+                Reload page
+            </button>
+        </div>
+    );
+}
+
 const mapElement = document.getElementById('map');
 if (mapElement) {
     const root = ReactDOM.createRoot(mapElement);
     root.render(
-        <Map />
+        <ErrorBoundary fallback={<MapFallback />}>
+            <Map />
+        </ErrorBoundary>
     );
 }

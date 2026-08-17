@@ -9,6 +9,12 @@ on:
     paths-ignore:
       - "**.md"
 
+# Main is exempt from cancellation so every main SHA gets its image — the type=sha and latest
+# tags depend on those builds completing.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 env:
   IMAGE_NAME: blt950/where2fly
 
@@ -35,7 +41,7 @@ jobs:
 
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.4
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: where2fly_test
@@ -106,8 +112,6 @@ jobs:
 
       - name: Checkout open repo
         uses: actions/checkout@v7
-        with:
-          repository: blt950/where2fly
 
       - name: Checkout private fonts repo
         uses: actions/checkout@v7
@@ -129,3 +133,16 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+          # Mounted rather than passed as a build-arg, which would persist in the image history.
+          secrets: |
+            sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      # Boots the framework end to end, so a misordered composer/autoloader step fails here
+      # rather than on the first production request.
+      - name: Smoke test image
+        run: |
+          IMAGE_TAG="$(echo "${{ steps.meta.outputs.tags }}" | head -n1)"
+          docker run --rm "$IMAGE_TAG" php artisan about

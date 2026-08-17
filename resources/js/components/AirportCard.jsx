@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useContext } from 'react';
+import { captureException } from '@sentry/react';
 import { MapContext } from './context/MapContext';
 import { CardContext } from './context/CardContext';
 
@@ -56,7 +57,10 @@ function AirportCard({ airportId }) {
                     dataCache.current[airportId] = data.data;
                     setData(data.data);
                 })
-                .catch(error => console.error(error.message));
+                .catch(error => {
+                    captureException(error);
+                    console.error(error.message);
+                });
         }
 
         setShowFlightsIdCard(null);

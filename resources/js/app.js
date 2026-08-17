@@ -1,3 +1,5 @@
+import './sentry';
+
 import './bootstrap';
 import '../sass/app.scss';
 

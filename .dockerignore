@@ -1,5 +1,6 @@
 node_modules
 vendor
+fonts-repo
 public/build
 public/hot
 storage/logs
