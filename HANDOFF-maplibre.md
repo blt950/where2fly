@@ -2,10 +2,16 @@
 
 Status: **plan, not yet implemented.** Everything below was researched against the live
 codebase and verified over the network where possible; nothing has been changed on `main`.
+
 Reviewed 2026-08-16: the `primaryAirport` ReferenceError, path options, padding values and
 the `Math.sqrt(Math.log(r))` NaN were re-verified line-by-line against `MapDrawRoute.jsx`,
-and the package list against `package.json`. §3 now carries a function-level parity table;
-§14 adds optional free weather layers.
+and the package list against `package.json`.
+
+Reviewed 2026-08-17: swapped the hand-ported solar-math terminator for the `crepuscule` npm
+package (§9) and RainViewer for Open-Meteo's `weather-map-layer` (§14), per owner request.
+Trimmed the provider-comparison sections (library alternatives, tile-provider alternatives,
+weather-source alternatives) — those decisions are final, not up for debate (§4). Added §16,
+a step-by-step implementation order meant to be prompted one step at a time.
 
 ---
 
@@ -43,6 +49,8 @@ across ~14k map initialisations per month.
 | Basemap | **CARTO `dark-matter-nolabels-gl-style`** — free, no key, same visual identity as today |
 | Terrain DEM | **AWS Open Data terrarium** — free, no key |
 | Terrain behaviour | **Zoom-gated at z7**; invisible at world/globe view |
+| Terminator | **`crepuscule` (npm)** — worker-computed raster tiles, not a hand-ported polygon (§9) |
+| Weather overlay | **Open-Meteo `@openmeteo/weather-map-layer`** — no key, separable/opt-in (§14) |
 | Camera | **Locked north-up**, no pitch, no bearing |
 | Cost | **$0/month**, no account |
 | Scope | React map layer only. **No PHP changes, no Blade changes** (except one attribution line) |
@@ -87,19 +95,19 @@ same component tree shape, same `MapContext`, same `window.*` bridge from Blade,
 | Pan to focused airport | `panTo` (ms-based duration) | ✅ |
 | Radar-ping blip on an airport | `maplibregl.Marker` + the existing `.radar-ping` CSS unchanged | ✅ |
 | Save map position to localStorage | `moveend` → `getCenter()`; JSON shape `{lng, lat}` is byte-compatible | ✅ no migration |
-| Day/night terminator | ~60 lines of solar maths ported to a GeoJSON `fill` layer | ✅ upgraded (gains a 60 s refresh; today it's computed once and goes stale) |
+| Day/night terminator | `crepuscule`'s `CrepusculeLive` — worker-computed raster tiles, auto-refreshing every 5s | ✅ upgraded (today's version computes once on mount and never updates or cleans up) |
 | Window bridge (`setAirportsData` etc.) + `mapReady`/`mapFocusAirport` events | Preserved verbatim — zero Blade/PHP changes | ✅ |
 | Sentry `ErrorBoundary` + `MapFallback` | Preserved, plus an explicit WebGL2 probe (risk 5) | ✅ hardened |
 | Map hidden on mobile (`display:none` < md) | Same CSS, **plus** skip GL construction entirely → saves ~276 KB + all tiles on phones | ✅ improved |
 | — (new) | Globe projection, real curvature | ➕ new |
 | — (new) | Zoom-gated hillshade terrain | ➕ new |
-| — (optional) | Weather radar overlay (§14) | ➕ optional |
+| — (new) | Weather overlay, user-toggled (§14) | ➕ new |
 
 ### Package-level: can the plugins move?
 
 Short answer: **every one of them goes away, and only one needs real work.** Three are replaced
-by built-in MapLibre features, one becomes unnecessary entirely, and one (the terminator) needs
-~60 lines of maths ported by hand.
+by built-in MapLibre features, one becomes unnecessary entirely, and one (the terminator) swaps
+for a small third-party package instead of a hand port.
 
 | Current package | What it does today | MapLibre path | Effort |
 |---|---|---|---|
@@ -108,15 +116,16 @@ by built-in MapLibre features, one becomes unnecessary entirely, and one (the te
 | `leaflet.markercluster` ^1.5.3 | clustering | **Built into MapLibre.** GeoJSON sources take `cluster: true` / `clusterRadius` / `clusterMaxZoom` and run Supercluster in the worker. Same algorithm family, no plugin | **None** |
 | `react-leaflet-cluster` ^4.1.3 | React wrapper for the above | Gone with it | **None** |
 | `@elfalem/leaflet-curve` ^0.9.2 | the Bézier route line | **Not needed** — replaced by real geodesic densification into a plain `line` layer. This plugin only existed because Leaflet has no curve primitive; we no longer want a curve, we want the actual geodesic | **None** (deleted) |
-| `@joergdietrich/leaflet.terminator` ^1.1.0 | day/night overlay | **No drop-in.** It subclasses `L.Polygon`, so it cannot be reused. But the useful part is ~60 lines of solar maths (`julian`, `GMST`, `_sunEclipticPosition`, `_eclipticObliquity`, `_sunEquatorialPosition`, `_hourAngle`, `_latitude`, `_compute`) — port those into a util that emits a GeoJSON polygon, render as a `fill` layer | **Medium** — the only real port |
+| `@joergdietrich/leaflet.terminator` ^1.1.0 | day/night overlay | **Swap for `crepuscule`** (npm), which computes the same twilight geometry as raster tiles in a worker (§9). Only fall back to a hand port if `crepuscule` doesn't attach cleanly to a raw `maplibregl.Map` | **Small** — one dependency swap, with a documented fallback |
 | `@types/leaflet` ^1.9.12 | types | Drop — `maplibre-gl` ships its own | **None** |
 | `L.divIcon` markers (`MarkerIcon.jsx`) | coloured dots | `circle` layer with `circle-radius` / `circle-color` expressions | **None** (deleted) |
 | `L.divIcon` clusters (`ClusterIcon.jsx`) | cluster bubbles | `circle` + `symbol` layers with `interpolate` on `point_count` | **None** (deleted) |
 | Permanent `L.Tooltip` labels | ICAO labels | `symbol` layer, `text-field: ['get','icao']` | **None** (deleted) |
 | `MapTooltipZoom.jsx` | CSS-class zoom filtering | layer `minzoom` on three label layers | **None** (deleted) |
 
-**Net: 7 packages removed, 1 added.** The dependency footprint gets *simpler*, not more complex
-— the reason MapLibre is bigger is that it absorbs all of this into the core.
+**Net: 7 packages removed, 2 added** (`maplibre-gl`, `crepuscule`; `@openmeteo/weather-map-layer`
+optionally on top for §14). The dependency footprint gets *simpler*, not more complex — the
+reason MapLibre is bigger is that it absorbs all of this into the core.
 
 ### Two capabilities that genuinely have no MapLibre equivalent
 
@@ -127,31 +136,17 @@ by built-in MapLibre features, one becomes unnecessary entirely, and one (the te
 
 ---
 
-## 4. Alternatives considered
+## 4. Decisions, not up for debate
 
-Ranked by how seriously they were considered. Cost column assumes **~14k map loads/month**.
-
-| Option | Curvature | Cost @ 14k/mo | Pros | Cons | Why not chosen |
-|---|---|---|---|---|---|
-| **MapLibre GL JS** ✅ | True globe projection | **$0** — BSD-3, no account | Free forever, no vendor. Globe + terrain + clustering + geodesic lines all in core. CARTO/OpenFreeMap/MapTiler/Stadia all serve it, so the tile provider stays swappable. Active development, v6 two months old | 276 KB gzip. WebGL2 required. Globe still has rough edges (`maxBounds` unsupported on globe; sky is experimental) | **Chosen** |
-| **Mapbox GL JS v3** | True globe | $0 at 14k (free tier is 50k loads/mo), but billing exists | Best-in-class globe, atmosphere, 3D terrain. Excellent docs. Has `line-trim-offset`, which would simplify the route animation | **Proprietary since v2** — source-available, not open source. Requires an account + access token in the frontend. You're one pricing change from a bill; free tiers have been cut before. Everything you'd use it for, MapLibre does free | MapLibre is the same engine forked at the last open-source commit. Paying in vendor lock-in for features you don't need |
-| **CesiumJS** | Full 3D WGS84 ellipsoid — the most *physically* correct option | $0 for the library (Apache 2.0); Cesium ion free tier is 5 GB storage / 100 GB streaming/mo, and is optional | Genuinely 3D: real ellipsoid geometry, native geodesic primitives, time-dynamic entities (would suit VATSIM traffic beautifully). Terrain is first-class | **Multi-MB bundle** (an order of magnitude over MapLibre) plus workers and static assets needing a Vite plugin. Its own styling system — the CARTO dark look would have to be rebuilt from scratch. Heavy on low-end GPUs | Bundle cost is indefensible for 14k inits/month, and rebuilding the visual identity violates "keep the dark look exactly". Right tool if this app ever becomes a 3D traffic viewer |
-| **deck.gl + `_GlobeView`** | True globe | $0 (MIT), plus a basemap from somewhere | `GreatCircleLayer` and `ArcLayer` give geodesics for free — literally the thing we're hand-writing. Superb for large point sets | `_GlobeView` is still underscore-prefixed (experimental) after years. Needs a basemap library underneath anyway — usually MapLibre — so it's *additive*, not an alternative. ~150 KB on top | Doesn't replace MapLibre, it sits on it. Worth revisiting **later** if you want animated VATSIM traffic; the 30-line geodesic util is cheaper than the dependency today |
-| **Globe.gl / three-globe** | True 3D sphere | $0 (MIT) | Beautiful, tiny API, arcs built in, great "wow" factor for the landing page | Not a *map*: no vector tiles, no zoom-dependent labels, no clustering, no real basemap. You'd lose airport labels, search-result rendering, everything | Where2Fly's map is a working instrument, not a hero graphic. Wrong category |
-| **OpenLayers** | Projections yes, **globe no** | $0 (BSD-2) | Genuinely excellent projection support — could render an orthographic/azimuthal-equidistant view via proj4 | No WebGL globe. Rendering is largely canvas-based; a full-page 80k-point map would be slower than today, not faster. Full rewrite for a *worse* outcome on the actual goal | Solves the projection half but not the "3D-like globe" half, at full migration cost |
-| **ArcGIS Maps SDK for JS** | True globe (`SceneView`) | Free tier exists but is credit-metered; commercial use needs a paid plan | Mature, genuinely good 3D globe. Strong geodesic tooling | Esri account, API key, credit metering. Heavy. Basemap styling is Esri's world | Fails the "free, no key, no billing surprise" constraint outright |
-| **Google Maps JS API** (incl. Photorealistic 3D Tiles) | 3D tiles / globe | Metered per map load; 2025 pricing changes altered the old $200 credit model — **verify before assuming free** | Photorealistic 3D is unmatched. Reliable | Proprietary, key required, per-load billing on a site that reloads the map on *every search*, and the dark minimal aesthetic is not its strength | Per-load billing against 14k+ inits is exactly the risk profile you asked to avoid |
-| **Stay on Leaflet + `leaflet.geodesic`** | Line correct, **map still flat** | $0 | ~1 file changed, hours not days, near-zero risk. Fixes the *accuracy* complaint completely | Doesn't touch Mercator distortion, no terrain, keeps 1000+ DOM markers and the permanent-tooltip perf problem | You explicitly chose the full migration. **Keep this in your back pocket** — it's the fallback if MapLibre hits a blocker, and it independently fixes the worst bug |
-
-### On tile providers (independent of library choice)
-
-| Provider | Cost @ 14k/mo | Notes |
-|---|---|---|
-| **CARTO GL styles** ✅ | **$0**, no key | `dark-matter-nolabels` is the exact vector twin of today's raster style. Verified 200, no auth. **Chosen** |
-| OpenFreeMap | $0, no key, no quota | Donation-funded, best-effort SLA. Styles: Positron, Bright, Liberty, Dark Fiord 3D. Good backup |
-| MapTiler | $0 free tier | **Free tier is non-commercial only**; 5k sessions / 100k requests then it halts. Paid from $25/mo |
-| Stadia / Jawg | $0 free tier | Account + key + referrer restrictions needed |
-| Self-hosted Protomaps PMTiles | $0 per-request, storage only | Ruled out — you said no self-hosting |
+MapLibre GL JS was chosen over Mapbox GL v3 (proprietary since v2, needs an account/token),
+Cesium (multi-MB bundle, would mean rebuilding the CARTO look from scratch), deck.gl (sits on
+top of a basemap library, doesn't replace one), Globe.gl/three-globe (not a real map — no
+vector tiles, no zoom-dependent labels, no clustering), OpenLayers (no WebGL globe), and
+ArcGIS/Google Maps (billing risk on a site that reloads the map on every search). CARTO's
+`dark-matter-nolabels-gl-style` was chosen as the basemap over OpenFreeMap/MapTiler/Stadia for
+being free, keyless, and the exact vector twin of today's raster style (§2). If you want the
+full comparison re-run — new library releases, pricing changes — ask; it isn't reproduced here.
+The Leaflet-based fallback if MapLibre itself hits a hard blocker is in §15.
 
 ---
 
@@ -442,7 +437,7 @@ const map = new maplibregl.Map({
     zoom: 4,
     minZoom: 0,                     // was 3
     maxZoom: 17,
-    attributionControl: false,      // we add a configured one, §9
+    attributionControl: false,      // we add a configured one, §10
     dragRotate: false,
     pitchWithRotate: false,
     touchPitch: false,
@@ -577,13 +572,58 @@ later and it tears, the mitigation is one line: `map.setProjection({type:'mercat
 
 ---
 
-## 9. Terminator
+## 9. Terminator — `crepuscule`, not a hand port
 
-Today's `MapTerminator.jsx` computes once on mount and **never updates or removes** — a long-lived
-tab shows a stale night line, and nothing cleans up on unmount.
+Package: **`crepuscule`** (npm, v1.0.0 — `npm install crepuscule`). Renders the day/night
+boundary as dynamically-generated **raster tiles** — a Web Worker (`tile-worker.js`) computes
+the twilight math per z/x/y, z0-22, served through a custom protocol registered on the map. Not
+a GeoJSON polygon, so the earlier plan of a `fill` layer is unnecessary — but keep the fallback
+below.
 
-Port the solar maths into `resources/js/components/utils/solarTerminator.js`, emitting a GeoJSON
-Polygon in `[lon, lat]`, and render as a `fill` layer below the airport layers:
+```js
+import { CrepusculeLive } from 'crepuscule';
+
+let terminator;
+map.on('style.load', () => {
+    terminator = new CrepusculeLive(map, {
+        color: [0, 0, 17],   // default; near-black, matches CARTO's palette
+        opacity: 0.3,        // matches today's leaflet.terminator opacity
+    });
+});
+// cleanup: terminator?.unmount();
+```
+
+`CrepusculeLive` auto-refreshes on its own timer (README states every 5s, on a worker) — no
+manual `setInterval` needed on our side, which also fixes today's staleness bug for free.
+Methods: `setDate()`, `setOpacity()`, `show()`/`hide()` (accept `{duration, delay}`), `update()`,
+`unmount()`; `CrepusculeLive` adds `start()`/`stop()`.
+
+**Ordering:** each instance's layer id is auto-generated (`crepuscule_layer_<uuid>`), so there's
+no fixed id to pass as `beforeId`. Newly added layers stack on top of whatever exists, so
+instantiate `CrepusculeLive` **first**, in `style.load`, before `MapAirportLayers`/`MapTerrain`
+add anything — that puts it at the bottom of the stack, which is where it belongs.
+
+**Two risks worth resolving in the first hour of implementation, not discovering later:**
+
+1. **Its `package.json` peer-dependency is `@maptiler/sdk ^1.1.1`, not `maplibre-gl`.** Every
+   official example (`examples/index.html`) instantiates against a `maptilersdk.Map`, none
+   against a raw `maplibregl.Map`. Reading the source (`src/crepuscule.ts`, ~7 KB) shows the only
+   map calls it makes are `addSource`/`getSource`/`addLayer`/`setPaintProperty`/`removeLayer`/
+   `removeSource`/`once`/`loaded`/`triggerRepaint`/`addProtocol` — all standard `maplibregl.Map`
+   methods that MapTiler SDK's `Map` class merely subclasses, so it should work unmodified.
+   **Verify `addProtocol` specifically** (imported from `@maptiler/sdk`, which re-exports
+   MapLibre's) against our raw `maplibregl.Map` instance before relying on it — this is the one
+   call most likely to diverge between the two SDKs.
+2. **The repo is stale:** last pushed 2024-03-11, 11 GitHub stars, `maplibre-gl` doesn't appear
+   in `package.json` at all. If the npm package doesn't attach cleanly to v6, the source is small
+   enough to vendor directly — copy `src/crepuscule.ts` + `src/tile-worker.js` into
+   `resources/js/components/utils/`, swap the `@maptiler/sdk` type imports for `maplibre-gl`'s.
+   That's a cheaper fallback than the from-scratch solar-math port below. License is a custom
+   `LICENSE.md` (GitHub reports it as "Other", not a recognized SPDX id) — read it before
+   vendoring or shipping.
+
+**Escape hatch if both of the above fail** — the original hand port, GeoJSON `fill` layer below
+the airport layers:
 
 ```js
 map.addLayer({
@@ -592,21 +632,12 @@ map.addLayer({
 }, 'airports-hit');
 ```
 
-> **Mount-order footgun:** `beforeId: 'airports-hit'` requires the airport layers to exist
-> already, but React mounts `MapTerminator` and `MapAirportLayers` independently. Either add
-> all layers in one deterministic place (`mapConfig.js` called from `MapProvider`), or guard:
-> `map.getLayer('airports-hit') ? addLayer(spec, 'airports-hit') : addLayer(spec)` and have
-> `MapAirportLayers` call `map.moveLayer('terminator', ...)` after it adds its own. Same
-> applies to the hillshade's `beforeId: 'boundary_country_inner'` (a CARTO style layer — that
-> one always exists after `style.load`).
-
-- **`longitudeRange: 720` → `360`.** The 720 existed purely to cover Leaflet's world copies; on a
-  globe it would wrap the polygon around itself.
-- **Refresh once a minute**: `setInterval(() => source.setData(terminatorPolygon()), 60_000)`. The
-  terminator moves 0.25°/minute. Clear the interval in cleanup — this fixes the current leak and
-  the staleness bug for free.
-- Poles: the ring's ±90° vertices get clamped to ±85.05° by geojson-vt, so the polar cap isn't
-  shaded. Combined with the polar hole in §7 the pole is black either way. Cosmetically fine.
+fed by ~60 lines of solar maths (`julian`, `GMST`, sun ecliptic/equatorial position, hour angle,
+latitude-of-terminator — the same maths any `leaflet.terminator`-style implementation uses)
+emitting a GeoJSON `Polygon` in `[lon, lat]`, refreshed on a manual `setInterval(..., 60_000)`
+with a `longitudeRange` of 360 (not Leaflet's 720, which existed only to cover world copies).
+Same mount-order footgun as above: guard with
+`map.getLayer('airports-hit') ? addLayer(spec, 'airports-hit') : addLayer(spec)`.
 
 ---
 
@@ -692,9 +723,11 @@ chunk CSS; fall back to the `app.scss` import if not.
 | `appStatic` pages | −59.7 KB | −59.7 KB, no maplibre at all |
 | mobile (< 768 px) | pays full map cost today | **−276 KB JS, −10.6 KB CSS, −all tiles** |
 
-Net **+216 KB gzip**, moved off the blocking path. That's the honest price of a GPU vector
-renderer with globe; there is no smaller library that does globe. (Aside: `vendor` is 96 KB gzip
-and mostly `@sentry/react` — out of scope, but the next-biggest lever if weight becomes a concern.)
+Net **+216 KB gzip**, moved off the blocking path. `crepuscule` and (if shipped)
+`@openmeteo/weather-map-layer` are both small single-file-ish packages, not separately measured
+here — check their real weight in the build output once added rather than assuming.
+`vendor` is 96 KB gzip and mostly `@sentry/react` — out of scope, but the next-biggest lever if
+weight becomes a concern.
 
 ### 11.5 File-by-file
 
@@ -707,38 +740,26 @@ and mostly `@sentry/react` — out of scope, but the next-biggest lever if weigh
 | `map/MapPan.jsx` | `panTo([lng, lat], { duration: 500 })` — ms, not seconds |
 | `map/MapPing.jsx` | `new maplibregl.Marker({ element, anchor:'center' })`. `.radar-ping` CSS unchanged — its `::before` at `top/left:-24px` on a 0×0 element behaves identically under `.maplibregl-marker{position:absolute}`. Keep the 1800 ms teardown |
 | `map/MapSaveView.jsx` | `map.on('moveend', …)`. `JSON.stringify(map.getCenter())` yields `{"lng":…,"lat":…}` — **byte-compatible with existing `localStorage.mapPosition`**, no migration needed |
-| `map/MapTerminator.jsx` | GeoJSON fill layer + 60 s refresh + cleanup |
+| `map/MapTerminator.jsx` | Swap `@joergdietrich/leaflet.terminator` for `crepuscule`'s `CrepusculeLive` (§9). Fall back to the GeoJSON `fill` layer only if the risks in §9 don't resolve cleanly |
 | `sass/app.scss` | Drop lines 47-48 |
 | `sass/map.scss` | Keep `.map`, `.map-error`, `.radar-ping` + keyframes, `.popup-*`, `.hint`, `.feedback`. Delete `.leaflet-div-icon`, `.leaflet-tooltip*`, the `.map.tt-filter` block (57-69), `.leaflet-marker-icon.marker-cluster` (97-114). Add `.maplibregl-map{background:#000}`, `.maplibregl-canvas:focus{outline:none}`, dark `.maplibregl-ctrl-attrib` |
 | `resources/js/app.js` | Gate the import on `#map` |
 | `vite.config.mjs` | `codeSplitting.groups` |
 | `views/layouts/footer.blade.php` | Line 10 attribution |
-| `package.json` | −7 packages, +`maplibre-gl@^6.4.0` |
+| `package.json` | −7 Leaflet packages, +`maplibre-gl@^6.4.0`, +`crepuscule`; optionally +`@openmeteo/weather-map-layer` for §14 (separate step, separate PR is fine) |
 
 **Delete:** `map/MapMarker.jsx`, `map/MapMarkerGroup.jsx`, `map/MapTooltipZoom.jsx`,
 `map/MapDrawRoute.jsx`, `utils/MarkerIcon.jsx`, `utils/ClusterIcon.jsx`
 
 **New:** `map/MapProvider.jsx`, `context/MapGLContext.js`, `map/mapConfig.js`,
 `map/MapAirportLayers.jsx`, `map/MapRoute.jsx`, `map/MapTerrain.jsx`, `utils/geodesic.js`,
-`utils/solarTerminator.js`, `utils/airportsGeoJson.js`
+`utils/airportsGeoJson.js`. (`utils/solarTerminator.js` only if the `crepuscule` fallback in §9
+is needed.)
 
 **Untouched (verified):** `MapContext.js`, `PopupContainer.jsx`, `AirportCard.jsx`,
 `FlightsCard.jsx`, `SceneryCard.jsx`, all four Blade consumers, `parts/map.blade.php`, and
 **every PHP file** — `MapHelper.php`, `SearchController.php`, `helpers.php`,
 `CalculationHelper.php`, `Airport.php`.
-
-### 11.6 Commit sequence
-
-1. Add `maplibre-gl`, `MapProvider` + context, bare CARTO globe + terminator. Everything else
-   stubbed → screenshot-verifiable.
-2. `MapAirportLayers` (source, dots, labels, clustering, click). Delete `MapMarker*`,
-   `MapTooltipZoom`, `MarkerIcon`, `ClusterIcon`.
-3. `geodesic.js` + `MapRoute` + `boundsFromCoordinates` in `MapBound`. Delete `MapDrawRoute`.
-4. `MapPan`, `MapPing`, `MapSaveView` ports.
-5. Attribution + `map.scss` cleanup + footer.
-6. Remove Leaflet deps, vite groups, dynamic import.
-7. `MapTerrain` — separable, ship last or separately.
-8. *(optional, separate PR)* Weather radar overlay (§14) — fully independent of 1-7.
 
 ---
 
@@ -830,65 +851,56 @@ network log for `fonts/` explicitly.
    the old look.
 8. **CARTO free-tier terms.** The raster endpoint is already in use and the GL style is the same
    product family, but confirm the vector endpoint's terms for a site with donations/ads.
-9. **Lost `showCoverageOnHover` and spiderfy.** Accept, or rebuild the hull via `getClusterLeaves`.
-10. **Vector vs raster rendering parity.** Same design family, exact colours pulled — but
+9. **`crepuscule`'s `@maptiler/sdk` peer-dependency and 2024-03-11 last-push date** (§9). Low
+   probability of an actual break given its API surface is standard MapLibre calls, but unverified
+   against v6 — resolve this in the first implementation session, not late.
+10. **Open-Meteo's `weather-map-layer` is pre-1.0** (v0.0.20) and GPL-2.0 licensed; maintainers
+    call it not production-ready themselves. Low risk to the core migration since it's fully
+    separable (§14) — confirm the license is acceptable before shipping it regardless.
+11. **Lost `showCoverageOnHover` and spiderfy.** Accept, or rebuild the hull via `getClusterLeaves`.
+12. **Vector vs raster rendering parity.** Same design family, exact colours pulled — but
     antialiasing, coastline weight and border weight will differ subtly. Hence baseline screenshots.
 
 ---
 
-## 14. Optional follow-up: free weather / cloud layers
+## 14. Weather overlay — Open-Meteo
 
-Not part of the migration — a separable follow-up that MapLibre makes trivial (any of these is
-a plain `raster` source + layer, ~10 lines). For a VATSIM flight-planning app, **precipitation
-radar** is the useful signal (pilots route around weather); satellite cloud imagery is mostly
-decorative at this map's zoom levels.
+Package: **`@openmeteo/weather-map-layer`** (npm, v0.0.20 — pre-1.0; the maintainers' own words:
+*"still under construction and not yet fully production-ready, API changes may occur"*).
+**GPL-2.0 licensed** — check that's acceptable for a client-side runtime dependency before
+shipping this (same category of check as CARTO's free-tier ToS in §13). No API key; data is
+served from a public CDN.
 
-### Recommended: RainViewer
-
-Global radar composite (1200+ radars, 150+ countries), **keyless**, past ~2 h of frames plus
-short-term nowcast, refreshed every 5-10 min. Flow: fetch
-`https://api.rainviewer.com/public/weather-maps.json` (tiny JSON: `host` + frame `path`s), take
-the latest `radar.past` frame, build a raster source:
+It registers a custom `om://` protocol that streams Open-Meteo's `.om` files, wrapped as a plain
+raster source:
 
 ```js
-const wm = await (await fetch('https://api.rainviewer.com/public/weather-maps.json')).json();
-const latest = wm.radar.past.at(-1);
-map.addSource('radar', {
-    type: 'raster', tileSize: 256,
-    // {size}/{z}/{x}/{y}/{color}/{smooth}_{snow}.png — color 4 = "The Weather Channel" scheme
-    tiles: [`${wm.host}${latest.path}/256/{z}/{x}/{y}/4/1_1.png`],
-    attribution: '<a href="https://www.rainviewer.com/">RainViewer</a>',
+import { omProtocol } from '@openmeteo/weather-map-layer';
+
+maplibregl.addProtocol('om', omProtocol);
+
+const omUrl = 'https://openmeteo-data-spatial.b-cdn.net/dwd_icon/latest.json?variable=precipitation';
+// swap `variable=` for cloud_cover / wind / temperature_2m / cape / etc — 120+ variables exist;
+// fetch the model's `latest.json` metadata endpoint to see what's available plus `reference_time`
+
+map.addSource('weather', {
+    type: 'raster', url: 'om://' + omUrl, tileSize: 512, maxzoom: 12,
 });
-map.addLayer({ id: 'radar', type: 'raster', source: 'radar',
-    paint: { 'raster-opacity': 0.6 } }, 'terminator');   // above basemap, below terminator/airports
+map.addLayer({ id: 'weather', type: 'raster', source: 'weather',
+    paint: { 'raster-opacity': 0.6 } }, 'terminator');
 ```
 
-Refresh the frame every ~5 min by re-fetching the JSON and swapping the source's tiles.
-Animation across the past-2h frames is possible (one source per frame, toggle opacity) but is
-a follow-up to the follow-up.
+For a flight-planning app, `precipitation` is the operationally useful layer (pilots route around
+weather); `cloud_cover`/`wind` are secondary. This is **forecast model output** (DWD ICON global),
+not live radar — re-fetch `latest.json` periodically (e.g. every 15-30 min) and compare
+`reference_time` before swapping the source URL. The metadata "Capture API" adds a documented
+0.5-1s delay per request, so don't call it on every render.
 
-**Caveats, honestly stated:**
-- **License:** the free public API is described as for *personal, educational and small-scale
-  community use*, with attribution. Where2Fly (donation-funded community site, ~14k
-  renders/mo) plausibly qualifies as small-scale community use, but it is not black-and-white —
-  worth a short email to RainViewer before shipping. Their docs also warn radar coverage can
-  shrink without notice (data owners can withdraw).
-- Radar tiles are Mercator rasters; they render fine under globe projection (same path as any
-  raster source), but expect softness at low zoom.
-- Make it a **user toggle, off by default** (like terrain): it adds tile requests per init and
-  visual noise over the deliberately minimal dark map.
+Ship as a **user toggle, off by default** — same reasoning as terrain: extra tile requests and
+visual noise over the deliberately minimal dark map, and the package's own maturity warning argues
+for opt-in over default-on.
 
-### Alternatives
-
-| Source | Coverage | Cost/key | Notes |
-|---|---|---|---|
-| **RainViewer** ✅ | Global radar composite | Free, keyless, attribution | See caveats above. Best coverage-to-effort ratio |
-| IEM NEXRAD (`mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png`) | **US only** | Free, keyless, university-run, stable for years | The zero-risk option, but useless for European VATSIM traffic |
-| NASA GIBS (WMTS) | Global satellite (MODIS/VIIRS true colour, cloud products) | Free, keyless, government | Daily imagery with hours of latency — decorative clouds, not operational weather |
-| Open-Meteo `weather-map-layer` | Global model data (precip, clouds, wind) | Free non-commercial, keyless | A MapLibre-native layer project by Open-Meteo; model output rather than radar. Young project — evaluate before depending on it |
-| OpenWeatherMap tiles | Global model-derived | Free tier **with API key** (exposed in frontend, quota-metered) | Low-res blobby tiles; key + metering is the profile we've avoided everywhere else |
-| MapTiler Weather | Global, polished SDK | **Non-commercial free tier only** | Same restriction that ruled MapTiler out for basemaps |
-| LibreWXR | Multi-region radar, RainViewer-compatible API | Free if **self-hosted** | Ruled out — no self-hosting, but noted as the escape hatch if RainViewer's terms tighten |
+**Fully independent of §1-13** — implement last, in its own PR, whenever convenient.
 
 ---
 
@@ -899,3 +911,33 @@ shippable on Leaflet**: keep everything as-is, replace `L.curve` with a geodesic
 from the same `greatCircle()` util in §6.1, and fix the `primaryAirport` `ReferenceError`. Hours
 of work, near-zero risk, and it fixes the worst-facing bug. You lose the globe, the Mercator
 correction, terrain, and the DOM-marker performance win.
+
+---
+
+## 16. Suggested implementation order
+
+Each step is independently promptable — hand the AI one step (plus a pointer to this file) rather
+than the whole migration at once. Re-run the relevant part of §12's page matrix after any step
+that touches rendering, not just at the very end.
+
+1. **Scaffold.** Add `maplibre-gl`. Build `MapProvider`/`MapGLContext` (§7): a bare globe with the
+   CARTO style + sky, `getInitMapPosition()` flipped to `[lng, lat]`. No airports, no route, no
+   terminator yet. Confirm the globe renders, atmosphere looks right, and `mapReady` still fires.
+2. **Terminator.** Add `crepuscule`, wire up `CrepusculeLive` (§9). Resolve risk #1 immediately —
+   confirm it attaches to a raw `maplibregl.Map` — since this step is most likely to need the
+   vendoring fallback, and better to know that now than after building on top of it.
+3. **Airport layers.** `MapAirportLayers` — source, dots, labels, clustering, click handling (§5).
+   Delete `MapMarker*`, `MapTooltipZoom`, `MarkerIcon`, `ClusterIcon`.
+4. **Geodesic route.** `utils/geodesic.js`, `MapRoute`, `boundsFromCoordinates` in `MapBound`
+   (§6). Delete `MapDrawRoute`. Run the four geometry proofs in §12 (antimeridian, high-latitude
+   antimeridian, polar bulge, short-route NaN guard) — these are the core value of the migration.
+5. **Remaining ports.** `MapPan`, `MapPing`, `MapSaveView` (§6.3, §11.5).
+6. **Polish.** Attribution control + footer line (§10), `map.scss` cleanup, dark
+   `.maplibregl-ctrl-attrib` override.
+7. **Cleanup + full regression.** Remove the 7 Leaflet packages, add the `vite.config.mjs` chunk
+   groups (§11.2), gate the dynamic import on `#map` (§11.1). Run the full §12 page matrix plus
+   console-hygiene pass here — this is the "does everything still work" checkpoint before moving
+   to optional extras. Run `php artisan test` once, as a pure regression check.
+8. **Terrain** (separable). Hillshade layer (§8). Fine as its own PR.
+9. **Weather overlay** (separable, fully independent). Open-Meteo layer + user toggle (§14). Fine
+   as its own PR, whenever.
