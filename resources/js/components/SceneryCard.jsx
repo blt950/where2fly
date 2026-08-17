@@ -46,9 +46,6 @@ function SceneryCard({ airportId }) {
                 .catch(error => {
                     captureException(error);
                     console.error(error.message)
-                    if(error.response.status === 404) {
-                        setData(undefined);
-                    }
                 });
         }
     }, [airportId]);

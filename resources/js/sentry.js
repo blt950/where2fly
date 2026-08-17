@@ -16,6 +16,11 @@ if (dsn) {
             'ResizeObserver loop completed with undelivered notifications',
             'AbortError',
             'The operation was aborted',
+            // A fetch that never reached the server is a network condition, not a bug.
+            // Anchored so genuine application TypeErrors still report.
+            /^Failed to fetch$/,
+            /^Load failed$/,
+            /^NetworkError when attempting to fetch resource\.$/,
             'Script error.',
         ],
 
