@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MapLibre demo — Where2Fly</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Demo only: CDN UMD build (v5 line; the real migration bundles v6 via Vite) -->
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+<style>
+    html, body { margin: 0; height: 100%; background: #000; }
+    #map { height: 100%; }
+    #ui { position: absolute; top: 10px; left: 10px; z-index: 1; color: #ccc;
+          font: 13px sans-serif; background: rgba(20,22,30,.85); padding: 8px 12px; border-radius: 6px; }
+    .maplibregl-ctrl-attrib { background: rgba(20,22,30,.7) !important; }
+    .maplibregl-ctrl-attrib, .maplibregl-ctrl-attrib a { color: #999 !important; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="ui">
+    <b>Where2Fly — MapLibre globe demo</b><br>
+    <label><input type="checkbox" id="radar"> RainViewer radar</label><br>
+    <label><input type="checkbox" id="route" checked> Route EGLL → RJTT (geodesic)</label><br>
+    <label>Sea <input type="color" id="sea" value="#2C353C"></label>
+    <label>Land <input type="color" id="land" value="#0e0e0e"></label><br>
+    <span style="color:#777">Zoom out for globe · drag to spin</span>
+</div>
+<script>
+// ---- data: [icao, lat, lon]; EGLL is the gold "primary" ----
+const AIRPORTS = [
+    ['EGLL',51.47,-0.46],['EGKK',51.15,-0.19],['EGSS',51.89,0.23],['EGCC',53.35,-2.27],['EGPH',55.95,-3.36],
+    ['EHAM',52.31,4.76],['EBBR',50.90,4.48],['LFPG',49.01,2.55],['LFPO',48.72,2.38],['LFBO',43.63,1.36],
+    ['EDDF',50.03,8.57],['EDDM',48.35,11.79],['EDDB',52.36,13.50],['EDDH',53.63,9.99],['EDDL',51.29,6.77],
+    ['LSZH',47.46,8.55],['LSGG',46.24,6.11],['LOWW',48.11,16.57],['LOWI',47.26,11.34],['LKPR',50.10,14.26],
+    ['EKCH',55.62,12.66],['ENGM',60.19,11.10],['ENBR',60.29,5.22],['ENVA',63.46,10.92],['ENTC',69.68,18.92],
+    ['ESSA',59.65,17.92],['ESGG',57.66,12.28],['EFHK',60.32,24.96],['EPWA',52.17,20.97],['LHBP',47.44,19.26],
+    ['LIRF',41.80,12.24],['LIMC',45.63,8.72],['LIPZ',45.51,12.35],['LEMD',40.47,-3.56],['LEBL',41.30,2.08],
+    ['LPPT',38.77,-9.13],['LGAV',37.94,23.94],['LTFM',41.26,28.74],['EIDW',53.42,-6.27],['BIKF',63.99,-22.61],
+    ['RJTT',35.55,139.78],['KSFO',37.62,-122.38],['KJFK',40.64,-73.78],['PANC',61.17,-149.99],
+];
+const geojson = { type:'FeatureCollection', features: AIRPORTS.map(([icao,lat,lon]) => ({
+    type:'Feature', geometry:{ type:'Point', coordinates:[lon,lat] },
+    properties:{ icao, color: icao==='EGLL' ? '#ddb81c' : '#808080' },
+})) };
+
+// ---- geodesic slerp with unwrapped longitudes (see HANDOFF-maplibre.md §6.1) ----
+function greatCircle([lon1,lat1],[lon2,lat2]) {
+    const D=Math.PI/180, p1=lat1*D, l1=lon1*D, p2=lat2*D, l2=lon2*D;
+    const d=2*Math.asin(Math.sqrt(Math.sin((p2-p1)/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin((l2-l1)/2)**2));
+    const n=Math.min(256,Math.max(32,Math.ceil(d/D))), out=[]; let prev=lon1;
+    for (let i=0;i<=n;i++){
+        const f=i/n, A=Math.sin((1-f)*d)/Math.sin(d), B=Math.sin(f*d)/Math.sin(d);
+        const x=A*Math.cos(p1)*Math.cos(l1)+B*Math.cos(p2)*Math.cos(l2);
+        const y=A*Math.cos(p1)*Math.sin(l1)+B*Math.cos(p2)*Math.sin(l2);
+        const z=A*Math.sin(p1)+B*Math.sin(p2);
+        const lat=Math.atan2(z,Math.hypot(x,y))/D; let lon=Math.atan2(y,x)/D;
+        while (lon-prev>180) lon-=360; while (lon-prev<-180) lon+=360;
+        out.push([lon,lat]); prev=lon;
+    }
+    return out;
+}
+
+// ---- day/night terminator polygon ----
+function terminatorRing(date=new Date()) {
+    const D=Math.PI/180, jd=date/864e5+2440587.5, n=jd-2451545;
+    const L=(280.46+0.9856474*n)%360, g=(357.528+0.9856003*n)%360*D;
+    const el=(L+1.915*Math.sin(g)+0.02*Math.sin(2*g))*D, ob=(23.439-4e-7*n)*D;
+    const dec=Math.asin(Math.sin(ob)*Math.sin(el));
+    const ra=Math.atan2(Math.cos(ob)*Math.sin(el),Math.cos(el));
+    const gmst=(18.697374558+24.06570982441908*n)%24;
+    const sunLon=(ra/D)-gmst*15, ring=[];
+    for (let i=-180;i<=180;i+=2){
+        const ha=(i-sunLon)*D;
+        ring.push([i, Math.atan(-Math.cos(ha)/Math.tan(dec))/D]);
+    }
+    const cap=dec<0?90:-90; // shade the night hemisphere
+    ring.push([180,cap],[-180,cap],ring[0]);
+    return { type:'Feature', geometry:{ type:'Polygon', coordinates:[ring] } };
+}
+
+// ---- map ----
+const map = new maplibregl.Map({
+    container:'map',
+    style:'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
+    center:[11,52], zoom:3, minZoom:0, maxZoom:17, attributionControl:{compact:true},
+    dragPan:{ linearity:0.3, maxSpeed:0, deceleration:2500 }, // maxSpeed:0 = no inertia; keep linearity>0 or duration becomes NaN and pan wedges
+});
+map.on('style.load', () => {
+    map.setProjection({ type:'globe' });
+    map.setSky({ 'sky-color':'#05070c','horizon-color':'#2C353C','fog-color':'#0e0e0e',
+                 'sky-horizon-blend':.5,'horizon-fog-blend':.6,
+                 'atmosphere-blend':['interpolate',['linear'],['zoom'],0,.6,5,.4,7,0] });
+
+    map.addSource('terminator',{ type:'geojson', data:terminatorRing() });
+    map.addLayer({ id:'terminator', type:'fill', source:'terminator',
+        paint:{ 'fill-color':'#000', 'fill-opacity':.3, 'fill-antialias':false } });
+
+    // airports: clustered dots + ICAO labels
+    map.addSource('airports',{ type:'geojson', data:geojson, cluster:true, clusterRadius:40, clusterMaxZoom:12 });
+    map.addLayer({ id:'clusters', type:'circle', source:'airports', filter:['has','point_count'],
+        paint:{ 'circle-color':'#ddb81c',
+                'circle-radius':['interpolate',['linear'],['get','point_count'],2,14,30,28] } });
+    map.addLayer({ id:'cluster-count', type:'symbol', source:'airports', filter:['has','point_count'],
+        layout:{ 'text-field':['get','point_count_abbreviated'],'text-size':12,'text-font':['Open Sans Bold'] },
+        paint:{ 'text-color':'#000' } });
+    map.addLayer({ id:'dots', type:'circle', source:'airports', filter:['!',['has','point_count']],
+        paint:{ 'circle-radius':5, 'circle-color':['to-color',['get','color']] } });
+    map.addLayer({ id:'labels', type:'symbol', source:'airports', filter:['!',['has','point_count']],
+        layout:{ 'text-field':['get','icao'],'text-size':13,'text-font':['Open Sans Regular'],
+                 'text-anchor':'right','text-offset':[-0.7,0] },
+        paint:{ 'text-color':['to-color',['get','color']] } });
+    map.on('click','clusters', async (e) => {
+        const f=e.features[0];
+        const z=await map.getSource('airports').getClusterExpansionZoom(f.properties.cluster_id);
+        map.easeTo({ center:f.geometry.coordinates, zoom:z });
+    });
+
+    // geodesic route EGLL -> RJTT with gradient reveal
+    const arc=greatCircle([-0.46,51.47],[139.78,35.55]);
+    map.addSource('routeSrc',{ type:'geojson', lineMetrics:true,
+        data:{ type:'Feature', geometry:{ type:'LineString', coordinates:arc } } });
+    map.addLayer({ id:'route', type:'line', source:'routeSrc',
+        layout:{ 'line-cap':'round' }, paint:{ 'line-color':'#ddb81c','line-width':2 } });
+    let t0=null;
+    const step=(ts)=>{ t0??=ts;
+        const p=Math.min(1,(ts-t0)/1500);
+        if (p>=1){ map.setPaintProperty('route','line-gradient',undefined); return; }
+        const a=Math.min(Math.max(p,.001),.998);
+        map.setPaintProperty('route','line-gradient',['interpolate',['linear'],['line-progress'],
+            0,'#ddb81c',a,'#ddb81c',a+.001,'rgba(221,184,28,0)',1,'rgba(221,184,28,0)']);
+        requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+    document.getElementById('route').onchange=(e)=>
+        map.setLayoutProperty('route','visibility',e.target.checked?'visible':'none');
+
+    // sea / land colour pickers. CARTO layer ids: water (fill), waterway (rivers), background (land).
+    // horizon-color is tied to the sea so the globe's limb keeps matching.
+    document.getElementById('sea').oninput=(e)=>{
+        map.setPaintProperty('water','fill-color',e.target.value);
+        map.setPaintProperty('waterway','line-color',e.target.value);
+        map.setSky({ ...map.getSky(), 'horizon-color':e.target.value });
+    };
+    document.getElementById('land').oninput=(e)=>{
+        map.setPaintProperty('background','background-color',e.target.value);
+        map.setSky({ ...map.getSky(), 'fog-color':e.target.value });
+    };
+
+    // RainViewer radar (latest frame), toggleable
+    document.getElementById('radar').onchange=async (e)=>{
+        if (!map.getSource('radarSrc')){
+            const wm=await (await fetch('https://api.rainviewer.com/public/weather-maps.json')).json();
+            const latest=wm.radar.past.at(-1);
+            map.addSource('radarSrc',{ type:'raster', tileSize:256,
+                tiles:[`${wm.host}${latest.path}/256/{z}/{x}/{y}/4/1_1.png`],
+                attribution:'<a href="https://www.rainviewer.com/">RainViewer</a>' });
+            map.addLayer({ id:'radarLyr', type:'raster', source:'radarSrc',
+                paint:{ 'raster-opacity':.6 } },'terminator');
+        }
+        map.setLayoutProperty('radarLyr','visibility',e.target.checked?'visible':'none');
+    };
+});
+</script>
+</body>
+</html>
