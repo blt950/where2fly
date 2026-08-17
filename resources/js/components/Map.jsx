@@ -19,6 +19,8 @@ import MapSaveView from './map/MapSaveView';
 import MapTerminator from './map/MapTerminator';
 import MapTooltipZoom from './map/MapTooltipZoom';
 
+const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
+
 // Check if the current route is the default view
 const isDefaultView = () => {
     if (!route().current('top') 
@@ -79,7 +81,6 @@ function Map() {
     const [primaryAirport, setPrimaryAirport] = useState(null);
     const [reverseDirection, setReverseDirection] = useState(null);
     const [showAirportIdCard, setShowAirportIdCard] = useState(null);
-    const [userAuthenticated, setUserAuthenticated] = useState(null);
 
     // On initial load
     useEffect(() => {
@@ -99,15 +100,6 @@ function Map() {
             setAirports(JSON.parse(cachedAirports));
         }
 
-        // Check if user is authenticated
-        fetch(route('api.user.authenticated'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
-            .then(response => response.json())
-            .then(data => setUserAuthenticated(data.data))
-            .catch(error => {
-                captureException(error);
-                console.error(error.message);
-            });
-    
         // Dispatch a custom event when the map is ready
         window.dispatchEvent(new Event('mapReady'));
 
@@ -126,11 +118,11 @@ function Map() {
                     captureException(error);
                     console.error(error.message);
                 });
-        } else if(isDefaultView() && userAuthenticated == false) {
+        } else if(isDefaultView()) {
             setAirports([]);
             localStorage.removeItem('userListAirportsCache');
         }
-    }, [userAuthenticated]);
+    }, []);
 
     // When focusAirport changes, pan to the airport and show the card.
     useEffect(() => {
@@ -232,7 +224,7 @@ function Map() {
         setFocusAirport,
         setShowAirportIdCard,
         userAuthenticated,
-    }), [airports, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection, userAuthenticated]);
+    }), [airports, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection]);
 
     return (
         <MapContext.Provider value={mapContextValue}>
