@@ -12,7 +12,7 @@ import { GLYPHS_URL, mapOptions, SKY } from './mapConfig';
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
-const MapProvider = ({ center, children }) => {
+const MapProvider = ({ center, projection, children }) => {
 
     const containerRef = useRef(null);
     const [map, setMap] = useState(null);
@@ -40,7 +40,9 @@ const MapProvider = ({ center, children }) => {
             instance.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
             instance.on('style.load', () => {
-                instance.setProjection({ type: 'globe' });
+                // Applied here as well as in the effect below so the first painted frame is
+                // already the projection the user chose, with no globe-to-flat flash.
+                instance.setProjection({ type: projection });
                 instance.setSky(SKY);
                 instance.setGlyphs(GLYPHS_URL);
                 setMap(instance);
@@ -56,6 +58,10 @@ const MapProvider = ({ center, children }) => {
             instance?.remove();
         };
     }, []);
+
+    useEffect(() => {
+        map?.setProjection({ type: projection });
+    }, [map, projection]);
 
     return (
         <MapGLContext.Provider value={map}>

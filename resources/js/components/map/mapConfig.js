@@ -36,3 +36,8 @@ export const mapOptions = (container, center) => ({
     // the inertia duration is speed/(deceleration*linearity), and 0/0 wedges panning.
     dragPan: { linearity: 0.3, maxSpeed: 0, deceleration: 2500 },
 });
+
+// Resolves the first of `ids` that is currently on the map, for use as addLayer's beforeId.
+// The overlay components mount independently and can each be toggled off, so no single layer
+// id is guaranteed to be there when another one needs to insert beneath it.
+export const insertBefore = (map, ids) => ids.find((id) => map.getLayer(id));

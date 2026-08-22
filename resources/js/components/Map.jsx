@@ -9,13 +9,16 @@ import { MapContext } from './context/MapContext';
 
 import PopupContainer from './PopupContainer';
 import MapAirportLayers from './map/MapAirportLayers';
+import MapControls from './map/MapControls';
 import MapBound from './map/MapBound';
 import MapPan from './map/MapPan';
 import MapPing from './map/MapPing';
 import MapProvider from './map/MapProvider';
 import MapRoute from './map/MapRoute';
 import MapSaveView from './map/MapSaveView';
+import MapTerrain from './map/MapTerrain';
 import MapTerminator from './map/MapTerminator';
+import { readPreferences, writePreferences } from './utils/mapPreferences';
 
 const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
 
@@ -83,6 +86,7 @@ function Map() {
     const [cluster, setCluster] = useState(true);
     const [initialCenter] = useState(getInitMapPosition);
     const [webgl2] = useState(supportsWebGL2);
+    const [preferences, setPreferences] = useState(readPreferences);
     const [clusterRadius, setClusterRadius] = useState(null);
     const [coordinates, setCoordinates] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
@@ -219,6 +223,11 @@ function Map() {
 
     }, [airports]);
 
+    const updatePreferences = (next) => {
+        setPreferences(next);
+        writePreferences(next);
+    };
+
     // Memoise the context value so unrelated Map state changes (coordinates,
     // mapBounds, showAirportIdCard, panning) don't give it a new identity and
     // re-render every marker. Only changes to the listed values propagate.
@@ -240,8 +249,9 @@ function Map() {
 
     return (
         <MapContext.Provider value={mapContextValue}>
-            <MapProvider center={initialCenter}>
-                <MapTerminator />
+            <MapProvider center={initialCenter} projection={preferences.projection}>
+                {preferences.terminator && <MapTerminator />}
+                {preferences.terrain && <MapTerrain />}
                 <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} />
                 {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} />}
@@ -249,6 +259,7 @@ function Map() {
                 {(isDefaultView() || route().current('scenery*')) && <MapSaveView />}
                 <MapPing ping={ping} />
             </MapProvider>
+            <MapControls preferences={preferences} onChange={updatePreferences} />
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
     );
