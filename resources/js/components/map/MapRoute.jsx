@@ -10,6 +10,18 @@ const COLOR = '#ddb81c';
 
 const easeInOutCubic = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
 
+// Solid up to `head` along the line, transparent after it. Stops must be strictly ascending
+// or the style spec rejects the whole expression and the paint update is silently dropped.
+const revealTo = (head) => {
+    const cut = Math.min(Math.max(head, 0.001), 0.998);
+
+    return ['interpolate', ['linear'], ['line-progress'],
+        0, COLOR,
+        cut, COLOR,
+        cut + 0.001, 'rgba(221,184,28,0)',
+        1, 'rgba(221,184,28,0)'];
+};
+
 // Leaflet's paddingTopLeft/paddingBottomRight, as MapLibre's padding object. Below the md
 // breakpoint the old code never flew at all, and .map is display:none there anyway.
 const framePadding = (width) => {
@@ -48,7 +60,9 @@ const MapRoute = ({ departure, arrival, reverseDirection = false }) => {
             type: 'line',
             source: SOURCE,
             layout: { 'line-cap': 'round', 'line-join': 'round' },
-            paint: { 'line-color': COLOR, 'line-width': 2 },
+            // Starts revealed to nothing. Painting a flat line-color here would show the whole
+            // route solid for the length of the flyTo, then animate it a second time.
+            paint: { 'line-color': COLOR, 'line-width': 2, 'line-gradient': revealTo(0) },
         });
 
         // The original read Math.sqrt(Math.log(r)) with r in planar degrees, which is NaN for
@@ -68,23 +82,14 @@ const MapRoute = ({ departure, arrival, reverseDirection = false }) => {
                 return;
             }
 
-            // Gradient stops must be strictly ascending or the whole paint update is dropped.
-            const head = Math.min(Math.max(progress, 0.001), 0.998);
-
-            map.setPaintProperty(LAYER, 'line-gradient', [
-                'interpolate', ['linear'], ['line-progress'],
-                0, COLOR,
-                head, COLOR,
-                head + 0.001, 'rgba(221,184,28,0)',
-                1, 'rgba(221,184,28,0)',
-            ]);
-
+            map.setPaintProperty(LAYER, 'line-gradient', revealTo(progress));
             frame = requestAnimationFrame(reveal);
         };
 
         const startReveal = () => { frame = requestAnimationFrame(reveal); };
         const padding = framePadding(window.innerWidth);
         const width = map.getContainer().clientWidth;
+        let flying = false;
 
         // MapLibre misbehaves when the horizontal padding meets or exceeds the canvas width.
         if (padding && padding.left + padding.right < width) {
@@ -93,10 +98,17 @@ const MapRoute = ({ departure, arrival, reverseDirection = false }) => {
 
             if (camera) {
                 map.flyTo({ ...camera, zoom: Math.max(3, camera.zoom), duration: 350 });
+                flying = true;
             }
         }
 
-        map.once('moveend', startReveal);
+        // Only wait for the camera if it actually moved — otherwise moveend never fires and
+        // the line stays revealed to nothing.
+        if (flying) {
+            map.once('moveend', startReveal);
+        } else {
+            startReveal();
+        }
 
         return () => {
             if (frame) { cancelAnimationFrame(frame); }
