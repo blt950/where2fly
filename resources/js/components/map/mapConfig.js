@@ -14,6 +14,11 @@ export const SKY = {
     'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 0.6, 5, 0.4, 7, 0],
 };
 
+// Self-hosted so ICAO labels keep the site's own typeface: CARTO's glyph server has Open
+// Sans, Roboto and Noto, but 404s on Work Sans. Rebuild with scripts/build-glyphs.mjs.
+export const GLYPHS_URL = '/fonts/{fontstack}/{range}.pbf';
+export const LABEL_FONT = ['Work Sans Regular'];
+
 // maxBounds is deliberately absent: the globe transform does not support constraining the
 // centre, and Leaflet's ±360 world-copy trick has no meaning on a sphere.
 export const mapOptions = (container, center) => ({

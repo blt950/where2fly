@@ -8,7 +8,7 @@ import * as maplibregl from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 
 import { MapGLContext } from '../context/MapGLContext';
-import { mapOptions, SKY } from './mapConfig';
+import { GLYPHS_URL, mapOptions, SKY } from './mapConfig';
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
@@ -37,6 +37,7 @@ const MapProvider = ({ center, children }) => {
             instance.on('style.load', () => {
                 instance.setProjection({ type: 'globe' });
                 instance.setSky(SKY);
+                instance.setGlyphs(GLYPHS_URL);
                 setMap(instance);
             });
         };

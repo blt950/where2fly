@@ -8,6 +8,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapContext } from './context/MapContext';
 
 import PopupContainer from './PopupContainer';
+import MapAirportLayers from './map/MapAirportLayers';
 import MapProvider from './map/MapProvider';
 import MapTerminator from './map/MapTerminator';
 
@@ -240,6 +241,7 @@ function Map() {
         <MapContext.Provider value={mapContextValue}>
             <MapProvider center={initialCenter}>
                 <MapTerminator />
+                <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} />
             </MapProvider>
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
