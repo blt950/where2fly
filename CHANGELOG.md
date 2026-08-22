@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.1.0](https://github.com/blt950/where2fly/compare/v3.0.4...v3.1.0) (2026-08-22)
+
+
+### Features
+
+* bi-directional whitelist ([#272](https://github.com/blt950/where2fly/issues/272)) ([6e69556](https://github.com/blt950/where2fly/commit/6e69556ec1aa45dac530b6e42c333303e833b14b))
+* bug report modal ([#260](https://github.com/blt950/where2fly/issues/260)) ([b6fe31c](https://github.com/blt950/where2fly/commit/b6fe31c64c5300554d5de7349fd658bfa7a410c9))
+
+
+### Bug Fixes
+
+* docker image build and ci ([#270](https://github.com/blt950/where2fly/issues/270)) ([92113ef](https://github.com/blt950/where2fly/commit/92113efbdeea6b4aa2895ba97fcd22cd9e0bfe3e))
+* Unneeded window reference ([4638634](https://github.com/blt950/where2fly/commit/4638634cce3c4f84bf7d36e76d5ac2dbe85170d5))
+
 ## [3.0.4](https://github.com/blt950/where2fly/compare/v3.0.3...v3.0.4) (2026-08-17)
 
 
