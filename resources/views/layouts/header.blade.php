@@ -19,6 +19,13 @@
     <title>{{ config('app.name') }}</title>
 @endif
 
+<link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+<link rel="preconnect" href="https://tiles.basemaps.cartocdn.com" crossorigin>
+<link rel="preconnect" href="https://s3.amazonaws.com" crossorigin>
+@foreach (['a', 'b', 'c', 'd'] as $shard)
+    <link rel="dns-prefetch" href="https://tiles-{{ $shard }}.basemaps.cartocdn.com">
+@endforeach
+
 <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
