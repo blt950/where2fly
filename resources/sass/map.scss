@@ -52,11 +52,13 @@
 
 .map-controls-toggle {
     width: 2.5rem;
-    height: 2.5rem;
+    height: 2.4rem;
 
     background: rgba($secondary, 0.85);
-    border: 1px solid $gray-500;
-    color: $gray-200;
+    border: 1px solid $gray-600;
+    color: $gray-500;
+
+    border-radius: 2px;
 
     &:hover,
     &[aria-expanded='true'] {
@@ -81,7 +83,7 @@
     padding: 0.75rem 1rem;
 
     background: rgba($secondary, 0.9);
-    border: 1px solid $gray-500;
+    border: 1px solid $gray-600;
 
     color: $gray-200;
     font-family: $font-family-sans-serif;
@@ -89,7 +91,6 @@
 
     fieldset + fieldset {
         margin-top: 0.75rem;
-        padding-top: 0.75rem;
         border-top: 1px solid $tertiary;
     }
 
@@ -115,9 +116,7 @@
 
     // These icons carry no .fa class, only .fa-sharp, so they need matching on the element.
     .form-check-label i {
-        width: 18px;
-        margin-right: 0.25rem;
-        text-align: center;
+        
     }
 }
 

@@ -65,7 +65,7 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
                     <fieldset>
                         <legend>Layers</legend>
                         {LAYERS.map(({ key, label, icon }) => (
-                            <div className="form-check" key={key}>
+                            <div className="form-check gap-1" key={key}>
                                 <input
                                     className="form-check-input"
                                     type="checkbox"
@@ -94,7 +94,7 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
                         <fieldset>
                             <legend>My lists</legend>
                             {lists.map(({ id, name, color }) => (
-                                <div className="form-check" key={id}>
+                                <div className="form-check gap-1" key={id}>
                                     <input
                                         className="form-check-input"
                                         type="checkbox"
@@ -116,7 +116,7 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
                     <fieldset>
                         <legend>Colours</legend>
                         {THEMES.map(({ value, label }) => (
-                            <div className="form-check" key={value}>
+                            <div className="form-check gap-1" key={value}>
                                 <input
                                     className="form-check-input"
                                     type="radio"
@@ -135,7 +135,7 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
                     <fieldset>
                         <legend>Projection</legend>
                         {PROJECTIONS.map(({ value, label, icon }) => (
-                            <div className="form-check" key={value}>
+                            <div className="form-check gap-1" key={value}>
                                 <input
                                     className="form-check-input"
                                     type="radio"
