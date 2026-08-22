@@ -26,6 +26,41 @@
     background: #000;
 }
 
+.map-reveal {
+    position: absolute;
+    top: $header-height;
+    left: $sidebar-width;
+    width: calc(100vw - $sidebar-width);
+    height: calc(100dvh - $header-height);
+
+    background: #262626;
+
+    z-index: 700;
+    pointer-events: none;
+
+    animation: map-reveal 1200ms ease forwards;
+
+    @include media-breakpoint-down(lg) {
+        left: $sidebar-width-min;
+        width: calc(100vw - $sidebar-width-min);
+    }
+
+    @include media-breakpoint-down(md) {
+        display: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        display: none;
+    }
+}
+
+@keyframes map-reveal {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
 .maplibregl-canvas:focus {
     outline: none;
 }
