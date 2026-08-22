@@ -22,6 +22,7 @@ export default defineConfig({
     },
     build: {
         sourcemap: process.env.SENTRY_AUTH_TOKEN ? 'hidden' : false,
+        chunkSizeWarningLimit: 1000,
         rolldownOptions: {
             output: {
                 codeSplitting: {
