@@ -88,6 +88,7 @@ function Map() {
     const [initialCenter] = useState(getInitMapPosition);
     const [webgl2] = useState(supportsWebGL2);
     const [preferences, setPreferences] = useState(readPreferences);
+    const [weatherStatus, setWeatherStatus] = useState('loading');
     const [clusterRadius, setClusterRadius] = useState(null);
     const [coordinates, setCoordinates] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
@@ -253,7 +254,7 @@ function Map() {
             <MapProvider center={initialCenter} projection={preferences.projection}>
                 {preferences.terminator && <MapTerminator />}
                 {preferences.terrain && <MapTerrain />}
-                {preferences.weather && <MapWeather />}
+                {preferences.weather && <MapWeather onStatus={setWeatherStatus} />}
                 <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} />
                 {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} />}
@@ -261,7 +262,7 @@ function Map() {
                 {(isDefaultView() || route().current('scenery*')) && <MapSaveView />}
                 <MapPing ping={ping} />
             </MapProvider>
-            <MapControls preferences={preferences} onChange={updatePreferences} />
+            <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus} />
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
     );

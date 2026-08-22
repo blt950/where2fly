@@ -1,12 +1,13 @@
 const STORAGE_KEY = 'mapPreferences';
 
-// Terrain and weather are off by default: both cost tile requests, and both add visual noise
-// over a basemap chosen for being minimal.
+// Precipitation is on by default because routing around weather is the job this app exists to
+// do. Terrain stays off: it is pure decoration at the zooms most sessions sit at, and unlike
+// radar it costs DEM tiles the moment you zoom past its gate.
 export const DEFAULT_PREFERENCES = {
     terminator: true,
     terrain: false,
-    weather: false,
-    projection: 'globe',
+    weather: true,
+    projection: 'mercator',
 };
 
 // Every search reloads the page, so preferences that did not survive a reload would have to be

@@ -10,8 +10,17 @@ const INDEX_URL = 'https://api.rainviewer.com/public/weather-maps.json';
 // RainViewer publishes a new radar frame roughly every 10 minutes.
 const REFRESH_MS = 5 * 60 * 1000;
 
-// 256px tiles, colour scheme 8 (Dark Sky — built for dark basemaps), smoothed, snow shown.
-const frameTiles = (host, path) => [`${host}${path}/256/{z}/{x}/{y}/8/1_1.png`];
+// RainViewer serves a literal "Zoom Level Not Supported" PNG above tile z7 — at either tile
+// size, it is a data-resolution cap, not a tile-size one. Capping the source here means
+// MapLibre overzooms the deepest real tiles instead of ever requesting that image.
+const MAX_TILE_ZOOM = 7;
+
+// Two levels of overzoom still reads as radar; beyond that it is misleading mush, so the layer
+// switches itself off and comes back on the way down. maxzoom is exclusive.
+const MAX_LAYER_ZOOM = 9;
+
+// 512px tiles, colour scheme 8 (Dark Sky — built for dark basemaps), smoothed, snow shown.
+const frameTiles = (host, path) => [`${host}${path}/512/{z}/{x}/{y}/8/1_1.png`];
 
 // The newest available frame: nowcast when RainViewer is publishing one, else the latest past.
 const latestFrame = (index) => {
@@ -21,7 +30,7 @@ const latestFrame = (index) => {
     return frames.length ? frames[frames.length - 1].path : null;
 };
 
-const MapWeather = () => {
+const MapWeather = ({ onStatus }) => {
 
     const map = useMapGL();
 
@@ -29,11 +38,29 @@ const MapWeather = () => {
         let cancelled = false;
         let timer = null;
         let currentPath = null;
+        let dataStatus = 'loading';
+
+        // Out-of-range is reported separately from the data status, so a hidden layer never
+        // sits there claiming to be live.
+        const publish = () => {
+            if (cancelled) {
+                return;
+            }
+
+            onStatus(dataStatus === 'error' || map.getZoom() < MAX_LAYER_ZOOM ? dataStatus : 'zoom');
+        };
 
         const apply = (index) => {
             const path = latestFrame(index);
 
-            if (cancelled || !path || path === currentPath) {
+            if (cancelled || !path) {
+                dataStatus = 'error';
+                publish();
+
+                return;
+            }
+
+            if (path === currentPath) {
                 return;
             }
 
@@ -50,16 +77,18 @@ const MapWeather = () => {
             map.addSource(SOURCE, {
                 type: 'raster',
                 tiles,
-                tileSize: 256,
-                maxzoom: 12,
+                tileSize: 512,
+                maxzoom: MAX_TILE_ZOOM,
                 attribution: '<a href="https://www.rainviewer.com/" target="_blank">RainViewer</a>',
             });
 
-            // Above the basemap and terrain, below the night shading and the airports.
+            // Above the basemap and terrain, below the night shading and every airport layer —
+            // so ICAO labels always stay legible over rain.
             map.addLayer({
                 id: LAYER,
                 type: 'raster',
                 source: SOURCE,
+                maxzoom: MAX_LAYER_ZOOM,
                 paint: { 'raster-opacity': 0.6 },
             }, insertBefore(map, ['terminator', 'airports-hit']));
         };
@@ -68,19 +97,49 @@ const MapWeather = () => {
             fetch(INDEX_URL, { cache: 'no-store' })
                 .then((response) => response.json())
                 .then(apply)
-                .catch(() => { /* radar is decorative; a failed refresh keeps the last frame */ });
+                .catch(() => {
+                    // A failed refresh keeps the frame already on screen; only say error when
+                    // there has never been one.
+                    if (!currentPath) { dataStatus = 'error'; }
+                    publish();
+                });
         };
 
+        const onSourceData = (event) => {
+            if (event.sourceId === SOURCE && event.isSourceLoaded) {
+                dataStatus = 'live';
+                publish();
+            }
+        };
+
+        const onSourceError = (event) => {
+            if (event.sourceId === SOURCE) {
+                dataStatus = 'error';
+                publish();
+            }
+        };
+
+        map.on('sourcedata', onSourceData);
+        map.on('error', onSourceError);
+        map.on('zoomend', publish);
+
+        publish();
         refresh();
         timer = setInterval(refresh, REFRESH_MS);
 
         return () => {
             cancelled = true;
             clearInterval(timer);
+            map.off('sourcedata', onSourceData);
+            map.off('error', onSourceError);
+            map.off('zoomend', publish);
+
             if (map.getLayer(LAYER)) { map.removeLayer(LAYER); }
             if (map.getSource(SOURCE)) { map.removeSource(SOURCE); }
+
+            onStatus('loading');
         };
-    }, [map]);
+    }, [map, onStatus]);
 
     return null;
 };

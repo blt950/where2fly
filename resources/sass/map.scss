@@ -94,6 +94,17 @@
         color: $primary;
         border-color: $primary;
     }
+
+    &--fault::after {
+        content: '';
+        position: absolute;
+        transform: translate(0.85rem, -0.85rem);
+
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background: color.adjust($danger, $lightness: 32%);
+    }
 }
 
 .map-controls-panel {
@@ -122,10 +133,29 @@
         text-transform: uppercase;
     }
 
+    .form-check {
+        display: flex;
+        align-items: center;
+    }
+
     .form-check-label .fa {
         width: 18px;
         margin-right: 0.25rem;
     }
+}
+
+// Radar health, shown only while the layer is on. Icon-only on purpose — it is there to make a
+// broken feed visible, not to explain itself.
+.map-controls-status {
+    margin-left: auto;
+    padding-left: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1;
+
+    &--loading { color: $gray-500; }
+    &--live { color: $primary; }
+    &--zoom { color: $gray-500; }
+    &--error { color: color.adjust($danger, $lightness: 32%); }
 }
 
 // One-shot radar blip shown when an airport is selected from the sidebar (MapPing)
