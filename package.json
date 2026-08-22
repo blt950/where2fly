@@ -19,6 +19,7 @@
         "leaflet": "^1.9.4",
         "leaflet.markercluster": "^1.5.3",
         "lodash": "^4.17.19",
+        "maplibre-gl": "^6.5.0",
         "nouislider": "^15.6.1",
         "postcss": "^8.1.14",
         "react": "^19.2.7",

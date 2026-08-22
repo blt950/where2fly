@@ -31,6 +31,14 @@
     background: #000;
 }
 
+.maplibregl-map {
+    background: #000;
+}
+
+.maplibregl-canvas:focus {
+    outline: none;
+}
+
 .leaflet-tooltip {
     text-align: right;
     min-width: 64px;

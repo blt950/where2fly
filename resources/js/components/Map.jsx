@@ -3,23 +3,25 @@ import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import { captureException, ErrorBoundary } from '@sentry/react';
 
+import 'maplibre-gl/dist/maplibre-gl.css';
+
 import { MapContext } from './context/MapContext';
 
-import { createClusterIcon } from './utils/ClusterIcon';
 import PopupContainer from './PopupContainer';
-import MarkerClusterGroup from 'react-leaflet-cluster';
-import { MapContainer, TileLayer } from 'react-leaflet'
-
-import MapBound from './map/MapBound';
-import MapDrawRoute from './map/MapDrawRoute';
-import MapMarkerGroup from './map/MapMarkerGroup';
-import MapPan from './map/MapPan';
-import MapPing from './map/MapPing';
-import MapSaveView from './map/MapSaveView';
-import MapTerminator from './map/MapTerminator';
-import MapTooltipZoom from './map/MapTooltipZoom';
+import MapProvider from './map/MapProvider';
 
 const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
+
+// MapLibre needs WebGL2. A device without it fails asynchronously inside the GL constructor,
+// which the ErrorBoundary cannot catch, so probe up front and show the fallback directly
+// rather than filling Sentry with unactionable errors from hardware we cannot fix.
+const supportsWebGL2 = () => {
+    try {
+        return !!document.createElement('canvas').getContext('webgl2');
+    } catch {
+        return false;
+    }
+};
 
 // Check if the current route is the default view
 const isDefaultView = () => {
@@ -35,42 +37,45 @@ const isDefaultView = () => {
     return false
 }
 
-// Get the initial map position
+// Get the initial map position. MapLibre takes [lng, lat] — the opposite order to Leaflet.
 const getInitMapPosition = () => {
 
     // Set position based on current top list filter
     if(route().current('top.filtered', 'AF')){
-        return [7.1881, 21.0936];
+        return [21.0936, 7.1881];
     } else if(route().current('top.filtered', 'AS')){
-        return [34.0479, 100.6197];
+        return [100.6197, 34.0479];
     } else if(route().current('top.filtered', 'EU')){
-        return [54.5260, 15.2551];
+        return [15.2551, 54.5260];
     } else if(route().current('top.filtered', 'NA')){
-        return [37.0902, -95.7129];
+        return [-95.7129, 37.0902];
     } else if(route().current('top.filtered', 'OC')){
-        return [-25.2744, 133.7751];
+        return [133.7751, -25.2744];
     } else if(route().current('top.filtered', 'SA')){
-        return [-8.7832, -55.4915];
+        return [-55.4915, -8.7832];
     } else if(route().current('top')){
         // A place in the middle of the ocean to avoid stretching the map bounds
-        return [45.14777, -35.4521]
+        return [-35.4521, 45.14777]
     }
 
-    // Set position based on localStorage
+    // Set position based on localStorage. The stored {lat, lng} shape predates MapLibre and
+    // is kept as-is so existing visitors keep their saved view.
     var storedPosition = localStorage.getItem('mapPosition');
     if (storedPosition) {
         const { lat, lng } = JSON.parse(storedPosition);
-        return [lat, lng];
+        return [lng, lat];
     }
 
     // Default to Berlin
-    return [52.51843039016386, 13.395199187248908];
+    return [13.395199187248908, 52.51843039016386];
 }
 
 function Map() {
 
     const [airports, setAirports] = useState([]);
     const [cluster, setCluster] = useState(true);
+    const [initialCenter] = useState(getInitMapPosition);
+    const [webgl2] = useState(supportsWebGL2);
     const [clusterRadius, setClusterRadius] = useState(null);
     const [coordinates, setCoordinates] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
@@ -226,42 +231,13 @@ function Map() {
         userAuthenticated,
     }), [airports, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection]);
 
+    if (!webgl2) {
+        return <MapFallback />;
+    }
+
     return (
         <MapContext.Provider value={mapContextValue}>
-            <MapContainer 
-                className="map" 
-                center={getInitMapPosition()}
-                zoom={4} 
-                attributionControl={false} 
-                zoomControl={false}
-                maxBounds={[[-85, -360], [85, 360]]}
-            >
-                <TileLayer
-                    url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-                    minZoom={3}
-                    maxZoom={17}
-                />
-
-                {clusterRadius && (
-                    <>
-                    {cluster ? (
-                        <MarkerClusterGroup chunkedLoading showCoverageOnHover={true} polygonOptions={{ color: '#46517c', fillColor: '#6676b6' }} maxClusterRadius={clusterRadius} iconCreateFunction={createClusterIcon}>
-                            <MapMarkerGroup/>
-                        </MarkerClusterGroup>
-                    ) : (
-                        <MapMarkerGroup/>
-                    )}
-                    </>
-                )}
-
-                {(isDefaultView() || route().current('scenery*')) && <MapSaveView />}
-                {(mapBounds && !route().current('top*')) && !route().current('scenery*') && <MapBound mapBounds={mapBounds} />}
-                {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
-                {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
-                <MapTerminator />
-                <MapTooltipZoom />
-                <MapPing ping={ping} />
-            </MapContainer>
+            <MapProvider center={initialCenter} />
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
     );
