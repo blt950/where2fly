@@ -39,19 +39,18 @@ export const labelSpec = ({ id, source, filter, minzoom = 0, overlap = false }) 
     paint: { 'text-color': ['to-color', ['get', 'color']] },
 });
 
-// Bubble grows with the log of the count, so a 2-airport cluster and a 2,000-airport one stay
-// within a readable range of each other.
-const clusterScale = (minRem, maxRem) => ['interpolate', ['linear'], ['ln', ['get', 'point_count']],
-    Math.log(2), minRem * ROOT_FONT_SIZE, Math.log(100), maxRem * ROOT_FONT_SIZE];
-
-// Cluster bubble and its count. Shared so the user's lists cluster exactly like search results.
+// MapLibre's stock cluster layers, with our palette, typeface and count size swapped in. The
+// circle step breaks and radii are the upstream example's — deliberately not tuned.
 export const clusterSpecs = ({ idPrefix, source, color, textColor }) => ([
     {
         id: `${idPrefix}-clusters`,
         type: 'circle',
         source,
         filter: ['has', 'point_count'],
-        paint: { 'circle-radius': clusterScale(1, 3.75 / 2), 'circle-color': color },
+        paint: {
+            'circle-color': color,
+            'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40],
+        },
     },
     {
         id: `${idPrefix}-cluster-count`,
@@ -59,10 +58,9 @@ export const clusterSpecs = ({ idPrefix, source, color, textColor }) => ([
         source,
         filter: ['has', 'point_count'],
         layout: {
-            'text-field': ['get', 'point_count_abbreviated'],
+            'text-field': '{point_count_abbreviated}',
             'text-font': LABEL_FONT,
-            'text-size': clusterScale(0.75, 3.75 * 0.35),
-            'text-allow-overlap': true,
+            'text-size': ROOT_FONT_SIZE,
         },
         paint: { 'text-color': textColor },
     },

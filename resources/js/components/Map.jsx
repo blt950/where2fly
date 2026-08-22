@@ -35,9 +35,6 @@ const supportsWebGL2 = () => {
     }
 };
 
-// A denser map needs a wider merge radius, or the clusters themselves become the clutter.
-const clusterRadiusFor = (count) => (count >= 1000 ? 60 : count > 200 ? 50 : 30);
-
 const DEFAULT_ZOOM = 4;
 
 // MapLibre takes [lng, lat] — the opposite order to Leaflet. Zoom is optional per entry and
@@ -86,7 +83,6 @@ function Map() {
     const [preferences, setPreferences] = useState(readPreferences);
     const [weatherStatus, setWeatherStatus] = useState('loading');
     const [lists, setLists] = useState([]);
-    const [clusterRadius, setClusterRadius] = useState(30);
     const [coordinates, setCoordinates] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
     const [focusAirport, setFocusAirport] = useState(null);
@@ -203,19 +199,11 @@ function Map() {
 
     // When airports data change, set the map bounds
     useEffect(() => {
-
-        const airportsKeys = Object.keys(airports);
-
-        if (airportsKeys.length === 0) {
+        if (isDefaultView() || Object.keys(airports).length === 0) {
             return;
         }
 
-        if (!isDefaultView()) {
-            setMapBounds(Object.values(airports).map(airport => [airport.lon, airport.lat]));
-        }
-
-        setClusterRadius(clusterRadiusFor(airportsKeys.length));
-
+        setMapBounds(Object.values(airports).map(airport => [airport.lon, airport.lat]));
     }, [airports]);
 
     const { palette, hillshade } = themeOf(preferences.theme);
@@ -226,11 +214,6 @@ function Map() {
         {},
         ...lists.filter(({ id }) => preferences.lists?.[id] !== false).map(({ airports }) => airports),
     ), [lists, preferences.lists]);
-
-    const listClusterRadius = useMemo(
-        () => clusterRadiusFor(Object.keys(listAirports).length),
-        [listAirports],
-    );
 
     // Scenery lists are held apart from `airports` so each one keeps its own colour and toggle,
     // but any ICAO the user can click has to resolve from either — `airports` alone is what the
@@ -274,10 +257,10 @@ function Map() {
                 {preferences.terrain && <MapTerrain hillshade={hillshade} />}
                 {preferences.weather && <MapWeather onStatus={setWeatherStatus} />}
                 <MapAirportSource id="airports" airports={airports} palette={palette}
-                    cluster={cluster} clusterRadius={clusterRadius} {...clusterColours} />
+                    cluster={cluster} {...clusterColours} />
                 {lists.length > 0 && (
                     <MapAirportSource id="user-list" airports={listAirports} palette={palette}
-                        cluster clusterRadius={listClusterRadius} {...CLUSTER_COLOURS.muted} />
+                        cluster {...CLUSTER_COLOURS.muted} />
                 )}
                 {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} color={palette.fallback} />}
