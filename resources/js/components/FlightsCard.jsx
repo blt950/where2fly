@@ -8,7 +8,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId, reverseD
 
     const dataCache = useRef({});
     const [data, setData] = useState(null);
-    const { airports, primaryAirport, focusAirport, highlightedAircrafts } = useContext(MapContext);
+    const { findAirport, primaryAirport, focusAirport, highlightedAircrafts } = useContext(MapContext);
     const { setShowFlightsIdCard } = useContext(CardContext);
     
     // Fetch airport data if it's not in the cache
@@ -70,7 +70,7 @@ function FlightsCard({ airlineId, departureAirportId, arrivalAirportId, reverseD
                                                 <li>
                                                     <a
                                                         className="dropdown-item"
-                                                        href={`https://dispatch.simbrief.com/options/custom?orig=${airports[reverseDirection ? focusAirport : primaryAirport].icao}&dest=${airports[reverseDirection ? primaryAirport : focusAirport].icao}&airline=${data.airline.icao_code}&fltnum=${flight.flight_number}&utm_campaign=where2fly.today`}
+                                                        href={`https://dispatch.simbrief.com/options/custom?orig=${findAirport(reverseDirection ? focusAirport : primaryAirport).icao}&dest=${findAirport(reverseDirection ? primaryAirport : focusAirport).icao}&airline=${data.airline.icao_code}&fltnum=${flight.flight_number}&utm_campaign=where2fly.today`}
                                                         target="_blank"
                                                         rel="noreferrer"
                                                     >

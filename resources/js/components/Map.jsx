@@ -3,75 +3,88 @@ import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import { captureException, ErrorBoundary } from '@sentry/react';
 
+import 'maplibre-gl/dist/maplibre-gl.css';
+
 import { MapContext } from './context/MapContext';
 
-import { createClusterIcon } from './utils/ClusterIcon';
 import PopupContainer from './PopupContainer';
-import MarkerClusterGroup from 'react-leaflet-cluster';
-import { MapContainer, TileLayer } from 'react-leaflet'
-
+import MapAirportSource from './map/MapAirportSource';
+import MapAttribution from './map/MapAttribution';
+import MapControls from './map/MapControls';
 import MapBound from './map/MapBound';
-import MapDrawRoute from './map/MapDrawRoute';
-import MapMarkerGroup from './map/MapMarkerGroup';
 import MapPan from './map/MapPan';
 import MapPing from './map/MapPing';
-import MapSaveView from './map/MapSaveView';
+import MapProvider from './map/MapProvider';
+import MapRoute from './map/MapRoute';
+import MapSaveView, { POSITION_KEY } from './map/MapSaveView';
+import MapTerrain from './map/MapTerrain';
+import MapWeather from './map/MapWeather';
 import MapTerminator from './map/MapTerminator';
-import MapTooltipZoom from './map/MapTooltipZoom';
+import { CLUSTER_COLOURS, themeOf } from './map/mapConfig';
+import { AIRPORT_SOURCES } from './utils/airportLayerSpec';
+import { isDefaultView } from './utils/mapRoutes';
+import { readPreferences, writePreferences } from './utils/mapPreferences';
+import { readStored, removeStored, writeStored } from './utils/storage';
 
 const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
 
-// Check if the current route is the default view
-const isDefaultView = () => {
-    if (!route().current('top') 
-        && !route().current('top.filtered')
-        && !route().current('search')
-        && !route().current('search.routes')
-        && !route().current('scenery')
-        && !route().current('scenery.filtered')
-        && route().current() !== undefined) {
-        return true;
+// MapLibre needs WebGL2
+const supportsWebGL2 = () => {
+    try {
+        return !!document.createElement('canvas').getContext('webgl2');
+    } catch {
+        return false;
     }
-    return false
-}
+};
 
-// Get the initial map position
+const DEFAULT_ZOOM = 4;
+const LISTS_CACHE_KEY = 'userListsCache';
+
+// MapLibre takes [lng, lat] — the opposite order to Leaflet. Zoom is optional per entry and
+// falls back to DEFAULT_ZOOM, so only the odd ones out need to say it.
+const view = (center, zoom = DEFAULT_ZOOM) => ({ center, zoom });
+
+const CONTINENT_VIEWS = {
+    AF: view([21, 0], 3.2),
+    AS: view([100, 35], 3),
+    EU: view([15, 55]),
+    NA: view([-95, 45]),
+    OC: view([135, -25], 3.5),
+    SA: view([-55, -20], 3),
+};
+
 const getInitMapPosition = () => {
 
-    // Set position based on current top list filter
-    if(route().current('top.filtered', 'AF')){
-        return [7.1881, 21.0936];
-    } else if(route().current('top.filtered', 'AS')){
-        return [34.0479, 100.6197];
-    } else if(route().current('top.filtered', 'EU')){
-        return [54.5260, 15.2551];
-    } else if(route().current('top.filtered', 'NA')){
-        return [37.0902, -95.7129];
-    } else if(route().current('top.filtered', 'OC')){
-        return [-25.2744, 133.7751];
-    } else if(route().current('top.filtered', 'SA')){
-        return [-8.7832, -55.4915];
-    } else if(route().current('top')){
-        // A place in the middle of the ocean to avoid stretching the map bounds
-        return [45.14777, -35.4521]
+    const continent = Object.keys(CONTINENT_VIEWS).find((code) => route().current('top.filtered', code));
+
+    if (continent) {
+        return CONTINENT_VIEWS[continent];
     }
 
-    // Set position based on localStorage
-    var storedPosition = localStorage.getItem('mapPosition');
-    if (storedPosition) {
-        const { lat, lng } = JSON.parse(storedPosition);
-        return [lat, lng];
+    if (route().current('top')) {
+        return view([-0, 30], 2);
+    }
+
+    // Pre-MapLibre this was stored without a zoom, which view()'s default parameter covers.
+    const stored = readStored(POSITION_KEY);
+
+    if (Number.isFinite(stored?.lat) && Number.isFinite(stored?.lng)) {
+        return view([stored.lng, stored.lat], stored.zoom);
     }
 
     // Default to Berlin
-    return [52.51843039016386, 13.395199187248908];
+    return view([13.395199187248908, 52.51843039016386]);
 }
 
 function Map() {
 
-    const [airports, setAirports] = useState([]);
+    const [airports, setAirports] = useState({});
     const [cluster, setCluster] = useState(true);
-    const [clusterRadius, setClusterRadius] = useState(null);
+    const [initialView] = useState(getInitMapPosition);
+    const [webgl2] = useState(supportsWebGL2);
+    const [preferences, setPreferences] = useState(readPreferences);
+    const [weatherStatus, setWeatherStatus] = useState('loading');
+    const [lists, setLists] = useState([]);
     const [coordinates, setCoordinates] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
     const [focusAirport, setFocusAirport] = useState(null);
@@ -92,36 +105,30 @@ function Map() {
         window.setHighlightedAircrafts = (data) => { setHighlightedAircrafts(data) }
         window.setPrimaryAirport = (airport) => { setPrimaryAirport(airport) }
         window.setReverseDirection = (boolean) => { setReverseDirection(boolean) }
-        window.isDefaultView = isDefaultView;
-
-        // Fetch from local storage cache
-        const cachedAirports = localStorage.getItem('userListAirportsCache');
-        if (isDefaultView() && cachedAirports && cachedAirports != undefined && cachedAirports != 'undefined') {
-            setAirports(JSON.parse(cachedAirports));
-        }
 
         // Dispatch a custom event when the map is ready
         window.dispatchEvent(new Event('mapReady'));
 
-    }, []);
+        if (!userAuthenticated || !isDefaultView()) {
+            removeStored(LISTS_CACHE_KEY);
 
-    // Fetch the user's list if they are authenticated
-    useEffect(() => {
-        if (isDefaultView() && userAuthenticated) {
-            fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
-                .then(response => response.json())
-                .then(data => {
-                    localStorage.setItem('userListAirportsCache', JSON.stringify(data.data));
-                    setAirports(data.data);
-                })
-                .catch(error => {
-                    captureException(error);
-                    console.error(error.message);
-                });
-        } else if(isDefaultView()) {
-            setAirports([]);
-            localStorage.removeItem('userListAirportsCache');
+            return;
         }
+
+        // Seed the overlay from cache so the lists are on screen before the fetch returns.
+        setLists(readStored(LISTS_CACHE_KEY) ?? []);
+
+        fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
+            .then(response => response.json())
+            .then(data => {
+                writeStored(LISTS_CACHE_KEY, data.data);
+                setLists(data.data ?? []);
+            })
+            .catch(error => {
+                captureException(error);
+                console.error(error.message);
+            });
+
     }, []);
 
     // When focusAirport changes, pan to the airport and show the card.
@@ -129,7 +136,9 @@ function Map() {
         if (focusAirport !== null && focusAirport !== undefined) {
 
             // Load the selected airport to map if it's not already loaded (e.g. searching up scenery)
-            if (airports[focusAirport] === undefined) {
+            const known = findAirport(focusAirport);
+
+            if (known === undefined) {
                 
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 fetch(route('api.mapdata.icao'), {
@@ -156,7 +165,7 @@ function Map() {
 
                     setAirports({ ...airports, [focusAirport]: airport });
                     // Use the temporary data as setAirports is async
-                    setCoordinates([airport.lat, airport.lon]);
+                    setCoordinates([airport.lon, airport.lat]);
                     setShowAirportIdCard(airport.id);
                 })
                 .catch(error => {
@@ -167,12 +176,12 @@ function Map() {
             } else {
 
                 // Set the coordinates and show the card
-                setCoordinates([airports[focusAirport].lat, airports[focusAirport].lon]);
-                setShowAirportIdCard(airports[focusAirport].id);
+                setCoordinates([Number(known.lon), Number(known.lat)]);
+                setShowAirportIdCard(known.id);
 
                 // For routes which define a primary airport, we want to draw the route as well
                 if(primaryAirport){
-                    setDrawRoute([primaryAirport, airports[focusAirport].icao]);
+                    setDrawRoute([primaryAirport, known.icao]);
                 }
 
                 // Dispatch a custom event when the map focuses on an airport
@@ -188,28 +197,34 @@ function Map() {
 
     // When airports data change, set the map bounds
     useEffect(() => {
-
-        const airportsKeys = Object.keys(airports);
-
-        if (!isDefaultView() && airports && airportsKeys.length > 0) {
-            var bounds = [];
-            Object.values(airports).forEach(airport => {
-                bounds.push([airport.lat, airport.lon]);
-            });
-            setMapBounds(bounds);
-        }
-        
-        if(airportsKeys.length > 0){
-            if (airportsKeys.length >= 1000) {
-                setClusterRadius(60);
-            } else if(airportsKeys.length > 200 && airportsKeys.length < 1000) {
-                setClusterRadius(50);
-            } else {
-                setClusterRadius(30);
-            }
+        if (isDefaultView() || Object.keys(airports).length === 0) {
+            return;
         }
 
+        setMapBounds(Object.values(airports).map(airport => [airport.lon, airport.lat]));
     }, [airports]);
+
+    const { palette, hillshade } = themeOf(preferences.theme);
+
+    // One source for every visible list — the airports already carry their list's color, so
+    // merging keeps a single set of layers instead of one per list.
+    const listAirports = useMemo(() => Object.assign(
+        {},
+        ...lists.filter(({ id }) => preferences.lists?.[id] !== false).map(({ airports }) => airports),
+    ), [lists, preferences.lists]);
+
+    // Scenery lists are held apart from `airports` so each one keeps its own color and toggle,
+    // but any ICAO the user can click has to resolve from either — `airports` alone is what the
+    // search-result layer draws, not the full set of focusable airports.
+    const findAirport = useMemo(
+        () => (icao) => airports[icao] ?? listAirports[icao],
+        [airports, listAirports],
+    );
+
+    const updatePreferences = (next) => {
+        setPreferences(next);
+        writePreferences(next);
+    };
 
     // Memoise the context value so unrelated Map state changes (coordinates,
     // mapBounds, showAirportIdCard, panning) don't give it a new identity and
@@ -217,6 +232,7 @@ function Map() {
     const mapContextValue = useMemo(() => ({
         airports,
         setAirports,
+        findAirport,
         focusAirport,
         highlightedAircrafts,
         primaryAirport,
@@ -224,44 +240,34 @@ function Map() {
         setFocusAirport,
         setShowAirportIdCard,
         userAuthenticated,
-    }), [airports, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection]);
+    }), [airports, findAirport, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection]);
+
+    if (!webgl2) {
+        return <MapFallback />;
+    }
+
+    const clusterColours = isDefaultView() ? CLUSTER_COLOURS.muted : CLUSTER_COLOURS.search;
 
     return (
         <MapContext.Provider value={mapContextValue}>
-            <MapContainer 
-                className="map" 
-                center={getInitMapPosition()}
-                zoom={4} 
-                attributionControl={false} 
-                zoomControl={false}
-                maxBounds={[[-85, -360], [85, 360]]}
-            >
-                <TileLayer
-                    url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-                    minZoom={3}
-                    maxZoom={17}
-                />
-
-                {clusterRadius && (
-                    <>
-                    {cluster ? (
-                        <MarkerClusterGroup chunkedLoading showCoverageOnHover={true} polygonOptions={{ color: '#46517c', fillColor: '#6676b6' }} maxClusterRadius={clusterRadius} iconCreateFunction={createClusterIcon}>
-                            <MapMarkerGroup/>
-                        </MarkerClusterGroup>
-                    ) : (
-                        <MapMarkerGroup/>
-                    )}
-                    </>
+            <MapProvider view={initialView} projection={preferences.projection} theme={preferences.theme}>
+                {preferences.terminator && <MapTerminator />}
+                {preferences.terrain && <MapTerrain hillshade={hillshade} />}
+                {preferences.weather && <MapWeather onStatus={setWeatherStatus} />}
+                <MapAirportSource id={AIRPORT_SOURCES.results} airports={airports} palette={palette}
+                    cluster={cluster} {...clusterColours} />
+                {lists.length > 0 && (
+                    <MapAirportSource id={AIRPORT_SOURCES.userLists} airports={listAirports} palette={palette}
+                        cluster {...CLUSTER_COLOURS.muted} />
                 )}
-
-                {(isDefaultView() || route().current('scenery*')) && <MapSaveView />}
-                {(mapBounds && !route().current('top*')) && !route().current('scenery*') && <MapBound mapBounds={mapBounds} />}
+                {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
+                {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} color={palette.fallback} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
-                {drawRoute && <MapDrawRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection}/>}
-                <MapTerminator />
-                <MapTooltipZoom />
+                {(isDefaultView() || route().current('scenery*')) && <MapSaveView />}
                 <MapPing ping={ping} />
-            </MapContainer>
+                <MapAttribution />
+            </MapProvider>
+            <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus} lists={lists} />
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
     );
@@ -269,8 +275,6 @@ function Map() {
 
 export default Map;
 
-// #map is an empty <aside>: the .map class that gives it size lives on MapContainer, so the
-// fallback has to carry it too or it collapses to nothing when the tree never renders.
 function MapFallback() {
     return (
         <div className="map map-error d-flex flex-column align-items-center justify-content-center text-center p-4">

@@ -20,9 +20,11 @@ class MapHelper
     /**
      * Generate airport map data from airports
      *
-     * @return string
+     * $color overrides whatever the models carry — user lists paint every airport their own.
+     *
+     * @return array
      */
-    public static function generateAirportMapDataFromAirports(Collection|array $airports)
+    public static function generateAirportMapDataFromAirports(Collection|array $airports, ?string $color = null)
     {
         $airportData = [];
         foreach ($airports as $airport) {
@@ -32,7 +34,7 @@ class MapHelper
                 'icao' => $airport->icao,
                 'lat' => $airport->coordinates->latitude,
                 'lon' => $airport->coordinates->longitude,
-                'color' => $airport->color,
+                'color' => $color ?? $airport->color,
                 'type' => $airport->type,
             ];
         }
@@ -41,22 +43,18 @@ class MapHelper
     }
 
     /**
-     * Get airports from user lists
+     * Grouped rather than flattened so the map can show and hide each list on its own.
      *
      * @return array
      */
-    public static function getAirportsFromUserLists(Collection $userLists)
+    public static function generateListMapData(Collection $userLists)
     {
-        $airports = [];
-
-        foreach ($userLists as $list) {
-            foreach ($list->airports as $airport) {
-                $airport->color = $list->color;
-                $airports[] = $airport;
-            }
-        }
-
-        return $airports;
+        return $userLists->map(fn ($list) => [
+            'id' => $list->id,
+            'name' => $list->name,
+            'color' => $list->color,
+            'airports' => self::generateAirportMapDataFromAirports($list->airports, $list->color),
+        ])->values()->all();
     }
 
     /**

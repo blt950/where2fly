@@ -22,11 +22,12 @@ export default defineConfig({
     },
     build: {
         sourcemap: process.env.SENTRY_AUTH_TOKEN ? 'hidden' : false,
+        chunkSizeWarningLimit: 1000,
         rolldownOptions: {
             output: {
                 codeSplitting: {
                     groups: [
-                        { name: 'leaflet', test: /node_modules\/.*leaflet/ },
+                        { name: 'maplibre', test: /node_modules\/(maplibre-gl|@maplibre|@mapbox|pbf|earcut|kdbush|potpack|gl-matrix|tinyqueue|quickselect|murmurhash-js)\// },
                         { name: 'react', test: /node_modules\/(react|react-dom|scheduler)\// },
                         { name: 'sentry', test: /node_modules\/@sentry/ },
                         { name: 'vendor', test: /node_modules/ },

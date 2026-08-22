@@ -6,8 +6,7 @@
         | <a href="{{ route('privacy') }}" class="text-white-50 text-decoration-underline">Privacy Policy</a>
         | <a href="{{ route('api') }}" class="text-white-50 text-decoration-underline">API</a>
     </div>
-    <div>
-        Map powered by <a class="text-white-50 text-decoration-underline" href="https://leafletjs.com/" target="_blank">Leaflet</a> & <a class="text-white-50 text-decoration-underline" href="https://cartodb.com/attribution" target="_blank">CartoDB</a>
-        
-    </div>
+    {{-- Filled in by the map, and only on pages that have one. Its contents track whichever
+         sources are actually being drawn. --}}
+    <div id="map-attribution"></div>
 </footer>

@@ -3,11 +3,9 @@ import './sentry';
 import './bootstrap';
 import '../sass/app.scss';
 
-// React
-import './components/Map';
-import './components/PopupContainer';
-import './components/AirportCard';
-import './components/ui/TAF';
+if (document.getElementById('map')) {
+    import('./components/Map');
+}
 
 // Other
 import '@u-elements/u-tabs';

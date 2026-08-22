@@ -1,5 +1,8 @@
 <aside id="map"></aside>
 
+{{-- Flat panel over the map area that simply fades away to make page transition smooter. --}}
+<div class="map-reveal" aria-hidden="true"></div>
+
 
 @if(!Route::is('search') && !Route::is('top'))
     @if(!Auth::user())

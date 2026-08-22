@@ -1,25 +1,27 @@
 import { useContext, useEffect } from 'react';
-import L from 'leaflet';
-import { useMap } from 'react-leaflet';
+import * as maplibregl from 'maplibre-gl';
 
 import { MapContext } from '../context/MapContext';
+import { useMapGL } from '../context/MapGLContext';
 
-// One-shot radar blip at the given airport, triggered via window.pingAirport()
 const MapPing = ({ ping }) => {
-    const map = useMap();
-    const { airports } = useContext(MapContext);
+
+    const map = useMapGL();
+    const { findAirport } = useContext(MapContext);
 
     useEffect(() => {
-        const airport = ping ? airports[ping.icao] : null;
+        const airport = ping ? findAirport(ping.icao) : null;
+
         if (!airport) {
-            return;
+            return undefined;
         }
 
-        const marker = L.marker([airport.lat, airport.lon], {
-            icon: L.divIcon({ className: 'radar-ping', iconSize: [0, 0] }),
-            interactive: false,
-            keyboard: false,
-        }).addTo(map);
+        const element = document.createElement('div');
+        element.className = 'radar-ping';
+
+        const marker = new maplibregl.Marker({ element, anchor: 'center' })
+            .setLngLat([Number(airport.lon), Number(airport.lat)])
+            .addTo(map);
 
         const timer = setTimeout(() => marker.remove(), 1800);
 
@@ -27,7 +29,7 @@ const MapPing = ({ ping }) => {
             clearTimeout(timer);
             marker.remove();
         };
-    }, [ping]);
+    }, [map, ping]);
 
     return null;
 };

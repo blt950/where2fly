@@ -16,56 +16,165 @@
     }
 }
 
-// Body text is dark (--bs-body-color), so the fallback sets its own colour to stay readable.
+// Body text is dark (--bs-body-color), so the fallback sets its own color to stay readable.
 .map-error{
     color: $bluewhite;
     background: $tertiary;
 }
 
-.leaflet-div-icon{
-    background: transparent;
-    border: 0;
-}
-
-.leaflet-container {
+.maplibregl-map {
     background: #000;
 }
 
-.leaflet-tooltip {
-    text-align: right;
-    min-width: 64px;
-    min-height: 36px;
+.map-reveal {
+    position: absolute;
+    top: $header-height;
+    left: $sidebar-width;
+    width: calc(100vw - $sidebar-width);
+    height: calc(100dvh - $header-height);
+
+    background: #262626;
+
+    z-index: 700;
+    pointer-events: none;
+
+    animation: map-reveal 1200ms ease forwards;
+
+    @include media-breakpoint-down(lg) {
+        left: $sidebar-width-min;
+        width: calc(100vw - $sidebar-width-min);
+    }
+
+    @include media-breakpoint-down(md) {
+        display: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        display: none;
+    }
 }
 
-.leaflet-tooltip.airport {
+@keyframes map-reveal {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
 
-    font-family: $font-family-sans-serif;
-    -webkit-font-smoothing: antialiased;
-    background-color: transparent;
-    border: transparent;
-    box-shadow: none;
+// The canvas is tabbable (MapLibre sets tabindex=0) and pans/zooms on the arrow and +/- keys,
+// so it has to show focus. :focus-visible keeps the ring off for plain clicks.
+.maplibregl-canvas:focus {
+    outline: none;
+}
 
-    color: $primary;
-    font-weight: normal;
+.maplibregl-canvas:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: -2px;
+}
+
+// Layer and projection controls, top-right of the map canvas.
+.map-controls {
+    position: absolute;
+    top: calc($header-height + 1rem);
+    right: 1rem;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+
+    // Above .hint and .popup-container, which both sit at 500 — an open dropdown wins.
+    z-index: 600;
+
+    // The map itself is hidden below md, so its controls have nothing to control.
+    @include media-breakpoint-down(md) {
+        display: none;
+    }
+}
+
+.map-controls-toggle {
+    width: 2.5rem;
+    height: 2.4rem;
     font-size: 1rem;
 
-    &:before{
-        display: none;
+    background: rgba($secondary, 0.85);
+    border: 1px solid $gray-600;
+    color: $gray-500;
+
+    border-radius: 2px;
+
+    &:hover,
+    &[aria-expanded='true'] {
+        color: $primary;
+        border-color: $primary;
+    }
+
+    &--fault::after {
+        content: '';
+        position: absolute;
+        transform: translate(0.85rem, -0.85rem);
+
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background: color.adjust($danger, $lightness: 32%);
     }
 }
 
-// Tooltip visibility by zoom/type, driven by classes set imperatively on the map container (see MapTooltipZoom).
-.map.tt-filter {
-    .leaflet-tooltip.airport--small_airport,
-    .leaflet-tooltip.airport--medium_airport {
-        display: none;
+.map-controls-panel {
+    width: 13rem;
+    padding: 0.75rem 1rem;
+
+    background: rgba($secondary, 0.9);
+    border: 1px solid $gray-600;
+
+    color: $gray-200;
+    font-family: $font-family-sans-serif;
+    font-size: 0.8125rem;
+
+    fieldset + fieldset {
+        margin-top: 0.75rem;
+        border-top: 1px solid $tertiary;
     }
 
-    &.tt-show-medium .leaflet-tooltip.airport--medium_airport { display: block; }
-    &.tt-show-small  .leaflet-tooltip.airport--small_airport  { display: block; }
+    legend {
+        float: none;
+        margin-bottom: 0.375rem;
 
-    // Focused / primary airport always keeps its label, regardless of zoom.
-    .leaflet-tooltip.airport--pinned { display: block; }
+        color: color.adjust($tertiary, $lightness: 45%);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+    }
+
+    // Bootstrap nudges the input down to meet the first line of text. Flex centering already
+    // does that job, so the nudge lands as a visible offset instead.
+    .form-check-input {
+        margin-top: 0;
+    }
+}
+
+// Radar health, shown only while the layer is on. Icon-only on purpose — it is there to make a
+// broken feed visible, not to explain itself.
+.map-controls-status {
+    margin-left: auto;
+    padding-left: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1;
+
+    &--loading { color: $gray-500; }
+    &--error { color: color.adjust($danger, $lightness: 32%); }
+}
+
+// The map's credit line, portalled into the footer. Its anchors arrive as source-supplied HTML
+// without the footer's utility classes, so they are styled here instead.
+#map-attribution a {
+    color: inherit;
+    text-decoration: underline;
 }
 
 // One-shot radar blip shown when an airport is selected from the sidebar (MapPing)
@@ -94,22 +203,12 @@
     }
 }
 
-.leaflet-marker-icon.marker-cluster{
-    color: black;
-    background: $primary;
-    border-radius: 50%;
-
-    width: 2.5rem;
-    height: 2.5rem;
-
-    font-family: $font-family-sans-serif;
-    -webkit-font-smoothing: antialiased;
-    font-size: 1rem;
-    text-align: center;
-
-    &.inverted{
-        color: white;
-        background: $tertiary;
+// The blip still has to say "the map moved to here", so it stays put rather than pulsing.
+// MapPing removes the marker after 1.8s either way.
+@media (prefers-reduced-motion: reduce) {
+    .radar-ping::before {
+        animation: none;
+        opacity: 1;
     }
 }
 

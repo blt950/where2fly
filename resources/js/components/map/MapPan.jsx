@@ -1,16 +1,18 @@
 import { useEffect } from 'react';
-import { useMap } from 'react-leaflet';
 
-function MapPan({ flyToCoordinates }) {
-    const map = useMap();
+import { useMapGL } from '../context/MapGLContext';
+
+const MapPan = ({ flyToCoordinates }) => {
+
+    const map = useMapGL();
 
     useEffect(() => {
         if (flyToCoordinates) {
-            map.panTo(flyToCoordinates, { animate: true, duration: 0.5, easeLinearity: 0.25 });
+            map.panTo(flyToCoordinates, { duration: 500 });
         }
-    }, [flyToCoordinates, map]);
+    }, [map, flyToCoordinates]);
 
     return null;
-}
+};
 
 export default MapPan;

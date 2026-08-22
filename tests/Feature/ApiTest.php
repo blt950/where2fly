@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Airport;
 use App\Models\ApiKey;
 use App\Models\Simulator;
 use App\Models\User;
@@ -257,6 +258,52 @@ class ApiTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonPath('message', 'Success');
+    }
+
+    public function test_list_airports_endpoint_groups_airports_per_list(): void
+    {
+        $user = User::factory()->create();
+        $simulator = Simulator::first();
+        $airport = Airport::first();
+
+        $list = UserList::create([
+            'name' => 'Grouped List',
+            'color' => '#00FF00',
+            'simulator_id' => $simulator->id,
+            'user_id' => $user->id,
+            'public' => false,
+            'hidden' => false,
+        ]);
+        $list->airports()->attach($airport->id);
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/lists/airports');
+
+        // The map toggles each list on its own, so identity has to survive the response.
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.id', $list->id)
+            ->assertJsonPath('data.0.name', 'Grouped List')
+            ->assertJsonPath('data.0.color', '#00FF00')
+            ->assertJsonPath('data.0.airports.' . $airport->icao . '.icao', $airport->icao)
+            ->assertJsonPath('data.0.airports.' . $airport->icao . '.color', '#00FF00');
+    }
+
+    public function test_list_airports_endpoint_excludes_hidden_lists(): void
+    {
+        $user = User::factory()->create();
+        $simulator = Simulator::first();
+
+        UserList::create([
+            'name' => 'Hidden List',
+            'color' => '#0000FF',
+            'simulator_id' => $simulator->id,
+            'user_id' => $user->id,
+            'public' => false,
+            'hidden' => true,
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/lists/airports');
+
+        $response->assertStatus(200)->assertJsonCount(0, 'data');
     }
 
     // -------------------------------------------------------------------------
