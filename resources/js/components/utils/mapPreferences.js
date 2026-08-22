@@ -2,7 +2,7 @@ const STORAGE_KEY = 'mapPreferences';
 
 export const DEFAULT_PREFERENCES = {
     terminator: true,
-    terrain: false,
+    terrain: true,
     weather: true,
     lists: {},
     projection: 'mercator',
