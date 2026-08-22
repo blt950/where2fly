@@ -9,6 +9,7 @@ import { MapContext } from './context/MapContext';
 
 import PopupContainer from './PopupContainer';
 import MapProvider from './map/MapProvider';
+import MapTerminator from './map/MapTerminator';
 
 const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
 
@@ -237,7 +238,9 @@ function Map() {
 
     return (
         <MapContext.Provider value={mapContextValue}>
-            <MapProvider center={initialCenter} />
+            <MapProvider center={initialCenter}>
+                <MapTerminator />
+            </MapProvider>
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
     );
