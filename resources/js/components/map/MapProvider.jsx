@@ -2,7 +2,7 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { MapGLContext } from '../context/MapGLContext';
-import { applyThemeOverrides, GLYPHS_URL, mapOptions, themeOf } from './mapConfig';
+import { applyTheme, GLYPHS_URL, mapOptions, themeOf } from './mapConfig';
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
@@ -30,9 +30,8 @@ const MapProvider = ({ view, projection, theme, children }) => {
                 const current = settings.current;
 
                 instance.setProjection({ type: current.projection });
-                instance.setSky(themeOf(current.theme).sky);
                 instance.setGlyphs(GLYPHS_URL);
-                applyThemeOverrides(instance, themeOf(current.theme));
+                applyTheme(instance, themeOf(current.theme));
 
                 setMap(instance);
                 setStyleEpoch((epoch) => epoch + 1);
@@ -70,8 +69,7 @@ const MapProvider = ({ view, projection, theme, children }) => {
             return;
         }
 
-        applyThemeOverrides(map, themeOf(theme));
-        map.setSky(themeOf(theme).sky);
+        applyTheme(map, themeOf(theme));
     }, [map, theme, styleEpoch]);
 
     return (

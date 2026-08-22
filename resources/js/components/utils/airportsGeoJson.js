@@ -1,8 +1,7 @@
 const TYPE_RADIUS = { large_airport: 5, medium_airport: 3.5, small_airport: 2.5 };
 
 // SearchController omits `color` for the primary airport and sends the literal 'grey' for
-// candidates. MarkerIcon.jsx fell back to the brand gold on a missing colour. Both are our own
-// palette rather than user data, so both follow the theme.
+// candidates. Both are our own palette rather than user data, so both follow the theme.
 const normalizeColor = (color, palette) => (!color ? palette.fallback : color === 'grey' ? palette.candidate : color);
 
 export const airportsToGeoJson = (airports, palette) => ({
@@ -19,5 +18,3 @@ export const airportsToGeoJson = (airports, palette) => ({
         },
     })),
 });
-
-export const EMPTY_FEATURE_COLLECTION = { type: 'FeatureCollection', features: [] };

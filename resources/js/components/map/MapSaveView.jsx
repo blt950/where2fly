@@ -6,7 +6,9 @@ const MapSaveView = () => {
     const map = useMapGL();
 
     useEffect(() => {
-        const save = () => localStorage.setItem('mapPosition', JSON.stringify(map.getCenter()));
+        // getCenter() alone yields {lng, lat}; getInitMapPosition also restores the zoom.
+        const save = () => localStorage.setItem('mapPosition',
+            JSON.stringify({ ...map.getCenter(), zoom: map.getZoom() }));
         map.on('moveend', save);
         return () => { map.off('moveend', save); };
     }, [map]);

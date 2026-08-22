@@ -7,41 +7,20 @@ import { useMapGL } from '../context/MapGLContext';
 // the same information into the page footer, which is where the site's other credits live.
 const FOOTER_SLOT = 'map-attribution';
 
-const visibleSourceIds = (map) => {
-    const zoom = map.getZoom();
-    const ids = new Set();
+// Anything that can add, remove or hide a source.
+const EVENTS = ['styledata', 'sourcedata', 'zoomend'];
 
-    map.getStyle().layers.forEach((layer) => {
-        if (!layer.source || layer.layout?.visibility === 'none') {
-            return;
-        }
-
-        if (layer.minzoom !== undefined && zoom < layer.minzoom) {
-            return;
-        }
-
-        if (layer.maxzoom !== undefined && zoom >= layer.maxzoom) {
-            return;
-        }
-
-        ids.add(layer.source);
-    });
-
-    return ids;
-};
-
+// The credit for every source currently being drawn. Layers outside their zoom range are
+// skipped, so the radar and terrain credits come and go with the layers themselves.
 const collectAttributions = (map) => {
-    const seen = [];
+    const zoom = map.getZoom();
+    const inRange = ({ minzoom = -Infinity, maxzoom = Infinity }) => zoom >= minzoom && zoom < maxzoom;
 
-    visibleSourceIds(map).forEach((id) => {
-        const attribution = map.getSource(id)?.attribution;
+    const sources = new Set(map.getStyle().layers
+        .filter((layer) => layer.source && layer.layout?.visibility !== 'none' && inRange(layer))
+        .map((layer) => layer.source));
 
-        if (attribution && !seen.includes(attribution)) {
-            seen.push(attribution);
-        }
-    });
-
-    return seen.join(', ');
+    return [...new Set([...sources].map((id) => map.getSource(id)?.attribution).filter(Boolean))].join(', ');
 };
 
 const MapAttribution = () => {
@@ -50,22 +29,12 @@ const MapAttribution = () => {
     const [attribution, setAttribution] = useState('');
 
     useEffect(() => {
-        const refresh = () => setAttribution((current) => {
-            const next = collectAttributions(map);
+        const refresh = () => setAttribution(collectAttributions(map));
 
-            return next === current ? current : next;
-        });
-
-        map.on('styledata', refresh);
-        map.on('sourcedata', refresh);
-        map.on('zoomend', refresh);
+        EVENTS.forEach((event) => map.on(event, refresh));
         refresh();
 
-        return () => {
-            map.off('styledata', refresh);
-            map.off('sourcedata', refresh);
-            map.off('zoomend', refresh);
-        };
+        return () => { EVENTS.forEach((event) => map.off(event, refresh)); };
     }, [map]);
 
     const slot = document.getElementById(FOOTER_SLOT);

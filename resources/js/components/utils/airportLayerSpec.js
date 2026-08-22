@@ -1,7 +1,6 @@
 import { LABEL_FONT } from '../map/mapConfig';
 
 export const ROOT_FONT_SIZE = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-export const filtersLabelsByZoom = () => route().current('search') || route().current() === undefined;
 
 export const NOT_A_CLUSTER = ['!', ['has', 'point_count']];
 
@@ -9,11 +8,17 @@ export const NOT_A_CLUSTER = ['!', ['has', 'point_count']];
 export const focusColor = (focusAirport, palette) => ['case',
     ['==', ['get', 'icao'], focusAirport ?? ''], palette.fallback, ['to-color', ['get', 'color']]];
 
-export const LABEL_MINZOOM = {
-    large_airport: () => 0,
-    medium_airport: () => (filtersLabelsByZoom() ? 6 : 0),
-    small_airport: () => (filtersLabelsByZoom() ? 8 : 0),
-};
+const AIRPORT_TYPES = ['large_airport', 'medium_airport', 'small_airport'];
+
+// One label layer per size, so the smaller ones can be held back until the map is zoomed in.
+export const labelIds = (prefix) =>
+    AIRPORT_TYPES.map((airportType) => [`${prefix}-label-${airportType.replace('_airport', '')}`, airportType]);
+
+// Search results are dense enough that labelling every airport at world zoom is unreadable;
+// the curated lists are not, so they label from zoom 0.
+const filtersLabelsByZoom = () => route().current('search') || route().current() === undefined;
+const ZOOM_GATE = { large_airport: 0, medium_airport: 6, small_airport: 8 };
+export const labelMinzoom = (airportType) => (filtersLabelsByZoom() ? ZOOM_GATE[airportType] : 0);
 
 // One ICAO label layer. Shared so the search/top airports and the user's own list render
 // identically rather than drifting apart.
@@ -46,7 +51,7 @@ export const clusterSpecs = ({ idPrefix, source, color, textColor }) => ([
         type: 'circle',
         source,
         filter: ['has', 'point_count'],
-        paint: { 'circle-radius': clusterScale(2 / 2, 3.75 / 2), 'circle-color': color },
+        paint: { 'circle-radius': clusterScale(1, 3.75 / 2), 'circle-color': color },
     },
     {
         id: `${idPrefix}-cluster-count`,

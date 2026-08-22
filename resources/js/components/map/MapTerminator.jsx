@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useMapGL } from '../context/MapGLContext';
+import { beneath } from './mapConfig';
 import { terminatorPolygon } from '../utils/solarTerminator';
 
 const REFRESH_MS = 60_000;
@@ -19,7 +20,7 @@ const MapTerminator = () => {
                 'fill-opacity': 0.3,
                 'fill-antialias': false,
             },
-        }, map.getLayer('airports-hit') ? 'airports-hit' : undefined);
+        }, beneath(map, ['airports-hit']));
 
         const timer = setInterval(() => {
             map.getSource('terminator')?.setData(terminatorPolygon());

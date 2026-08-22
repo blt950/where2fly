@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { useMapGL } from '../context/MapGLContext';
-import { insertBefore } from './mapConfig';
+import { beneath } from './mapConfig';
 
 const SOURCE = 'weather';
 const LAYER = 'weather-radar';
@@ -82,7 +82,7 @@ const MapWeather = ({ onStatus }) => {
                 source: SOURCE,
                 maxzoom: MAX_LAYER_ZOOM,
                 paint: { 'raster-opacity': 0.3 },
-            }, insertBefore(map, ['terminator', 'airports-hit']));
+            }, beneath(map, ['terminator', 'airports-hit']));
         };
 
         const refresh = () => {

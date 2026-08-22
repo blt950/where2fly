@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { useMapGL } from '../context/MapGLContext';
-import { insertBefore } from './mapConfig';
+import { beneath } from './mapConfig';
 
 const SOURCE = 'dem';
 const LAYER = 'hillshade';
@@ -24,7 +24,7 @@ const MapTerrain = ({ hillshade }) => {
             type: 'hillshade',
             source: SOURCE,
             paint: hillshade,
-        }, insertBefore(map, ['water', 'boundary_country_inner', 'terminator', 'airports-hit']));
+        }, beneath(map, ['water', 'boundary_country_inner', 'terminator', 'airports-hit']));
 
         return () => {
             if (map.getLayer(LAYER)) { map.removeLayer(LAYER); }

@@ -3,28 +3,49 @@ import { useEffect, useRef, useState } from 'react';
 import { MAP_THEMES } from './mapConfig';
 
 const LAYERS = [
-    { key: 'terminator', label: 'Day & night', icon: 'fa-moon' },
-    { key: 'terrain', label: 'Terrain relief', icon: 'fa-mountains' },
-    { key: 'weather', label: 'Precipitation', icon: 'fa-cloud-rain' },
+    { value: 'terminator', label: 'Day & night', icon: 'fa-moon' },
+    { value: 'terrain', label: 'Terrain relief', icon: 'fa-mountains' },
+    { value: 'weather', label: 'Precipitation', icon: 'fa-cloud-rain' },
 ];
 
 const THEMES = Object.entries(MAP_THEMES).map(([value, { label }]) => ({ value, label }));
-
-const WEATHER_STATUS = {
-    loading: { icon: 'fa-circle-notch fa-spin', title: 'Loading radar' },
-    error: { icon: 'fa-triangle-exclamation', title: 'Radar unavailable' },
-};
 
 const PROJECTIONS = [
     { value: 'globe', label: '3D globe', icon: 'fa-earth-europe' },
     { value: 'mercator', label: '2D map', icon: 'fa-map' },
 ];
 
+const WEATHER_STATUS = {
+    loading: { icon: 'fa-circle-notch fa-spin', title: 'Loading radar' },
+    error: { icon: 'fa-triangle-exclamation', title: 'Radar unavailable' },
+};
+
+// One row of the panel: a checkbox when it stands alone, a radio when it belongs to a group.
+const Option = ({ id, name, label, icon, colour, checked, onChange, children }) => (
+    <div className="form-check gap-1">
+        <input
+            className="form-check-input"
+            type={name ? 'radio' : 'checkbox'}
+            name={name}
+            id={id}
+            checked={checked}
+            onChange={onChange}
+        />
+        <label className="form-check-label" htmlFor={id}>
+            {icon && <i className={`fa-sharp ${icon}`} aria-hidden="true"></i>}
+            {colour && <i className="fa-sharp fa-circle" aria-hidden="true" style={{ color: colour }}></i>}
+            {' '}{label}
+        </label>
+        {children}
+    </div>
+);
+
 const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
 
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
     const showsFault = preferences.weather && weatherStatus === 'error';
+    const status = preferences.weather ? WEATHER_STATUS[weatherStatus] : null;
 
     useEffect(() => {
         if (!open) {
@@ -64,29 +85,26 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
                 <div className="map-controls-panel">
                     <fieldset>
                         <legend>Layers</legend>
-                        {LAYERS.map(({ key, label, icon }) => (
-                            <div className="form-check gap-1" key={key}>
-                                <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    id={`map-layer-${key}`}
-                                    checked={preferences[key]}
-                                    onChange={() => onChange({ ...preferences, [key]: !preferences[key] })}
-                                />
-                                <label className="form-check-label" htmlFor={`map-layer-${key}`}>
-                                    <i className={`fa-sharp ${icon}`} aria-hidden="true"></i> {label}
-                                </label>
-                                {key === 'weather' && preferences.weather && WEATHER_STATUS[weatherStatus] && (
+                        {LAYERS.map(({ value, label, icon }) => (
+                            <Option
+                                key={value}
+                                id={`map-layer-${value}`}
+                                label={label}
+                                icon={icon}
+                                checked={preferences[value]}
+                                onChange={() => onChange({ ...preferences, [value]: !preferences[value] })}
+                            >
+                                {value === 'weather' && status && (
                                     <span
                                         className={`map-controls-status map-controls-status--${weatherStatus}`}
-                                        title={WEATHER_STATUS[weatherStatus].title}
-                                        aria-label={WEATHER_STATUS[weatherStatus].title}
+                                        title={status.title}
+                                        aria-label={status.title}
                                         role="status"
                                     >
-                                        <i className={`fa-sharp ${WEATHER_STATUS[weatherStatus].icon}`} aria-hidden="true"></i>
+                                        <i className={`fa-sharp ${status.icon}`} aria-hidden="true"></i>
                                     </span>
                                 )}
-                            </div>
+                            </Option>
                         ))}
                     </fieldset>
 
@@ -94,62 +112,37 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
                         <fieldset>
                             <legend>My lists</legend>
                             {lists.map(({ id, name, color }) => (
-                                <div className="form-check gap-1" key={id}>
-                                    <input
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        id={`map-list-${id}`}
-                                        checked={preferences.lists?.[id] !== false}
-                                        onChange={() => onChange({
-                                            ...preferences,
-                                            lists: { ...preferences.lists, [id]: preferences.lists?.[id] === false },
-                                        })}
-                                    />
-                                    <label className="form-check-label" htmlFor={`map-list-${id}`}>
-                                        <i className="fa-sharp fa-circle" aria-hidden="true" style={{ color }}></i> {name}
-                                    </label>
-                                </div>
+                                <Option
+                                    key={id}
+                                    id={`map-list-${id}`}
+                                    label={name}
+                                    colour={color}
+                                    checked={preferences.lists?.[id] !== false}
+                                    onChange={() => onChange({
+                                        ...preferences,
+                                        lists: { ...preferences.lists, [id]: preferences.lists?.[id] === false },
+                                    })}
+                                />
                             ))}
                         </fieldset>
                     )}
 
-                    <fieldset>
-                        <legend>Colours</legend>
-                        {THEMES.map(({ value, label }) => (
-                            <div className="form-check gap-1" key={value}>
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="map-theme"
-                                    id={`map-theme-${value}`}
-                                    checked={preferences.theme === value}
-                                    onChange={() => onChange({ ...preferences, theme: value })}
+                    {[['theme', 'Colours', THEMES], ['projection', 'Projection', PROJECTIONS]].map(([key, legend, options]) => (
+                        <fieldset key={key}>
+                            <legend>{legend}</legend>
+                            {options.map(({ value, label, icon }) => (
+                                <Option
+                                    key={value}
+                                    id={`map-${key}-${value}`}
+                                    name={`map-${key}`}
+                                    label={label}
+                                    icon={icon}
+                                    checked={preferences[key] === value}
+                                    onChange={() => onChange({ ...preferences, [key]: value })}
                                 />
-                                <label className="form-check-label" htmlFor={`map-theme-${value}`}>
-                                    {label}
-                                </label>
-                            </div>
-                        ))}
-                    </fieldset>
-
-                    <fieldset>
-                        <legend>Projection</legend>
-                        {PROJECTIONS.map(({ value, label, icon }) => (
-                            <div className="form-check gap-1" key={value}>
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="map-projection"
-                                    id={`map-projection-${value}`}
-                                    checked={preferences.projection === value}
-                                    onChange={() => onChange({ ...preferences, projection: value })}
-                                />
-                                <label className="form-check-label" htmlFor={`map-projection-${value}`}>
-                                    <i className={`fa-sharp ${icon}`} aria-hidden="true"></i> {label}
-                                </label>
-                            </div>
-                        ))}
-                    </fieldset>
+                            ))}
+                        </fieldset>
+                    ))}
                 </div>
             )}
         </div>

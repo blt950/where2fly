@@ -54,6 +54,12 @@ export const MAP_THEMES = {
 };
 
 export const themeOf = (key) => MAP_THEMES[key] ?? MAP_THEMES.default;
+// Search results cluster in the brand gold; every other view uses the muted home-page bubble.
+export const CLUSTER_COLOURS = {
+    search: { clusterColor: '#ddb81c', clusterTextColor: '#000000' },
+    muted: { clusterColor: '#2f3549', clusterTextColor: '#ffffff' },
+};
+
 export const GLYPHS_URL = '/fonts/{fontstack}/{range}.pbf';
 export const LABEL_FONT = ['Work Sans Regular'];
 
@@ -71,9 +77,13 @@ export const mapOptions = (container, view, style) => ({
     dragPan: { maxSpeed: 1000 },
 });
 
-export const insertBefore = (map, ids) => ids.find((id) => map.getLayer(id));
-export const applyThemeOverrides = (map, theme) => {
+// The first of these layers that exists — where an overlay slots into the stack.
+export const beneath = (map, ids) => ids.find((id) => map.getLayer(id));
+// A style swap resets sky and land colours, so this runs on every load, not once.
+export const applyTheme = (map, theme) => {
     theme.overrides.forEach(([layer, property, value]) => {
         if (map.getLayer(layer)) { map.setPaintProperty(layer, property, value); }
     });
+
+    map.setSky(theme.sky);
 };
