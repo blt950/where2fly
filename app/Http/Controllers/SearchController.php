@@ -52,15 +52,16 @@ class SearchController extends Controller
         $aircrafts = Aircraft::all()->pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
         $destinationInputs = $this->getDestinationInputs();
-        $whitelistDatabase = null;
 
         $lists = UserList::where('public', true)
             ->when(Auth::check(), fn ($q) => $q->orWhere('user_id', Auth::id()))
             ->get();
 
-        if (old('whitelists') !== null) {
-            $whitelistDatabase = $this->getWhitelistsFromInput(old('whitelists'));
-        }
+        $whitelistDatabase = $this->getWhitelistsFromInput(array_merge(
+            old('arrivalWhitelists', []),
+            old('departureWhitelists', []),
+            old('whitelists', []),
+        ));
 
         return view($view, compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
     }
@@ -97,6 +98,8 @@ class SearchController extends Controller
             'sortByWeather' => ['in:0,1'],
             'sortByATC' => ['in:0,1'],
             'whitelists' => ['sometimes', 'array'],
+            'arrivalWhitelists' => ['sometimes', 'array'],
+            'departureWhitelists' => ['sometimes', 'array'],
             'scores' => ['sometimes', 'array', new ValidScores],
             'metcondition' => ['required', 'in:IFR,VFR,ANY'],
             'destinationWithRoutesOnly' => ['required', 'numeric', 'between:-1,1'],
@@ -149,11 +152,12 @@ class SearchController extends Controller
         isset($data['sortByWeather']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::weatherTypes()) : null;
         isset($data['sortByATC']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::vatsimTypes()) : null;
 
-        $whitelist = null;
-        if (isset($data['whitelists'])) {
-            $whitelist = UserList::whereIn('id', $data['whitelists'])->get();
-            $whitelist = $whitelist->pluck('airports')->flatten()->pluck('icao')->unique()->toArray();
-        }
+        // The anchor is whichever side the pilot supplied, the suggestions are the other.
+        // `whitelists` predates the split and only restricted suggestions in practice —
+        // keep mapping it there so bookmarked searches keep their meaning.
+        $suggestionSide = $direction == 'departure' ? 'arrival' : 'departure';
+        $suggestionWhitelist = $this->getWhitelistedIcaos($data[$suggestionSide . 'Whitelists'] ?? $data['whitelists'] ?? null);
+        $anchorWhitelist = $this->getWhitelistedIcaos($data[$direction . 'Whitelists'] ?? null);
 
         $filterByScores = array_map('intval', $data['scores']);
 
@@ -194,18 +198,21 @@ class SearchController extends Controller
         $anchorIds = null;
         $scoreTargetIds = null;
         if (! isset($data['icao'])) {
-            $anchorPool = fn () => Airport::airportOpen()->isAirportSize($destinationAirportSize)
+            $pool = fn (?array $whitelist) => Airport::airportOpen()->isAirportSize($destinationAirportSize)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                 ->filterAirbases($destinationAirbases)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
                 ->returnOnlyWhitelistedIcao($whitelist)
                 ->has('metar');
 
+            $anchorPool = fn () => $pool($anchorWhitelist);
+
             $presenceScores = array_filter($filterByScores, fn ($value) => $value == 1);
 
             if (! empty($presenceScores)) {
                 // Match targets by reason only — ETA windowing happens in the
-                // destination query, once an anchor is drawn
-                $scoreTargetIds = $anchorPool()->filterByScores($presenceScores)->pluck('airports.id');
+                // destination query, once an anchor is drawn. The target is a
+                // stand-in for a suggestion, so it takes the suggestion whitelist
+                $scoreTargetIds = $pool($suggestionWhitelist)->filterByScores($presenceScores)->pluck('airports.id');
             } else {
                 // Pool is identical between attempts — fetch the ids once
                 $anchorIds = $anchorPool()->pluck('airports.id');
@@ -269,7 +276,7 @@ class SearchController extends Controller
                 ->withinDistance($primaryAirport, $minDistance, $maxDistance, $primaryAirport->icao)->withinBearing($primaryAirport, $flightDirection, $minDistance, $maxDistance)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
                 ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
-                ->returnOnlyWhitelistedIcao($whitelist)
+                ->returnOnlyWhitelistedIcao($suggestionWhitelist)
                 ->select('airports.id')
                 ->sortByScores($sortByScores, $eta, $candidatesAreDepartures)
                 ->has('metar')
@@ -413,12 +420,25 @@ class SearchController extends Controller
     }
 
     /**
-     * Get the relevant whitelist data.
+     * Get the relevant whitelist data, keyed by list id.
      * Note: This allows a user to get whitelists even if they don't own them.
      */
     private function getWhitelistsFromInput($old)
     {
-        return UserList::whereIn('id', $old)->get();
+        return UserList::whereIn('id', $old)->get()->keyBy('id');
+    }
+
+    /**
+     * Resolve the chosen lists into the ICAOs they whitelist, or null for no filter.
+     */
+    private function getWhitelistedIcaos(?array $listIds): ?array
+    {
+        if (empty($listIds)) {
+            return null;
+        }
+
+        return UserList::whereIn('id', $listIds)->get()
+            ->pluck('airports')->flatten()->pluck('icao')->unique()->toArray();
     }
 
     /**

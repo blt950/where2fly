@@ -765,13 +765,14 @@ class Airport extends Model
     }
 
     /**
-     * Scope a query to only include airports that have the given scores
+     * Scope a query to only include the given ICAOs. Used for both the arrival
+     * and departure whitelist, depending on which side the query resolves.
      */
     #[Scope]
-    protected function returnOnlyWhitelistedIcao(Builder $query, ?array $whitelistedArrivals = null): void
+    protected function returnOnlyWhitelistedIcao(Builder $query, ?array $whitelistedIcaos = null): void
     {
-        if (isset($whitelistedArrivals)) {
-            $query->whereIn('icao', $whitelistedArrivals);
+        if (isset($whitelistedIcaos)) {
+            $query->whereIn('icao', $whitelistedIcaos);
         }
     }
 

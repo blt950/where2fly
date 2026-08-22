@@ -228,6 +228,96 @@ class SearchTest extends TestCase
         });
     }
 
+    public function test_arrival_whitelist_restricts_suggestions_when_searching_arrivals(): void
+    {
+        $list = $this->createWhitelist('ENBR');
+
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'arrivalWhitelists' => [$list->id],
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENBR');
+        });
+    }
+
+    public function test_departure_whitelist_restricts_suggestions_when_searching_departures(): void
+    {
+        $list = $this->createWhitelist('ENBR');
+
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'direction' => 'arrival',
+            'departureWhitelists' => [$list->id],
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENBR');
+        });
+    }
+
+    public function test_departure_whitelist_restricts_the_random_anchor(): void
+    {
+        $list = $this->createWhitelist('ENGM');
+
+        $params = $this->validSearchParams;
+        unset($params['icao']);
+
+        $response = $this->get('/search?' . http_build_query(array_merge($params, [
+            'departureWhitelists' => [$list->id],
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('primaryAirport', fn ($airport) => $airport->icao === 'ENGM');
+    }
+
+    public function test_departure_whitelist_is_ignored_when_a_departure_icao_is_given(): void
+    {
+        $list = $this->createWhitelist('ENBR');
+
+        $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'icao' => 'ENGM',
+            'departureWhitelists' => [$list->id],
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('primaryAirport', fn ($airport) => $airport->icao === 'ENGM');
+        $response->assertViewHas('suggestedAirports', fn ($airports) => $airports->isNotEmpty());
+    }
+
+    public function test_both_whitelists_apply_to_their_own_side(): void
+    {
+        $anchorList = $this->createWhitelist('ENGM');
+        $suggestionList = $this->createWhitelist('ENBR');
+
+        $params = $this->validSearchParams;
+        unset($params['icao']);
+
+        $response = $this->get('/search?' . http_build_query(array_merge($params, [
+            'departureWhitelists' => [$anchorList->id],
+            'arrivalWhitelists' => [$suggestionList->id],
+        ])));
+
+        $response->assertOk();
+        $response->assertViewHas('primaryAirport', fn ($airport) => $airport->icao === 'ENGM');
+        $response->assertViewHas('suggestedAirports', function ($airports) {
+            return $airports->isNotEmpty()
+                && $airports->pluck('icao')->every(fn ($icao) => $icao === 'ENBR');
+        });
+    }
+
+    private function createWhitelist(string $icao): UserList
+    {
+        $user = User::factory()->create();
+        $list = UserList::create(['name' => $icao . ' Whitelist', 'user_id' => $user->id, 'public' => true]);
+        $list->airports()->attach(Airport::where('icao', $icao)->first());
+
+        return $list;
+    }
+
     public function test_search_airtime_is_within_searched_bounds(): void
     {
         $response = $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
