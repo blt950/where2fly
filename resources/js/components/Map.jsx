@@ -17,6 +17,7 @@ import MapProvider from './map/MapProvider';
 import MapRoute from './map/MapRoute';
 import MapSaveView from './map/MapSaveView';
 import MapTerrain from './map/MapTerrain';
+import MapWeather from './map/MapWeather';
 import MapTerminator from './map/MapTerminator';
 import { readPreferences, writePreferences } from './utils/mapPreferences';
 
@@ -252,6 +253,7 @@ function Map() {
             <MapProvider center={initialCenter} projection={preferences.projection}>
                 {preferences.terminator && <MapTerminator />}
                 {preferences.terrain && <MapTerrain />}
+                {preferences.weather && <MapWeather />}
                 <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} />
                 {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} />}

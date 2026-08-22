@@ -1,7 +1,28 @@
 # Handoff: migrating the Where2Fly map from Leaflet to MapLibre GL
 
-Status: **plan, not yet implemented.** Everything below was researched against the live
-codebase and verified over the network where possible; nothing has been changed on `main`.
+Status: **implemented** on `feat/maplibre` (steps 1-9 of §16, one commit each). Everything below
+was researched against the live codebase before implementation; the deviations that implementation
+forced are listed immediately under "As built" and are authoritative where they disagree with the
+body of this document.
+
+## As built — where reality differed from the plan
+
+| Plan | What actually shipped |
+|---|---|
+| `import maplibregl from 'maplibre-gl'` | **v6 has no default export.** Namespace import throughout |
+| `setWorkerUrl()` is an escape hatch (§13 risk 4) | **Mandatory.** v6 resolves its worker as a sibling of `import.meta.url`, which after bundling is a 404 Vite never emits. The failure is silent — no error event, black canvas, zero tile requests. Fixed with Vite's `?worker&url` |
+| `crepuscule` for the terminator (§9) | **Cannot be used.** Its LICENSE.md is MapTiler's proprietary licence, scoped to "use only with MapTiler service(s)" and conditioned on an active MapTiler account. That rules out vendoring too. No MapLibre-compatible alternative exists on npm, so §9's escape hatch was taken: solar geometry ported from the MIT `leaflet.terminator`, verified against known solar declinations |
+| Open-Meteo `weather-map-layer` (§14) | **Cannot be used.** GPL-2.0 with no "or later" clause, and this repo is AGPL-3.0 — incompatible. Shipped as RainViewer radar raster tiles instead: no npm dependency, therefore no licence to conflict, and live radar rather than forecast output |
+| Open Sans labels, self-host Work Sans "only if the diff bothers you" (risk 6) | Work Sans self-hosted from the start. `scripts/build-glyphs.mjs`, output committed under `public/fonts/` |
+| `line-gradient` under globe unproven (risk 1) | **Confirmed working.** A 50% reveal cuts the line cleanly at its midpoint |
+| Unwrapped longitudes through geojson-vt unproven (risk 2) | **Confirmed working.** At z13, past the globe-to-mercator transition, RJTT-KSFO crosses ±180 with no seam |
+| §11.1: dynamic import a "small page-count win" | Much larger. `Map.jsx` is the app's only React mount point, so the other three React imports in `app.js` were dead. Gating them removes React and MapLibre from every page without a map |
+| — | **New:** a layer/projection control in the top-right of the canvas, with preferences persisted to `localStorage` |
+
+Two things left deliberately undone: `resources/js/sentry.js` still imports `init` from
+`@sentry/react`, which pulls React onto every page (~59.6 KB gzip) — §11.4 scopes it out.
+And `app.blade.php`'s second `@vite` call re-emits the shared vendor chunk's stylesheet after
+`app.css`, so map CSS overrides are scoped under `.map` rather than relying on load order.
 
 Reviewed 2026-08-16: the `primaryAirport` ReferenceError, path options, padding values and
 the `Math.sqrt(Math.log(r))` NaN were re-verified line-by-line against `MapDrawRoute.jsx`,
