@@ -294,3 +294,33 @@ u-tab[aria-selected="true"] {
         color: $bluewhite;
     }
 }
+
+/*
+* Bug report modal
+*/
+
+.bug-report {
+
+    .modal-content {
+        color: $bluewhite;
+        background: $secondary;
+        border: 0;
+    }
+
+    .modal-header, .modal-footer {
+        border: 0;
+
+        h3{
+            color: $white;
+        }
+    }
+
+    textarea.form-control {
+        height: auto;
+        min-height: 10rem;
+    }
+
+    .form-text {
+        color: $gray-500;
+    }
+}
