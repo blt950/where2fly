@@ -36,11 +36,11 @@ const framePadding = (width) => {
 const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
 
     const map = useMapGL();
-    const { airports } = useContext(MapContext);
+    const { findAirport } = useContext(MapContext);
 
     useEffect(() => {
-        const from = airports[reverseDirection ? arrival : departure];
-        const to = airports[reverseDirection ? departure : arrival];
+        const from = findAirport(reverseDirection ? arrival : departure);
+        const to = findAirport(reverseDirection ? departure : arrival);
 
         if (!from || !to) {
             return undefined;
@@ -118,7 +118,7 @@ const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
             if (map.getLayer(LAYER)) { map.removeLayer(LAYER); }
             if (map.getSource(SOURCE)) { map.removeSource(SOURCE); }
         };
-    }, [map, airports, departure, arrival, reverseDirection, color]);
+    }, [map, findAirport, departure, arrival, reverseDirection, color]);
 
     return null;
 };

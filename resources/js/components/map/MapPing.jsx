@@ -8,10 +8,10 @@ import { useMapGL } from '../context/MapGLContext';
 const MapPing = ({ ping }) => {
 
     const map = useMapGL();
-    const { airports } = useContext(MapContext);
+    const { findAirport } = useContext(MapContext);
 
     useEffect(() => {
-        const airport = ping ? airports[ping.icao] : null;
+        const airport = ping ? findAirport(ping.icao) : null;
 
         if (!airport) {
             return undefined;

@@ -161,7 +161,7 @@ function Map() {
         if (focusAirport !== null && focusAirport !== undefined) {
 
             // Load the selected airport to map if it's not already loaded (e.g. searching up scenery)
-            const known = airports[focusAirport] ?? listAirports[focusAirport];
+            const known = findAirport(focusAirport);
 
             if (known === undefined) {
                 
@@ -250,6 +250,14 @@ function Map() {
         ...lists.filter(({ id }) => preferences.lists?.[id] !== false).map(({ airports }) => airports),
     ), [lists, preferences.lists]);
 
+    // Scenery lists are held apart from `airports` so each one keeps its own colour and toggle,
+    // but any ICAO the user can click has to resolve from either — `airports` alone is what the
+    // search-result layer draws, not the full set of focusable airports.
+    const findAirport = useMemo(
+        () => (icao) => airports[icao] ?? listAirports[icao],
+        [airports, listAirports],
+    );
+
     const updatePreferences = (next) => {
         setPreferences(next);
         writePreferences(next);
@@ -261,6 +269,7 @@ function Map() {
     const mapContextValue = useMemo(() => ({
         airports,
         setAirports,
+        findAirport,
         focusAirport,
         highlightedAircrafts,
         primaryAirport,
@@ -268,7 +277,7 @@ function Map() {
         setFocusAirport,
         setShowAirportIdCard,
         userAuthenticated,
-    }), [airports, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection]);
+    }), [airports, findAirport, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection]);
 
     if (!webgl2) {
         return <MapFallback />;
