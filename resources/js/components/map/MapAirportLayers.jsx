@@ -40,7 +40,14 @@ const labelLayer = (id, airportType, minzoom) => ({
         'text-anchor': 'right',
         'text-offset': [-0.6, 0],
     },
-    paint: { 'text-color': ['to-color', ['get', 'color']] },
+    paint: {
+        'text-color': ['to-color', ['get', 'color']],
+        // GL text has no CSS shadow to fall back on. A dark halo is what keeps ICAOs legible
+        // where the label crosses bright radar, coastline or hillshade.
+        'text-halo-color': '#000000',
+        'text-halo-width': 2,
+        'text-halo-blur': 0.5,
+    },
 });
 
 const MapAirportLayers = ({ cluster, clusterRadius }) => {
