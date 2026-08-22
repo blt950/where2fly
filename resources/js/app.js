@@ -3,11 +3,11 @@ import './sentry';
 import './bootstrap';
 import '../sass/app.scss';
 
-// React
-import './components/Map';
-import './components/PopupContainer';
-import './components/AirportCard';
-import './components/ui/TAF';
+// React. Map is the app's only mount point — PopupContainer, AirportCard and TAF all hang off
+// its tree — so gating it here keeps React and MapLibre off every page without a map.
+if (document.getElementById('map')) {
+    import('./components/Map');
+}
 
 // Other
 import '@u-elements/u-tabs';

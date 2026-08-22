@@ -26,7 +26,9 @@ export default defineConfig({
             output: {
                 codeSplitting: {
                     groups: [
-                        { name: 'leaflet', test: /node_modules\/.*leaflet/ },
+                        // Naming maplibre-gl alone would leave pbf, earcut, gl-matrix and the
+                        // @mapbox/* helpers in vendor, dragging map-only code onto every page.
+                        { name: 'maplibre', test: /node_modules\/(maplibre-gl|@maplibre|@mapbox|pbf|earcut|kdbush|potpack|gl-matrix|tinyqueue|quickselect|murmurhash-js)\// },
                         { name: 'react', test: /node_modules\/(react|react-dom|scheduler)\// },
                         { name: 'vendor', test: /node_modules/ },
                     ],
