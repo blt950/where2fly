@@ -1,286 +1,448 @@
-# Graph Report - .  (2026-07-08)
+# Graph Report - app  (2026-08-22)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 370 files · ~435,202 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1219 nodes · 1838 edges · 227 communities (189 shown, 38 thin omitted)
-- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 247 edges (avg confidence: 0.8)
+- 1577 nodes · 2670 edges · 255 communities (204 shown, 51 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 57 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7904c0a0`
+- Built from commit: `4beafaf4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Community 0|Community 0]]
-- [[_COMMUNITY_Community 1|Community 1]]
-- [[_COMMUNITY_Community 2|Community 2]]
-- [[_COMMUNITY_Community 3|Community 3]]
-- [[_COMMUNITY_Community 4|Community 4]]
-- [[_COMMUNITY_Community 5|Community 5]]
-- [[_COMMUNITY_Community 6|Community 6]]
-- [[_COMMUNITY_Community 7|Community 7]]
-- [[_COMMUNITY_Community 8|Community 8]]
-- [[_COMMUNITY_Community 9|Community 9]]
-- [[_COMMUNITY_Community 10|Community 10]]
-- [[_COMMUNITY_Community 11|Community 11]]
-- [[_COMMUNITY_Community 12|Community 12]]
-- [[_COMMUNITY_Community 13|Community 13]]
-- [[_COMMUNITY_Community 14|Community 14]]
-- [[_COMMUNITY_Community 15|Community 15]]
-- [[_COMMUNITY_Community 16|Community 16]]
-- [[_COMMUNITY_Community 17|Community 17]]
-- [[_COMMUNITY_Community 19|Community 19]]
-- [[_COMMUNITY_Community 20|Community 20]]
-- [[_COMMUNITY_Community 21|Community 21]]
-- [[_COMMUNITY_Community 22|Community 22]]
-- [[_COMMUNITY_Community 23|Community 23]]
-- [[_COMMUNITY_Community 24|Community 24]]
-- [[_COMMUNITY_Community 25|Community 25]]
-- [[_COMMUNITY_Community 26|Community 26]]
-- [[_COMMUNITY_Community 27|Community 27]]
-- [[_COMMUNITY_Community 28|Community 28]]
-- [[_COMMUNITY_Community 29|Community 29]]
-- [[_COMMUNITY_Community 30|Community 30]]
-- [[_COMMUNITY_Community 31|Community 31]]
-- [[_COMMUNITY_Community 32|Community 32]]
-- [[_COMMUNITY_Community 33|Community 33]]
-- [[_COMMUNITY_Community 34|Community 34]]
-- [[_COMMUNITY_Community 35|Community 35]]
-- [[_COMMUNITY_Community 36|Community 36]]
-- [[_COMMUNITY_Community 37|Community 37]]
-- [[_COMMUNITY_Community 38|Community 38]]
-- [[_COMMUNITY_Community 39|Community 39]]
-- [[_COMMUNITY_Community 40|Community 40]]
-- [[_COMMUNITY_Community 41|Community 41]]
-- [[_COMMUNITY_Community 42|Community 42]]
-- [[_COMMUNITY_Community 43|Community 43]]
-- [[_COMMUNITY_Community 44|Community 44]]
-- [[_COMMUNITY_Community 45|Community 45]]
-- [[_COMMUNITY_Community 69|Community 69]]
-- [[_COMMUNITY_Community 108|Community 108]]
-- [[_COMMUNITY_Community 109|Community 109]]
-- [[_COMMUNITY_Community 110|Community 110]]
-- [[_COMMUNITY_Community 111|Community 111]]
-- [[_COMMUNITY_Community 112|Community 112]]
-- [[_COMMUNITY_Community 113|Community 113]]
-- [[_COMMUNITY_Community 114|Community 114]]
-- [[_COMMUNITY_Community 115|Community 115]]
-- [[_COMMUNITY_Community 116|Community 116]]
-- [[_COMMUNITY_Community 117|Community 117]]
-- [[_COMMUNITY_Community 119|Community 119]]
-- [[_COMMUNITY_Community 120|Community 120]]
-- [[_COMMUNITY_Community 121|Community 121]]
-- [[_COMMUNITY_Community 122|Community 122]]
-- [[_COMMUNITY_Community 123|Community 123]]
-- [[_COMMUNITY_Community 124|Community 124]]
-- [[_COMMUNITY_Community 125|Community 125]]
-- [[_COMMUNITY_Community 126|Community 126]]
-- [[_COMMUNITY_Community 127|Community 127]]
-- [[_COMMUNITY_Community 128|Community 128]]
-- [[_COMMUNITY_Community 129|Community 129]]
-- [[_COMMUNITY_Community 130|Community 130]]
-- [[_COMMUNITY_Community 131|Community 131]]
-- [[_COMMUNITY_Community 132|Community 132]]
-- [[_COMMUNITY_Community 133|Community 133]]
-- [[_COMMUNITY_Community 134|Community 134]]
+- TafForecast
+- AirportCard.jsx
+- Illuminate\Console\Command
+- AirportScore
+- Controller
+- SearchTest
+- SceneryDeveloper
+- User
+- dependencies
+- Simulator
+- AirportFilterHelper
+- Controllers/SearchController.php
+- Where2Fly Project (README overview)
+- Illuminate\Database\Eloquent\Model
+- AirportCallsignHelper
+- Airport
+- ApiTest
+- UserAccountTest
+- UserController.php
+- Illuminate\Database\Eloquent\Builder
+- TestCase
+- Illuminate\Http\Request
+- Scenery
+- require
+- useMapGL
+- AircraftHelper
+- UserListController
+- ApiKey
+- CI PHPUnit Job (MySQL 8 service, where2fly_test DB)
+- FeedbackController
+- composer.json
+- require-dev
+- Illuminate\Support\Str
+- FlightAircraft
+- WithinDistanceTest
+- Map.jsx
+- config
+- psr-4
+- scripts
+- app.blade.php
+- searchForm.js
+- arrivals.blade.php
+- departures.blade.php
+- Aircraft
+- Carbon\Carbon
+- extra
+- Illuminate\Database\Schema\Blueprint
+- Illuminate\Support\Facades\Schema
+- airportLayerSpec.js
+- mapConfig.js
+- RouteFilterTest
+- Illuminate\Database\Migrations\Migration
+- 2024_07_22_072158_add_geospacial_airport_coordinates.php
+- MapWeather.jsx
+- Airline
+- MapHelper
+- Eloquent (Laravel 13.x)
+- backup.php
+- Flight
+- Routing & Controllers (Laravel 13.x)
+- Upgrading From Laravel 12.x to 13.0
+- feedback/index.blade.php
+- show.blade.php
+- front/routes.blade.php
+- appStatic.blade.php
+- airports.blade.php
+- top.blade.php
+- entrypoint.sh
+- install-npm.sh
+- layouts.tracking
+- combobox.js
+- admin.blade.php
+- login.blade.php
+- register.blade.php
+- resetForm.blade.php
+- resetRequest.blade.php
+- settings.blade.php
+- api.blade.php
+- changelog.blade.php
+- list/create.blade.php
+- list/edit.blade.php
+- list/index.blade.php
+- privacy.blade.php
+- scenery.blade.php
+- scenery/create.blade.php
+- scenery/edit.blade.php
+- search/routes.blade.php
+- SearchController
+- Database: Query Builder (Laravel 13.x)
+- ATC Bookings API
+- run-where2fly/package.json
+- disposable-email.php
+- logging.php
+- Endpoint groups
+- errors.icons.nosedive
+- errors.icons.lost
+- Illuminate\Support\Facades\Broadcast
+- Illuminate\Support\Facades\Schedule
+- web.php
+- Common Helpers & Facades Quick Reference (Laravel 13.x)
+- Laravel 13
+- Data API
+- renovate.json
+- MapControls.jsx
+- FeedbackVote
+- run-where2fly/SKILL.md
+- Events API
+- terminatorPolygon
+- driver.mjs
+- METAR API, Slurper API
+- VATSIM APIs
+- app.js
+- [3.0.4](https://github.com/blt950/where2fly/compare/v3.0.3...v3.0.4) (2026-08-17)
+- release-please-config.json
+- build-glyphs.mjs
 
 ## God Nodes (most connected - your core abstractions)
-1. `Airport` - 84 edges
-2. `User` - 68 edges
-3. `SearchTest` - 48 edges
-4. `AirportScore` - 45 edges
-5. `UserList` - 35 edges
-6. `Simulator` - 33 edges
-7. `TestCase` - 28 edges
-8. `ApiTest` - 24 edges
-9. `Metar` - 23 edges
-10. `Scenery` - 23 edges
+1. `Airport` - 110 edges
+2. `User` - 81 edges
+3. `AirportScore` - 61 edges
+4. `SearchTest` - 51 edges
+5. `Simulator` - 44 edges
+6. `UserList` - 44 edges
+7. `Scenery` - 30 edges
+8. `ApiTest` - 26 edges
+9. `TestCase` - 26 edges
+10. `TafForecast` - 25 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `up()` --calls--> `Airport`  [INFERRED]
-  database/migrations/2024_07_22_072158_add_geospacial_airport_coordinates.php → app/Models/Airport.php
 - `Where2Fly Application (Laravel 13 + Blade + React map canvas)` --semantically_similar_to--> `Where2Fly Project (README overview)`  [INFERRED] [semantically similar]
   CLAUDE.md → README.md
-- `up()` --calls--> `FlightAircraft`  [INFERRED]
-  database/migrations/2024_03_17_210345_add_aircraft_to_new_table.php → app/Models/FlightAircraft.php
-- `up()` --calls--> `Scenery`  [INFERRED]
-  database/migrations/2024_09_29_111847_convert_scenery_sims_to_pivot_table.php → app/Models/Scenery.php
-- `up()` --calls--> `Simulator`  [INFERRED]
-  database/migrations/2025_02_01_085035_transfer_sceneries_to_pivot.php → app/Models/Simulator.php
+- `up()` --calls--> `Airport`  [EXTRACTED]
+  database/migrations/2024_07_22_072158_add_geospacial_airport_coordinates.php → app/Models/Airport.php
+- `Ko-fi Sponsorship (where2fly)` --conceptually_related_to--> `Where2Fly Project (README overview)`  [INFERRED]
+  .github/FUNDING.yml → README.md
+- `Bug Report Issue Template` --conceptually_related_to--> `Where2Fly Project (README overview)`  [INFERRED]
+  .github/ISSUE_TEMPLATE/bug_report.md → README.md
+- `Feature Request Issue Template` --conceptually_related_to--> `Where2Fly Project (README overview)`  [INFERRED]
+  .github/ISSUE_TEMPLATE/feature_request.md → README.md
 
 ## Import Cycles
-- 1-file cycle: `resources/js/bootstrap.js -> resources/js/bootstrap.js`
-- 1-file cycle: `resources/js/nouislider.js -> resources/js/nouislider.js`
+- None detected.
 
 ## Hyperedges (group relationships)
 - **CI Pipeline: lint -> tests -> container build, all via shared setup-dependencies action** — _github_workflows_ci_lint_job, _github_workflows_ci_tests_job, _github_workflows_ci_build_container_job, _github_actions_setup_dependencies_action_setup_dependencies [EXTRACTED 1.00]
-- **Shared where2fly_test MySQL contract between CI services and local test setup** — _github_workflows_ci_tests_job, _github_workflows_tests_phpunit_job, claude_testing_mysql [INFERRED 0.95]
 - **where2fly container image lifecycle: CI builds and pushes to ghcr.io, prod compose pulls it, dev compose builds locally instead** — _github_workflows_ci_build_container_job, docker_compose_web_service, docker_compose_dev_web_service [INFERRED 0.85]
 
-## Communities (227 total, 38 thin omitted)
+## Communities (255 total, 51 thin omitted)
 
-### Community 0 - "Community 0"
+### Community 0 - "TafForecast"
 Cohesion: 0.06
-Nodes (7): FetchMetars, FetchTafs, AviationWeatherHelper, WeatherScoreHelper, Metar, TafForecast, TafForecastTest
+Nodes (10): FetchMetars, FetchTafs, AviationWeatherHelper, WeatherScoreHelper, Carbon, Metar, TafForecast, SimpleXMLElement (+2 more)
 
-### Community 1 - "Community 1"
-Cohesion: 0.08
-Nodes (25): AirportCard(), CardContext, MapContext, FlightsCard(), getInitMapPosition(), isDefaultView(), Map(), MapBound() (+17 more)
+### Community 1 - "AirportCard.jsx"
+Cohesion: 0.18
+Nodes (12): AirportCard(), CardContext, FlightsCard(), SceneryCard(), CurrencyDropdown(), SimbriefLink(), TAF(), ExternalLinkTracker() (+4 more)
 
-### Community 2 - "Community 2"
+### Community 2 - "Illuminate\Console\Command"
+Cohesion: 0.12
+Nodes (9): AccountClearUnverified, CleanupSceneries, EnrichAirports, EnrichFlights, EnrichSceneries, FetchGithubIssues, UpdateData, Command (+1 more)
+
+### Community 3 - "AirportScore"
+Cohesion: 0.09
+Nodes (7): AirportScore, ScoreIcon, Illuminate\View\Component, PHPUnit\Framework\TestCase, ScorePredictionTest, TopAirportsTest, ForecastWeightTest
+
+### Community 4 - "Controller"
+Cohesion: 0.17
+Nodes (7): SearchController, TopController, Controller, AirportResource, SuggestedAirportResource, Illuminate\Foundation\Auth\Access\AuthorizesRequests, Illuminate\Http\Resources\Json\JsonResource
+
+### Community 6 - "SceneryDeveloper"
+Cohesion: 0.14
+Nodes (3): SceneryHelper, MapController, SceneryDeveloper
+
+### Community 7 - "User"
+Cohesion: 0.10
+Nodes (8): User, UserListPolicy, UserPolicy, Illuminate\Auth\Passwords\CanResetPassword, Illuminate\Contracts\Auth\MustVerifyEmail, Illuminate\Foundation\Auth\User, Illuminate\Notifications\Notifiable, SceneryTest
+
+### Community 8 - "dependencies"
+Cohesion: 0.05
+Nodes (41): bootstrap, laravel-vite-plugin, lodash, maplibre-gl, nouislider, dependencies, bootstrap, laravel-vite-plugin (+33 more)
+
+### Community 9 - "Simulator"
+Cohesion: 0.10
+Nodes (4): Simulator, UserList, Illuminate\Support\Facades\Auth, UserListTest
+
+### Community 10 - "AirportFilterHelper"
+Cohesion: 0.14
+Nodes (7): AirportFilterHelper, distance(), CollectionAirportFilter, AppServiceProvider, Illuminate\Auth\Notifications\VerifyEmail, Illuminate\Notifications\Messages\MailMessage, Illuminate\Support\ServiceProvider
+
+### Community 11 - "Controllers/SearchController.php"
 Cohesion: 0.06
-Nodes (16): AccountClearUnverified, CalcFlights, CleanupSceneries, CreateApiKey, EnrichAirports, EnrichFlights, EnrichSceneries, FetchBookings (+8 more)
+Nodes (28): CountryHelper, getCountryName(), rwyIdentToHeading(), ScoreHelper, AdminVariables, FeedbackVariables, UserActive, AirportExists (+20 more)
 
-### Community 3 - "Community 3"
-Cohesion: 0.08
-Nodes (9): AirportScore, Builder, Carbon, Collection, View, ScoreIcon, Component, ScorePredictionTest (+1 more)
-
-### Community 4 - "Community 4"
-Cohesion: 0.07
-Nodes (18): AircraftHelper, Request, SearchController, Request, TopController, ScoreController, Request, View (+10 more)
-
-### Community 6 - "Community 6"
-Cohesion: 0.08
-Nodes (9): getCountryName(), rwyIdentToHeading(), MapHelper, Collection, SceneryHelper, MapController, Request, Flight (+1 more)
-
-### Community 7 - "Community 7"
-Cohesion: 0.09
-Nodes (9): User, UserListPolicy, UserPolicy, Authenticatable, CanResetPassword, MustVerifyEmail, Notifiable, AdminTest (+1 more)
-
-### Community 8 - "Community 8"
-Cohesion: 0.07
-Nodes (29): dependencies, bootstrap, @elfalem/leaflet-curve, @joergdietrich/leaflet.terminator, laravel-vite-plugin, leaflet, leaflet.markercluster, lodash (+21 more)
-
-### Community 9 - "Community 9"
-Cohesion: 0.12
-Nodes (3): Simulator, UserList, UserListTest
-
-### Community 10 - "Community 10"
-Cohesion: 0.09
-Nodes (8): AirportFilterHelper, distance(), Request, UserController, CollectionAirportFilter, AppServiceProvider, EmailVerificationRequest, ServiceProvider
-
-### Community 11 - "Community 11"
-Cohesion: 0.12
-Nodes (13): AirportExists, Closure, FlightDirection, Closure, Closure, ValidAircrafts, Closure, ValidAirlines (+5 more)
-
-### Community 12 - "Community 12"
+### Community 12 - "Where2Fly Project (README overview)"
 Cohesion: 0.09
 Nodes (24): Ko-fi Sponsorship (where2fly), Bug Report Issue Template, Issue Template Config (blank issues disabled), Feature Request Issue Template, Aircraft Type Codeletters (GA, GAT, GTP, JS, JM, JML, JL, JXL), API Attribution Requirement (Powered by Where2Fly link), Score Reason Codes (METAR_WINDY..METAR_THUNDERSTORM, VATSIM_ATC, VATSIM_EVENT, VATSIM_POPULAR), POST /api/search Endpoint (departure/arrival, destinations, codeletter, score and airport filters) (+16 more)
 
-### Community 13 - "Community 13"
-Cohesion: 0.14
-Nodes (6): Airline, Controller, Event, Taf, HasFactory, Model
+### Community 13 - "Illuminate\Database\Eloquent\Model"
+Cohesion: 0.09
+Nodes (9): ApiLog, Controller, Event, NotableAirport, NotableAirportTag, Runway, Taf, Illuminate\Database\Eloquent\Factories\HasFactory (+1 more)
 
-### Community 14 - "Community 14"
+### Community 14 - "AirportCallsignHelper"
+Cohesion: 0.11
+Nodes (8): FetchBookings, FetchVatsim, AirportCallsignHelper, Booking, Illuminate\Support\Facades\File, Illuminate\Support\Facades\Http, RuntimeException, AirportCallsignHelperTest
+
+### Community 18 - "UserController.php"
+Cohesion: 0.22
+Nodes (6): Illuminate\Auth\Events\PasswordReset, Illuminate\Auth\Events\Registered, Illuminate\Foundation\Auth\EmailVerificationRequest, Illuminate\Support\Facades\Hash, Illuminate\Support\Facades\Password, RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile
+
+### Community 20 - "TestCase"
 Cohesion: 0.13
-Nodes (4): Booking, Runway, TestAirportSeeder, Seeder
+Nodes (6): CreatesApplication, Illuminate\Foundation\Testing\RefreshDatabase, Illuminate\Foundation\Testing\TestCase, AdminTest, ResponseTest, TestCase
 
-### Community 20 - "Community 20"
-Cohesion: 0.23
-Nodes (5): BaseTestCase, CreatesApplication, RefreshDatabase, ResponseTest, TestCase
+### Community 21 - "Illuminate\Http\Request"
+Cohesion: 0.17
+Nodes (4): SceneryController, UserController, Illuminate\Contracts\Http\Kernel, Illuminate\Http\Request
 
-### Community 21 - "Community 21"
-Cohesion: 0.18
-Nodes (4): LoginController, Request, Request, SceneryController
-
-### Community 22 - "Community 22"
-Cohesion: 0.13
+### Community 22 - "Scenery"
+Cohesion: 0.16
 Nodes (4): Scenery, SceneryPolicy, up(), up()
 
-### Community 23 - "Community 23"
+### Community 23 - "require"
 Cohesion: 0.12
-Nodes (17): require, graham-campbell/markdown, guzzlehttp/guzzle, laravel/framework, laravel/nightwatch, laravel/sanctum, laravel/tinker, laravel/ui (+9 more)
+Nodes (16): require, graham-campbell/markdown, laravel/framework, laravel/sanctum, laravel/tinker, laravel/ui, league/flysystem-aws-s3-v3, matanyadaev/laravel-eloquent-spatial (+8 more)
 
-### Community 24 - "Community 24"
+### Community 24 - "useMapGL"
+Cohesion: 0.18
+Nodes (16): MapContext, useMapGL(), collectAttributions(), EVENTS, MapAttribution(), MapBound(), MapPan(), MapPing() (+8 more)
+
+### Community 25 - "AircraftHelper"
+Cohesion: 0.12
+Nodes (4): AircraftHelper, CalculationHelper, InvalidArgumentException, Location\Coordinate
+
+### Community 27 - "ApiKey"
+Cohesion: 0.25
+Nodes (3): CreateApiKey, ApiToken, ApiKey
+
+### Community 28 - "CI PHPUnit Job (MySQL 8 service, where2fly_test DB)"
+Cohesion: 0.29
+Nodes (8): Setup Dependencies Composite Action (PHP 8.3.2, composer cache, optional Node 22), CI Build Container Job (pushes ghcr.io/blt950/where2fly, injects private fonts repo), CI Lint Job (Pint --test), CI PHPUnit Job (MySQL 8 service, where2fly_test DB), Testing Against Real MySQL (where2fly_test database, PHPUnit only, no sqlite fallback), Dev Compose Web Service (builds local Dockerfile, bind-mounts repo into container where2fly), Production Compose Web Service (pulls ghcr.io/blt950/where2fly:latest), Docker Development Setup (docker-compose.dev.yml, migrate, key:generate, schedule:run cron)
+
+### Community 30 - "composer.json"
 Cohesion: 0.17
-Nodes (9): AdminVariables, Closure, Request, FeedbackVariables, Closure, Request, Closure, Request (+1 more)
+Nodes (11): autoload-dev, psr-4, description, keywords, license, name, prefer-stable, Tests\\ (+3 more)
 
-### Community 25 - "Community 25"
-Cohesion: 0.16
-Nodes (3): CalculationHelper, Carbon, Coordinate
-
-### Community 26 - "Community 26"
-Cohesion: 0.26
-Nodes (4): Controller, Request, UserListController, AuthorizesRequests
-
-### Community 27 - "Community 27"
-Cohesion: 0.23
-Nodes (5): ApiToken, Closure, Request, ApiKey, ApiLog
-
-### Community 28 - "Community 28"
-Cohesion: 0.27
-Nodes (10): Setup Dependencies Composite Action (PHP 8.3.2, composer cache, optional Node 22), CI Build Container Job (pushes ghcr.io/blt950/where2fly, injects private fonts repo), CI Lint Job (Pint --test), CI PHPUnit Job (MySQL 8 service, where2fly_test DB), Legacy Linting Workflow (disabled, superseded by ci.yaml), Legacy Tests Workflow (disabled, superseded by ci.yaml), Testing Against Real MySQL (where2fly_test database, PHPUnit only, no sqlite fallback), Dev Compose Web Service (builds local Dockerfile, bind-mounts repo into container where2fly) (+2 more)
-
-### Community 30 - "Community 30"
-Cohesion: 0.20
-Nodes (9): autoload-dev, psr-4, description, keywords, license, name, prefer-stable, Tests\\ (+1 more)
-
-### Community 31 - "Community 31"
+### Community 31 - "require-dev"
 Cohesion: 0.22
 Nodes (9): require-dev, barryvdh/laravel-debugbar, fakerphp/faker, laravel/pint, laravel/sail, mockery/mockery, nunomaduro/collision, phpunit/phpunit (+1 more)
 
-### Community 32 - "Community 32"
-Cohesion: 0.28
-Nodes (3): AirportFactory, UserFactory, Factory
+### Community 32 - "Illuminate\Support\Str"
+Cohesion: 0.17
+Nodes (5): AirportFactory, UserFactory, Illuminate\Database\Eloquent\Factories\Factory, Illuminate\Support\Str, Pdo\Mysql
 
-### Community 36 - "Community 36"
+### Community 35 - "Map.jsx"
+Cohesion: 0.19
+Nodes (17): CONTINENT_VIEWS, getInitMapPosition(), Map(), mapElement, MapSaveView(), POSITION_KEY, supportsWebGL2(), view() (+9 more)
+
+### Community 36 - "config"
 Cohesion: 0.33
 Nodes (6): php-http/discovery, config, allow-plugins, optimize-autoloader, preferred-install, sort-packages
 
-### Community 37 - "Community 37"
-Cohesion: 0.33
-Nodes (6): autoload, files, psr-4, App\\, Database\\Factories\\, Database\\Seeders\\
+### Community 37 - "psr-4"
+Cohesion: 0.29
+Nodes (7): autoload, files, psr-4, App\\, Database\\Factories\\, Database\\Seeders\\, app/Helpers/helpers.php
 
-### Community 38 - "Community 38"
-Cohesion: 0.40
-Nodes (5): scripts, post-autoload-dump, post-create-project-cmd, post-root-package-install, post-update-cmd
+### Community 38 - "scripts"
+Cohesion: 0.20
+Nodes (10): scripts, post-autoload-dump, post-create-project-cmd, post-root-package-install, post-update-cmd, Illuminate\\Foundation\\ComposerScripts::postAutoloadDump, @php artisan key:generate --ansi, @php artisan package:discover --ansi (+2 more)
 
-### Community 39 - "Community 39"
+### Community 39 - "app.blade.php"
 Cohesion: 0.40
 Nodes (4): layouts.footer, parts.map, layouts.header, layouts.menu
 
-### Community 40 - "Community 40"
+### Community 40 - "searchForm.js"
 Cohesion: 0.60
 Nodes (3): contractFilters(), expandFilters(), toggleFilters()
 
-### Community 41 - "Community 41"
+### Community 41 - "arrivals.blade.php"
 Cohesion: 0.40
 Nodes (4): front.parts.form, front.parts.sliders, front.parts.tabs, layouts.title
 
-### Community 42 - "Community 42"
+### Community 42 - "departures.blade.php"
 Cohesion: 0.40
 Nodes (4): front.parts.form, front.parts.sliders, front.parts.tabs, layouts.title
 
-### Community 45 - "Community 45"
+### Community 44 - "Carbon\Carbon"
+Cohesion: 0.17
+Nodes (5): Carbon\Carbon, Illuminate\Database\Eloquent\Attributes\Scope, MatanYadaev\EloquentSpatial\Objects\LineString, MatanYadaev\EloquentSpatial\Objects\Polygon, MatanYadaev\EloquentSpatial\Traits\HasSpatial
+
+### Community 45 - "extra"
 Cohesion: 0.67
 Nodes (3): extra, laravel, dont-discover
+
+### Community 57 - "airportLayerSpec.js"
+Cohesion: 0.21
+Nodes (17): MapAirportSource(), pinnedFilter(), AIRPORT_TYPES, clusterIds(), clusterSpecs(), filtersLabelsByZoom(), focusColor(), labelIds() (+9 more)
+
+### Community 59 - "mapConfig.js"
+Cohesion: 0.17
+Nodes (13): MapGLContext, applyTheme(), BASEMAP_ANCHORS, CLUSTER_COLOURS, DARK_HILLSHADE, DARK_PALETTE, GLYPHS_URL, LABEL_FONT (+5 more)
+
+### Community 69 - "2024_07_22_072158_add_geospacial_airport_coordinates.php"
+Cohesion: 0.27
+Nodes (5): up(), TestAirportSeeder, Illuminate\Database\Seeder, MatanYadaev\EloquentSpatial\Enums\Srid, MatanYadaev\EloquentSpatial\Objects\Point
+
+### Community 71 - "MapWeather.jsx"
+Cohesion: 0.33
+Nodes (11): beneath(), TERMINATOR_LAYER, removeSourceLayer(), useMapLayer(), MapTerminator(), MapTerrain(), frameTiles(), latestFrame() (+3 more)
+
+### Community 76 - "Airline"
+Cohesion: 0.19
+Nodes (5): CalcFlights, ReuploadAirlines, Airline, Attribute, Illuminate\Database\Eloquent\Casts\Attribute
+
+### Community 78 - "MapHelper"
+Cohesion: 0.22
+Nodes (4): MapHelper, TopController, Illuminate\Support\Collection, Illuminate\View\View
+
+### Community 79 - "Eloquent (Laravel 13.x)"
+Cohesion: 0.15
+Nodes (12): Attribute-by-attribute reference, Casts, Common query/CRUD patterns, Eloquent (Laravel 13.x), Global scopes, Local scopes: `#[Scope]` attribute (new style) replaces `scopeXxx()`, Model definition: attribute style vs. property style, Pending attributes on scopes (+4 more)
+
+### Community 90 - "backup.php"
+Cohesion: 0.17
+Nodes (11): Spatie\Backup\Notifications\Notifiable, Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification, Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification, Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification, Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification, Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification, Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification, Spatie\Backup\Tasks\Cleanup\Strategies\DefaultStrategy (+3 more)
+
+### Community 97 - "Routing & Controllers (Laravel 13.x)"
+Cohesion: 0.18
+Nodes (10): Authorization attribute: `#[Authorize]` (new in 13.x), Basic route definitions, Controller middleware — three ways (all still valid), Dependency injection in controllers, Fine-grained resource middleware (`middlewareFor` / `withoutMiddlewareFor`), Named routes & groups, Resource controllers, Route model binding (+2 more)
+
+### Community 101 - "Upgrading From Laravel 12.x to 13.0"
+Cohesion: 0.18
+Nodes (10): Cache `serializable_classes` config, CSRF middleware renamed: `PreventRequestForgery`, High impact, Low impact (know these exist, fix if they bite), Medium impact, MySQL/MariaDB `upsert` requires non-empty `uniqueBy`, Not covered here, Updating dependencies (+2 more)
+
+### Community 117 - "combobox.js"
+Cohesion: 0.40
+Nodes (4): destination, destinationList, exclusiveDestinations, placeholderConfigs
+
+### Community 136 - "Database: Query Builder (Laravel 13.x)"
+Cohesion: 0.20
+Nodes (9): Basic queries, Database: Query Builder (Laravel 13.x), Insert / update / delete, Joins, Migrations — quick reminders, Pessimistic locking, Transactions, Vector similarity clauses (new in 13, PostgreSQL + pgvector only) (+1 more)
+
+### Community 137 - "ATC Bookings API"
+Cohesion: 0.20
+Nodes (9): ATC Bookings API, `DELETE /booking/{id}`, Field notes, `GET /booking`, `GET /booking/{id}`, `POST /booking`, `PUT /booking/{id}`, Read (public, no auth) (+1 more)
+
+### Community 141 - "run-where2fly/package.json"
+Cohesion: 0.22
+Nodes (8): dependencies, playwright, description, name, private, type, version, playwright
+
+### Community 145 - "logging.php"
+Cohesion: 0.50
+Nodes (3): Monolog\Handler\NullHandler, Monolog\Handler\StreamHandler, Monolog\Handler\SyslogUdpHandler
+
+### Community 150 - "Endpoint groups"
+Cohesion: 0.22
+Nodes (8): atc, Authentication, community, Core API, Endpoint groups, members, Notes, orgs
+
+### Community 228 - "Common Helpers & Facades Quick Reference (Laravel 13.x)"
+Cohesion: 0.25
+Nodes (7): `Arr` (`Illuminate\Support\Arr`), `collect()` / `Illuminate\Support\Collection`, Common Helpers & Facades Quick Reference (Laravel 13.x), `Http` (`Illuminate\Support\Facades\Http`), React + SCSS stack notes, `Str` (`Illuminate\Support\Str`), `Validator` / form validation
+
+### Community 229 - "Laravel 13"
+Cohesion: 0.25
+Nodes (7): A note on confidence, A quick taste of the attribute style, Laravel 13, New capabilities worth knowing about, Stack context, What changed from Laravel 12 to 13, Where to look
+
+### Community 230 - "Data API"
+Cohesion: 0.25
+Nodes (7): Data API, Endpoints, Example: filter to pilots inbound to a specific airport (pseudocode), Example: find all online controllers at a facility, `GET /transceivers-data.json`, `GET /vatsim-data.json` — response schema, `GET /vatsim-servers.json`, `/all-servers.json`, `/sweatbox-servers.json`
+
+### Community 231 - "renovate.json"
+Cohesion: 0.25
+Nodes (7): config:recommended, dependencies, customManagers, extends, labels, packageRules, $schema
+
+### Community 232 - "MapControls.jsx"
+Cohesion: 0.25
+Nodes (6): MAP_THEMES, LAYERS, MapControls(), PROJECTIONS, THEMES, WEATHER_STATUS
+
+### Community 234 - "run-where2fly/SKILL.md"
+Cohesion: 0.29
+Nodes (6): Gotchas, Prerequisites, Run (agent path), Run (human path), Setup, Test
+
+### Community 235 - "Events API"
+Cohesion: 0.29
+Nodes (6): Endpoints, Events API, Field notes, Practical notes for polling, Recipes, Response shape
+
+### Community 236 - "terminatorPolygon"
+Cohesion: 0.52
+Nodes (6): eclipticObliquity(), gmst(), julian(), sunEclipticLongitude(), sunEquatorialPosition(), terminatorPolygon()
+
+### Community 237 - "driver.mjs"
+Cohesion: 0.40
+Nodes (5): consoleMessages, parseSelector(), rl, runLine(), screenshotDir
+
+### Community 238 - "METAR API, Slurper API"
+Cohesion: 0.33
+Nodes (5): `GET /:icao`, `GET /users/info`, METAR API, METAR API, Slurper API, Slurper API
+
+### Community 239 - "VATSIM APIs"
+Cohesion: 0.40
+Nodes (4): General notes that apply across all of these, Quick recipes, VATSIM APIs, Which API do I need?
+
+### Community 241 - "[3.0.4](https://github.com/blt950/where2fly/compare/v3.0.3...v3.0.4) (2026-08-17)"
+Cohesion: 0.50
+Nodes (3): [3.0.4](https://github.com/blt950/where2fly/compare/v3.0.3...v3.0.4) (2026-08-17), Bug Fixes, Changelog
 
 ## Ambiguous Edges - Review These
 - `Data Ingestion Pipeline (update:data -> fetch:metars/tafs/vatsim; fetch:bookings; AWC bulk cache files, not per-airport calls)` → `External Data Sources (OurAirports, Airlabs, metar.vatsim.net, api.met.no TAF, FSAddonCompare, flagicons)`  [AMBIGUOUS]
   README.md · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **122 isolated node(s):** `name`, `type`, `description`, `keywords`, `license` (+117 more)
+- **237 isolated node(s):** `screenshotDir`, `consoleMessages`, `rl`, `name`, `version` (+232 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **51 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `Data Ingestion Pipeline (update:data -> fetch:metars/tafs/vatsim; fetch:bookings; AWC bulk cache files, not per-airport calls)` and `External Data Sources (OurAirports, Airlabs, metar.vatsim.net, api.met.no TAF, FSAddonCompare, flagicons)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `Airport` connect `Community 15` to `Community 0`, `Community 2`, `Community 35`, `Community 4`, `Community 3`, `Community 6`, `Community 69`, `Community 34`, `Community 9`, `Community 44`, `Community 13`, `Community 14`, `Community 19`, `Community 20`, `Community 21`, `Community 25`, `Community 26`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
-- **Why does `User` connect `Community 7` to `Community 2`, `Community 9`, `Community 10`, `Community 13`, `Community 16`, `Community 17`, `Community 18`, `Community 20`, `Community 21`, `Community 22`?**
-  _High betweenness centrality (0.052) - this node is a cross-community bridge._
-- **Why does `SearchTest` connect `Community 5` to `Community 9`, `Community 20`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
-- **Are the 22 inferred relationships involving `Airport` (e.g. with `.handle()` and `.handle()`) actually correct?**
-  _`Airport` has 22 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 46 inferred relationships involving `User` (e.g. with `.handle()` and `.showAdmin()`) actually correct?**
-  _`User` has 46 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 13 inferred relationships involving `AirportScore` (e.g. with `.scoreBookings()` and `.scoreMetars()`) actually correct?**
-  _`AirportScore` has 13 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `Airport` connect `Airport` to `TafForecast`, `Illuminate\Console\Command`, `AirportScore`, `Controller`, `SceneryDeveloper`, `SearchController`, `Simulator`, `Controllers/SearchController.php`, `Illuminate\Database\Eloquent\Model`, `AirportCallsignHelper`, `Illuminate\Database\Eloquent\Builder`, `TestCase`, `Illuminate\Http\Request`, `AircraftHelper`, `UserListController`, `WithinDistanceTest`, `Aircraft`, `Carbon\Carbon`, `RouteFilterTest`, `2024_07_22_072158_add_geospacial_airport_coordinates.php`, `MapHelper`, `Flight`?**
+  _High betweenness centrality (0.151) - this node is a cross-community bridge._
+- **Why does `User` connect `User` to `Illuminate\Support\Str`, `Illuminate\Console\Command`, `web.php`, `Simulator`, `Illuminate\Database\Eloquent\Model`, `MapHelper`, `ApiTest`, `UserAccountTest`, `UserController.php`, `TestCase`, `Illuminate\Http\Request`, `Scenery`?**
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **Why does `SearchTest` connect `SearchTest` to `Simulator`, `TestCase`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
+- **What connects `screenshotDir`, `consoleMessages`, `rl` to the rest of the system?**
+  _237 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `TafForecast` be split into smaller, more focused modules?**
+  _Cohesion score 0.05513784461152882 - nodes in this community are weakly interconnected._
+- **Should `Illuminate\Console\Command` be split into smaller, more focused modules?**
+  _Cohesion score 0.1225296442687747 - nodes in this community are weakly interconnected._
