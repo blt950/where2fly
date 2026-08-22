@@ -91,7 +91,7 @@ function Map() {
     const [webgl2] = useState(supportsWebGL2);
     const [preferences, setPreferences] = useState(readPreferences);
     const [weatherStatus, setWeatherStatus] = useState('loading');
-    const [listAirports, setListAirports] = useState({});
+    const [lists, setLists] = useState([]);
     const [clusterRadius, setClusterRadius] = useState(null);
     const [coordinates, setCoordinates] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
@@ -115,13 +115,15 @@ function Map() {
         window.setReverseDirection = (boolean) => { setReverseDirection(boolean) }
         window.isDefaultView = isDefaultView;
 
-        // Seed the overlay from cache so the list is on screen before the fetch returns
-        const cachedAirports = localStorage.getItem('userListAirportsCache');
-        if (userAuthenticated && cachedAirports && cachedAirports != 'undefined') {
+        // Seed the overlay from cache so the lists are on screen before the fetch returns.
+        // The pre-grouping cache key is dropped rather than parsed — its shape no longer fits.
+        localStorage.removeItem('userListAirportsCache');
+        const cachedLists = localStorage.getItem('userListsCache');
+        if (userAuthenticated && cachedLists) {
             try {
-                setListAirports(JSON.parse(cachedAirports));
+                setLists(JSON.parse(cachedLists) ?? []);
             } catch {
-                localStorage.removeItem('userListAirportsCache');
+                localStorage.removeItem('userListsCache');
             }
         }
 
@@ -130,18 +132,12 @@ function Map() {
 
     }, []);
 
-    // The user's scenery list, drawn as its own overlay so it can show on any page without
-    // displacing that page's own airports. Same endpoint and cache as before.
+    // The user's scenery lists, drawn as their own overlay so they can show on any page without
+    // displacing that page's airports. Fetched once; per-list visibility is applied locally.
     useEffect(() => {
         if (!userAuthenticated) {
-            localStorage.removeItem('userListAirportsCache');
-            setListAirports({});
-
-            return;
-        }
-
-        if (!preferences.list) {
-            setListAirports({});
+            localStorage.removeItem('userListsCache');
+            setLists([]);
 
             return;
         }
@@ -149,14 +145,14 @@ function Map() {
         fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
             .then(response => response.json())
             .then(data => {
-                localStorage.setItem('userListAirportsCache', JSON.stringify(data.data));
-                setListAirports(data.data ?? {});
+                localStorage.setItem('userListsCache', JSON.stringify(data.data));
+                setLists(data.data ?? []);
             })
             .catch(error => {
                 captureException(error);
                 console.error(error.message);
             });
-    }, [preferences.list]);
+    }, []);
 
     // When focusAirport changes, pan to the airport and show the card.
     useEffect(() => {
@@ -245,6 +241,13 @@ function Map() {
 
     const { halo, palette } = themeOf(preferences.theme);
 
+    // One source for every visible list — the airports already carry their list's colour, so
+    // merging keeps a single set of layers instead of one per list.
+    const listAirports = useMemo(() => Object.assign(
+        {},
+        ...lists.filter(({ id }) => preferences.lists?.[id] !== false).map(({ airports }) => airports),
+    ), [lists, preferences.lists]);
+
     const updatePreferences = (next) => {
         setPreferences(next);
         writePreferences(next);
@@ -276,14 +279,14 @@ function Map() {
                 {preferences.terrain && <MapTerrain />}
                 {preferences.weather && <MapWeather onStatus={setWeatherStatus} />}
                 <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} haloColor={halo} palette={palette} />
-                {userAuthenticated && preferences.list && <MapUserList listAirports={listAirports} haloColor={halo} palette={palette} />}
+                {lists.length > 0 && <MapUserList listAirports={listAirports} haloColor={halo} palette={palette} />}
                 {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} color={palette.fallback} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {(isDefaultView() || route().current('scenery*')) && <MapSaveView />}
                 <MapPing ping={ping} />
             </MapProvider>
-            <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus} userAuthenticated={userAuthenticated} />
+            <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus} lists={lists} />
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
     );

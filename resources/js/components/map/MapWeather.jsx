@@ -89,7 +89,9 @@ const MapWeather = ({ onStatus }) => {
                 type: 'raster',
                 source: SOURCE,
                 maxzoom: MAX_LAYER_ZOOM,
-                paint: { 'raster-opacity': 0.6 },
+                // 0.5 keeps ICAO labels readable where they cross a cell; the halo alone was not
+                // quite enough over the brightest returns.
+                paint: { 'raster-opacity': 0.5 },
             }, insertBefore(map, ['terminator', 'airports-hit']));
         };
 

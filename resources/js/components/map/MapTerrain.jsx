@@ -22,23 +22,26 @@ const MapTerrain = () => {
             attribution: '<a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md">Tilezen Joerd</a>',
         });
 
-        // minzoom 7 with the exaggeration ramping up from nothing is what keeps the dark look
-        // intact: no DEM requests and no visual change at the z2-6 most sessions sit at. A
-        // 1400x1000 viewport at z8 pulls roughly 24 tiles, about 1.5MB.
+        // No zoom gate: seeing at a glance where the terrain is, is most useful on a
+        // continental overview. The layer stays opt-in and off by default, so DEM tiles are
+        // only ever fetched by someone who asked for them.
+        //
+        // Exaggeration is stronger when zoomed out, where the DEM is downsampled and relief
+        // would otherwise wash out; it eases back as real detail arrives.
         map.addLayer({
             id: LAYER,
             type: 'hillshade',
             source: SOURCE,
-            minzoom: 7,
             paint: {
-                'hillshade-exaggeration': ['interpolate', ['linear'], ['zoom'], 7, 0, 9, 0.35],
+                'hillshade-exaggeration': ['interpolate', ['linear'], ['zoom'], 0, 0.6, 5, 0.5, 9, 0.35],
                 'hillshade-shadow-color': '#000000',
                 'hillshade-highlight-color': '#3a4048',
                 'hillshade-accent-color': '#000000',
             },
-            // Under country borders but above land and water. The fallbacks matter because
-            // CARTO owns that layer id and the terminator is user-toggleable.
-        }, insertBefore(map, ['boundary_country_inner', 'terminator', 'airports-hit']));
+            // Beneath the water fill, which is opaque: the terrarium DEM carries bathymetry, and
+            // without this the ocean floor gets hillshaded too and the sea stops being flat.
+            // The fallbacks matter because CARTO owns those ids and the terminator is optional.
+        }, insertBefore(map, ['water', 'boundary_country_inner', 'terminator', 'airports-hit']));
 
         return () => {
             if (map.getLayer(LAYER)) { map.removeLayer(LAYER); }

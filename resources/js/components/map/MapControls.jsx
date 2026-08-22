@@ -2,13 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 
 import { MAP_THEMES } from './mapConfig';
 
-// requiresAuth keeps the scenery list out of the panel for logged-out visitors, where it would
-// only ever be an option that does nothing.
 const LAYERS = [
     { key: 'terminator', label: 'Day & night', icon: 'fa-moon' },
     { key: 'terrain', label: 'Terrain relief', icon: 'fa-mountains' },
     { key: 'weather', label: 'Precipitation', icon: 'fa-cloud-rain' },
-    { key: 'list', label: 'My scenery list', icon: 'fa-list', requiresAuth: true },
 ];
 
 const THEMES = Object.entries(MAP_THEMES).map(([value, { label }]) => ({ value, label }));
@@ -27,7 +24,7 @@ const PROJECTIONS = [
     { value: 'mercator', label: '2D map', icon: 'fa-map' },
 ];
 
-const MapControls = ({ preferences, onChange, weatherStatus, userAuthenticated }) => {
+const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
 
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
@@ -75,7 +72,7 @@ const MapControls = ({ preferences, onChange, weatherStatus, userAuthenticated }
                 <div className="map-controls-panel">
                     <fieldset>
                         <legend>Layers</legend>
-                        {LAYERS.filter(({ requiresAuth }) => userAuthenticated || !requiresAuth).map(({ key, label, icon }) => (
+                        {LAYERS.map(({ key, label, icon }) => (
                             <div className="form-check" key={key}>
                                 <input
                                     className="form-check-input"
@@ -100,6 +97,29 @@ const MapControls = ({ preferences, onChange, weatherStatus, userAuthenticated }
                             </div>
                         ))}
                     </fieldset>
+
+                    {lists.length > 0 && (
+                        <fieldset>
+                            <legend>My lists</legend>
+                            {lists.map(({ id, name, color }) => (
+                                <div className="form-check" key={id}>
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id={`map-list-${id}`}
+                                        checked={preferences.lists?.[id] !== false}
+                                        onChange={() => onChange({
+                                            ...preferences,
+                                            lists: { ...preferences.lists, [id]: preferences.lists?.[id] === false },
+                                        })}
+                                    />
+                                    <label className="form-check-label" htmlFor={`map-list-${id}`}>
+                                        <i className="fa-sharp fa-circle" aria-hidden="true" style={{ color }}></i> {name}
+                                    </label>
+                                </div>
+                            ))}
+                        </fieldset>
+                    )}
 
                     <fieldset>
                         <legend>Colours</legend>

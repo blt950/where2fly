@@ -95,29 +95,16 @@ Last update in production: 2026-07-29
 ## Debugging the map
 
 Airport dots and ICAO labels are drawn by the GPU inside a single `<canvas>`, so there are no
-DOM nodes to inspect — devtools' element picker will only ever find the canvas. The map
-instance is exposed as `window.map` instead:
+DOM nodes to inspect — devtools' element picker will only ever find the canvas, and there is
+deliberately no global handle on the map.
 
-```js
-// what is on the map right now
-map.getStyle().layers.map(l => l.id)
-map.queryRenderedFeatures({ layers: ['airports-dots'] }).map(f => f.properties.icao)
-map.queryRenderedFeatures({ layers: ['airports-dots'] })[0].properties   // icao, color, type, r
+To experiment with label styling, add a temporary `window.__map = instance` in
+`MapProvider.jsx` and use `__map.setPaintProperty('airports-label-large', 'text-halo-width', 3)`
+and friends from the console. Do not call it `window.map` — the `<aside id="map">` element
+already claims that name through the browser's implicit named-access global.
 
-// tweak the ICAO labels live — these are the knobs worth playing with
-map.setPaintProperty('airports-label-large', 'text-halo-width', 3)
-map.setPaintProperty('airports-label-large', 'text-color', '#ff0000')
-map.setLayoutProperty('airports-label-large', 'text-size', 20)
-map.setLayoutProperty('airports-label-medium', 'text-offset', [-1, 0])
-
-// camera, and which airport is selected
-map.jumpTo({ center: [8, 50], zoom: 6 })
-setFocusAirport('EGLL')
-```
-
-Label layers are `airports-label-{large,medium,small,pinned}`, plus
-`user-list-label-*` for the scenery list. Changes made this way last until reload; to keep
-them, edit `resources/js/components/utils/airportLayerSpec.js`.
+The label layers are `airports-label-{large,medium,small,pinned}` plus `user-list-label-*`;
+their styling lives in `resources/js/components/utils/airportLayerSpec.js`.
 
 Layer preferences live in `localStorage.mapPreferences` — clear it to get the defaults back.
 

@@ -35,10 +35,7 @@ class MapController extends Controller
     {
         $userLists = UserList::where('user_id', Auth::id())->where('hidden', false)->with('airports')->get();
 
-        $airportsMapCollection = MapHelper::getAirportsFromUserLists($userLists);
-        $airportMapData = MapHelper::generateAirportMapDataFromAirports($airportsMapCollection);
-
-        return response()->json(['message' => 'Success', 'data' => $airportMapData], 200);
+        return response()->json(['message' => 'Success', 'data' => MapHelper::generateListMapData($userLists)], 200);
     }
 
     /**

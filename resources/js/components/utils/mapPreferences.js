@@ -7,8 +7,9 @@ export const DEFAULT_PREFERENCES = {
     terminator: true,
     terrain: false,
     weather: true,
-    // Matches the old behaviour, where a logged-in user's list appeared without being asked for.
-    list: true,
+    // Per scenery list, keyed by list id. Absent means visible, so a list created later shows
+    // up rather than starting hidden.
+    lists: {},
     projection: 'mercator',
     theme: 'default',
 };

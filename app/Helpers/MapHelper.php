@@ -41,22 +41,26 @@ class MapHelper
     }
 
     /**
-     * Get airports from user lists
+     * Generate map data grouped per user list
+     *
+     * Grouped rather than flattened so the map can show and hide each list on its own.
      *
      * @return array
      */
-    public static function getAirportsFromUserLists(Collection $userLists)
+    public static function generateListMapData(Collection $userLists)
     {
-        $airports = [];
-
-        foreach ($userLists as $list) {
+        return $userLists->map(function ($list) {
             foreach ($list->airports as $airport) {
                 $airport->color = $list->color;
-                $airports[] = $airport;
             }
-        }
 
-        return $airports;
+            return [
+                'id' => $list->id,
+                'name' => $list->name,
+                'color' => $list->color,
+                'airports' => self::generateAirportMapDataFromAirports($list->airports),
+            ];
+        })->values()->all();
     }
 
     /**

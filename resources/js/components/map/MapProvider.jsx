@@ -48,10 +48,6 @@ const MapProvider = ({ center, projection, theme, children }) => {
             // own as sources come and go.
             instance.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
-            // Debug handle. Airport dots and labels are GPU-drawn, so there is no DOM node for
-            // devtools to pick — this is how you reach them from the console. See README.
-            window.map = instance;
-
             instance.on('style.load', () => {
                 const current = settings.current;
 
@@ -73,7 +69,6 @@ const MapProvider = ({ center, projection, theme, children }) => {
         return () => {
             observer.disconnect();
             instance?.remove();
-            delete window.map;
         };
     }, []);
 
