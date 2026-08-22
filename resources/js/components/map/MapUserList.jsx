@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 
 import { MapContext } from '../context/MapContext';
 import { useMapGL } from '../context/MapGLContext';
-import { clusterSpecs, LABEL_MINZOOM, labelSpec, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
+import { clusterSpecs, focusColor, LABEL_MINZOOM, labelSpec, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
 import { airportsToGeoJson } from '../utils/airportsGeoJson';
 
 const SOURCE = 'user-list';
@@ -19,7 +19,7 @@ const CLICKABLE = [HIT, ...LABELS.map(([id]) => id)];
 const MapUserList = ({ listAirports, clusterRadius, palette }) => {
 
     const map = useMapGL();
-    const { setFocusAirport } = useContext(MapContext);
+    const { focusAirport, setFocusAirport } = useContext(MapContext);
 
     useEffect(() => {
         map.addSource(SOURCE, {
@@ -94,6 +94,18 @@ const MapUserList = ({ listAirports, clusterRadius, palette }) => {
     useEffect(() => {
         map.getSource(SOURCE)?.setData(airportsToGeoJson(listAirports, palette));
     }, [map, listAirports, palette]);
+
+    // Same focus highlight the search airports get — a list airport is clickable, so it has to
+    // show which one is open.
+    useEffect(() => {
+        const color = focusColor(focusAirport, palette);
+
+        if (map.getLayer(DOTS)) { map.setPaintProperty(DOTS, 'circle-color', color); }
+
+        LABELS.forEach(([id]) => {
+            if (map.getLayer(id)) { map.setPaintProperty(id, 'text-color', color); }
+        });
+    }, [map, focusAirport, palette]);
 
     return null;
 };

@@ -5,6 +5,10 @@ export const filtersLabelsByZoom = () => route().current('search') || route().cu
 
 export const NOT_A_CLUSTER = ['!', ['has', 'point_count']];
 
+// The focused airport takes the brand colour; everything else keeps the colour it came with.
+export const focusColor = (focusAirport, palette) => ['case',
+    ['==', ['get', 'icao'], focusAirport ?? ''], palette.fallback, ['to-color', ['get', 'color']]];
+
 export const LABEL_MINZOOM = {
     large_airport: () => 0,
     medium_airport: () => (filtersLabelsByZoom() ? 6 : 0),

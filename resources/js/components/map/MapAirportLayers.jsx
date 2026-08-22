@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 
 import { MapContext } from '../context/MapContext';
 import { useMapGL } from '../context/MapGLContext';
-import { clusterSpecs, LABEL_MINZOOM, labelSpec, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
+import { clusterSpecs, focusColor, LABEL_MINZOOM, labelSpec, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
 import { airportsToGeoJson, EMPTY_FEATURE_COLLECTION } from '../utils/airportsGeoJson';
 
 const SOURCE = 'airports';
@@ -81,8 +81,7 @@ const MapAirportLayers = ({ cluster, clusterRadius, palette }) => {
 
     useEffect(() => {
         const pinned = [focusAirport, primaryAirport].filter(Boolean);
-        const color = ['case', ['==', ['get', 'icao'], focusAirport ?? ''], palette.fallback,
-            ['to-color', ['get', 'color']]];
+        const color = focusColor(focusAirport, palette);
 
         if (map.getLayer('airports-dots')) {
             map.setPaintProperty('airports-dots', 'circle-color', color);
