@@ -6,7 +6,7 @@ import { applyThemeOverrides, GLYPHS_URL, mapOptions, themeOf } from './mapConfi
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
-const MapProvider = ({ center, projection, theme, children }) => {
+const MapProvider = ({ view, projection, theme, children }) => {
 
     const containerRef = useRef(null);
     const [map, setMap] = useState(null);
@@ -23,7 +23,7 @@ const MapProvider = ({ center, projection, theme, children }) => {
                 return;
             }
 
-            instance = new maplibregl.Map(mapOptions(container, center, themeOf(theme).style));
+            instance = new maplibregl.Map(mapOptions(container, view, themeOf(theme).style));
             instance.touchZoomRotate.disableRotation();
 
             instance.on('style.load', () => {

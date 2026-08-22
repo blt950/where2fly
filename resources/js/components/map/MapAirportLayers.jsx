@@ -2,18 +2,13 @@ import { useContext, useEffect } from 'react';
 
 import { MapContext } from '../context/MapContext';
 import { useMapGL } from '../context/MapGLContext';
-import { LABEL_MINZOOM, labelSpec, ROOT_FONT_SIZE } from '../utils/airportLayerSpec';
+import { clusterSpecs, LABEL_MINZOOM, labelSpec, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
 import { airportsToGeoJson, EMPTY_FEATURE_COLLECTION } from '../utils/airportsGeoJson';
-import { LABEL_FONT } from './mapConfig';
 
 const SOURCE = 'airports';
 
 const AIRPORT_LAYERS = ['airports-hit', 'airports-label-large', 'airports-label-medium',
     'airports-label-small', 'airports-label-pinned'];
-
-const NOT_A_CLUSTER = ['!', ['has', 'point_count']];
-const clusterScale = (minRem, maxRem) => ['interpolate', ['linear'], ['ln', ['get', 'point_count']],
-    Math.log(2), minRem * ROOT_FONT_SIZE, Math.log(100), maxRem * ROOT_FONT_SIZE];
 
 const MapAirportLayers = ({ cluster, clusterRadius, palette }) => {
 
@@ -40,30 +35,12 @@ const MapAirportLayers = ({ cluster, clusterRadius, palette }) => {
         });
 
         if (cluster) {
-            map.addLayer({
-                id: 'airports-clusters',
-                type: 'circle',
+            clusterSpecs({
+                idPrefix: 'airports',
                 source: SOURCE,
-                filter: ['has', 'point_count'],
-                paint: {
-                    'circle-radius': clusterScale(2 / 2, 3.75 / 2),
-                    'circle-color': isDefaultView() ? '#2f3549' : '#ddb81c',
-                },
-            });
-
-            map.addLayer({
-                id: 'airports-cluster-count',
-                type: 'symbol',
-                source: SOURCE,
-                filter: ['has', 'point_count'],
-                layout: {
-                    'text-field': ['get', 'point_count_abbreviated'],
-                    'text-font': LABEL_FONT,
-                    'text-size': clusterScale(0.75, 3.75 * 0.35),
-                    'text-allow-overlap': true,
-                },
-                paint: { 'text-color': isDefaultView() ? '#ffffff' : '#000000' },
-            });
+                color: isDefaultView() ? '#2f3549' : '#ddb81c',
+                textColor: isDefaultView() ? '#ffffff' : '#000000',
+            }).forEach((spec) => map.addLayer(spec));
         }
 
         map.addLayer({

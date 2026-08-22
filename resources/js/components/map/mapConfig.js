@@ -12,6 +12,24 @@ const sky = (skyColor, horizon, fog) => ({
 const DARK_PALETTE = { fallback: '#ddb81c', candidate: '#808080' };
 const LIGHT_PALETTE = { fallback: '#8a6d0b', candidate: '#5a5a5a' };
 
+// Land is near-black on the dark themes, so shadow and accent have almost nothing to darken —
+// the relief has to be carried by the lit slopes, which is why the highlight runs this bright.
+const DARK_HILLSHADE = {
+    'hillshade-exaggeration': ['interpolate', ['linear'], ['zoom'], 0, 0.85, 5, 0.75, 9, 0.55],
+    'hillshade-shadow-color': '#000000',
+    'hillshade-highlight-color': '#9a9a9a',
+    'hillshade-accent-color': '#2b2b2b',
+};
+
+// Inverted on the near-white positron land: the highlight is what disappears, so the shading
+// does the work.
+const LIGHT_HILLSHADE = {
+    'hillshade-exaggeration': ['interpolate', ['linear'], ['zoom'], 0, 0.6, 5, 0.5, 9, 0.35],
+    'hillshade-shadow-color': '#4a4a4a',
+    'hillshade-highlight-color': '#ffffff',
+    'hillshade-accent-color': '#7d7d7d',
+};
+
 export const MAP_THEMES = {
     default: {
         label: 'Default',
@@ -23,6 +41,7 @@ export const MAP_THEMES = {
         ],
         sky: sky('#05070c', '#2C353C', '#0e0e0e'),
         palette: DARK_PALETTE,
+        hillshade: DARK_HILLSHADE,
     },
     darker: {
         label: 'Darker',
@@ -34,6 +53,7 @@ export const MAP_THEMES = {
         ],
         sky: sky('#040404', '#262626', '#090909'),
         palette: DARK_PALETTE,
+        hillshade: DARK_HILLSHADE,
     },
     light: {
         label: 'Light',
@@ -41,6 +61,7 @@ export const MAP_THEMES = {
         overrides: [],
         sky: sky('#cfd9e6', '#d4dadc', '#fafaf8'),
         palette: LIGHT_PALETTE,
+        hillshade: LIGHT_HILLSHADE,
     },
 };
 
@@ -48,11 +69,11 @@ export const themeOf = (key) => MAP_THEMES[key] ?? MAP_THEMES.default;
 export const GLYPHS_URL = '/fonts/{fontstack}/{range}.pbf';
 export const LABEL_FONT = ['Work Sans Regular'];
 
-export const mapOptions = (container, center, style) => ({
+export const mapOptions = (container, view, style) => ({
     container,
     style,
-    center,
-    zoom: 4,
+    center: view.center,
+    zoom: view.zoom,
     minZoom: 0,
     maxZoom: 17,
     attributionControl: false,

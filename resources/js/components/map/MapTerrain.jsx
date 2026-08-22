@@ -5,7 +5,7 @@ import { insertBefore } from './mapConfig';
 
 const SOURCE = 'dem';
 const LAYER = 'hillshade';
-const MapTerrain = () => {
+const MapTerrain = ({ hillshade }) => {
 
     const map = useMapGL();
 
@@ -23,19 +23,14 @@ const MapTerrain = () => {
             id: LAYER,
             type: 'hillshade',
             source: SOURCE,
-            paint: {
-                'hillshade-exaggeration': ['interpolate', ['linear'], ['zoom'], 0, 0.6, 5, 0.5, 9, 0.35],
-                'hillshade-shadow-color': '#000000',
-                'hillshade-highlight-color': '#3a4048',
-                'hillshade-accent-color': '#000000',
-            },
+            paint: hillshade,
         }, insertBefore(map, ['water', 'boundary_country_inner', 'terminator', 'airports-hit']));
 
         return () => {
             if (map.getLayer(LAYER)) { map.removeLayer(LAYER); }
             if (map.getSource(SOURCE)) { map.removeSource(SOURCE); }
         };
-    }, [map]);
+    }, [map, hillshade]);
 
     return null;
 };

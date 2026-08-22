@@ -49,44 +49,52 @@ const isDefaultView = () => {
     return false
 }
 
-// Get the initial map position. MapLibre takes [lng, lat] — the opposite order to Leaflet.
+// A denser map needs a wider merge radius, or the clusters themselves become the clutter.
+const clusterRadiusFor = (count) => (count >= 1000 ? 60 : count > 200 ? 50 : 30);
+
+const DEFAULT_ZOOM = 4;
+
+// Get the initial map view. MapLibre takes [lng, lat] — the opposite order to Leaflet. Zoom is
+// optional per entry and falls back to DEFAULT_ZOOM, so only the odd ones out need to say it.
+const view = (center, zoom = DEFAULT_ZOOM) => ({ center, zoom });
+
 const getInitMapPosition = () => {
 
     // Set position based on current top list filter
     if(route().current('top.filtered', 'AF')){
-        return [21.0936, 7.1881];
+        return view([21.0936, 7.1881]);
     } else if(route().current('top.filtered', 'AS')){
-        return [100.6197, 34.0479];
+        return view([100.6197, 34.0479]);
     } else if(route().current('top.filtered', 'EU')){
-        return [15.2551, 54.5260];
+        return view([15.2551, 54.5260]);
     } else if(route().current('top.filtered', 'NA')){
-        return [-95.7129, 37.0902];
+        return view([-95.7129, 37.0902]);
     } else if(route().current('top.filtered', 'OC')){
-        return [133.7751, -25.2744];
+        return view([133.7751, -25.2744]);
     } else if(route().current('top.filtered', 'SA')){
-        return [-55.4915, -8.7832];
+        return view([-55.4915, -8.7832]);
     } else if(route().current('top')){
         // A place in the middle of the ocean to avoid stretching the map bounds
-        return [-35.4521, 45.14777]
+        return view([-35.4521, 45.14777]);
     }
 
     // Set position based on localStorage. The stored {lat, lng} shape predates MapLibre and
     // is kept as-is so existing visitors keep their saved view.
     var storedPosition = localStorage.getItem('mapPosition');
     if (storedPosition) {
-        const { lat, lng } = JSON.parse(storedPosition);
-        return [lng, lat];
+        const { lat, lng, zoom } = JSON.parse(storedPosition);
+        return view([lng, lat], zoom);
     }
 
     // Default to Berlin
-    return [13.395199187248908, 52.51843039016386];
+    return view([13.395199187248908, 52.51843039016386]);
 }
 
 function Map() {
 
     const [airports, setAirports] = useState([]);
     const [cluster, setCluster] = useState(true);
-    const [initialCenter] = useState(getInitMapPosition);
+    const [initialView] = useState(getInitMapPosition);
     const [webgl2] = useState(supportsWebGL2);
     const [preferences, setPreferences] = useState(readPreferences);
     const [weatherStatus, setWeatherStatus] = useState('loading');
@@ -225,18 +233,12 @@ function Map() {
         }
         
         if(airportsKeys.length > 0){
-            if (airportsKeys.length >= 1000) {
-                setClusterRadius(60);
-            } else if(airportsKeys.length > 200 && airportsKeys.length < 1000) {
-                setClusterRadius(50);
-            } else {
-                setClusterRadius(30);
-            }
+            setClusterRadius(clusterRadiusFor(airportsKeys.length));
         }
 
     }, [airports]);
 
-    const { palette } = themeOf(preferences.theme);
+    const { palette, hillshade } = themeOf(preferences.theme);
 
     // One source for every visible list — the airports already carry their list's colour, so
     // merging keeps a single set of layers instead of one per list.
@@ -244,6 +246,11 @@ function Map() {
         {},
         ...lists.filter(({ id }) => preferences.lists?.[id] !== false).map(({ airports }) => airports),
     ), [lists, preferences.lists]);
+
+    const listClusterRadius = useMemo(
+        () => clusterRadiusFor(Object.keys(listAirports).length),
+        [listAirports],
+    );
 
     // Scenery lists are held apart from `airports` so each one keeps its own colour and toggle,
     // but any ICAO the user can click has to resolve from either — `airports` alone is what the
@@ -280,12 +287,12 @@ function Map() {
 
     return (
         <MapContext.Provider value={mapContextValue}>
-            <MapProvider center={initialCenter} projection={preferences.projection} theme={preferences.theme}>
+            <MapProvider view={initialView} projection={preferences.projection} theme={preferences.theme}>
                 {preferences.terminator && <MapTerminator />}
-                {preferences.terrain && <MapTerrain />}
+                {preferences.terrain && <MapTerrain hillshade={hillshade} />}
                 {preferences.weather && <MapWeather onStatus={setWeatherStatus} />}
                 <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} palette={palette} />
-                {lists.length > 0 && <MapUserList listAirports={listAirports} palette={palette} />}
+                {lists.length > 0 && <MapUserList listAirports={listAirports} clusterRadius={listClusterRadius} palette={palette} />}
                 {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} color={palette.fallback} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
