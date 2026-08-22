@@ -7,8 +7,6 @@ import { useMapGL } from '../context/MapGLContext';
 // the same information into the page footer, which is where the site's other credits live.
 const FOOTER_SLOT = 'map-attribution';
 
-// Which sources are actually being drawn right now. Crediting a hidden layer would be wrong,
-// and the set genuinely changes as terrain and radar are toggled or zoomed past.
 const visibleSourceIds = (map) => {
     const zoom = map.getZoom();
     const ids = new Set();
@@ -18,7 +16,6 @@ const visibleSourceIds = (map) => {
             return;
         }
 
-        // maxzoom is exclusive, minzoom inclusive — the same comparison MapLibre uses.
         if (layer.minzoom !== undefined && zoom < layer.minzoom) {
             return;
         }
@@ -53,7 +50,6 @@ const MapAttribution = () => {
     const [attribution, setAttribution] = useState('');
 
     useEffect(() => {
-        // sourcedata fires per tile, so only re-render when the credit line actually changes.
         const refresh = () => setAttribution((current) => {
             const next = collectAttributions(map);
 

@@ -1,4 +1,3 @@
-// Leaflet sized its DivIcons 10/7/5 px across; these are the matching circle radii.
 const TYPE_RADIUS = { large_airport: 5, medium_airport: 3.5, small_airport: 2.5 };
 
 // SearchController omits `color` for the primary airport and sends the literal 'grey' for

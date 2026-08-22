@@ -26,9 +26,7 @@ import { readPreferences, writePreferences } from './utils/mapPreferences';
 
 const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
 
-// MapLibre needs WebGL2. A device without it fails asynchronously inside the GL constructor,
-// which the ErrorBoundary cannot catch, so probe up front and show the fallback directly
-// rather than filling Sentry with unactionable errors from hardware we cannot fix.
+// MapLibre needs WebGL2
 const supportsWebGL2 = () => {
     try {
         return !!document.createElement('canvas').getContext('webgl2');
@@ -133,9 +131,6 @@ function Map() {
 
     }, []);
 
-    // The user's scenery lists. Confined to the default view, as before the MapLibre migration:
-    // on a search or top list the page's own airports are the subject, and the list would only
-    // add noise. Fetched once; per-list visibility is applied locally.
     useEffect(() => {
         if (!userAuthenticated || !isDefaultView()) {
             localStorage.removeItem('userListsCache');
@@ -306,8 +301,6 @@ function Map() {
 
 export default Map;
 
-// #map is an empty <aside>: the .map class that gives it size lives on MapContainer, so the
-// fallback has to carry it too or it collapses to nothing when the tree never renders.
 function MapFallback() {
     return (
         <div className="map map-error d-flex flex-column align-items-center justify-content-center text-center p-4">

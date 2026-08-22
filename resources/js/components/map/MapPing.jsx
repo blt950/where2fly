@@ -4,7 +4,6 @@ import * as maplibregl from 'maplibre-gl';
 import { MapContext } from '../context/MapContext';
 import { useMapGL } from '../context/MapGLContext';
 
-// One-shot radar blip at the given airport, triggered via window.pingAirport()
 const MapPing = ({ ping }) => {
 
     const map = useMapGL();
@@ -17,8 +16,6 @@ const MapPing = ({ ping }) => {
             return undefined;
         }
 
-        // A zero-size element whose ::before draws the expanding ring, exactly as the Leaflet
-        // DivIcon did — .maplibregl-marker is position:absolute, so the CSS carries over.
         const element = document.createElement('div');
         element.className = 'radar-ping';
 

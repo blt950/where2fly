@@ -8,7 +8,6 @@ const MapPan = ({ flyToCoordinates }) => {
 
     useEffect(() => {
         if (flyToCoordinates) {
-            // MapLibre counts the duration in milliseconds; Leaflet counted seconds.
             map.panTo(flyToCoordinates, { duration: 500 });
         }
     }, [map, flyToCoordinates]);

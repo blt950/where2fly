@@ -1,11 +1,7 @@
 import { useEffect } from 'react';
-
 import { useMapGL } from '../context/MapGLContext';
 import { terminatorPolygon } from '../utils/solarTerminator';
 
-// The terminator drifts a quarter degree of longitude a minute — under a pixel at the zooms
-// this map lives at, so a minute between recomputes is plenty. The Leaflet version it replaces
-// computed once on mount and went stale for the rest of the session.
 const REFRESH_MS = 60_000;
 
 const MapTerminator = () => {
@@ -14,9 +10,6 @@ const MapTerminator = () => {
 
     useEffect(() => {
         map.addSource('terminator', { type: 'geojson', data: terminatorPolygon() });
-
-        // Mounted before the airport layers so it lands at the bottom of the stack. The guard
-        // covers a remount, where those layers already exist and would otherwise be covered.
         map.addLayer({
             id: 'terminator',
             type: 'fill',

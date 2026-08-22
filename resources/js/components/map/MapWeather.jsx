@@ -10,9 +10,7 @@ const INDEX_URL = 'https://api.rainviewer.com/public/weather-maps.json';
 // RainViewer publishes a new radar frame roughly every 10 minutes.
 const REFRESH_MS = 5 * 60 * 1000;
 
-// RainViewer serves a literal "Zoom Level Not Supported" PNG above tile z7 — at either tile
-// size, it is a data-resolution cap, not a tile-size one. Capping the source here means
-// MapLibre overzooms the deepest real tiles instead of ever requesting that image.
+// RainViewer serves a literal "Zoom Level Not Supported" PNG above tile z7
 const MAX_TILE_ZOOM = 7;
 
 // Two levels of overzoom still reads as radar; beyond that it is misleading mush, so the layer
@@ -83,9 +81,7 @@ const MapWeather = ({ onStatus }) => {
                 type: 'raster',
                 source: SOURCE,
                 maxzoom: MAX_LAYER_ZOOM,
-                // 0.5 is what keeps ICAO labels readable where they cross a cell — the labels
-                // carry no outline of their own.
-                paint: { 'raster-opacity': 0.5 },
+                paint: { 'raster-opacity': 0.3 },
             }, insertBefore(map, ['terminator', 'airports-hit']));
         };
 
@@ -94,8 +90,6 @@ const MapWeather = ({ onStatus }) => {
                 .then((response) => response.json())
                 .then(apply)
                 .catch(() => {
-                    // A failed refresh keeps the frame already on screen; only say error when
-                    // there has never been one.
                     if (!currentPath) { dataStatus = 'error'; }
                     publish();
                 });

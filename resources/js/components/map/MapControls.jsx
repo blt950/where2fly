@@ -10,8 +10,6 @@ const LAYERS = [
 
 const THEMES = Object.entries(MAP_THEMES).map(([value, { label }]) => ({ value, label }));
 
-// Only the states worth interrupting for. A working radar says nothing — the rain on the map
-// is its own confirmation.
 const WEATHER_STATUS = {
     loading: { icon: 'fa-circle-notch fa-spin', title: 'Loading radar' },
     error: { icon: 'fa-triangle-exclamation', title: 'Radar unavailable' },
@@ -26,12 +24,8 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
 
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
-
-    // The full status lives inside the panel, which is closed most of the time — so a broken
-    // feed, and only a broken feed, also marks the collapsed button.
     const showsFault = preferences.weather && weatherStatus === 'error';
 
-    // Standard dropdown dismissal. Without it the panel covers the hint card with no way back.
     useEffect(() => {
         if (!open) {
             return undefined;

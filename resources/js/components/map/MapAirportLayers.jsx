@@ -8,15 +8,10 @@ import { LABEL_FONT } from './mapConfig';
 
 const SOURCE = 'airports';
 
-// Every layer a click on an airport can land on. Leaflet forwarded clicks on the ICAO text to
-// its marker (MapMarker set interactive on the tooltip), so the label layers belong here too.
 const AIRPORT_LAYERS = ['airports-hit', 'airports-label-large', 'airports-label-medium',
     'airports-label-small', 'airports-label-pinned'];
 
 const NOT_A_CLUSTER = ['!', ['has', 'point_count']];
-
-// ClusterIcon.jsx scaled the bubble from 2rem to 3.75rem across ln(2)..ln(100), and interpolate
-// clamps outside its stops for free — the Math.min/max the old ratio needed.
 const clusterScale = (minRem, maxRem) => ['interpolate', ['linear'], ['ln', ['get', 'point_count']],
     Math.log(2), minRem * ROOT_FONT_SIZE, Math.log(100), maxRem * ROOT_FONT_SIZE];
 
@@ -25,8 +20,6 @@ const MapAirportLayers = ({ cluster, clusterRadius, palette }) => {
     const map = useMapGL();
     const { airports, focusAirport, primaryAirport, setFocusAirport } = useContext(MapContext);
 
-    // cluster and clusterRadius are fixed when a GeoJSON source is created — setData cannot
-    // change them — so changing either means tearing the source down and rebuilding.
     useEffect(() => {
         map.addSource(SOURCE, {
             type: 'geojson',
@@ -78,14 +71,9 @@ const MapAirportLayers = ({ cluster, clusterRadius, palette }) => {
             type: 'circle',
             source: SOURCE,
             filter: NOT_A_CLUSTER,
-            // to-color is required: a ['get'] returns a string, and MapLibre will not coerce a
-            // string-typed expression to a colour.
             paint: { 'circle-radius': ['get', 'r'], 'circle-color': ['to-color', ['get', 'color']] },
         });
 
-        // Leaflet's zoom was integer, so its `zoom > 5` meant 6 and up. MapLibre's is
-        // fractional, hence minzoom rather than a filter — which is also free at render time
-        // and correctly releases collision space.
         ['large_airport', 'medium_airport', 'small_airport'].forEach((airportType) => {
             map.addLayer(labelSpec({
                 id: `airports-label-${airportType.replace('_airport', '')}`,
@@ -95,8 +83,6 @@ const MapAirportLayers = ({ cluster, clusterRadius, palette }) => {
             }));
         });
 
-        // The focused and primary airports keep their label at every zoom, and never lose a
-        // collision against a neighbour.
         map.addLayer(labelSpec({
             id: 'airports-label-pinned',
             source: SOURCE,
@@ -112,14 +98,10 @@ const MapAirportLayers = ({ cluster, clusterRadius, palette }) => {
         };
     }, [map, cluster, clusterRadius, palette]);
 
-    // Data updates are a plain setData — no teardown, no re-tiling of the basemap.
     useEffect(() => {
         map.getSource(SOURCE)?.setData(airports ? airportsToGeoJson(airports, palette) : EMPTY_FEATURE_COLLECTION);
     }, [map, airports, palette]);
 
-    // Focus/primary highlighting is a paint update plus one filter swap: main-thread only, no
-    // worker round-trip. feature-state would be unreliable here because Supercluster
-    // regenerates its features per zoom and drops the state with them.
     useEffect(() => {
         const pinned = [focusAirport, primaryAirport].filter(Boolean);
         const color = ['case', ['==', ['get', 'icao'], focusAirport ?? ''], palette.fallback,

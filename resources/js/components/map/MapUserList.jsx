@@ -14,9 +14,6 @@ const LABELS = ['large_airport', 'medium_airport', 'small_airport']
 
 const CLICKABLE = [HIT, ...LABELS.map(([id]) => id)];
 
-// The user's own scenery list, as an overlay in its own right rather than something only the
-// logged-in home page gets. Same endpoint and same cache as before; it just renders as a layer
-// now, so it can sit over search results without disturbing them.
 const MapUserList = ({ listAirports, palette }) => {
 
     const map = useMapGL();
