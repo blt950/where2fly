@@ -5,10 +5,26 @@ Flight destination finder: given a departure or arrival airport, suggests nearby
 ## Tech stack
 
 - **Backend:** Laravel 13, PHP ^8.2, MySQL 8.4 (Oracle client, see Dockerfile), Sentry, `laravel-eloquent-spatial` for geo queries.
-- **Frontend:** Blade + React 19 for the interactive map canvas only (`resources/js/components/map`) — the rest of the UI is server-rendered Blade/JS/SCSS.
+- **Frontend:** Blade + React 19 for the interactive map canvas only (`resources/js/components/map`) — the rest of the UI is server-rendered Blade/JS/SCSS. The map is MapLibre GL (WebGL2) on CARTO basemap tiles.
 - **Frontend layout:** `resources/js/components/{map,context,ui,utils}`, `resources/js/functions`.
 
 Consult the `laravel-13` skill for Laravel 13-specific API/behavior questions (post-dates training data), and the `run-where2fly` skill to build/run the app, take screenshots, or run the PHP test suite.
+
+## The map (MapLibre GL)
+
+`Map.jsx` is the app's only React mount point, dynamically imported from `app.js` only when the page has an `#map` element — so React and MapLibre stay off every page without a map. Don't add static React imports back to `app.js`.
+
+**Component convention:** `MapProvider` owns the `maplibregl.Map` and hands it down through `MapGLContext`; every child renders `null` and does its work in effects. One component owns one source and its layer, and takes both down on unmount — use `useMapLayer` from `map/mapLayers.js` rather than hand-rolling `addSource`/`addLayer`/teardown (`removeSourceLayer` alone is for overlays that can't add on mount, e.g. `MapWeather` waiting on a fetch). Layer ids that cross module boundaries live in `mapConfig.js` (`BASEMAP_ANCHORS`, `TERMINATOR_LAYER`) and `utils/airportLayerSpec.js` (`AIRPORT_SOURCES`, `hitId`, `clusterIds`) — overlays stack against them via `beneath()`, and a rename that misses one degrades silently into wrong z-ordering, never an error.
+
+**Gotchas** (each cost real debugging time):
+
+- **`setWorkerUrl` is mandatory.** MapLibre v6 resolves its worker relative to `import.meta.url`, which after bundling is a 404 Vite never emits. The failure is silent: no error event, black canvas, zero tile requests. `MapProvider` fixes it with Vite's `?worker&url`.
+- **v6 has no default export** — namespace imports (`import * as maplibregl`) throughout.
+- **Glyphs are committed**, under `public/fonts/`, because CARTO's glyph server only carries Open Sans / Roboto / Noto. Regenerate only when the typeface changes: `npm install --no-save fontnik && node scripts/build-glyphs.mjs` (fontnik is native and deliberately not a devDependency, so it can't break CI).
+- **Style swaps remount every child.** Changing theme calls `setStyle`, which fires `style.load` and bumps `styleEpoch`; children are keyed on it, so glyphs, projection and theme overrides must be reapplied on every load, not once.
+- **`localStorage` throws outright** where a browser blocks site data, and the map reads it during render — always go through `utils/storage.js`, never `localStorage` directly.
+- **Reduced motion:** MapLibre turns `flyTo` into a synchronous `jumpTo`, which fires `moveend` *inside* the call — register listeners before flying, not after. Own animations (the route reveal, the radar ping) need their own `prefers-reduced-motion` path.
+- **Tile providers are third parties** your browser talks to directly (CARTO always; Tilezen DEM and RainViewer when terrain/precipitation are on). `resources/views/privacy.blade.php` lists them — keep it in step when adding a source.
 
 ## Codebase navigation
 

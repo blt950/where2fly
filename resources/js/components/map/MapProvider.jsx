@@ -12,8 +12,16 @@ const MapProvider = ({ view, projection, theme, children }) => {
     const [map, setMap] = useState(null);
     const [styleEpoch, setStyleEpoch] = useState(0);
     const settings = useRef({ projection, theme });
-    settings.current = { projection, theme };
 
+    // style.load fires long after mount and has to read whatever is current by then, not what
+    // was captured on the effect below — hence the ref, written after each render rather than
+    // during it.
+    useEffect(() => {
+        settings.current = { projection, theme };
+    });
+
+    // Mount only: view and theme seed the first map, and the effects below own every later
+    // change. Re-running this would rebuild the map underneath its children.
     useEffect(() => {
         const container = containerRef.current;
         let instance = null;

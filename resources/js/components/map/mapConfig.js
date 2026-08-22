@@ -77,9 +77,14 @@ export const mapOptions = (container, view, style) => ({
     dragPan: { maxSpeed: 1000 },
 });
 
+// Layer ids that cross module boundaries: overlays stack against them, so a rename has to be
+// visible from one place. The first two come from the CARTO basemap style.
+export const BASEMAP_ANCHORS = { water: 'water', countryBorders: 'boundary_country_inner' };
+export const TERMINATOR_LAYER = 'terminator';
+
 // The first of these layers that exists — where an overlay slots into the stack.
 export const beneath = (map, ids) => ids.find((id) => map.getLayer(id));
-// A style swap resets sky and land colours, so this runs on every load, not once.
+// A style swap resets sky and land colors, so this runs on every load, not once.
 export const applyTheme = (map, theme) => {
     theme.overrides.forEach(([layer, property, value]) => {
         if (map.getLayer(layer)) { map.setPaintProperty(layer, property, value); }

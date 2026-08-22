@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 
 import { useMapGL } from '../context/MapGLContext';
-import { beneath } from './mapConfig';
+import { AIRPORT_SOURCES, hitId } from '../utils/airportLayerSpec';
+import { beneath, TERMINATOR_LAYER } from './mapConfig';
+import { removeSourceLayer } from './mapLayers';
 
 const SOURCE = 'weather';
 const LAYER = 'weather-radar';
@@ -17,7 +19,7 @@ const MAX_TILE_ZOOM = 7;
 // switches itself off and comes back on the way down. maxzoom is exclusive.
 const MAX_LAYER_ZOOM = 9;
 
-// 512px tiles, colour scheme 8 (Dark Sky — built for dark basemaps), smoothed, snow shown.
+// 512px tiles, color scheme 8 (Dark Sky — built for dark basemaps), smoothed, snow shown.
 const frameTiles = (host, path) => [`${host}${path}/512/{z}/{x}/{y}/8/1_1.png`];
 
 // The newest available frame: nowcast when RainViewer is publishing one, else the latest past.
@@ -82,7 +84,7 @@ const MapWeather = ({ onStatus }) => {
                 source: SOURCE,
                 maxzoom: MAX_LAYER_ZOOM,
                 paint: { 'raster-opacity': 0.3 },
-            }, beneath(map, ['terminator', 'airports-hit']));
+            }, beneath(map, [TERMINATOR_LAYER, hitId(AIRPORT_SOURCES.results)]));
         };
 
         const refresh = () => {
@@ -122,8 +124,7 @@ const MapWeather = ({ onStatus }) => {
             map.off('sourcedata', onSourceData);
             map.off('error', onSourceError);
 
-            if (map.getLayer(LAYER)) { map.removeLayer(LAYER); }
-            if (map.getSource(SOURCE)) { map.removeSource(SOURCE); }
+            removeSourceLayer(map, LAYER, SOURCE);
 
             onStatus('loading');
         };

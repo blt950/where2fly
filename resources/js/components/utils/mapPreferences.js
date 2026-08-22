@@ -1,3 +1,5 @@
+import { readStored, writeStored } from './storage';
+
 const STORAGE_KEY = 'mapPreferences';
 
 export const DEFAULT_PREFERENCES = {
@@ -9,14 +11,6 @@ export const DEFAULT_PREFERENCES = {
     theme: 'default',
 };
 
-export const readPreferences = () => {
-    try {
-        return { ...DEFAULT_PREFERENCES, ...JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') };
-    } catch {
-        return { ...DEFAULT_PREFERENCES };
-    }
-};
+export const readPreferences = () => ({ ...DEFAULT_PREFERENCES, ...readStored(STORAGE_KEY) });
 
-export const writePreferences = (preferences) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
-};
+export const writePreferences = (preferences) => writeStored(STORAGE_KEY, preferences);

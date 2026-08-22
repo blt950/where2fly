@@ -16,13 +16,15 @@ import MapPan from './map/MapPan';
 import MapPing from './map/MapPing';
 import MapProvider from './map/MapProvider';
 import MapRoute from './map/MapRoute';
-import MapSaveView from './map/MapSaveView';
+import MapSaveView, { POSITION_KEY } from './map/MapSaveView';
 import MapTerrain from './map/MapTerrain';
 import MapWeather from './map/MapWeather';
 import MapTerminator from './map/MapTerminator';
 import { CLUSTER_COLOURS, themeOf } from './map/mapConfig';
+import { AIRPORT_SOURCES } from './utils/airportLayerSpec';
 import { isDefaultView } from './utils/mapRoutes';
 import { readPreferences, writePreferences } from './utils/mapPreferences';
+import { readStored, removeStored, writeStored } from './utils/storage';
 
 const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
 
@@ -36,6 +38,7 @@ const supportsWebGL2 = () => {
 };
 
 const DEFAULT_ZOOM = 4;
+const LISTS_CACHE_KEY = 'userListsCache';
 
 // MapLibre takes [lng, lat] — the opposite order to Leaflet. Zoom is optional per entry and
 // falls back to DEFAULT_ZOOM, so only the odd ones out need to say it.
@@ -62,12 +65,11 @@ const getInitMapPosition = () => {
         return view([-0, 30], 2);
     }
 
-    const storedPosition = localStorage.getItem('mapPosition');
+    // Pre-MapLibre this was stored without a zoom, which view()'s default parameter covers.
+    const stored = readStored(POSITION_KEY);
 
-    if (storedPosition) {
-        const { lat, lng, zoom } = JSON.parse(storedPosition);
-
-        return view([lng, lat], zoom);
+    if (Number.isFinite(stored?.lat) && Number.isFinite(stored?.lng)) {
+        return view([stored.lng, stored.lat], stored.zoom);
     }
 
     // Default to Berlin
@@ -108,22 +110,18 @@ function Map() {
         window.dispatchEvent(new Event('mapReady'));
 
         if (!userAuthenticated || !isDefaultView()) {
-            localStorage.removeItem('userListsCache');
+            removeStored(LISTS_CACHE_KEY);
 
             return;
         }
 
         // Seed the overlay from cache so the lists are on screen before the fetch returns.
-        try {
-            setLists(JSON.parse(localStorage.getItem('userListsCache')) ?? []);
-        } catch {
-            localStorage.removeItem('userListsCache');
-        }
+        setLists(readStored(LISTS_CACHE_KEY) ?? []);
 
         fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
             .then(response => response.json())
             .then(data => {
-                localStorage.setItem('userListsCache', JSON.stringify(data.data));
+                writeStored(LISTS_CACHE_KEY, data.data);
                 setLists(data.data ?? []);
             })
             .catch(error => {
@@ -208,14 +206,14 @@ function Map() {
 
     const { palette, hillshade } = themeOf(preferences.theme);
 
-    // One source for every visible list — the airports already carry their list's colour, so
+    // One source for every visible list — the airports already carry their list's color, so
     // merging keeps a single set of layers instead of one per list.
     const listAirports = useMemo(() => Object.assign(
         {},
         ...lists.filter(({ id }) => preferences.lists?.[id] !== false).map(({ airports }) => airports),
     ), [lists, preferences.lists]);
 
-    // Scenery lists are held apart from `airports` so each one keeps its own colour and toggle,
+    // Scenery lists are held apart from `airports` so each one keeps its own color and toggle,
     // but any ICAO the user can click has to resolve from either — `airports` alone is what the
     // search-result layer draws, not the full set of focusable airports.
     const findAirport = useMemo(
@@ -256,10 +254,10 @@ function Map() {
                 {preferences.terminator && <MapTerminator />}
                 {preferences.terrain && <MapTerrain hillshade={hillshade} />}
                 {preferences.weather && <MapWeather onStatus={setWeatherStatus} />}
-                <MapAirportSource id="airports" airports={airports} palette={palette}
+                <MapAirportSource id={AIRPORT_SOURCES.results} airports={airports} palette={palette}
                     cluster={cluster} {...clusterColours} />
                 {lists.length > 0 && (
-                    <MapAirportSource id="user-list" airports={listAirports} palette={palette}
+                    <MapAirportSource id={AIRPORT_SOURCES.userLists} airports={listAirports} palette={palette}
                         cluster {...CLUSTER_COLOURS.muted} />
                 )}
                 {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}

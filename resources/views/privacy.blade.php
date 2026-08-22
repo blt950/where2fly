@@ -25,7 +25,15 @@
             <p>Automatically recorded by our servers for security, optimization, and functionality purposes. This may include your IP address, browser type, and language.</p>
             
             <h3 class="fs-5 fw-normal mt-3">Local Storage</h3>
-            <p>We use local storage on your device to save the map position for your convenience. This data is stored locally on your device and is not transmitted to our servers or shared with any third parties.</p>
+            <p>We use local storage on your device to save the map position and your map display preferences for your convenience. This data is stored locally on your device and is not transmitted to our servers or shared with any third parties.</p>
+
+            <h3 class="fs-5 fw-normal mt-3">Map data</h3>
+            <p>The map is drawn from tiles fetched by your browser directly from the providers listed below. That means your IP address is visible to them, in the same way it would be if you visited their websites. The terrain and precipitation layers can be turned off in the map's layer controls, in the top right corner of the map.</p>
+            <ul>
+                <li><u>CARTO:</u> the base map tiles, always loaded.</li>
+                <li><u>Amazon S3 (Tilezen Terrain Tiles):</u> the elevation data behind the terrain relief layer.</li>
+                <li><u>RainViewer:</u> the weather radar imagery behind the precipitation layer.</li>
+            </ul>
 
             <h3 class="fs-5 fw-normal mt-3">Subprocessors</h3>
             <p>

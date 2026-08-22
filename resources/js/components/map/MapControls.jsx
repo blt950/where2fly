@@ -23,7 +23,7 @@ const WEATHER_STATUS = {
 };
 
 // One row of the panel: a checkbox when it stands alone, a radio when it belongs to a group.
-const Option = ({ id, name, label, icon, colour, checked, onChange, children }) => (
+const Option = ({ id, name, label, icon, color, checked, onChange, children }) => (
     <div className="form-check gap-1">
         <input
             className="form-check-input"
@@ -35,7 +35,7 @@ const Option = ({ id, name, label, icon, colour, checked, onChange, children }) 
         />
         <label className="form-check-label" htmlFor={id}>
             {icon && <i className={`fa-sharp ${icon}`} aria-hidden="true"></i>}
-            {colour && <i className="fa-sharp fa-circle" aria-hidden="true" style={{ color: colour }}></i>}
+            {color && <i className="fa-sharp fa-circle" aria-hidden="true" style={{ color }}></i>}
             {' '}{label}
         </label>
         {children}
@@ -126,7 +126,7 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
                                     key={id}
                                     id={`map-list-${id}`}
                                     label={name}
-                                    colour={color}
+                                    color={color}
                                     checked={preferences.lists?.[id] !== false}
                                     onChange={() => onChange({
                                         ...preferences,

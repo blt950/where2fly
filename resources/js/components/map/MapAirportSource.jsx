@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 
 import { MapContext } from '../context/MapContext';
 import { useMapGL } from '../context/MapGLContext';
-import { clusterSpecs, focusColor, labelIds, labelMinzoom, labelSpec, labelTypeFilter, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
+import { clusterIds, clusterSpecs, focusColor, hitId, labelIds, labelMinzoom, labelSpec, labelTypeFilter, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
 import { airportsToGeoJson } from '../utils/airportsGeoJson';
 
 const pinnedFilter = (icaos) => ['all', NOT_A_CLUSTER, ['in', ['get', 'icao'], ['literal', icaos]]];
@@ -15,6 +15,8 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
     const { focusAirport, primaryAirport, setFocusAirport } = useContext(MapContext);
 
     const labels = labelIds(id);
+    const clusters = clusterIds(id);
+    const hit = hitId(id);
     const pinned = `${id}-label-pinned`;
     const dots = `${id}-dots`;
 
@@ -29,7 +31,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
         // A small_airport is a 5px click target. A transparent circle over it fixes that;
         // queryRenderedFeatures tests geometry, not alpha, so the clicks still land.
         map.addLayer({
-            id: `${id}-hit`,
+            id: hit,
             type: 'circle',
             source: id,
             filter: NOT_A_CLUSTER,
@@ -60,7 +62,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
         map.addLayer(labelSpec({ id: pinned, source: id, filter: pinnedFilter([]), overlap: true }));
 
         return () => {
-            [`${id}-hit`, `${id}-clusters`, `${id}-cluster-count`, dots, ...labels.map(([labelId]) => labelId), pinned]
+            [hit, ...clusters, dots, ...labels.map(([labelId]) => labelId), pinned]
                 .forEach((layer) => { if (map.getLayer(layer)) { map.removeLayer(layer); } });
 
             if (map.getSource(id)) { map.removeSource(id); }
@@ -102,7 +104,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
 
         const pointer = () => { map.getCanvas().style.cursor = 'pointer'; };
         const reset = () => { map.getCanvas().style.cursor = ''; };
-        const interactive = [`${id}-hit`, `${id}-clusters`, ...labels.map(([labelId]) => labelId), pinned];
+        const interactive = [hit, clusters[0], ...labels.map(([labelId]) => labelId), pinned];
 
         map.on('click', interactive, onClick);
         map.on('mouseenter', interactive, pointer);

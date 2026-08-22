@@ -1,36 +1,34 @@
 import { useEffect } from 'react';
-import { useMapGL } from '../context/MapGLContext';
-import { beneath } from './mapConfig';
+
+import { AIRPORT_SOURCES, hitId } from '../utils/airportLayerSpec';
 import { terminatorPolygon } from '../utils/solarTerminator';
+import { TERMINATOR_LAYER } from './mapConfig';
+import { useMapLayer } from './mapLayers';
 
 const REFRESH_MS = 60_000;
 
 const MapTerminator = () => {
 
-    const map = useMapGL();
-
-    useEffect(() => {
-        map.addSource('terminator', { type: 'geojson', data: terminatorPolygon() });
-        map.addLayer({
-            id: 'terminator',
+    const map = useMapLayer({
+        id: TERMINATOR_LAYER,
+        source: { type: 'geojson', data: terminatorPolygon() },
+        layer: {
             type: 'fill',
-            source: 'terminator',
             paint: {
                 'fill-color': '#000000',
                 'fill-opacity': 0.3,
                 'fill-antialias': false,
             },
-        }, beneath(map, ['airports-hit']));
+        },
+        below: [hitId(AIRPORT_SOURCES.results)],
+    });
 
+    useEffect(() => {
         const timer = setInterval(() => {
-            map.getSource('terminator')?.setData(terminatorPolygon());
+            map.getSource(TERMINATOR_LAYER)?.setData(terminatorPolygon());
         }, REFRESH_MS);
 
-        return () => {
-            clearInterval(timer);
-            if (map.getLayer('terminator')) { map.removeLayer('terminator'); }
-            if (map.getSource('terminator')) { map.removeSource('terminator'); }
-        };
+        return () => clearInterval(timer);
     }, [map]);
 
     return null;

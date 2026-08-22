@@ -2,6 +2,7 @@ import { useContext, useEffect } from 'react';
 import { MapContext } from '../context/MapContext';
 import { useMapGL } from '../context/MapGLContext';
 import { arcDegrees, boundsFromCoordinates, greatCircle } from '../utils/geodesic';
+import { removeSourceLayer } from './mapLayers';
 
 const SOURCE = 'route';
 const LAYER = 'route-line';
@@ -112,8 +113,7 @@ const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
         return () => {
             if (frame) { cancelAnimationFrame(frame); }
             map.off('moveend', startReveal);
-            if (map.getLayer(LAYER)) { map.removeLayer(LAYER); }
-            if (map.getSource(SOURCE)) { map.removeSource(SOURCE); }
+            removeSourceLayer(map, LAYER, SOURCE);
         };
     }, [map, findAirport, departure, arrival, reverseDirection, color]);
 

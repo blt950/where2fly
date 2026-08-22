@@ -4,9 +4,15 @@ export const ROOT_FONT_SIZE = parseFloat(getComputedStyle(document.documentEleme
 
 export const NOT_A_CLUSTER = ['!', ['has', 'point_count']];
 
-// The focused airport takes the brand colour; everything else keeps the colour it came with.
+// The focused airport takes the brand color; everything else keeps the color it came with.
 export const focusColor = (focusAirport, palette) => ['case',
     ['==', ['get', 'icao'], focusAirport ?? ''], palette.fallback, ['to-color', ['get', 'color']]];
+
+// MapAirportSource is mounted once per data set and builds every id from these prefixes; the
+// overlays stack against the results source's hit layer, so it is named here too.
+export const AIRPORT_SOURCES = { results: 'airports', userLists: 'user-list' };
+export const hitId = (prefix) => `${prefix}-hit`;
+export const clusterIds = (prefix) => [`${prefix}-clusters`, `${prefix}-cluster-count`];
 
 const AIRPORT_TYPES = ['large_airport', 'medium_airport', 'small_airport'];
 const CATCH_ALL = AIRPORT_TYPES[AIRPORT_TYPES.length - 1];
@@ -48,7 +54,7 @@ export const labelSpec = ({ id, source, filter, minzoom = 0, overlap = false }) 
 
 export const clusterSpecs = ({ idPrefix, source, color, textColor }) => ([
     {
-        id: `${idPrefix}-clusters`,
+        id: clusterIds(idPrefix)[0],
         type: 'circle',
         source,
         filter: ['has', 'point_count'],
@@ -58,7 +64,7 @@ export const clusterSpecs = ({ idPrefix, source, color, textColor }) => ([
         },
     },
     {
-        id: `${idPrefix}-cluster-count`,
+        id: clusterIds(idPrefix)[1],
         type: 'symbol',
         source,
         filter: ['has', 'point_count'],
