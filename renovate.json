@@ -2,6 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "labels": ["dependencies"],
+  "minimumReleaseAge": "3 days",
+  "vulnerabilityAlerts": {
+    "minimumReleaseAge": "0 days",
+    "labels": ["security"],
+    "prPriority": 20
+  },
   "packageRules": [
     {
       "description": "Playwright driver for the run-where2fly agent skill: not shipped, not run by CI",
@@ -27,6 +33,18 @@
       "matchManagers": ["composer"],
       "matchDepNames": ["php"],
       "enabled": false
+    },
+    {
+      "matchManagers": ["composer"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchManagers": ["npm"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "minimumReleaseAge": "2 days"
     }
   ],
   "customManagers": [
