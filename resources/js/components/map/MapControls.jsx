@@ -10,13 +10,11 @@ const LAYERS = [
 
 const THEMES = Object.entries(MAP_THEMES).map(([value, { label }]) => ({ value, label }));
 
-// Enough to tell working from not working at a glance; the titles are there for anyone who
-// hovers, not as on-screen copy.
+// Only the states worth interrupting for. A working radar says nothing — the rain on the map
+// is its own confirmation.
 const WEATHER_STATUS = {
     loading: { icon: 'fa-circle-notch fa-spin', title: 'Loading radar' },
-    live: { icon: 'fa-signal-stream', title: 'Radar is live' },
     error: { icon: 'fa-triangle-exclamation', title: 'Radar unavailable' },
-    zoom: { icon: 'fa-magnifying-glass-minus', title: 'Zoom out to see radar' },
 };
 
 const PROJECTIONS = [
@@ -84,14 +82,14 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
                                 <label className="form-check-label" htmlFor={`map-layer-${key}`}>
                                     <i className={`fa-sharp ${icon}`} aria-hidden="true"></i> {label}
                                 </label>
-                                {key === 'weather' && preferences.weather && (
+                                {key === 'weather' && preferences.weather && WEATHER_STATUS[weatherStatus] && (
                                     <span
                                         className={`map-controls-status map-controls-status--${weatherStatus}`}
-                                        title={WEATHER_STATUS[weatherStatus]?.title}
-                                        aria-label={WEATHER_STATUS[weatherStatus]?.title}
+                                        title={WEATHER_STATUS[weatherStatus].title}
+                                        aria-label={WEATHER_STATUS[weatherStatus].title}
                                         role="status"
                                     >
-                                        <i className={`fa-sharp ${WEATHER_STATUS[weatherStatus]?.icon}`} aria-hidden="true"></i>
+                                        <i className={`fa-sharp ${WEATHER_STATUS[weatherStatus].icon}`} aria-hidden="true"></i>
                                     </span>
                                 )}
                             </div>

@@ -9,6 +9,7 @@ import { MapContext } from './context/MapContext';
 
 import PopupContainer from './PopupContainer';
 import MapAirportLayers from './map/MapAirportLayers';
+import MapAttribution from './map/MapAttribution';
 import MapControls from './map/MapControls';
 import MapBound from './map/MapBound';
 import MapPan from './map/MapPan';
@@ -119,7 +120,7 @@ function Map() {
         // The pre-grouping cache key is dropped rather than parsed — its shape no longer fits.
         localStorage.removeItem('userListAirportsCache');
         const cachedLists = localStorage.getItem('userListsCache');
-        if (userAuthenticated && cachedLists) {
+        if (userAuthenticated && isDefaultView() && cachedLists) {
             try {
                 setLists(JSON.parse(cachedLists) ?? []);
             } catch {
@@ -132,10 +133,11 @@ function Map() {
 
     }, []);
 
-    // The user's scenery lists, drawn as their own overlay so they can show on any page without
-    // displacing that page's airports. Fetched once; per-list visibility is applied locally.
+    // The user's scenery lists. Confined to the default view, as before the MapLibre migration:
+    // on a search or top list the page's own airports are the subject, and the list would only
+    // add noise. Fetched once; per-list visibility is applied locally.
     useEffect(() => {
-        if (!userAuthenticated) {
+        if (!userAuthenticated || !isDefaultView()) {
             localStorage.removeItem('userListsCache');
             setLists([]);
 
@@ -239,7 +241,7 @@ function Map() {
 
     }, [airports]);
 
-    const { halo, palette } = themeOf(preferences.theme);
+    const { palette } = themeOf(preferences.theme);
 
     // One source for every visible list — the airports already carry their list's colour, so
     // merging keeps a single set of layers instead of one per list.
@@ -278,13 +280,14 @@ function Map() {
                 {preferences.terminator && <MapTerminator />}
                 {preferences.terrain && <MapTerrain />}
                 {preferences.weather && <MapWeather onStatus={setWeatherStatus} />}
-                <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} haloColor={halo} palette={palette} />
-                {lists.length > 0 && <MapUserList listAirports={listAirports} haloColor={halo} palette={palette} />}
+                <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} palette={palette} />
+                {lists.length > 0 && <MapUserList listAirports={listAirports} palette={palette} />}
                 {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} color={palette.fallback} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {(isDefaultView() || route().current('scenery*')) && <MapSaveView />}
                 <MapPing ping={ping} />
+                <MapAttribution />
             </MapProvider>
             <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus} lists={lists} />
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}

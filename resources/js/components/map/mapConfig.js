@@ -33,7 +33,6 @@ export const MAP_THEMES = {
             ['waterway', 'line-color', 'rgba(63, 90, 109, 1)'],
         ],
         sky: sky('#05070c', '#2C353C', '#0e0e0e'),
-        halo: '#000000',
         palette: DARK_PALETTE,
     },
     darker: {
@@ -45,7 +44,6 @@ export const MAP_THEMES = {
             ['waterway', 'line-color', '#3a3a3a'],
         ],
         sky: sky('#040404', '#262626', '#090909'),
-        halo: '#000000',
         palette: DARK_PALETTE,
     },
     light: {
@@ -55,10 +53,8 @@ export const MAP_THEMES = {
         style: cartoStyle('positron-nolabels'),
         overrides: [],
         sky: sky('#cfd9e6', '#d4dadc', '#fafaf8'),
-        // Light basemaps want dark text with a light halo. Going the other way — a dark halo to
-        // rescue the gold — turns the muted grey candidates into heavy dark chips and inverts
-        // the hierarchy, so the palette darkens instead.
-        halo: '#ffffff',
+        // Light basemaps need dark text; the palette darkens rather than the type gaining an
+        // outline.
         palette: LIGHT_PALETTE,
     },
 };

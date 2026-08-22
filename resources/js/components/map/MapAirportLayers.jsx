@@ -20,7 +20,7 @@ const NOT_A_CLUSTER = ['!', ['has', 'point_count']];
 const clusterScale = (minRem, maxRem) => ['interpolate', ['linear'], ['ln', ['get', 'point_count']],
     Math.log(2), minRem * ROOT_FONT_SIZE, Math.log(100), maxRem * ROOT_FONT_SIZE];
 
-const MapAirportLayers = ({ cluster, clusterRadius, haloColor, palette }) => {
+const MapAirportLayers = ({ cluster, clusterRadius, palette }) => {
 
     const map = useMapGL();
     const { airports, focusAirport, primaryAirport, setFocusAirport } = useContext(MapContext);
@@ -92,7 +92,6 @@ const MapAirportLayers = ({ cluster, clusterRadius, haloColor, palette }) => {
                 source: SOURCE,
                 filter: ['all', NOT_A_CLUSTER, ['==', ['get', 'type'], airportType]],
                 minzoom: LABEL_MINZOOM[airportType](),
-                haloColor,
             }));
         });
 
@@ -102,7 +101,6 @@ const MapAirportLayers = ({ cluster, clusterRadius, haloColor, palette }) => {
             id: 'airports-label-pinned',
             source: SOURCE,
             filter: ['all', NOT_A_CLUSTER, ['in', ['get', 'icao'], ['literal', []]]],
-            haloColor,
             overlap: true,
         }));
 
@@ -112,7 +110,7 @@ const MapAirportLayers = ({ cluster, clusterRadius, haloColor, palette }) => {
 
             if (map.getSource(SOURCE)) { map.removeSource(SOURCE); }
         };
-    }, [map, cluster, clusterRadius, haloColor, palette]);
+    }, [map, cluster, clusterRadius, palette]);
 
     // Data updates are a plain setData — no teardown, no re-tiling of the basemap.
     useEffect(() => {

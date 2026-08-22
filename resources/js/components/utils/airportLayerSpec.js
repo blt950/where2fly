@@ -17,7 +17,7 @@ export const LABEL_MINZOOM = {
 
 // One ICAO label layer. Shared so the search/top airports and the user's own list render
 // identically rather than drifting apart.
-export const labelSpec = ({ id, source, filter, minzoom = 0, haloColor, overlap = false }) => ({
+export const labelSpec = ({ id, source, filter, minzoom = 0, overlap = false }) => ({
     id,
     type: 'symbol',
     source,
@@ -32,12 +32,5 @@ export const labelSpec = ({ id, source, filter, minzoom = 0, haloColor, overlap 
         'text-offset': [-0.6, 0],
         ...(overlap ? { 'text-allow-overlap': true, 'text-ignore-placement': true } : {}),
     },
-    paint: {
-        'text-color': ['to-color', ['get', 'color']],
-        // GL text has no CSS shadow to fall back on. A halo is what keeps ICAOs legible where
-        // the label crosses bright radar, coastline or hillshade.
-        'text-halo-color': haloColor,
-        'text-halo-width': 2,
-        'text-halo-blur': 0.5,
-    },
+    paint: { 'text-color': ['to-color', ['get', 'color']] },
 });

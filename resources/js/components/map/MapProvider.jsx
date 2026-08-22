@@ -43,11 +43,6 @@ const MapProvider = ({ center, projection, theme, children }) => {
             instance = new maplibregl.Map(mapOptions(container, center, themeOf(theme).style));
             instance.touchZoomRotate.disableRotation();
 
-            // MapLibre aggregates the attribution field of every source, so CARTO's "© CARTO,
-            // © OpenStreetMap contributors" and the DEM's Tilezen credit stay correct on their
-            // own as sources come and go.
-            instance.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
-
             instance.on('style.load', () => {
                 const current = settings.current;
 

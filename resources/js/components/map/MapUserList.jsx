@@ -17,7 +17,7 @@ const CLICKABLE = [HIT, ...LABELS.map(([id]) => id)];
 // The user's own scenery list, as an overlay in its own right rather than something only the
 // logged-in home page gets. Same endpoint and same cache as before; it just renders as a layer
 // now, so it can sit over search results without disturbing them.
-const MapUserList = ({ listAirports, haloColor, palette }) => {
+const MapUserList = ({ listAirports, palette }) => {
 
     const map = useMapGL();
     const { setFocusAirport } = useContext(MapContext);
@@ -46,7 +46,6 @@ const MapUserList = ({ listAirports, haloColor, palette }) => {
                 source: SOURCE,
                 filter: ['==', ['get', 'type'], airportType],
                 minzoom: LABEL_MINZOOM[airportType](),
-                haloColor,
             }));
         });
 
@@ -66,7 +65,7 @@ const MapUserList = ({ listAirports, haloColor, palette }) => {
             [...CLICKABLE, DOTS].forEach((id) => { if (map.getLayer(id)) { map.removeLayer(id); } });
             if (map.getSource(SOURCE)) { map.removeSource(SOURCE); }
         };
-    }, [map, haloColor, palette, setFocusAirport]);
+    }, [map, palette, setFocusAirport]);
 
     useEffect(() => {
         map.getSource(SOURCE)?.setData(airportsToGeoJson(listAirports, palette));

@@ -6,4 +6,7 @@
         | <a href="{{ route('privacy') }}" class="text-white-50 text-decoration-underline">Privacy Policy</a>
         | <a href="{{ route('api') }}" class="text-white-50 text-decoration-underline">API</a>
     </div>
+    {{-- Filled in by the map, and only on pages that have one. Its contents track whichever
+         sources are actually being drawn. --}}
+    <div id="map-attribution"></div>
 </footer>

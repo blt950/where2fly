@@ -40,14 +40,8 @@ const MapWeather = ({ onStatus }) => {
         let currentPath = null;
         let dataStatus = 'loading';
 
-        // Out-of-range is reported separately from the data status, so a hidden layer never
-        // sits there claiming to be live.
         const publish = () => {
-            if (cancelled) {
-                return;
-            }
-
-            onStatus(dataStatus === 'error' || map.getZoom() < MAX_LAYER_ZOOM ? dataStatus : 'zoom');
+            if (!cancelled) { onStatus(dataStatus); }
         };
 
         const apply = (index) => {
@@ -89,8 +83,8 @@ const MapWeather = ({ onStatus }) => {
                 type: 'raster',
                 source: SOURCE,
                 maxzoom: MAX_LAYER_ZOOM,
-                // 0.5 keeps ICAO labels readable where they cross a cell; the halo alone was not
-                // quite enough over the brightest returns.
+                // 0.5 is what keeps ICAO labels readable where they cross a cell — the labels
+                // carry no outline of their own.
                 paint: { 'raster-opacity': 0.5 },
             }, insertBefore(map, ['terminator', 'airports-hit']));
         };
@@ -123,7 +117,6 @@ const MapWeather = ({ onStatus }) => {
 
         map.on('sourcedata', onSourceData);
         map.on('error', onSourceError);
-        map.on('zoomend', publish);
 
         publish();
         refresh();
@@ -134,7 +127,6 @@ const MapWeather = ({ onStatus }) => {
             clearInterval(timer);
             map.off('sourcedata', onSourceData);
             map.off('error', onSourceError);
-            map.off('zoomend', publish);
 
             if (map.getLayer(LAYER)) { map.removeLayer(LAYER); }
             if (map.getSource(SOURCE)) { map.removeSource(SOURCE); }
