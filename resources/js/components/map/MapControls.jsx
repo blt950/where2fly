@@ -15,6 +15,8 @@ const PROJECTIONS = [
     { value: 'mercator', label: '2D map', icon: 'fa-map' },
 ];
 
+const PANEL_ID = 'map-controls-panel';
+
 const WEATHER_STATUS = {
     loading: { icon: 'fa-circle-notch fa-spin', title: 'Loading radar' },
     error: { icon: 'fa-triangle-exclamation', title: 'Radar unavailable' },
@@ -44,6 +46,7 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
 
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
+    const toggleRef = useRef(null);
     const showsFault = preferences.weather && weatherStatus === 'error';
     const status = preferences.weather ? WEATHER_STATUS[weatherStatus] : null;
 
@@ -56,7 +59,12 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
             if (!containerRef.current?.contains(event.target)) { setOpen(false); }
         };
         const onKeyDown = (event) => {
-            if (event.key === 'Escape') { setOpen(false); }
+            // Escape is only reachable from inside the panel, so focus has to go back to the
+            // toggle rather than falling to the body.
+            if (event.key === 'Escape') {
+                setOpen(false);
+                toggleRef.current?.focus();
+            }
         };
 
         document.addEventListener('pointerdown', onPointerDown);
@@ -72,8 +80,10 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
         <div className="map-controls" ref={containerRef}>
             <button
                 type="button"
+                ref={toggleRef}
                 className={`map-controls-toggle${showsFault ? ' map-controls-toggle--fault' : ''}`}
                 aria-expanded={open}
+                aria-controls={PANEL_ID}
                 aria-label="Map layers and projection"
                 title="Map layers and projection"
                 onClick={() => setOpen((wasOpen) => !wasOpen)}
@@ -82,7 +92,7 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
             </button>
 
             {open && (
-                <div className="map-controls-panel">
+                <div className="map-controls-panel" id={PANEL_ID}>
                     <fieldset>
                         <legend>Layers</legend>
                         {LAYERS.map(({ value, label, icon }) => (

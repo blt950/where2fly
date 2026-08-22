@@ -75,7 +75,17 @@ const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
             frame = requestAnimationFrame(reveal);
         };
 
-        const startReveal = () => { frame = requestAnimationFrame(reveal); };
+        // Drawing the line on is motion for its own sake — reduced-motion users get the
+        // finished route instead.
+        const startReveal = () => {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                map.setPaintProperty(LAYER, 'line-gradient', undefined);
+
+                return;
+            }
+
+            frame = requestAnimationFrame(reveal);
+        };
         const padding = framePadding(window.innerWidth);
         const width = map.getContainer().clientWidth;
         let flying = false;

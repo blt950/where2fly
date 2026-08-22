@@ -61,8 +61,15 @@
     }
 }
 
+// The canvas is tabbable (MapLibre sets tabindex=0) and pans/zooms on the arrow and +/- keys,
+// so it has to show focus. :focus-visible keeps the ring off for plain clicks.
 .maplibregl-canvas:focus {
     outline: none;
+}
+
+.maplibregl-canvas:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: -2px;
 }
 
 // Layer and projection controls, top-right of the map canvas.
@@ -193,6 +200,15 @@
     to {
         transform: scale(1.6);
         opacity: 0;
+    }
+}
+
+// The blip still has to say "the map moved to here", so it stays put rather than pulsing.
+// MapPing removes the marker after 1.8s either way.
+@media (prefers-reduced-motion: reduce) {
+    .radar-ping::before {
+        animation: none;
+        opacity: 1;
     }
 }
 
