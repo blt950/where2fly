@@ -17,7 +17,7 @@ const LIGHT_PALETTE = { fallback: '#8a6d0b', candidate: '#5a5a5a' };
 const DARK_HILLSHADE = {
     'hillshade-exaggeration': ['interpolate', ['linear'], ['zoom'], 0, 0.85, 5, 0.75, 9, 0.55],
     'hillshade-shadow-color': '#000000',
-    'hillshade-highlight-color': '#9a9a9a',
+    'hillshade-highlight-color': '#302f2f',
     'hillshade-accent-color': '#2b2b2b',
 };
 
