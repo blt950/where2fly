@@ -16,6 +16,7 @@
             <span class="badge ps-0 pb-2">2026-XX</span>
             <ul>
                 <li>Added a new map engine with precipitation layer and more configurable in top right</li>
+                <li>Added map controls to choose colors and toggle your lists</li>
                 <li>Added possibility to specify a whitelist both directions</li>
                 <li>Added a bug report button on the feedback page</li>
             </ul>
