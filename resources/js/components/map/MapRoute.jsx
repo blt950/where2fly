@@ -6,20 +6,22 @@ import { arcDegrees, boundsFromCoordinates, greatCircle } from '../utils/geodesi
 
 const SOURCE = 'route';
 const LAYER = 'route-line';
-const COLOR = '#ddb81c';
+
+const transparent = (hex) => `rgba(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))}, 0)`;
 
 const easeInOutCubic = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
 
 // Solid up to `head` along the line, transparent after it. Stops must be strictly ascending
 // or the style spec rejects the whole expression and the paint update is silently dropped.
-const revealTo = (head) => {
+const revealTo = (head, color) => {
     const cut = Math.min(Math.max(head, 0.001), 0.998);
+    const gone = transparent(color);
 
     return ['interpolate', ['linear'], ['line-progress'],
-        0, COLOR,
-        cut, COLOR,
-        cut + 0.001, 'rgba(221,184,28,0)',
-        1, 'rgba(221,184,28,0)'];
+        0, color,
+        cut, color,
+        cut + 0.001, gone,
+        1, gone];
 };
 
 // Leaflet's paddingTopLeft/paddingBottomRight, as MapLibre's padding object. Below the md
@@ -31,7 +33,7 @@ const framePadding = (width) => {
     return null;
 };
 
-const MapRoute = ({ departure, arrival, reverseDirection = false }) => {
+const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
 
     const map = useMapGL();
     const { airports } = useContext(MapContext);
@@ -62,7 +64,7 @@ const MapRoute = ({ departure, arrival, reverseDirection = false }) => {
             layout: { 'line-cap': 'round', 'line-join': 'round' },
             // Starts revealed to nothing. Painting a flat line-color here would show the whole
             // route solid for the length of the flyTo, then animate it a second time.
-            paint: { 'line-color': COLOR, 'line-width': 2, 'line-gradient': revealTo(0) },
+            paint: { 'line-color': color, 'line-width': 2, 'line-gradient': revealTo(0, color) },
         });
 
         // The original read Math.sqrt(Math.log(r)) with r in planar degrees, which is NaN for
@@ -82,7 +84,7 @@ const MapRoute = ({ departure, arrival, reverseDirection = false }) => {
                 return;
             }
 
-            map.setPaintProperty(LAYER, 'line-gradient', revealTo(progress));
+            map.setPaintProperty(LAYER, 'line-gradient', revealTo(progress, color));
             frame = requestAnimationFrame(reveal);
         };
 
@@ -116,7 +118,7 @@ const MapRoute = ({ departure, arrival, reverseDirection = false }) => {
             if (map.getLayer(LAYER)) { map.removeLayer(LAYER); }
             if (map.getSource(SOURCE)) { map.removeSource(SOURCE); }
         };
-    }, [map, airports, departure, arrival, reverseDirection]);
+    }, [map, airports, departure, arrival, reverseDirection, color]);
 
     return null;
 };

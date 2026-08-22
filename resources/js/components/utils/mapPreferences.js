@@ -7,7 +7,10 @@ export const DEFAULT_PREFERENCES = {
     terminator: true,
     terrain: false,
     weather: true,
+    // Matches the old behaviour, where a logged-in user's list appeared without being asked for.
+    list: true,
     projection: 'mercator',
+    theme: 'default',
 };
 
 // Every search reloads the page, so preferences that did not survive a reload would have to be

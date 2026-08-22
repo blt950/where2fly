@@ -2,11 +2,11 @@ import { useContext, useEffect } from 'react';
 
 import { MapContext } from '../context/MapContext';
 import { useMapGL } from '../context/MapGLContext';
+import { LABEL_MINZOOM, labelSpec, ROOT_FONT_SIZE } from '../utils/airportLayerSpec';
 import { airportsToGeoJson, EMPTY_FEATURE_COLLECTION } from '../utils/airportsGeoJson';
 import { LABEL_FONT } from './mapConfig';
 
 const SOURCE = 'airports';
-const FOCUS_COLOR = '#ddb81c';
 
 // Every layer a click on an airport can land on. Leaflet forwarded clicks on the ICAO text to
 // its marker (MapMarker set interactive on the tooltip), so the label layers belong here too.
@@ -15,42 +15,12 @@ const AIRPORT_LAYERS = ['airports-hit', 'airports-label-large', 'airports-label-
 
 const NOT_A_CLUSTER = ['!', ['has', 'point_count']];
 
-const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-
 // ClusterIcon.jsx scaled the bubble from 2rem to 3.75rem across ln(2)..ln(100), and interpolate
 // clamps outside its stops for free — the Math.min/max the old ratio needed.
 const clusterScale = (minRem, maxRem) => ['interpolate', ['linear'], ['ln', ['get', 'point_count']],
-    Math.log(2), minRem * rem, Math.log(100), maxRem * rem];
+    Math.log(2), minRem * ROOT_FONT_SIZE, Math.log(100), maxRem * ROOT_FONT_SIZE];
 
-// Zoom/type label filtering only ever applied on /search and the home page — not on /top,
-// /scenery or /search/routes. Preserved from the CSS-class filtering this replaces.
-const filtersLabelsByZoom = () => route().current('search') || route().current() === undefined;
-
-const labelLayer = (id, airportType, minzoom) => ({
-    id,
-    type: 'symbol',
-    source: SOURCE,
-    minzoom,
-    filter: ['all', NOT_A_CLUSTER, ['==', ['get', 'type'], airportType]],
-    layout: {
-        'text-field': ['get', 'icao'],
-        'text-font': LABEL_FONT,
-        'text-size': rem,
-        // Leaflet placed the tooltip to the marker's left, so the text ends where the dot begins.
-        'text-anchor': 'right',
-        'text-offset': [-0.6, 0],
-    },
-    paint: {
-        'text-color': ['to-color', ['get', 'color']],
-        // GL text has no CSS shadow to fall back on. A dark halo is what keeps ICAOs legible
-        // where the label crosses bright radar, coastline or hillshade.
-        'text-halo-color': '#000000',
-        'text-halo-width': 2,
-        'text-halo-blur': 0.5,
-    },
-});
-
-const MapAirportLayers = ({ cluster, clusterRadius }) => {
+const MapAirportLayers = ({ cluster, clusterRadius, haloColor, palette }) => {
 
     const map = useMapGL();
     const { airports, focusAirport, primaryAirport, setFocusAirport } = useContext(MapContext);
@@ -60,7 +30,7 @@ const MapAirportLayers = ({ cluster, clusterRadius }) => {
     useEffect(() => {
         map.addSource(SOURCE, {
             type: 'geojson',
-            data: airportsToGeoJson(airports),
+            data: airportsToGeoJson(airports, palette),
             cluster,
             clusterRadius,
             clusterMaxZoom: 12,
@@ -116,18 +86,25 @@ const MapAirportLayers = ({ cluster, clusterRadius }) => {
         // Leaflet's zoom was integer, so its `zoom > 5` meant 6 and up. MapLibre's is
         // fractional, hence minzoom rather than a filter — which is also free at render time
         // and correctly releases collision space.
-        map.addLayer(labelLayer('airports-label-large', 'large_airport', 0));
-        map.addLayer(labelLayer('airports-label-medium', 'medium_airport', filtersLabelsByZoom() ? 6 : 0));
-        map.addLayer(labelLayer('airports-label-small', 'small_airport', filtersLabelsByZoom() ? 8 : 0));
+        ['large_airport', 'medium_airport', 'small_airport'].forEach((airportType) => {
+            map.addLayer(labelSpec({
+                id: `airports-label-${airportType.replace('_airport', '')}`,
+                source: SOURCE,
+                filter: ['all', NOT_A_CLUSTER, ['==', ['get', 'type'], airportType]],
+                minzoom: LABEL_MINZOOM[airportType](),
+                haloColor,
+            }));
+        });
 
         // The focused and primary airports keep their label at every zoom, and never lose a
         // collision against a neighbour.
-        const pinned = labelLayer('airports-label-pinned', null, 0);
-        map.addLayer({
-            ...pinned,
+        map.addLayer(labelSpec({
+            id: 'airports-label-pinned',
+            source: SOURCE,
             filter: ['all', NOT_A_CLUSTER, ['in', ['get', 'icao'], ['literal', []]]],
-            layout: { ...pinned.layout, 'text-allow-overlap': true, 'text-ignore-placement': true },
-        });
+            haloColor,
+            overlap: true,
+        }));
 
         return () => {
             [...AIRPORT_LAYERS, 'airports-clusters', 'airports-cluster-count', 'airports-dots']
@@ -135,19 +112,19 @@ const MapAirportLayers = ({ cluster, clusterRadius }) => {
 
             if (map.getSource(SOURCE)) { map.removeSource(SOURCE); }
         };
-    }, [map, cluster, clusterRadius]);
+    }, [map, cluster, clusterRadius, haloColor, palette]);
 
     // Data updates are a plain setData — no teardown, no re-tiling of the basemap.
     useEffect(() => {
-        map.getSource(SOURCE)?.setData(airports ? airportsToGeoJson(airports) : EMPTY_FEATURE_COLLECTION);
-    }, [map, airports]);
+        map.getSource(SOURCE)?.setData(airports ? airportsToGeoJson(airports, palette) : EMPTY_FEATURE_COLLECTION);
+    }, [map, airports, palette]);
 
     // Focus/primary highlighting is a paint update plus one filter swap: main-thread only, no
     // worker round-trip. feature-state would be unreliable here because Supercluster
     // regenerates its features per zoom and drops the state with them.
     useEffect(() => {
         const pinned = [focusAirport, primaryAirport].filter(Boolean);
-        const color = ['case', ['==', ['get', 'icao'], focusAirport ?? ''], FOCUS_COLOR,
+        const color = ['case', ['==', ['get', 'icao'], focusAirport ?? ''], palette.fallback,
             ['to-color', ['get', 'color']]];
 
         if (map.getLayer('airports-dots')) {
@@ -162,7 +139,7 @@ const MapAirportLayers = ({ cluster, clusterRadius }) => {
             map.setFilter('airports-label-pinned',
                 ['all', NOT_A_CLUSTER, ['in', ['get', 'icao'], ['literal', pinned]]]);
         }
-    }, [map, focusAirport, primaryAirport]);
+    }, [map, focusAirport, primaryAirport, palette]);
 
     useEffect(() => {
         const focus = (e) => setFocusAirport(e.features[0].properties.icao);

@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { MAP_THEMES } from './mapConfig';
+
+// requiresAuth keeps the scenery list out of the panel for logged-out visitors, where it would
+// only ever be an option that does nothing.
 const LAYERS = [
     { key: 'terminator', label: 'Day & night', icon: 'fa-moon' },
     { key: 'terrain', label: 'Terrain relief', icon: 'fa-mountains' },
     { key: 'weather', label: 'Precipitation', icon: 'fa-cloud-rain' },
+    { key: 'list', label: 'My scenery list', icon: 'fa-list', requiresAuth: true },
 ];
+
+const THEMES = Object.entries(MAP_THEMES).map(([value, { label }]) => ({ value, label }));
 
 // Enough to tell working from not working at a glance; the titles are there for anyone who
 // hovers, not as on-screen copy.
@@ -20,7 +27,7 @@ const PROJECTIONS = [
     { value: 'mercator', label: '2D map', icon: 'fa-map' },
 ];
 
-const MapControls = ({ preferences, onChange, weatherStatus }) => {
+const MapControls = ({ preferences, onChange, weatherStatus, userAuthenticated }) => {
 
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
@@ -68,7 +75,7 @@ const MapControls = ({ preferences, onChange, weatherStatus }) => {
                 <div className="map-controls-panel">
                     <fieldset>
                         <legend>Layers</legend>
-                        {LAYERS.map(({ key, label, icon }) => (
+                        {LAYERS.filter(({ requiresAuth }) => userAuthenticated || !requiresAuth).map(({ key, label, icon }) => (
                             <div className="form-check" key={key}>
                                 <input
                                     className="form-check-input"
@@ -90,6 +97,25 @@ const MapControls = ({ preferences, onChange, weatherStatus }) => {
                                         <i className={`fa-sharp ${WEATHER_STATUS[weatherStatus]?.icon}`} aria-hidden="true"></i>
                                     </span>
                                 )}
+                            </div>
+                        ))}
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Colours</legend>
+                        {THEMES.map(({ value, label }) => (
+                            <div className="form-check" key={value}>
+                                <input
+                                    className="form-check-input"
+                                    type="radio"
+                                    name="map-theme"
+                                    id={`map-theme-${value}`}
+                                    checked={preferences.theme === value}
+                                    onChange={() => onChange({ ...preferences, theme: value })}
+                                />
+                                <label className="form-check-label" htmlFor={`map-theme-${value}`}>
+                                    {label}
+                                </label>
                             </div>
                         ))}
                     </fieldset>

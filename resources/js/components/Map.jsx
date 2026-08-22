@@ -17,8 +17,10 @@ import MapProvider from './map/MapProvider';
 import MapRoute from './map/MapRoute';
 import MapSaveView from './map/MapSaveView';
 import MapTerrain from './map/MapTerrain';
+import MapUserList from './map/MapUserList';
 import MapWeather from './map/MapWeather';
 import MapTerminator from './map/MapTerminator';
+import { themeOf } from './map/mapConfig';
 import { readPreferences, writePreferences } from './utils/mapPreferences';
 
 const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
@@ -89,6 +91,7 @@ function Map() {
     const [webgl2] = useState(supportsWebGL2);
     const [preferences, setPreferences] = useState(readPreferences);
     const [weatherStatus, setWeatherStatus] = useState('loading');
+    const [listAirports, setListAirports] = useState({});
     const [clusterRadius, setClusterRadius] = useState(null);
     const [coordinates, setCoordinates] = useState(null);
     const [drawRoute, setDrawRoute] = useState(null);
@@ -112,10 +115,14 @@ function Map() {
         window.setReverseDirection = (boolean) => { setReverseDirection(boolean) }
         window.isDefaultView = isDefaultView;
 
-        // Fetch from local storage cache
+        // Seed the overlay from cache so the list is on screen before the fetch returns
         const cachedAirports = localStorage.getItem('userListAirportsCache');
-        if (isDefaultView() && cachedAirports && cachedAirports != undefined && cachedAirports != 'undefined') {
-            setAirports(JSON.parse(cachedAirports));
+        if (userAuthenticated && cachedAirports && cachedAirports != 'undefined') {
+            try {
+                setListAirports(JSON.parse(cachedAirports));
+            } catch {
+                localStorage.removeItem('userListAirportsCache');
+            }
         }
 
         // Dispatch a custom event when the map is ready
@@ -123,31 +130,42 @@ function Map() {
 
     }, []);
 
-    // Fetch the user's list if they are authenticated
+    // The user's scenery list, drawn as its own overlay so it can show on any page without
+    // displacing that page's own airports. Same endpoint and cache as before.
     useEffect(() => {
-        if (isDefaultView() && userAuthenticated) {
-            fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
-                .then(response => response.json())
-                .then(data => {
-                    localStorage.setItem('userListAirportsCache', JSON.stringify(data.data));
-                    setAirports(data.data);
-                })
-                .catch(error => {
-                    captureException(error);
-                    console.error(error.message);
-                });
-        } else if(isDefaultView()) {
-            setAirports([]);
+        if (!userAuthenticated) {
             localStorage.removeItem('userListAirportsCache');
+            setListAirports({});
+
+            return;
         }
-    }, []);
+
+        if (!preferences.list) {
+            setListAirports({});
+
+            return;
+        }
+
+        fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
+            .then(response => response.json())
+            .then(data => {
+                localStorage.setItem('userListAirportsCache', JSON.stringify(data.data));
+                setListAirports(data.data ?? {});
+            })
+            .catch(error => {
+                captureException(error);
+                console.error(error.message);
+            });
+    }, [preferences.list]);
 
     // When focusAirport changes, pan to the airport and show the card.
     useEffect(() => {
         if (focusAirport !== null && focusAirport !== undefined) {
 
             // Load the selected airport to map if it's not already loaded (e.g. searching up scenery)
-            if (airports[focusAirport] === undefined) {
+            const known = airports[focusAirport] ?? listAirports[focusAirport];
+
+            if (known === undefined) {
                 
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 fetch(route('api.mapdata.icao'), {
@@ -185,12 +203,12 @@ function Map() {
             } else {
 
                 // Set the coordinates and show the card
-                setCoordinates([airports[focusAirport].lon, airports[focusAirport].lat]);
-                setShowAirportIdCard(airports[focusAirport].id);
+                setCoordinates([Number(known.lon), Number(known.lat)]);
+                setShowAirportIdCard(known.id);
 
                 // For routes which define a primary airport, we want to draw the route as well
                 if(primaryAirport){
-                    setDrawRoute([primaryAirport, airports[focusAirport].icao]);
+                    setDrawRoute([primaryAirport, known.icao]);
                 }
 
                 // Dispatch a custom event when the map focuses on an airport
@@ -225,6 +243,8 @@ function Map() {
 
     }, [airports]);
 
+    const { halo, palette } = themeOf(preferences.theme);
+
     const updatePreferences = (next) => {
         setPreferences(next);
         writePreferences(next);
@@ -251,18 +271,19 @@ function Map() {
 
     return (
         <MapContext.Provider value={mapContextValue}>
-            <MapProvider center={initialCenter} projection={preferences.projection}>
+            <MapProvider center={initialCenter} projection={preferences.projection} theme={preferences.theme}>
                 {preferences.terminator && <MapTerminator />}
                 {preferences.terrain && <MapTerrain />}
                 {preferences.weather && <MapWeather onStatus={setWeatherStatus} />}
-                <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} />
+                <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} haloColor={halo} palette={palette} />
+                {userAuthenticated && preferences.list && <MapUserList listAirports={listAirports} haloColor={halo} palette={palette} />}
                 {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
-                {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} />}
+                {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} color={palette.fallback} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {(isDefaultView() || route().current('scenery*')) && <MapSaveView />}
                 <MapPing ping={ping} />
             </MapProvider>
-            <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus} />
+            <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus} userAuthenticated={userAuthenticated} />
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
     );

@@ -92,6 +92,35 @@ Last update in production: 2026-07-29
     ```
 - Update the `runways` by truncating the data and then importing the CSV.
 
+## Debugging the map
+
+Airport dots and ICAO labels are drawn by the GPU inside a single `<canvas>`, so there are no
+DOM nodes to inspect — devtools' element picker will only ever find the canvas. The map
+instance is exposed as `window.map` instead:
+
+```js
+// what is on the map right now
+map.getStyle().layers.map(l => l.id)
+map.queryRenderedFeatures({ layers: ['airports-dots'] }).map(f => f.properties.icao)
+map.queryRenderedFeatures({ layers: ['airports-dots'] })[0].properties   // icao, color, type, r
+
+// tweak the ICAO labels live — these are the knobs worth playing with
+map.setPaintProperty('airports-label-large', 'text-halo-width', 3)
+map.setPaintProperty('airports-label-large', 'text-color', '#ff0000')
+map.setLayoutProperty('airports-label-large', 'text-size', 20)
+map.setLayoutProperty('airports-label-medium', 'text-offset', [-1, 0])
+
+// camera, and which airport is selected
+map.jumpTo({ center: [8, 50], zoom: 6 })
+setFocusAirport('EGLL')
+```
+
+Label layers are `airports-label-{large,medium,small,pinned}`, plus
+`user-list-label-*` for the scenery list. Changes made this way last until reload; to keep
+them, edit `resources/js/components/utils/airportLayerSpec.js`.
+
+Layer preferences live in `localStorage.mapPreferences` — clear it to get the defaults back.
+
 ## Data Sources
 
 This project uses the following data sources:

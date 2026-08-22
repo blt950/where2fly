@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 // v6 is ESM-only and ships named exports only — there is no default export to import.
 import * as maplibregl from 'maplibre-gl';
 // v6 resolves its worker as a sibling of import.meta.url, which after bundling points at a
@@ -8,14 +8,23 @@ import * as maplibregl from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 
 import { MapGLContext } from '../context/MapGLContext';
-import { GLYPHS_URL, mapOptions, SKY } from './mapConfig';
+import { applyThemeOverrides, GLYPHS_URL, mapOptions, themeOf } from './mapConfig';
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
-const MapProvider = ({ center, projection, children }) => {
+const MapProvider = ({ center, projection, theme, children }) => {
 
     const containerRef = useRef(null);
     const [map, setMap] = useState(null);
+
+    // Bumped on every style.load. Children are keyed on it so that swapping the basemap
+    // remounts them, and each one re-adds its own sources and layers in tree order — a style
+    // swap discards everything the previous style was carrying.
+    const [styleEpoch, setStyleEpoch] = useState(0);
+
+    // Read through refs so a theme or projection change never rebuilds the map itself.
+    const settings = useRef({ projection, theme });
+    settings.current = { projection, theme };
 
     useEffect(() => {
         const container = containerRef.current;
@@ -31,7 +40,7 @@ const MapProvider = ({ center, projection, children }) => {
 
             // center is read from the first render on purpose: it is the initial camera, not
             // a controlled prop, and later panning must not snap it back.
-            instance = new maplibregl.Map(mapOptions(container, center));
+            instance = new maplibregl.Map(mapOptions(container, center, themeOf(theme).style));
             instance.touchZoomRotate.disableRotation();
 
             // MapLibre aggregates the attribution field of every source, so CARTO's "© CARTO,
@@ -39,13 +48,21 @@ const MapProvider = ({ center, projection, children }) => {
             // own as sources come and go.
             instance.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
+            // Debug handle. Airport dots and labels are GPU-drawn, so there is no DOM node for
+            // devtools to pick — this is how you reach them from the console. See README.
+            window.map = instance;
+
             instance.on('style.load', () => {
-                // Applied here as well as in the effect below so the first painted frame is
-                // already the projection the user chose, with no globe-to-flat flash.
-                instance.setProjection({ type: projection });
-                instance.setSky(SKY);
+                const current = settings.current;
+
+                // A style swap resets all of this, so it is applied on every load, not once.
+                instance.setProjection({ type: current.projection });
+                instance.setSky(themeOf(current.theme).sky);
                 instance.setGlyphs(GLYPHS_URL);
+                applyThemeOverrides(instance, themeOf(current.theme));
+
                 setMap(instance);
+                setStyleEpoch((epoch) => epoch + 1);
             });
         };
 
@@ -56,6 +73,7 @@ const MapProvider = ({ center, projection, children }) => {
         return () => {
             observer.disconnect();
             instance?.remove();
+            delete window.map;
         };
     }, []);
 
@@ -63,10 +81,38 @@ const MapProvider = ({ center, projection, children }) => {
         map?.setProjection({ type: projection });
     }, [map, projection]);
 
+    // Only swap stylesheets when the theme actually points at a different one — Default and
+    // Darker share dark-matter, and re-fetching it would throw away every custom layer for
+    // nothing. The ref also skips the stylesheet the map was just constructed with.
+    const appliedStyle = useRef(themeOf(theme).style);
+
+    useEffect(() => {
+        const next = themeOf(theme).style;
+
+        if (!map || next === appliedStyle.current) {
+            return;
+        }
+
+        appliedStyle.current = next;
+        map.setStyle(next);
+    }, [map, theme]);
+
+    // Repaint for the palette. Keyed on styleEpoch as well as theme so it covers both routes
+    // in: a same-stylesheet switch, where no style.load fires at all, and the reload after a
+    // genuine stylesheet swap.
+    useEffect(() => {
+        if (!map) {
+            return;
+        }
+
+        applyThemeOverrides(map, themeOf(theme));
+        map.setSky(themeOf(theme).sky);
+    }, [map, theme, styleEpoch]);
+
     return (
         <MapGLContext.Provider value={map}>
             <div className="map" ref={containerRef} />
-            {map && children}
+            {map && <Fragment key={styleEpoch}>{children}</Fragment>}
         </MapGLContext.Provider>
     );
 };
