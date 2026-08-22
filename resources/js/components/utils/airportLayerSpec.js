@@ -39,8 +39,6 @@ export const labelSpec = ({ id, source, filter, minzoom = 0, overlap = false }) 
     paint: { 'text-color': ['to-color', ['get', 'color']] },
 });
 
-// MapLibre's stock cluster layers, with our palette, typeface and count size swapped in. The
-// circle step breaks and radii are the upstream example's — deliberately not tuned.
 export const clusterSpecs = ({ idPrefix, source, color, textColor }) => ([
     {
         id: `${idPrefix}-clusters`,

@@ -84,7 +84,9 @@ const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
             const camera = map.cameraForBounds(boundsFromCoordinates(line), { padding, maxZoom: 7 });
 
             if (camera) {
-                map.flyTo({ ...camera, zoom: Math.max(3, camera.zoom), duration: 350 });
+                // Leaflet snapped the fitted zoom down to a whole level, which is where the
+                // route's breathing room came from. MapLibre returns it fractional.
+                map.flyTo({ ...camera, zoom: Math.floor(camera.zoom-0.3), duration: 350 });
                 flying = true;
             }
         }
