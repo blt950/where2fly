@@ -32,19 +32,7 @@ const LIGHT_HILLSHADE = {
 
 export const MAP_THEMES = {
     default: {
-        label: 'Default',
-        style: cartoStyle('dark-matter-nolabels'),
-        overrides: [
-            ['background', 'background-color', '#0e0e0e'],
-            ['water', 'fill-color', '#2C353C'],
-            ['waterway', 'line-color', 'rgba(63, 90, 109, 1)'],
-        ],
-        sky: sky('#05070c', '#2C353C', '#0e0e0e'),
-        palette: DARK_PALETTE,
-        hillshade: DARK_HILLSHADE,
-    },
-    darker: {
-        label: 'Darker',
+        label: 'Dark',
         style: cartoStyle('dark-matter-nolabels'),
         overrides: [
             ['background', 'background-color', '#090909'],

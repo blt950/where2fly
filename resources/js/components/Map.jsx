@@ -62,24 +62,21 @@ const getInitMapPosition = () => {
 
     // Set position based on current top list filter
     if(route().current('top.filtered', 'AF')){
-        return view([21.0936, 7.1881]);
+        return view([21, 0], 3.2);
     } else if(route().current('top.filtered', 'AS')){
-        return view([100.6197, 34.0479]);
+        return view([100, 35], 3);
     } else if(route().current('top.filtered', 'EU')){
-        return view([15.2551, 54.5260]);
+        return view([15, 55]);
     } else if(route().current('top.filtered', 'NA')){
-        return view([-95.7129, 37.0902]);
+        return view([-95, 45]);
     } else if(route().current('top.filtered', 'OC')){
-        return view([133.7751, -25.2744]);
+        return view([135, -25], 3.5);
     } else if(route().current('top.filtered', 'SA')){
-        return view([-55.4915, -8.7832]);
+        return view([-55, -20], 3);
     } else if(route().current('top')){
-        // A place in the middle of the ocean to avoid stretching the map bounds
-        return view([-35.4521, 45.14777]);
+        return view([-0, 30], 2);
     }
 
-    // Set position based on localStorage. The stored {lat, lng} shape predates MapLibre and
-    // is kept as-is so existing visitors keep their saved view.
     var storedPosition = localStorage.getItem('mapPosition');
     if (storedPosition) {
         const { lat, lng, zoom } = JSON.parse(storedPosition);
