@@ -23,7 +23,7 @@ const clusterScale = (minRem, maxRem) => ['interpolate', ['linear'], ['ln', ['ge
     Math.log(2), minRem * rem, Math.log(100), maxRem * rem];
 
 // Zoom/type label filtering only ever applied on /search and the home page — not on /top,
-// /scenery or /search/routes. See the old MapTooltipZoom.
+// /scenery or /search/routes. Preserved from the CSS-class filtering this replaces.
 const filtersLabelsByZoom = () => route().current('search') || route().current() === undefined;
 
 const labelLayer = (id, airportType, minzoom) => ({

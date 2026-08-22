@@ -22,15 +22,6 @@
     background: $tertiary;
 }
 
-.leaflet-div-icon{
-    background: transparent;
-    border: 0;
-}
-
-.leaflet-container {
-    background: #000;
-}
-
 .maplibregl-map {
     background: #000;
 }
@@ -39,41 +30,35 @@
     outline: none;
 }
 
-.leaflet-tooltip {
-    text-align: right;
-    min-width: 64px;
-    min-height: 36px;
-}
-
-.leaflet-tooltip.airport {
-
+// MapLibre's attribution chrome is dark-on-white by default, unreadable over #0e0e0e land.
+// Scoped under .map to outrank it: maplibre-gl.css sits in the shared vendor chunk, which
+// app.blade.php's second @vite call re-emits after app.css, so load order cannot be relied on.
+.map .maplibregl-ctrl-attrib,
+.map .maplibregl-ctrl-attrib.maplibregl-compact,
+.map .maplibregl-ctrl-attrib.maplibregl-compact-show {
+    background: rgba($secondary, 0.75);
+    color: $gray-200;
     font-family: $font-family-sans-serif;
-    -webkit-font-smoothing: antialiased;
-    background-color: transparent;
-    border: transparent;
-    box-shadow: none;
+    font-size: 0.6875rem;
 
-    color: $primary;
-    font-weight: normal;
-    font-size: 1rem;
+    a {
+        color: $gray-200;
 
-    &:before{
-        display: none;
+        &:hover {
+            color: $bluewhite;
+        }
     }
 }
 
-// Tooltip visibility by zoom/type, driven by classes set imperatively on the map container (see MapTooltipZoom).
-.map.tt-filter {
-    .leaflet-tooltip.airport--small_airport,
-    .leaflet-tooltip.airport--medium_airport {
-        display: none;
-    }
+// The page footer is drawn over the map's bottom edge, which is where MapLibre parks the
+// attribution by default — lift it clear or the credit is invisible.
+.map .maplibregl-ctrl-bottom-right {
+    bottom: $footer-height;
+}
 
-    &.tt-show-medium .leaflet-tooltip.airport--medium_airport { display: block; }
-    &.tt-show-small  .leaflet-tooltip.airport--small_airport  { display: block; }
-
-    // Focused / primary airport always keeps its label, regardless of zoom.
-    .leaflet-tooltip.airport--pinned { display: block; }
+// The ⓘ toggle is a dark SVG background-image, so it inverts rather than takes a colour.
+.map .maplibregl-ctrl-attrib-button {
+    filter: invert(1);
 }
 
 // One-shot radar blip shown when an airport is selected from the sidebar (MapPing)
@@ -99,25 +84,6 @@
     to {
         transform: scale(1.6);
         opacity: 0;
-    }
-}
-
-.leaflet-marker-icon.marker-cluster{
-    color: black;
-    background: $primary;
-    border-radius: 50%;
-
-    width: 2.5rem;
-    height: 2.5rem;
-
-    font-family: $font-family-sans-serif;
-    -webkit-font-smoothing: antialiased;
-    font-size: 1rem;
-    text-align: center;
-
-    &.inverted{
-        color: white;
-        background: $tertiary;
     }
 }
 
