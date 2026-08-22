@@ -10,8 +10,11 @@ import { MapContext } from './context/MapContext';
 import PopupContainer from './PopupContainer';
 import MapAirportLayers from './map/MapAirportLayers';
 import MapBound from './map/MapBound';
+import MapPan from './map/MapPan';
+import MapPing from './map/MapPing';
 import MapProvider from './map/MapProvider';
 import MapRoute from './map/MapRoute';
+import MapSaveView from './map/MapSaveView';
 import MapTerminator from './map/MapTerminator';
 
 const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
@@ -165,7 +168,7 @@ function Map() {
 
                     setAirports({ ...airports, [focusAirport]: airport });
                     // Use the temporary data as setAirports is async
-                    setCoordinates([airport.lat, airport.lon]);
+                    setCoordinates([airport.lon, airport.lat]);
                     setShowAirportIdCard(airport.id);
                 })
                 .catch(error => {
@@ -176,7 +179,7 @@ function Map() {
             } else {
 
                 // Set the coordinates and show the card
-                setCoordinates([airports[focusAirport].lat, airports[focusAirport].lon]);
+                setCoordinates([airports[focusAirport].lon, airports[focusAirport].lat]);
                 setShowAirportIdCard(airports[focusAirport].id);
 
                 // For routes which define a primary airport, we want to draw the route as well
@@ -242,6 +245,9 @@ function Map() {
                 <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} />
                 {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} />}
+                {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
+                {(isDefaultView() || route().current('scenery*')) && <MapSaveView />}
+                <MapPing ping={ping} />
             </MapProvider>
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
