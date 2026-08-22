@@ -9,7 +9,9 @@ import { MapContext } from './context/MapContext';
 
 import PopupContainer from './PopupContainer';
 import MapAirportLayers from './map/MapAirportLayers';
+import MapBound from './map/MapBound';
 import MapProvider from './map/MapProvider';
+import MapRoute from './map/MapRoute';
 import MapTerminator from './map/MapTerminator';
 
 const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
@@ -199,11 +201,7 @@ function Map() {
         const airportsKeys = Object.keys(airports);
 
         if (!isDefaultView() && airports && airportsKeys.length > 0) {
-            var bounds = [];
-            Object.values(airports).forEach(airport => {
-                bounds.push([airport.lat, airport.lon]);
-            });
-            setMapBounds(bounds);
+            setMapBounds(Object.values(airports).map(airport => [airport.lon, airport.lat]));
         }
         
         if(airportsKeys.length > 0){
@@ -242,6 +240,8 @@ function Map() {
             <MapProvider center={initialCenter}>
                 <MapTerminator />
                 <MapAirportLayers cluster={cluster} clusterRadius={clusterRadius ?? 30} />
+                {(mapBounds && !route().current('top*') && !route().current('scenery*')) && <MapBound mapBounds={mapBounds} />}
+                {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} />}
             </MapProvider>
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
