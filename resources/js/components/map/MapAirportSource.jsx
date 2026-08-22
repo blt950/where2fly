@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 
 import { MapContext } from '../context/MapContext';
 import { useMapGL } from '../context/MapGLContext';
-import { clusterSpecs, focusColor, labelIds, labelMinzoom, labelSpec, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
+import { clusterSpecs, focusColor, labelIds, labelMinzoom, labelSpec, labelTypeFilter, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
 import { airportsToGeoJson } from '../utils/airportsGeoJson';
 
 const pinnedFilter = (icaos) => ['all', NOT_A_CLUSTER, ['in', ['get', 'icao'], ['literal', icaos]]];
@@ -52,7 +52,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
         labels.forEach(([labelId, airportType]) => map.addLayer(labelSpec({
             id: labelId,
             source: id,
-            filter: ['all', NOT_A_CLUSTER, ['==', ['get', 'type'], airportType]],
+            filter: ['all', NOT_A_CLUSTER, labelTypeFilter(airportType)],
             minzoom: labelMinzoom(airportType),
         })));
 

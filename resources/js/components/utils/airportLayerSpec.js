@@ -9,10 +9,17 @@ export const focusColor = (focusAirport, palette) => ['case',
     ['==', ['get', 'icao'], focusAirport ?? ''], palette.fallback, ['to-color', ['get', 'color']]];
 
 const AIRPORT_TYPES = ['large_airport', 'medium_airport', 'small_airport'];
+const CATCH_ALL = AIRPORT_TYPES[AIRPORT_TYPES.length - 1];
 
 // One label layer per size, so the smaller ones can be held back until the map is zoomed in.
 export const labelIds = (prefix) =>
     AIRPORT_TYPES.map((airportType) => [`${prefix}-label-${airportType.replace('_airport', '')}`, airportType]);
+
+// The smallest tier is the catch-all: heliports, seaplane bases and anything else label with it
+// rather than going unlabelled, which is what Leaflet's per-marker tooltips did.
+export const labelTypeFilter = (airportType) => (airportType === CATCH_ALL
+    ? ['!', ['in', ['get', 'type'], ['literal', AIRPORT_TYPES.slice(0, -1)]]]
+    : ['==', ['get', 'type'], airportType]);
 
 // Search results are dense enough that labelling every airport at world zoom is unreadable;
 // the curated lists are not, so they label from zoom 0.

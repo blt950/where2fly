@@ -84,6 +84,10 @@ const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
             const camera = map.cameraForBounds(boundsFromCoordinates(line), { padding, maxZoom: 7 });
 
             if (camera) {
+                // Under prefers-reduced-motion flyTo falls through to jumpTo, which fires
+                // moveend inside the call — listen first or the reveal never starts.
+                map.once('moveend', startReveal);
+
                 // Leaflet snapped the fitted zoom down to a whole level, which is where the
                 // route's breathing room came from. MapLibre returns it fractional.
                 map.flyTo({ ...camera, zoom: Math.floor(camera.zoom-0.3), duration: 350 });
@@ -91,9 +95,7 @@ const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
             }
         }
 
-        if (flying) {
-            map.once('moveend', startReveal);
-        } else {
+        if (!flying) {
             startReveal();
         }
 

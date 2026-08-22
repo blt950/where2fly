@@ -16,7 +16,9 @@ const collectAttributions = (map) => {
     const zoom = map.getZoom();
     const inRange = ({ minzoom = -Infinity, maxzoom = Infinity }) => zoom >= minzoom && zoom < maxzoom;
 
-    const sources = new Set(map.getStyle().layers
+    // getStyle() returns undefined while a style is still loading, which the full style
+    // rebuild path walks straight into.
+    const sources = new Set((map.getStyle()?.layers ?? [])
         .filter((layer) => layer.source && layer.layout?.visibility !== 'none' && inRange(layer))
         .map((layer) => layer.source));
 

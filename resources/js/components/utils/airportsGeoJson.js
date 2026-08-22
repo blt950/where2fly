@@ -12,9 +12,9 @@ export const airportsToGeoJson = (airports, palette) => ({
         properties: {
             id: airport.id,
             icao: airport.icao,
-            type: airport.type ?? 'large_airport',
+            type: airport.type ?? 'small_airport',
             color: normalizeColor(airport.color, palette),
-            r: TYPE_RADIUS[airport.type] ?? TYPE_RADIUS.large_airport,
+            r: TYPE_RADIUS[airport.type] ?? TYPE_RADIUS.small_airport,
         },
     })),
 });
