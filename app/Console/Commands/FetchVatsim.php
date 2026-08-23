@@ -75,7 +75,7 @@ class FetchVatsim extends Command
         }
 
         $this->info('Fetching online controllers...');
-        $response = Http::get('https://data.vatsim.net/v3/vatsim-data.json');
+        $response = Http::timeout(60)->retry(3, 1000)->get('https://data.vatsim.net/v3/vatsim-data.json');
 
         $vatsimPilots = null;
         if ($response->successful()) {
@@ -141,6 +141,18 @@ class FetchVatsim extends Command
     {
         $scoreInsert = [];
         $airports = Airport::where('type', '!=', 'closed')->has('metar')->with('controllers', 'events')->get();
+
+        // Plain float pairs, computed once, so the per-airport hot loop below skips repeated object property access.
+        $pilotCoords = [];
+        foreach ($vatsimPilots ?? [] as $vp) {
+            if ($vp->latitude === null || $vp->longitude === null) {
+                continue;
+            }
+            $pilotCoords[] = [(float) $vp->latitude, (float) $vp->longitude];
+        }
+
+        // 5nm search radius as degrees latitude (60nm/deg) plus 20% margin, used to bounding-box filter pilots before the exact distance() call.
+        $latDelta = (5 / 60) * 1.2;
 
         foreach ($airports as $airport) {
 
@@ -209,10 +221,25 @@ class FetchVatsim extends Command
             }
 
             // VATSIM_POPULAR: Check if many pilots are moving around the airport
-            if ($vatsimPilots) {
+            if ($pilotCoords) {
+                $airportLat = (float) $airport->latitude_deg;
+                $airportLon = (float) $airport->longitude_deg;
+                // Longitude degrees shrink toward the poles; clamp cos() so the box never narrows below the latitude box.
+                $lonDelta = $latDelta / max(0.1, cos(deg2rad($airportLat)));
+
                 $movements = 0;
-                foreach ($vatsimPilots as $vp) {
-                    if (distance($airport->latitude_deg, $airport->longitude_deg, $vp->latitude, $vp->longitude) <= 5) {
+                foreach ($pilotCoords as [$pilotLat, $pilotLon]) {
+                    if (abs($pilotLat - $airportLat) > $latDelta) {
+                        continue;
+                    }
+
+                    $dLon = abs($pilotLon - $airportLon);
+                    $dLon = $dLon > 180 ? 360 - $dLon : $dLon;
+                    if ($dLon > $lonDelta) {
+                        continue;
+                    }
+
+                    if (distance($airportLat, $airportLon, $pilotLat, $pilotLon) <= 5) {
                         $movements++;
                     }
                 }
