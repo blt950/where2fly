@@ -62,7 +62,7 @@ document.querySelectorAll('u-combobox').forEach(element => {
     });
 
     // Clear input and close the combobox when an option is selected
-    element.addEventListener('comboboxafterselect', (event) => {
+    element.addEventListener('comboboxafterselect', () => {
         input.value = null;
         input.focus();
         setTimeout(() => {

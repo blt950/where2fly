@@ -164,7 +164,9 @@ function Map() {
                         return;
                     }
 
-                    setAirports({ ...airports, [focusAirport]: airport });
+                    // Functional update: this lands after an await, so spreading the captured
+                    // `airports` would revert anything written since (e.g. setAirportsData).
+                    setAirports((previous) => ({ ...previous, [focusAirport]: airport }));
                     // Use the temporary data as setAirports is async
                     setCoordinates([airport.lon, airport.lat]);
                     setShowAirportIdCard(airport.id);
@@ -194,6 +196,7 @@ function Map() {
             setDrawRoute(null);
             setCoordinates(null);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [focusAirport]);
 
     // When airports data change, set the map bounds

@@ -29,7 +29,7 @@ function AirportCard({ airportId }) {
 
     useEffect(() => {
         window.setShowSceneryIdCard = (data) => { setShowSceneryIdCard(data) }
-    }), [];
+    }, []);
 
     // Fetch airport data if it's not in the cache
     useEffect(() => {
@@ -77,6 +77,7 @@ function AirportCard({ airportId }) {
         // Dispatch a custom event when the map focuses on an airport
         window.dispatchEvent(new CustomEvent('airportReady', { detail: { icao: findAirport(focusAirport).icao } }));
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [airportId]);
 
     useEffect(() => { if(showFlightsIdCard !== null) {

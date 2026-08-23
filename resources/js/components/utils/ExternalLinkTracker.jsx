@@ -1,5 +1,3 @@
-import { UHTMLTabListElement } from "@u-elements/u-tabs";
-
 const ExternalLinkTracker = () => {
 
     // Add metrics to card
@@ -10,7 +8,7 @@ const ExternalLinkTracker = () => {
             // Check if the link is not pointing to your own domain
             if (link.hostname !== window.location.hostname && !link.hasAttribute('data-click-event-added')) {
                 link.setAttribute('data-click-event-added', 'true');
-                link.addEventListener('click', function (e) {
+                link.addEventListener('click', function () {
                     // Only get the domain of the link to avoid sending the full URL
                     let url = new URL(link.href);
                     let domain = url.hostname;

@@ -29,6 +29,7 @@ const MapPing = ({ ping }) => {
             clearTimeout(timer);
             marker.remove();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [map, ping]);
 
     return null;

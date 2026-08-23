@@ -54,6 +54,7 @@ const MapProvider = ({ view, projection, theme, children }) => {
             observer.disconnect();
             instance?.remove();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {

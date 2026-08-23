@@ -34,6 +34,25 @@ jobs:
       - name: Check formatting
         run: ./vendor/bin/pint --test
 
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          path: "."
+          setup-node: "true"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
   tests:
     name: PHPUnit
     runs-on: ubuntu-latest
@@ -84,7 +103,7 @@ jobs:
   build-container:
     name: Build Container
     runs-on: ubuntu-latest
-    needs: tests
+    needs: [tests, frontend]
     if: github.event_name == 'push'
     steps:
       - name: configure docker buildx

@@ -67,6 +67,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
 
             if (map.getSource(id)) { map.removeSource(id); }
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [map, id, cluster, clusterColor, clusterTextColor, palette]);
 
     useEffect(() => {
@@ -85,6 +86,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
         if (map.getLayer(pinned)) {
             map.setFilter(pinned, pinnedFilter([focusAirport, primaryAirport].filter(Boolean)));
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [map, id, focusAirport, primaryAirport, palette]);
 
     useEffect(() => {
@@ -115,6 +117,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
             map.off('mouseenter', interactive, pointer);
             map.off('mouseleave', interactive, reset);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [map, id, setFocusAirport]);
 
     return null;

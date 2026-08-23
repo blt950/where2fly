@@ -146,7 +146,7 @@ submitButtons.forEach(function(button) {
     });
 });
 
-addEventListener('pageshow', (event) => {
+addEventListener('pageshow', () => {
 
     submitButtons.forEach(function(button) {
         button.removeAttribute('disabled')

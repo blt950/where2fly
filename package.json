@@ -2,7 +2,9 @@
     "private": true,
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "test": "vitest run",
+        "lint": "eslint resources/js"
     },
     "dependencies": {
         "@popperjs/core": "^2.11.6",
@@ -24,5 +26,15 @@
         "sass": "^1.77.6",
         "sortable-tablesort": "^4.0.2",
         "vite": "^8.0.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.39.5",
+        "@testing-library/react": "^16.3.2",
+        "eslint": "^9.39.5",
+        "eslint-plugin-react": "^7.37.5",
+        "eslint-plugin-react-hooks": "^5.2.0",
+        "globals": "^17.11.0",
+        "jsdom": "^30.0.1",
+        "vitest": "^4.1.11"
     }
 }
