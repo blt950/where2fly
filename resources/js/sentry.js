@@ -22,6 +22,7 @@ if (dsn) {
             /^Load failed$/,
             /^NetworkError when attempting to fetch resource\.$/,
             'Script error.',
+            /\[Cloudflare Turnstile\] Error: (300|600)\d{3}/,
         ],
 
         denyUrls: [
