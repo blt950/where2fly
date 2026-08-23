@@ -7,6 +7,8 @@ use App\Models\SceneryDeveloper;
 use App\Models\Simulator;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class SceneryTest extends TestCase
@@ -178,5 +180,139 @@ class SceneryTest extends TestCase
 
         $count = SceneryDeveloper::where('developer', 'SharedDev')->where('icao', 'EDDM')->count();
         $this->assertEquals(1, $count);
+    }
+
+    // -------------------------------------------------------------------------
+    // Map scenery endpoint / FSAddonCompare fallback
+    // -------------------------------------------------------------------------
+
+    private function cacheScenery(string $developer, int $simulatorId, ?int $sourceReferenceId, string $link): Scenery
+    {
+        $developerModel = SceneryDeveloper::firstOrCreate([
+            'icao' => 'EDDM',
+            'developer' => $developer,
+        ], [
+            'airport_id' => $this->airports['EDDM']->id,
+        ]);
+
+        return Scenery::create([
+            'scenery_developer_id' => $developerModel->id,
+            'simulator_id' => $simulatorId,
+            'link' => $link,
+            'payware' => true,
+            'published' => true,
+            'source' => $sourceReferenceId ? 'fsaddoncompare' : 'where2fly',
+            'source_reference_id' => $sourceReferenceId,
+        ]);
+    }
+
+    private function fsacProduct(int $id, string $developer): array
+    {
+        return [
+            'id' => $id,
+            'developer' => $developer,
+            'name' => $developer . ' EDDM',
+            'link' => 'https://www.fsaddoncompare.com/product/' . $id . '/EDDM',
+            'ratingAverage' => 4.5,
+            'simulatorVersions' => ['MSFS2020'],
+            'prices' => [[
+                'store' => 'Contrail',
+                'link' => 'https://r.fsaddoncompare.com?url=https%3A%2F%2Fcontrail.shop%2Fproducts%2Feddm-' . $id,
+                'simulatorVersions' => ['MSFS2020'],
+                'currencyPrice' => ['AUD' => 34.84, 'CAD' => 34.39, 'EUR' => 20.97, 'GBP' => 18.31, 'USD' => 24.98],
+                'isDeveloper' => false,
+            ]],
+        ];
+    }
+
+    private function fakeFsac(array $results): void
+    {
+        Http::fake(['api.fsaddoncompare.com/*' => Http::response([
+            'metadata' => ['total' => count($results), 'page' => 1, 'results' => count($results)],
+            'results' => $results ?: null,
+        ], 200)]);
+    }
+
+    private function getScenery()
+    {
+        return $this->postJson(route('api.airport.scenery'), ['airportIcao' => 'EDDM']);
+    }
+
+    public function test_cached_scenery_is_returned_when_fsac_knows_nothing_about_the_airport(): void
+    {
+        // A delisted ICAO still answers 200, with a null results payload
+        $this->cacheScenery('Burning Blue Design', 1, 2758, 'https://orbxdirect.com/product/eddm-msfs');
+        $this->fakeFsac([]);
+
+        $response = $this->getScenery();
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.MSFS2020.0.developer', 'Burning Blue Design');
+        $response->assertJsonPath('data.MSFS2020.0.fsac', false);
+    }
+
+    public function test_cached_scenery_is_returned_when_fsac_errors(): void
+    {
+        $this->cacheScenery('Burning Blue Design', 1, 2758, 'https://orbxdirect.com/product/eddm-msfs');
+        Http::fake(['api.fsaddoncompare.com/*' => Http::response('Not Found', 404)]);
+
+        $response = $this->getScenery();
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.MSFS2020.0.developer', 'Burning Blue Design');
+    }
+
+    public function test_cached_scenery_is_returned_when_fsac_is_unreachable(): void
+    {
+        $this->cacheScenery('Burning Blue Design', 1, 2758, 'https://orbxdirect.com/product/eddm-msfs');
+        Http::fake(fn () => throw new ConnectionException('cURL error 6: Could not resolve host'));
+
+        $response = $this->getScenery();
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.MSFS2020.0.developer', 'Burning Blue Design');
+    }
+
+    public function test_delisted_product_falls_back_to_cache_while_listed_products_come_from_fsac(): void
+    {
+        $this->cacheScenery('sim-wings', 1, 4270, 'https://contrail.shop/products/eddm-4270');
+        $this->cacheScenery('Burning Blue Design', 1, 2758, 'https://orbxdirect.com/product/eddm-msfs');
+        $this->fakeFsac([$this->fsacProduct(4270, 'sim-wings')]);
+
+        $response = $this->getScenery();
+
+        $response->assertStatus(200);
+        $sceneries = collect($response->json('data.MSFS2020'));
+        $this->assertEquals(2, $sceneries->count());
+        $this->assertTrue($sceneries->firstWhere('developer', 'sim-wings')['fsac']);
+        $this->assertFalse($sceneries->firstWhere('developer', 'Burning Blue Design')['fsac']);
+    }
+
+    public function test_product_returned_by_fsac_is_not_duplicated_by_its_cached_copy(): void
+    {
+        $this->cacheScenery('sim-wings', 1, 4270, 'https://contrail.shop/products/eddm-4270');
+        $this->fakeFsac([$this->fsacProduct(4270, 'sim-wings')]);
+
+        $response = $this->getScenery();
+
+        $response->assertStatus(200);
+        $this->assertEquals(1, count($response->json('data.MSFS2020')));
+        $response->assertJsonPath('data.MSFS2020.0.fsac', true);
+    }
+
+    public function test_scenery_endpoint_returns_404_when_nothing_is_cached_and_fsac_is_empty(): void
+    {
+        $this->fakeFsac([]);
+
+        $this->getScenery()->assertStatus(404);
+    }
+
+    public function test_unpublished_cached_scenery_is_not_returned_on_fsac_miss(): void
+    {
+        $scenery = $this->cacheScenery('Burning Blue Design', 1, 2758, 'https://orbxdirect.com/product/eddm-msfs');
+        $scenery->update(['published' => false]);
+        $this->fakeFsac([]);
+
+        $this->getScenery()->assertStatus(404);
     }
 }

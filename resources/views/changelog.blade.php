@@ -19,6 +19,7 @@
                 <li>Added map controls in top right for settings like colors, toggle lists and layers</li>
                 <li>Added derparture whitelist filter in extended filters</li>
                 <li>Added a bug report button on the feedback page</li>
+                <li>Fixed airport not always showing all available sceneries</li>
             </ul>
 
             <h2 class="mb-0">v3.0.4</h2>

@@ -12,6 +12,7 @@ use App\Models\Scenery;
 use App\Models\SceneryDeveloper;
 use App\Models\Simulator;
 use App\Models\UserList;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -217,11 +218,16 @@ class MapController extends Controller
             'airportIcao' => ['required', 'exists:airports,icao'],
         ])['airportIcao'];
 
-        // 2. Fetch FSAddonCompare sceneries
-        $fsacResponse = $this->fetchFsacSceneries($airportIcao);
+        // 2. Fetch FSAddonCompare sceneries. A timeout or an unreachable host throws rather
+        // than returning a response, and must fall back to the cache like any other failure.
+        try {
+            $fsacResponse = $this->fetchFsacSceneries($airportIcao);
+        } catch (ConnectionException $e) {
+            $fsacResponse = null;
+        }
 
         // 3. Decide how to handle response
-        if ($fsacResponse->successful()) {
+        if ($fsacResponse && $fsacResponse->successful()) {
             $returnData = $this->handleSuccessfulFsacResponse($fsacResponse, $airportIcao);
         } else {
             // If FSAddonCompare API fails, get local sceneries
@@ -261,8 +267,11 @@ class MapController extends Controller
             'MSFS2020' => Simulator::find(1),
         ];
 
-        // Run through results and decide actions
-        $fsacSceneries = collect(json_decode($fsacResponse->body(), false)->results);
+        // Run through results and decide actions. "results" is null when the airport is unknown
+        // to FSAddonCompare, which still comes back as a 200.
+        $fsacBody = json_decode($fsacResponse->body(), false);
+        $fsacSceneries = collect(is_object($fsacBody) ? ($fsacBody->results ?? []) : []);
+        $seenSourceReferenceIds = [];
         foreach ($fsacSceneries as $scenery) {
 
             // Get id for the product
@@ -330,12 +339,14 @@ class MapController extends Controller
                     'payware' => $cheapestStore->currencyPrice->EUR > 0,
                     'fsac' => true,
                 ]);
+
+                $seenSourceReferenceIds[] = $fsacId;
             }
 
         }
 
         // Add our own local sceneries which are not covered by FSAddonCompare
-        SceneryHelper::fetchW2fSceneries($returnData, $airportIcao, true);
+        SceneryHelper::fetchW2fSceneries($returnData, $airportIcao, $seenSourceReferenceIds);
 
         return $returnData;
     }

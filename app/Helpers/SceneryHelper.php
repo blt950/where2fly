@@ -81,7 +81,11 @@ class SceneryHelper
         ];
     }
 
-    public static function fetchW2fSceneries(&$returnData, $airportIcao, $whereNotSourceReference = false)
+    /**
+     * Only the source references seen in the current API response are excluded, never every
+     * mirrored row: a product FSAddonCompare has delisted must still fall back to our copy.
+     */
+    public static function fetchW2fSceneries(&$returnData, $airportIcao, array $excludeSourceReferenceIds = [])
     {
         $w2fDevelopers = SceneryDeveloper::where('icao', $airportIcao)->with(['sceneries' => function ($query) {
             $query->where('published', true);
@@ -89,8 +93,8 @@ class SceneryHelper
         foreach ($w2fDevelopers as $sceneryDeveloperModel) {
 
             $sceneryModels = $sceneryDeveloperModel->sceneries;
-            if ($whereNotSourceReference) {
-                $sceneryModels = $sceneryModels->whereNull('source_reference_id');
+            if (! empty($excludeSourceReferenceIds)) {
+                $sceneryModels = $sceneryModels->whereNotIn('source_reference_id', $excludeSourceReferenceIds);
             }
 
             foreach ($sceneryModels as $sceneryModel) {
