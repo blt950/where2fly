@@ -42,7 +42,7 @@ const Option = ({ id, name, label, icon, color, checked, onChange, children }) =
     </div>
 );
 
-const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
+const MapControls = ({ preferences, onChange, weatherStatus, lists, onListToggle }) => {
 
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
@@ -121,17 +121,14 @@ const MapControls = ({ preferences, onChange, weatherStatus, lists }) => {
                     {lists.length > 0 && (
                         <fieldset>
                             <legend>My lists</legend>
-                            {lists.map(({ id, name, color }) => (
+                            {lists.map(({ id, name, color, hidden }) => (
                                 <Option
                                     key={id}
                                     id={`map-list-${id}`}
                                     label={name}
                                     color={color}
-                                    checked={preferences.lists?.[id] !== false}
-                                    onChange={() => onChange({
-                                        ...preferences,
-                                        lists: { ...preferences.lists, [id]: preferences.lists?.[id] === false },
-                                    })}
+                                    checked={!hidden}
+                                    onChange={() => onListToggle(id, !hidden)}
                                 />
                             ))}
                         </fieldset>

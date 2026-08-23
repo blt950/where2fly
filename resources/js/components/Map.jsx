@@ -40,6 +40,17 @@ const supportsWebGL2 = () => {
 const DEFAULT_ZOOM = 4;
 const LISTS_CACHE_KEY = 'userListsCache';
 
+const postJson = (url, body) => fetch(url, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+    },
+    body: JSON.stringify(body),
+});
+
 // MapLibre takes [lng, lat] — the opposite order to Leaflet. Zoom is optional per entry and
 // falls back to DEFAULT_ZOOM, so only the odd ones out need to say it.
 const view = (center, zoom = DEFAULT_ZOOM) => ({ center, zoom });
@@ -140,17 +151,7 @@ function Map() {
 
             if (known === undefined) {
                 
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                fetch(route('api.mapdata.icao'), {
-                    method: "POST",
-                    credentials: 'include',
-                    headers: { 
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({ icao: focusAirport })
-                })
+                postJson(route('api.mapdata.icao'), { icao: focusAirport })
                 .then(response => response.json().then(body => ({ ok: response.ok, body })))
                 .then(({ ok, body }) => {
                     const airport = ok ? body.data?.[focusAirport] : undefined;
@@ -210,8 +211,8 @@ function Map() {
     // merging keeps a single set of layers instead of one per list.
     const listAirports = useMemo(() => Object.assign(
         {},
-        ...lists.filter(({ id }) => preferences.lists?.[id] !== false).map(({ airports }) => airports),
-    ), [lists, preferences.lists]);
+        ...lists.filter(({ hidden }) => !hidden).map(({ airports }) => airports),
+    ), [lists]);
 
     // Scenery lists are held apart from `airports` so each one keeps its own color and toggle,
     // but any ICAO the user can click has to resolve from either — `airports` alone is what the
@@ -220,6 +221,29 @@ function Map() {
         () => (icao) => airports[icao] ?? listAirports[icao],
         [airports, listAirports],
     );
+
+    // `hidden` is one flag shared with the lists page, so the toggle has to reach the server.
+    // Applied optimistically — the map redraws now and rolls back if the write fails.
+    const setListHidden = (id, hidden) => {
+        const previous = lists;
+        const next = lists.map((list) => (list.id === id ? { ...list, hidden } : list));
+
+        setLists(next);
+        writeStored(LISTS_CACHE_KEY, next);
+
+        postJson(route('api.lists.visibility', { list: id }), { hidden })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`Could not save list visibility (${response.status})`);
+                }
+            })
+            .catch((error) => {
+                setLists(previous);
+                writeStored(LISTS_CACHE_KEY, previous);
+                captureException(error);
+                console.error(error.message);
+            });
+    };
 
     const updatePreferences = (next) => {
         setPreferences(next);
@@ -267,7 +291,8 @@ function Map() {
                 <MapPing ping={ping} />
                 <MapAttribution />
             </MapProvider>
-            <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus} lists={lists} />
+            <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus}
+                lists={lists} onListToggle={setListHidden} />
             {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
         </MapContext.Provider>
     );

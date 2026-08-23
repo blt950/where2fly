@@ -287,7 +287,7 @@ class ApiTest extends TestCase
             ->assertJsonPath('data.0.airports.' . $airport->icao . '.color', '#00FF00');
     }
 
-    public function test_list_airports_endpoint_excludes_hidden_lists(): void
+    public function test_list_airports_endpoint_returns_hidden_lists_with_their_flag(): void
     {
         $user = User::factory()->create();
         $simulator = Simulator::first();
@@ -303,7 +303,73 @@ class ApiTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')->getJson('/api/lists/airports');
 
-        $response->assertStatus(200)->assertJsonCount(0, 'data');
+        // Hidden lists still ship, so the map can offer them as an unchecked toggle.
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Hidden List')
+            ->assertJsonPath('data.0.hidden', true);
+    }
+
+    public function test_list_visibility_endpoint_persists_hidden_state(): void
+    {
+        $user = User::factory()->create();
+        $list = $this->makeList($user, 'Toggleable List');
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/lists/' . $list->id . '/visibility', ['hidden' => true])
+            ->assertStatus(200)
+            ->assertJsonPath('data.hidden', true);
+
+        $this->assertTrue($list->fresh()->hidden);
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/lists/' . $list->id . '/visibility', ['hidden' => false])
+            ->assertStatus(200);
+
+        $this->assertFalse($list->fresh()->hidden);
+    }
+
+    public function test_list_visibility_endpoint_requires_a_boolean(): void
+    {
+        $user = User::factory()->create();
+        $list = $this->makeList($user, 'Validated List');
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/lists/' . $list->id . '/visibility', ['hidden' => 'maybe'])
+            ->assertStatus(422);
+    }
+
+    public function test_list_visibility_endpoint_rejects_another_users_list(): void
+    {
+        $owner = User::factory()->create();
+        $stranger = User::factory()->create();
+        $list = $this->makeList($owner, 'Private List');
+
+        $this->actingAs($stranger, 'sanctum')
+            ->postJson('/api/lists/' . $list->id . '/visibility', ['hidden' => true])
+            ->assertStatus(403);
+
+        $this->assertFalse($list->fresh()->hidden);
+    }
+
+    public function test_list_visibility_endpoint_rejects_guests(): void
+    {
+        $list = $this->makeList(User::factory()->create(), 'Guarded List');
+
+        $this->postJson('/api/lists/' . $list->id . '/visibility', ['hidden' => true])
+            ->assertStatus(401);
+    }
+
+    private function makeList(User $user, string $name): UserList
+    {
+        return UserList::create([
+            'name' => $name,
+            'color' => '#00FF00',
+            'simulator_id' => Simulator::first()->id,
+            'user_id' => $user->id,
+            'public' => false,
+            'hidden' => false,
+        ]);
     }
 
     // -------------------------------------------------------------------------

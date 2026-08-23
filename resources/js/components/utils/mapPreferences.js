@@ -6,7 +6,6 @@ export const DEFAULT_PREFERENCES = {
     terminator: true,
     terrain: true,
     weather: true,
-    lists: {},
     projection: 'mercator',
     theme: 'default',
 };

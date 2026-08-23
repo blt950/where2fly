@@ -53,6 +53,7 @@ class MapHelper
             'id' => $list->id,
             'name' => $list->name,
             'color' => $list->color,
+            'hidden' => $list->hidden,
             'airports' => self::generateAirportMapDataFromAirports($list->airports, $list->color),
         ])->values()->all();
     }
