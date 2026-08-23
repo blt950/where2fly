@@ -27,5 +27,10 @@ if [ -z "$APP_KEY" ] && [ ! -f "$SERVICE_ROOT/.env" ]; then
     php artisan key:generate
 fi
 
+# Build config/route/view caches at runtime (they bake in the final .env),
+# then hand the root-owned cache files back to the service user.
+php artisan optimize
+chown -R www-data:www-data "$SERVICE_ROOT"/bootstrap/cache "$SERVICE_ROOT"/storage/framework/views
+
 exec docker-php-entrypoint "$@"
 

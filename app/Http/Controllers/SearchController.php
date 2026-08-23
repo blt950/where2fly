@@ -49,7 +49,7 @@ class SearchController extends Controller
     private function buildSearchView(string $view): View
     {
         $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
-        $aircrafts = Aircraft::all()->pluck('icao')->sort();
+        $aircrafts = Aircraft::pluck('icao')->sort();
         $prefilledIcao = request()->input('icao');
         $destinationInputs = $this->getDestinationInputs();
 

@@ -1,6 +1,18 @@
 <?php
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schedule;
+
+// Session GC lottery is disabled (config/session.php) so visitors never pay
+// for the sweep — expired session files are cleaned up here instead.
+Schedule::call(function () {
+    $cutoff = now()->subMinutes(config('session.lifetime'))->getTimestamp();
+    foreach (File::files(config('session.files')) as $file) {
+        if ($file->getMTime() < $cutoff) {
+            File::delete($file->getPathname());
+        }
+    }
+})->name('session-gc')->hourlyAt(50);
 
 // Update METARs, TAFs, events, online controllers and calculate new scores.
 Schedule::command('update:data')->hourlyAt(5)->sentryMonitor();
