@@ -16,7 +16,7 @@
         
         <div class="col-xs-12 text-start">
 
-            <label for="destination">
+            <label for="destination-input">
                 {{ ucfirst($area) }} Area
             </label>
             <u-combobox data-multiple id="destination">
@@ -39,7 +39,7 @@
                     @endforeach
                 @endif
 
-                <input list="destination-list" placeholder="Anywhere">
+                <input list="destination-list" id="destination-input" placeholder="Anywhere">
                 <u-datalist id="destination-list" class="taller" tabindex="-1" hidden>
 
                     @foreach($destinationInputs as $key => $value)
@@ -135,7 +135,7 @@
 
             <div class="col-xs-12 text-start">
 
-                <label for="aircraft">
+                <label for="aircraft-input">
                     Aircraft
                 </label>
                 <u-combobox id="aircraft" data-multiple>
@@ -149,7 +149,7 @@
                             @endforeach
                         @endforeach
                     @endisset
-                    <input list="aircraft-list" placeholder="All aircraft">
+                    <input list="aircraft-list" id="aircraft-input" placeholder="All aircraft">
                     <u-datalist id="aircraft-list" tabindex="-1" hidden>
                         @foreach($aircrafts as $aircraft)
                             <u-option value="{{ $aircraft }}">{{ $aircraft }}</u-option>
@@ -160,7 +160,7 @@
                     <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
 
-                <label for="airlines" class="pt-4">
+                <label for="airlines-input" class="pt-4">
                     Airlines
                 </label>
                 <u-combobox id="airlines" data-multiple>
@@ -174,7 +174,7 @@
                             @endforeach
                         @endforeach
                     @endisset
-                    <input list="airlines-list" placeholder="All airlines">
+                    <input list="airlines-list" id="airlines-input" placeholder="All airlines">
                     <u-datalist id="airlines-list" tabindex="-1" hidden>
                         @foreach($airlines as $airline)
                             <u-option value="{{ $airline->icao_code }}">{{ $airline->name }} ({{ $airline->icao_code }})</u-option>
@@ -185,7 +185,7 @@
                     <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror
 
-                <label for="destinationExclusions" class="pt-4">
+                <label for="destinationExclusions-input" class="pt-4">
                     {{ ucfirst($area) }} Exclusions
                 </label>
                 <u-combobox data-multiple id="destinationExclusions">
@@ -208,7 +208,7 @@
                         @endforeach
                     @endif
 
-                    <input list="destinationExclusions-list" placeholder="None">
+                    <input list="destinationExclusions-list" id="destinationExclusions-input" placeholder="None">
                     <u-datalist id="destinationExclusions-list" class="taller" tabindex="-1" hidden>
 
                         @foreach($destinationInputs as $key => $value)

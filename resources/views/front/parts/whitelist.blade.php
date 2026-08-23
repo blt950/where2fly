@@ -1,4 +1,4 @@
-<label for="{{ $id }}" class="{{ $labelClass ?? '' }}">
+<label for="{{ $id }}-input" class="{{ $labelClass ?? '' }}">
     {{ $label }}
     @isset($locked)
         <i class="fa-sharp fa-lock" id="{{ $id }}LockIcon" @class(['d-none' => ! $locked])></i>
@@ -12,7 +12,7 @@
         @endisset
     @endforeach
 
-    <input list="{{ $id }}-list" placeholder="{{ $placeholder }}" @disabled($locked ?? false)>
+    <input list="{{ $id }}-list" id="{{ $id }}-input" placeholder="{{ $placeholder }}" @disabled($locked ?? false)>
     <u-datalist id="{{ $id }}-list" tabindex="-1" hidden>
         <select name="{{ $inputName }}[]" multiple @disabled($locked ?? false)></select>
         @foreach($lists as $list)
