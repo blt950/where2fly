@@ -178,6 +178,9 @@ class SearchController extends Controller
 
         $filterByAirlines = $data['airlines'] ?? null;
         $filterByAircrafts = $data['aircrafts'] ?? null;
+        // Resolved once and threaded through both filterRoutesAndAirlines call sites below,
+        // instead of re-resolving icao->id on every pool/candidate query.
+        $filterByAircraftIds = isset($filterByAircrafts) ? Aircraft::whereIn('icao', $filterByAircrafts)->pluck('id')->all() : null;
 
         [$minDistance, $maxDistance] = CalculationHelper::aircraftNmPerHourRange($codeletter, $airtimeMin, $airtimeMax);
 
@@ -198,13 +201,18 @@ class SearchController extends Controller
         $anchorIds = null;
         $scoreTargetIds = null;
         if (! isset($data['icao'])) {
-            $pool = fn (?array $whitelist) => Airport::airportOpen()->isAirportSize($destinationAirportSize)
+            // Pool is identical across whitelists and every attempt — fetch the heavy
+            // base query once, then whitelist by whereIn-ing the cheap id list instead
+            // of re-running filterRoutesAndAirlines/has('metar') per whitelist/attempt.
+            $basePoolIds = Airport::airportOpen()->isAirportSize($destinationAirportSize)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-                ->filterAirbases($destinationAirbases)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
-                ->returnOnlyWhitelistedIcao($whitelist)
-                ->has('metar');
+                ->filterAirbases($destinationAirbases)->filterRoutesAndAirlines(null, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly, filterByAircraftIds: $filterByAircraftIds)
+                ->has('metar')
+                ->pluck('airports.id');
 
-            $anchorPool = fn () => $pool($anchorWhitelist);
+            $anchorIds = $anchorWhitelist === null
+                ? $basePoolIds
+                : Airport::whereIn('airports.id', $basePoolIds)->returnOnlyWhitelistedIcao($anchorWhitelist)->pluck('airports.id');
 
             $presenceScores = array_filter($filterByScores, fn ($value) => $value == 1);
 
@@ -212,10 +220,10 @@ class SearchController extends Controller
                 // Match targets by reason only — ETA windowing happens in the
                 // destination query, once an anchor is drawn. The target is a
                 // stand-in for a suggestion, so it takes the suggestion whitelist
-                $scoreTargetIds = $pool($suggestionWhitelist)->filterByScores($presenceScores)->pluck('airports.id');
-            } else {
-                // Pool is identical between attempts — fetch the ids once
-                $anchorIds = $anchorPool()->pluck('airports.id');
+                $scoreTargetIds = Airport::whereIn('airports.id', $basePoolIds)
+                    ->returnOnlyWhitelistedIcao($suggestionWhitelist)
+                    ->filterByScores($presenceScores)
+                    ->pluck('airports.id');
             }
 
             if (($scoreTargetIds ?? $anchorIds)->isEmpty()) {
@@ -245,7 +253,7 @@ class SearchController extends Controller
                 if ($scoreTargetIds !== null) {
                     // Fresh target and in-range anchor each attempt
                     $target = Airport::find($scoreTargetIds->random());
-                    $anchorId = $anchorPool()->notIcao($target->icao)
+                    $anchorId = Airport::whereIn('airports.id', $anchorIds)->notIcao($target->icao)
                         ->withinDistance($target, $minDistance, $maxDistance, $target->icao)
                         ->inRandomOrder()
                         ->value('airports.id');
@@ -275,7 +283,7 @@ class SearchController extends Controller
                 ->notInContinent($destinationExclusions)->notInCountry($destinationExclusions, $primaryAirport->iso_country)->notInState($destinationExclusions)
                 ->withinDistance($primaryAirport, $minDistance, $maxDistance, $primaryAirport->icao)->withinBearing($primaryAirport, $flightDirection, $minDistance, $maxDistance)
                 ->filterRunwayLengths($rwyLengthMin, $rwyLengthMax, $codeletter)->filterRunwayLights($destinationRunwayLights)
-                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly)
+                ->filterAirbases($destinationAirbases)->filterByScores($filterByScores, $eta, $candidatesAreDepartures)->filterRoutesAndAirlines($primaryAirport->icao, $filterByAirlines, $filterByAircrafts, $destinationWithRoutesOnly, filterByAircraftIds: $filterByAircraftIds)
                 ->returnOnlyWhitelistedIcao($suggestionWhitelist)
                 ->select('airports.id')
                 ->sortByScores($sortByScores, $eta, $candidatesAreDepartures)
@@ -437,7 +445,7 @@ class SearchController extends Controller
             return null;
         }
 
-        return UserList::whereIn('id', $listIds)->get()
+        return UserList::with('airports')->whereIn('id', $listIds)->get()
             ->pluck('airports')->flatten()->pluck('icao')->unique()->toArray();
     }
 
