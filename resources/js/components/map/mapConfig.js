@@ -10,7 +10,7 @@ const sky = (skyColor, horizon, fog) => ({
 });
 
 const DARK_PALETTE = { fallback: '#ddb81c', candidate: '#808080' };
-const LIGHT_PALETTE = { fallback: '#8a6d0b', candidate: '#5a5a5a' };
+const LIGHT_PALETTE = { fallback: '#695310', candidate: '#5a5a5a' };
 
 // Land is near-black on the dark themes, so shadow and accent have almost nothing to darken —
 // the relief has to be carried by the lit slopes, which is why the highlight runs this bright.
