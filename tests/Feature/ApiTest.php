@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Airport;
 use App\Models\ApiKey;
 use App\Models\Simulator;
 use App\Models\User;
@@ -257,6 +258,118 @@ class ApiTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonPath('message', 'Success');
+    }
+
+    public function test_list_airports_endpoint_groups_airports_per_list(): void
+    {
+        $user = User::factory()->create();
+        $simulator = Simulator::first();
+        $airport = Airport::first();
+
+        $list = UserList::create([
+            'name' => 'Grouped List',
+            'color' => '#00FF00',
+            'simulator_id' => $simulator->id,
+            'user_id' => $user->id,
+            'public' => false,
+            'hidden' => false,
+        ]);
+        $list->airports()->attach($airport->id);
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/lists/airports');
+
+        // The map toggles each list on its own, so identity has to survive the response.
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.id', $list->id)
+            ->assertJsonPath('data.0.name', 'Grouped List')
+            ->assertJsonPath('data.0.color', '#00FF00')
+            ->assertJsonPath('data.0.airports.' . $airport->icao . '.icao', $airport->icao)
+            ->assertJsonPath('data.0.airports.' . $airport->icao . '.color', '#00FF00');
+    }
+
+    public function test_list_airports_endpoint_returns_hidden_lists_with_their_flag(): void
+    {
+        $user = User::factory()->create();
+        $simulator = Simulator::first();
+
+        UserList::create([
+            'name' => 'Hidden List',
+            'color' => '#0000FF',
+            'simulator_id' => $simulator->id,
+            'user_id' => $user->id,
+            'public' => false,
+            'hidden' => true,
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/lists/airports');
+
+        // Hidden lists still ship, so the map can offer them as an unchecked toggle.
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Hidden List')
+            ->assertJsonPath('data.0.hidden', true);
+    }
+
+    public function test_list_visibility_endpoint_persists_hidden_state(): void
+    {
+        $user = User::factory()->create();
+        $list = $this->makeList($user, 'Toggleable List');
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/lists/' . $list->id . '/visibility', ['hidden' => true])
+            ->assertStatus(200)
+            ->assertJsonPath('data.hidden', true);
+
+        $this->assertTrue($list->fresh()->hidden);
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/lists/' . $list->id . '/visibility', ['hidden' => false])
+            ->assertStatus(200);
+
+        $this->assertFalse($list->fresh()->hidden);
+    }
+
+    public function test_list_visibility_endpoint_requires_a_boolean(): void
+    {
+        $user = User::factory()->create();
+        $list = $this->makeList($user, 'Validated List');
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/lists/' . $list->id . '/visibility', ['hidden' => 'maybe'])
+            ->assertStatus(422);
+    }
+
+    public function test_list_visibility_endpoint_rejects_another_users_list(): void
+    {
+        $owner = User::factory()->create();
+        $stranger = User::factory()->create();
+        $list = $this->makeList($owner, 'Private List');
+
+        $this->actingAs($stranger, 'sanctum')
+            ->postJson('/api/lists/' . $list->id . '/visibility', ['hidden' => true])
+            ->assertStatus(403);
+
+        $this->assertFalse($list->fresh()->hidden);
+    }
+
+    public function test_list_visibility_endpoint_rejects_guests(): void
+    {
+        $list = $this->makeList(User::factory()->create(), 'Guarded List');
+
+        $this->postJson('/api/lists/' . $list->id . '/visibility', ['hidden' => true])
+            ->assertStatus(401);
+    }
+
+    private function makeList(User $user, string $name): UserList
+    {
+        return UserList::create([
+            'name' => $name,
+            'color' => '#00FF00',
+            'simulator_id' => Simulator::first()->id,
+            'user_id' => $user->id,
+            'public' => false,
+            'hidden' => false,
+        ]);
     }
 
     // -------------------------------------------------------------------------

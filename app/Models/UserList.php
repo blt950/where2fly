@@ -18,6 +18,14 @@ class UserList extends Model
         'hidden',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'public' => 'boolean',
+            'hidden' => 'boolean',
+        ];
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

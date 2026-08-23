@@ -1,16 +1,21 @@
 import { useEffect } from 'react';
-import { useMap } from 'react-leaflet';
 
-function MapBound({ mapBounds }) {
-    const map = useMap();
+import { useMapGL } from '../context/MapGLContext';
+import { boundsFromCoordinates } from '../utils/geodesic';
+
+const MapBound = ({ mapBounds }) => {
+
+    const map = useMapGL();
 
     useEffect(() => {
-        if(mapBounds !== undefined){
-            map.fitBounds(mapBounds, {padding: [50, 50], animate: false, duration: 0})
+        if (!mapBounds?.length) {
+            return;
         }
-    }, [mapBounds]);
+
+        map.fitBounds(boundsFromCoordinates(mapBounds), { padding: 50, animate: false });
+    }, [map, mapBounds]);
 
     return null;
-}
+};
 
 export default MapBound;

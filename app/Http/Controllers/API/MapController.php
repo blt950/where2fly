@@ -30,15 +30,28 @@ class MapController extends Controller
 
     /**
      * Get airports from lists
+     *
+     * Hidden lists are included, carrying their flag: the map draws them as unchecked toggles
+     * rather than dropping them, so a list can be brought back without leaving the map.
      */
     public function getListAirports()
     {
-        $userLists = UserList::where('user_id', Auth::id())->where('hidden', false)->with('airports')->get();
+        $userLists = UserList::where('user_id', Auth::id())->with('airports')->get();
 
-        $airportsMapCollection = MapHelper::getAirportsFromUserLists($userLists);
-        $airportMapData = MapHelper::generateAirportMapDataFromAirports($airportsMapCollection);
+        return response()->json(['message' => 'Success', 'data' => MapHelper::generateListMapData($userLists)], 200);
+    }
 
-        return response()->json(['message' => 'Success', 'data' => $airportMapData], 200);
+    /**
+     * One flag behind both the map's list toggles and the lists page's show/hide buttons.
+     */
+    public function setListVisibility(Request $request, UserList $list)
+    {
+        $this->authorize('update', $list);
+
+        $list->hidden = $request->validate(['hidden' => ['required', 'boolean']])['hidden'];
+        $list->save();
+
+        return response()->json(['message' => 'Success', 'data' => ['id' => $list->id, 'hidden' => $list->hidden]], 200);
     }
 
     /**

@@ -31,4 +31,5 @@ Route::post('/mapdata/icao', [MapController::class, 'getMapdataFromIcao'])->name
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/lists/airports', [MapController::class, 'getListAirports'])->name('api.lists.airports');
+    Route::post('/lists/{list}/visibility', [MapController::class, 'setListVisibility'])->name('api.lists.visibility');
 });
