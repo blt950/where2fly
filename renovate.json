@@ -9,10 +9,6 @@
   },
   "packageRules": [
     {
-      "isVulnerabilityAlert": true,
-      "prPriority": 20
-    },
-    {
       "description": "Playwright driver for the run-where2fly agent skill: not shipped, not run by CI",
       "matchFileNames": [".claude/**"],
       "enabled": false
