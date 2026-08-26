@@ -13,7 +13,7 @@
         <div class="text-start">
 
             <h2 class="mb-0">v3.1.0</h2>
-            <span class="badge ps-0 pb-2">2026-08-24</span>
+            <span class="badge ps-0 pb-2">2026-08-27</span>
             <ul>
                 <li>Added a new map engine with precipitation and terrain layers</li>
                 <li>Added map controls in top right for settings like colors, toggle lists and layers</li>
