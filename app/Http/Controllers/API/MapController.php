@@ -123,7 +123,7 @@ class MapController extends Controller
                 'runways' => fn ($q) => $q->where('closed', false)
                     ->whereNotNull('length_ft')
                     ->whereNot('le_ident', '')->whereNot('he_ident', ''), // runway must have both idents
-                'notableAirport', 'notableAirportTags',
+                'notableAirport', 'notableAirportTags', 'metar', 'taf',
             ])
             ->where('id', $secondaryAirport)->first();
         $metar = isset($airport->metar) ? $airport->metar->metar : null;
@@ -133,9 +133,9 @@ class MapController extends Controller
         $airport->country = getCountryName($airport->iso_country);
 
         // Get lists which this airport is present
-        $lists = UserList::where('user_id', Auth::id())->where('public', false)->whereHas('airports', function ($query) use ($secondaryAirport) {
+        $lists = Auth::check() ? UserList::where('user_id', Auth::id())->where('public', false)->whereHas('airports', function ($query) use ($secondaryAirport) {
             $query->where('airport_id', $secondaryAirport);
-        })->get();
+        })->get() : collect();
 
         // Get notable airport data if applicable
         $notable = null;

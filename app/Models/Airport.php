@@ -677,91 +677,126 @@ class Airport extends Model
      * Scope a query to only include airports that have routes and airlines
      */
     #[Scope]
-    protected function filterRoutesAndAirlines(Builder $query, ?string $departureIcao = null, ?array $filterByAirlines = null, ?array $filterByAircrafts = null, ?int $destinationWithRoutesOnly = null, string $flightDirection = 'arrivalFlights'): void
+    protected function filterRoutesAndAirlines(Builder $query, ?string $departureIcao = null, ?array $filterByAirlines = null, ?array $filterByAircrafts = null, ?int $destinationWithRoutesOnly = null, string $flightDirection = 'arrivalFlights', ?array $filterByAircraftIds = null): void
     {
-        // Resolve to ids so the EXISTS below filters the indexed pivot column
-        $filterByAircraftIds = isset($filterByAircrafts)
+        // Resolve to ids so the EXISTS/subquery below filters the indexed pivot column.
+        // Callers that already resolved this once per request pass it through.
+        $filterByAircraftIds ??= isset($filterByAircrafts)
             ? Aircraft::whereIn('icao', $filterByAircrafts)->pluck('id')->all()
             : null;
+
+        // Dep-null + aircraft filter is the slow shape: a correlated EXISTS re-evaluated
+        // per candidate row. Invert it to one uncorrelated subquery below. Dep-constrained
+        // and airline-only paths stay whereHas/whereDoesntHave — already index-cheap.
+        $invertForAircraft = $departureIcao === null && isset($filterByAircrafts);
 
         if (isset($destinationWithRoutesOnly) && $destinationWithRoutesOnly !== 0) {
 
             if ($destinationWithRoutesOnly == 1) {
-                $query->whereHas($flightDirection, function ($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts, $filterByAircraftIds) {
+                if ($invertForAircraft) {
+                    $query->whereIn('airports.id', self::servedAirportIdsQuery($flightDirection, $filterByAirlines, $filterByAircraftIds));
+                } else {
+                    $query->whereHas($flightDirection, function ($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts, $filterByAircraftIds) {
 
-                    if (isset($departureIcao)) {
-                        if ($flightDirection == 'arrivalFlights') {
-                            $query->where('dep_icao', $departureIcao);
-                        } else {
-                            $query->where('arr_icao', $departureIcao);
+                        if (isset($departureIcao)) {
+                            if ($flightDirection == 'arrivalFlights') {
+                                $query->where('dep_icao', $departureIcao);
+                            } else {
+                                $query->where('arr_icao', $departureIcao);
+                            }
                         }
-                    }
 
-                    $query->where('flights.seen_counter', '>', 3);
+                        $query->where('flights.seen_counter', '>', 3);
 
-                    if (isset($filterByAirlines)) {
-                        $query->whereIn('airline_icao', $filterByAirlines);
-                    }
+                        if (isset($filterByAirlines)) {
+                            $query->whereIn('airline_icao', $filterByAirlines);
+                        }
 
-                    if (isset($filterByAircrafts)) {
-                        $query->whereHas('aircrafts', function ($query) use ($filterByAircraftIds) {
-                            $query->whereIn('flight_aircraft.aircraft_id', $filterByAircraftIds);
-                        });
-                    }
-                });
+                        if (isset($filterByAircrafts)) {
+                            $query->whereHas('aircrafts', function ($query) use ($filterByAircraftIds) {
+                                $query->whereIn('flight_aircraft.aircraft_id', $filterByAircraftIds);
+                            });
+                        }
+                    });
+                }
             } elseif ($destinationWithRoutesOnly == -1) {
-                $query->whereDoesntHave($flightDirection, function ($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts, $filterByAircraftIds) {
+                if ($invertForAircraft) {
+                    $query->whereNotIn('airports.id', self::servedAirportIdsQuery($flightDirection, $filterByAirlines, $filterByAircraftIds));
+                } else {
+                    $query->whereDoesntHave($flightDirection, function ($query) use ($departureIcao, $filterByAirlines, $flightDirection, $filterByAircrafts, $filterByAircraftIds) {
 
-                    if (isset($departureIcao)) {
-                        if ($flightDirection == 'arrivalFlights') {
-                            $query->where('dep_icao', $departureIcao);
-                        } else {
-                            $query->where('arr_icao', $departureIcao);
+                        if (isset($departureIcao)) {
+                            if ($flightDirection == 'arrivalFlights') {
+                                $query->where('dep_icao', $departureIcao);
+                            } else {
+                                $query->where('arr_icao', $departureIcao);
+                            }
                         }
-                    }
 
-                    $query->where('flights.seen_counter', '>', 3);
+                        $query->where('flights.seen_counter', '>', 3);
 
-                    if (isset($filterByAirlines)) {
-                        $query->whereIn('airline_icao', $filterByAirlines);
-                    }
+                        if (isset($filterByAirlines)) {
+                            $query->whereIn('airline_icao', $filterByAirlines);
+                        }
 
-                    if (isset($filterByAircrafts)) {
-                        $query->whereHas('aircrafts', function ($query) use ($filterByAircraftIds) {
-                            $query->whereIn('flight_aircraft.aircraft_id', $filterByAircraftIds);
-                        });
-                    }
-                });
+                        if (isset($filterByAircrafts)) {
+                            $query->whereHas('aircrafts', function ($query) use ($filterByAircraftIds) {
+                                $query->whereIn('flight_aircraft.aircraft_id', $filterByAircraftIds);
+                            });
+                        }
+                    });
+                }
             }
 
         } elseif (isset($filterByAirlines) || isset($filterByAircrafts)) {
-            $query->whereHas($flightDirection, function ($query) use ($departureIcao, $filterByAirlines, $filterByAircrafts, $filterByAircraftIds) {
-                if (isset($departureIcao)) {
+            if ($invertForAircraft) {
+                $query->whereIn('airports.id', self::servedAirportIdsQuery($flightDirection, $filterByAirlines, $filterByAircraftIds));
+            } else {
+                $query->whereHas($flightDirection, function ($query) use ($departureIcao, $filterByAirlines, $filterByAircrafts, $filterByAircraftIds) {
+                    if (isset($departureIcao)) {
 
-                    if ($filterByAirlines) {
-                        $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlines);
+                        if ($filterByAirlines) {
+                            $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlines);
+                        }
+
+                        if ($filterByAircrafts) {
+                            $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3)->whereHas('aircrafts', function ($query) use ($filterByAircraftIds) {
+                                $query->whereIn('flight_aircraft.aircraft_id', $filterByAircraftIds);
+                            });
+                        }
+
+                    } else {
+
+                        if ($filterByAirlines) {
+                            $query->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlines);
+                        }
+
+                        if ($filterByAircrafts) {
+                            $query->where('flights.seen_counter', '>', 3)->whereHas('aircrafts', function ($query) use ($filterByAircraftIds) {
+                                $query->whereIn('flight_aircraft.aircraft_id', $filterByAircraftIds);
+                            });
+                        }
                     }
-
-                    if ($filterByAircrafts) {
-                        $query->where('dep_icao', $departureIcao)->where('flights.seen_counter', '>', 3)->whereHas('aircrafts', function ($query) use ($filterByAircraftIds) {
-                            $query->whereIn('flight_aircraft.aircraft_id', $filterByAircraftIds);
-                        });
-                    }
-
-                } else {
-
-                    if ($filterByAirlines) {
-                        $query->where('flights.seen_counter', '>', 3)->whereIn('airline_icao', $filterByAirlines);
-                    }
-
-                    if ($filterByAircrafts) {
-                        $query->where('flights.seen_counter', '>', 3)->whereHas('aircrafts', function ($query) use ($filterByAircraftIds) {
-                            $query->whereIn('flight_aircraft.aircraft_id', $filterByAircraftIds);
-                        });
-                    }
-                }
-            });
+                });
+            }
         }
+    }
+
+    /**
+     * Airports served by an aircraft-matching flight (optionally also airline-matching,
+     * same flight), evaluated once as an uncorrelated subquery in place of a per-candidate EXISTS.
+     */
+    private static function servedAirportIdsQuery(string $flightDirection, ?array $filterByAirlines, array $filterByAircraftIds)
+    {
+        $column = $flightDirection === 'arrivalFlights' ? 'airport_arr_id' : 'airport_dep_id';
+
+        return Flight::query()
+            ->where('seen_counter', '>', 3)
+            ->when(isset($filterByAirlines), fn ($q) => $q->whereIn('airline_icao', $filterByAirlines))
+            ->whereIn('flights.id', FlightAircraft::query()->select('flight_id')->whereIn('aircraft_id', $filterByAircraftIds))
+            // Nullable FK — without this, NOT IN against a NULL-containing set matches zero rows.
+            ->whereNotNull($column)
+            ->select($column);
     }
 
     /**

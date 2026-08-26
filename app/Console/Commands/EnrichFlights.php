@@ -31,7 +31,7 @@ class EnrichFlights extends Command
     public function handle()
     {
         // Get flights that have been seen within the last 6 hours and upsert the aircraft_icao to the flight_aircrafts table
-        $flights = Flight::where('last_seen_at', '>=', now()->subHours(6))->get();
+        $flights = Flight::select('id', 'last_aircraft_icao', 'last_seen_at')->where('last_seen_at', '>=', now()->subHours(6))->get();
         $upsertAircraftData = [];
         $aircraftTypeConversions = [
             '0000' => null,

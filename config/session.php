@@ -113,7 +113,9 @@ return [
     |
     */
 
-    'lottery' => [2, 100],
+    // In-request GC sweeps the whole session dir (multi-second tail); a
+    // scheduled task in routes/console.php cleans up instead.
+    'lottery' => [0, 100],
 
     /*
     |--------------------------------------------------------------------------

@@ -52,6 +52,40 @@ class RouteFilterTest extends TestCase
     }
 
     /**
+     * Same as seedFlight but with a NULL airport_arr_id — models an unresolved
+     * arrival FK despite a valid arr_icao string (the column is nullable).
+     */
+    private function seedFlightWithNullArrival(string $depIcao, string $arrIcao, string $airlineIcao, array $aircraftIcaos, int $seenCounter = 10): Flight
+    {
+        $dep = Airport::where('icao', $depIcao)->firstOrFail();
+
+        $flight = new Flight;
+        $flight->forceFill([
+            'airline_icao' => $airlineIcao,
+            'airline_iata' => substr($airlineIcao, 0, 2),
+            'flight_number' => (string) fake()->numberBetween(100, 999),
+            'flight_icao' => $airlineIcao . $depIcao . $arrIcao . 'N',
+            'airport_dep_id' => $dep->id,
+            'dep_icao' => $depIcao,
+            'airport_arr_id' => null,
+            'arr_icao' => $arrIcao,
+            'last_aircraft_icao' => $aircraftIcaos[0] ?? '',
+            'seen_counter' => $seenCounter,
+        ])->save();
+
+        foreach ($aircraftIcaos as $icao) {
+            $aircraft = Aircraft::firstOrCreate(['icao' => $icao]);
+
+            (new FlightAircraft)->forceFill([
+                'flight_id' => $flight->id,
+                'aircraft_id' => $aircraft->id,
+            ])->save();
+        }
+
+        return $flight;
+    }
+
+    /**
      * @return array<int, string>
      */
     private function filter(...$args): array
@@ -167,6 +201,31 @@ class RouteFilterTest extends TestCase
         $this->seedFlight('ENGM', 'EDDF', 'SAS', ['B738'], seenCounter: 3);
 
         $this->assertContains('EDDF', $this->filter('ENGM', null, ['B738'], -1));
+    }
+
+    // -------------------------------------------------------------------------
+    // Dep-null + aircraft filter — inverted-subquery path (perf refactor)
+    // -------------------------------------------------------------------------
+
+    public function test_routes_only_with_aircraft_filter_dep_null_returns_only_served_airports(): void
+    {
+        $this->seedFlight('ENGM', 'EDDF', 'SAS', ['B738']);
+        $this->seedFlight('ENGM', 'EGLL', 'BAW', ['A320']);
+
+        $this->assertSame(['EDDF'], $this->filter(null, null, ['B738'], 1));
+    }
+
+    public function test_routes_only_negative_with_aircraft_filter_dep_null_excludes_served_airports(): void
+    {
+        $this->seedFlight('ENGM', 'EDDF', 'SAS', ['B738']);
+        // A NULL airport_arr_id must not leak into the excluded set — NOT IN
+        // against a set containing NULL matches zero rows, excluding everything
+        $this->seedFlightWithNullArrival('ENGM', 'EGLL', 'SAS', ['B738']);
+
+        $withoutB738 = $this->filter(null, null, ['B738'], -1);
+
+        $this->assertNotContains('EDDF', $withoutB738);
+        $this->assertContains('EGLL', $withoutB738);
     }
 
     // -------------------------------------------------------------------------
