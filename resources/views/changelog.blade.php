@@ -17,7 +17,7 @@
             <ul>
                 <li>Added a new map engine with precipitation and terrain layers</li>
                 <li>Added map controls in top right for settings like colors, toggle lists and layers</li>
-                <li>Added derparture whitelist filter in extended filters</li>
+                <li>Added departure whitelist filter in extended filters</li>
                 <li>Added a bug report button on the feedback page</li>
                 <li>Fixed airport not always showing all available sceneries</li>
             </ul>
