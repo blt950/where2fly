@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.1.1](https://github.com/blt950/where2fly/compare/v3.1.0...v3.1.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* better webgl error ([f806cd3](https://github.com/blt950/where2fly/commit/f806cd3f60994b9ee7029f3f5e26ca2c6edd7605))
+* error boundries ([a2155c2](https://github.com/blt950/where2fly/commit/a2155c279bf94975efec7bbcecd296a7fe69ba0c))
+* Texts and typos ([5968f19](https://github.com/blt950/where2fly/commit/5968f193a35385dc42d8fcfc257bd94c59cc8009))
+
 ## [3.1.0](https://github.com/blt950/where2fly/compare/v3.0.4...v3.1.0) (2026-08-27)
 
 
