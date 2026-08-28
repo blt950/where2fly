@@ -319,8 +319,8 @@ function MapFallback({ webgl }) {
             </p>
             <p className="mb-3">
                 {webgl
-                    ? 'This browser has no WebGL2, which the map needs to draw. It is usually disabled in the browser settings, or hardware acceleration is off.'
-                    : 'We have been notified about it. Reloading the page usually sorts it.'}
+                    ? 'WebGL2 needed to draw the map. Check if hardware acceleration is on and WebGL2 is enabled in browser settings.'
+                    : 'We have been notified about it. Try reloading the page.'}
             </p>
             <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
                 Reload page
