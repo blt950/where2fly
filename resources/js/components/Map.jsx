@@ -270,7 +270,7 @@ function Map() {
     }), [airports, findAirport, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection]);
 
     if (!webgl2) {
-        return <MapFallback />;
+        return <MapFallback webgl />;
     }
 
     const clusterColours = isDefaultView() ? CLUSTER_COLOURS.muted : CLUSTER_COLOURS.search;
@@ -303,13 +303,19 @@ function Map() {
 
 export default Map;
 
-function MapFallback() {
+// A missing WebGL2 context is the user's to turn back on, so don't tell them we were notified
+// and to reload — neither is true.
+function MapFallback({ webgl }) {
     return (
         <div className="map map-error d-flex flex-column align-items-center justify-content-center text-center p-4">
             <p className="mb-1">
                 <i className="fa-sharp fa-triangle-exclamation" aria-hidden="true"></i> The map could not be loaded
             </p>
-            <p className="mb-3">We have been notified about it. Reloading the page usually sorts it.</p>
+            <p className="mb-3">
+                {webgl
+                    ? 'This browser has no WebGL2, which the map needs to draw. It is usually disabled in the browser settings, or hardware acceleration is off.'
+                    : 'We have been notified about it. Reloading the page usually sorts it.'}
+            </p>
             <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
                 Reload page
             </button>

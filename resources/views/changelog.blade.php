@@ -12,6 +12,13 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v3.1.1</h2>
+            <span class="badge ps-0 pb-2">2026-08-28</span>
+            <ul>
+                <li>Fixed a better WebGL2 error for users who don't have it enabled</li>
+                <li>Fixed typos</li>
+            </ul>
+
             <h2 class="mb-0">v3.1.0</h2>
             <span class="badge ps-0 pb-2">2026-08-27</span>
             <ul>
