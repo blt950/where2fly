@@ -24,6 +24,8 @@ if (dsn) {
         ],
 
         denyUrls: [
+            /beacon\.min\.js/i,
+            /static\.cloudflareinsights\.com/i,
             /extensions\//i,
             /^chrome:\/\//i,
             /^chrome-extension:\/\//i,

@@ -296,7 +296,13 @@ function Map() {
             </MapProvider>
             <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus}
                 lists={lists} onListToggle={setListHidden} />
-            {showAirportIdCard && <PopupContainer airportId={showAirportIdCard} />}
+            {showAirportIdCard && (
+                // A card that throws mid-commit used to hit the root boundary and take the whole
+                // map down with it — the map stays up, only the card goes.
+                <ErrorBoundary fallback={null}>
+                    <PopupContainer airportId={showAirportIdCard} />
+                </ErrorBoundary>
+            )}
         </MapContext.Provider>
     );
 }
