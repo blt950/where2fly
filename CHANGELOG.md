@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.2](https://github.com/blt950/where2fly/compare/v3.1.1...v3.1.2) (2026-09-01)
+
+
+### Bug Fixes
+
+* css load ([7dce489](https://github.com/blt950/where2fly/commit/7dce489aa1c28fa224a9b87119883818373f5e6a))
+* front-end issues ([#301](https://github.com/blt950/where2fly/issues/301)) ([4db7a6e](https://github.com/blt950/where2fly/commit/4db7a6e780add2ac0ef9a47db58d9fba55892e28))
+
 ## [3.1.1](https://github.com/blt950/where2fly/compare/v3.1.0...v3.1.1) (2026-08-28)
 
 
