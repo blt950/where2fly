@@ -12,6 +12,12 @@
     <div class="container">
         <div class="text-start">
 
+            <h2 class="mb-0">v3.1.2</h2>
+            <span class="badge ps-0 pb-2">2026-09-01</span>
+            <ul>
+                <li>Fixed miscellaneous frontend errors</li>
+            </ul>
+
             <h2 class="mb-0">v3.1.1</h2>
             <span class="badge ps-0 pb-2">2026-08-28</span>
             <ul>
