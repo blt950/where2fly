@@ -67,7 +67,7 @@
 
             var icao = document.querySelector('#airport').value;
             document.querySelector('#airportNotFound').classList.add('d-none');
-            setFocusAirport(icao);
+            window.setFocusAirport?.(icao);
         });
 
         window.addEventListener('mapAirportNotFound', function() {
