@@ -142,7 +142,9 @@ submitButtons.forEach(function(button) {
             submitFormMetrics();
         }
 
-        document.getElementById('form').requestSubmit()
+        // requestSubmit is unavailable before Safari 16 — fall back to plain submit
+        var searchForm = document.getElementById('form');
+        searchForm.requestSubmit ? searchForm.requestSubmit() : searchForm.submit();
     });
 });
 
