@@ -21,6 +21,11 @@ if (dsn) {
             /^NetworkError when attempting to fetch resource\.( \(.+\))?$/,
             'Script error.',
             /\[Cloudflare Turnstile\] Error: (300|600)\d{3}/,
+            // Chunk load failures (flaky network, stale bundle after deploy) — app.js already shows a reload fallback
+            /^Importing a module script failed/,
+            /error loading dynamically imported module/,
+            // Safari < 16.4 can't parse class static blocks in our Safari 16+ targeted bundles
+            "Unexpected token '{'",
         ],
 
         denyUrls: [

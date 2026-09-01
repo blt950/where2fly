@@ -293,7 +293,8 @@
                 row.addEventListener('click', function() {
                     const icao = this.getAttribute('data-airport-icao');
 
-                    setFocusAirport(icao);
+                    // Map may not have loaded yet (or at all) — don't let a missing global kill the row toggle
+                    window.setFocusAirport?.(icao);
 
                     // Close all other detail rows before toggling the clicked one
                     const detailsRow = document.getElementById('details-' + icao);
