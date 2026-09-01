@@ -24,6 +24,8 @@ if (dsn) {
             // Chunk load failures (flaky network, stale bundle after deploy) — app.js already shows a reload fallback
             /^Importing a module script failed/,
             /error loading dynamically imported module/,
+            // Safari < 16.4 can't parse class static blocks in our Safari 16+ targeted bundles
+            "Unexpected token '{'",
         ],
 
         denyUrls: [
