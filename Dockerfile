@@ -1,5 +1,5 @@
 # Intermediate build container for front-end resources
-FROM docker.io/library/node:26.7-alpine AS frontend
+FROM docker.io/library/node:26.8-alpine AS frontend
 # Easy to prune intermediary containers
 LABEL stage=build
 
