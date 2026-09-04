@@ -19,7 +19,7 @@ RUN --mount=type=secret,id=sentry_auth_token \
 
 ####################################################################################################
 # Primary container
-FROM docker.io/library/php:8.5.9-apache-trixie
+FROM docker.io/library/php:8.5.10-apache-trixie
 
 # Default container port for the apache configuration
 EXPOSE 80 443
