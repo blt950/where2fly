@@ -148,13 +148,12 @@
 
     .form-check {
         display: flex;
-        align-items: center;
     }
 
     // Bootstrap nudges the input down to meet the first line of text. Flex centering already
     // does that job, so the nudge lands as a visible offset instead.
     .form-check-input {
-        margin-top: 0;
+        margin-top: 1px;
     }
 }
 
