@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.3](https://github.com/blt950/where2fly/compare/v3.1.2...v3.1.3) (2026-09-06)
+
+
+### Bug Fixes
+
+* Alignment with long named lists in map options ([dd5d4ff](https://github.com/blt950/where2fly/commit/dd5d4ffa15c5e4eea5c761acb25b5417423c9922))
+
 ## [3.1.2](https://github.com/blt950/where2fly/compare/v3.1.1...v3.1.2) (2026-09-01)
 
 
