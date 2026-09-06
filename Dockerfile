@@ -62,7 +62,7 @@ RUN install-php-extensions pdo_mysql zip opcache intl excimer
 COPY ./container/configs/php.ini /usr/local/etc/php/php.ini
 
 # Install composer
-COPY --from=docker.io/library/composer:2.10.2 /usr/bin/composer /usr/bin/composer
+COPY --from=docker.io/library/composer:2.10.3 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 
 # Deps layer: no scripts (artisan isn't copied yet), no autoloader (dumped after the app COPY)
