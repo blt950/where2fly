@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.1.4](https://github.com/blt950/where2fly/compare/v3.1.3...v3.1.4) (2026-09-20)
+
+
+### Bug Fixes
+
+* Corrupt xml files from aviationweather ([c2b9605](https://github.com/blt950/where2fly/commit/c2b960537a1c732f238429595ff9f2819f8efb6a))
+* Misc map loading issue ([fe9cd26](https://github.com/blt950/where2fly/commit/fe9cd26200d4cc3e98c2a810dcf9187a77d8e387))
+* New Sentry exceptions ([bcf453e](https://github.com/blt950/where2fly/commit/bcf453ec0a3993d0cccf96e3d9a0eae35b0a7399))
+* Null METARs breaking API ([ca93144](https://github.com/blt950/where2fly/commit/ca93144e1180a2384a989c4abeeeabb85231fff8))
+* Removed debug print ([2945eaa](https://github.com/blt950/where2fly/commit/2945eaa754d4d6e0879333aacc85482cd58ab7c1))
+* Updated sentry config ([9071e2c](https://github.com/blt950/where2fly/commit/9071e2cccc15be87f4a072e581334764db46f26c))
+
 ## [3.1.3](https://github.com/blt950/where2fly/compare/v3.1.2...v3.1.3) (2026-09-06)
 
 
