@@ -8,7 +8,8 @@
       "Bash(timeout 20 bash -c 'until curl -sf http://127.0.0.1:8000/ >/dev/null; do sleep 1; done')",
       "Bash(curl -s http://127.0.0.1:8000/)",
       "Bash(npm run *)",
-      "Bash(php artisan tinker '--execute= *)"
+      "Bash(php artisan tinker '--execute= *)",
+      "mcp__sentry__update_issue"
     ]
   },
   "enabledMcpjsonServers": [
