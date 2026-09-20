@@ -1,7 +1,7 @@
 # Where2Fly
 Always struggling to decide where to fly? Find some suggested destinations with fun weather and coverage!
 
-<img width="2187" height="1163" alt="screen" src="https://github.com/user-attachments/assets/8f6fb1be-3405-41a5-b608-f9020f8f9e0b" />
+<img width="2187" alt="screen" src="https://github.com/user-attachments/assets/8f6fb1be-3405-41a5-b608-f9020f8f9e0b" />
 
 ## License
 
