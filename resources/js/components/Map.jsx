@@ -25,6 +25,7 @@ import { AIRPORT_SOURCES } from './utils/airportLayerSpec';
 import { isDefaultView } from './utils/mapRoutes';
 import { readPreferences, writePreferences } from './utils/mapPreferences';
 import { readStored, removeStored, writeStored } from './utils/storage';
+import { asList, mergeListAirports } from './utils/userLists';
 
 const userAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === '1';
 
@@ -127,13 +128,15 @@ function Map() {
         }
 
         // Seed the overlay from cache so the lists are on screen before the fetch returns.
-        setLists(readStored(LISTS_CACHE_KEY) ?? []);
+        setLists(asList(readStored(LISTS_CACHE_KEY)));
 
         fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
             .then(response => response.json())
             .then(data => {
-                writeStored(LISTS_CACHE_KEY, data.data);
-                setLists(data.data ?? []);
+                const lists = asList(data.data);
+
+                writeStored(LISTS_CACHE_KEY, lists);
+                setLists(lists);
             })
             .catch(error => {
                 captureException(error);
@@ -210,12 +213,7 @@ function Map() {
 
     const { palette, hillshade } = themeOf(preferences.theme);
 
-    // One source for every visible list — the airports already carry their list's color, so
-    // merging keeps a single set of layers instead of one per list.
-    const listAirports = useMemo(() => Object.assign(
-        {},
-        ...lists.filter(({ hidden }) => !hidden).map(({ airports }) => airports),
-    ), [lists]);
+    const listAirports = useMemo(() => mergeListAirports(lists), [lists]);
 
     // Scenery lists are held apart from `airports` so each one keeps its own color and toggle,
     // but any ICAO the user can click has to resolve from either — `airports` alone is what the
