@@ -102,8 +102,6 @@ class FetchVatsim extends Command
                         'callsign' => $controller->callsign,
                         'logon_time' => Carbon::parse($controller->logon_time),
                     ];
-
-                    $this->info('Controller ' . $controller->callsign . ' online at ' . $callsign);
                 }
             }
         }
