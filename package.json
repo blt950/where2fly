@@ -1,4 +1,5 @@
 {
+    "name": "where2fly",
     "private": true,
     "scripts": {
         "dev": "vite",

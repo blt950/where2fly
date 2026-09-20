@@ -22,6 +22,7 @@ graphify-out/manifest.json
 graphify-out/.*
 graphify-out/cost.json
 .mcp.json
+.phpunit.cache/*
 
 /resources/fonts/fa-brands-400.ttf
 /resources/fonts/fa-brands-400.woff2
