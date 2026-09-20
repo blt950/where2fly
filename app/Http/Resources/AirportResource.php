@@ -9,6 +9,11 @@ class AirportResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $metar = $this->metar?->metar;
+        if ($metar !== null && ! app()->isProduction()) {
+            $metar = 'TEST-DATA ' . $metar;
+        }
+
         return [
             'name' => $this->name,
             'icao' => $this->icao,
@@ -16,7 +21,7 @@ class AirportResource extends JsonResource
             'continent' => $this->continent,
             'country' => $this->iso_country,
             'region' => $this->iso_region,
-            'metar' => app()->isProduction() ? $this->metar->metar : 'TEST-DATA ' . $this->metar->metar,
+            'metar' => $metar,
             'taf' => optional($this->taf)->raw_text,
             'longestRwyFt' => $this->longestRunway(),
             'scores' => $this->displayScores()->map(fn ($s) => [

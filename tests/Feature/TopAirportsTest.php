@@ -103,4 +103,22 @@ class TopAirportsTest extends TestCase
         $this->assertCount(0, Cache::get('top-airports:all:none:any:30', []));
         $this->assertFalse(Cache::has('top-airports:all:none:any:30'));
     }
+
+    public function test_top_api_serves_airports_that_have_no_metar(): void
+    {
+        Cache::flush();
+
+        // Ranking counts any score source, so an airport can be listed on its
+        // VATSIM rows alone and never have had an observation
+        $icao = AirportScore::getTopAirports()->pluck('airport.icao')->first();
+        Airport::where('icao', $icao)->first()->metar()->delete();
+        Cache::flush();
+
+        $response = $this->getJson('/api/top');
+        $response->assertStatus(200);
+
+        $entry = collect($response->json('data'))->firstWhere('icao', $icao);
+        $this->assertNotNull($entry, 'the airport should still be ranked without a METAR');
+        $this->assertNull($entry['metar']);
+    }
 }
