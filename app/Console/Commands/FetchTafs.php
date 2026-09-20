@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Exceptions\WeatherCacheUnavailableException;
 use App\Helpers\AviationWeatherHelper;
 use App\Helpers\WeatherScoreHelper;
 use App\Models\Airport;
@@ -38,8 +39,21 @@ class FetchTafs extends Command
         $processTime = microtime(true);
         $this->info("Starting fetching of TAF's");
 
-        $paths = AviationWeatherHelper::downloadCache('https://aviationweather.gov/data/cache/tafs.cache.xml.gz');
-        $tafDocuments = $this->parseTafDocuments($paths['xml']);
+        try {
+            $paths = AviationWeatherHelper::downloadCache('https://aviationweather.gov/data/cache/tafs.cache.xml.gz');
+            $tafDocuments = $this->parseTafDocuments($paths['xml']);
+        } catch (WeatherCacheUnavailableException $e) {
+            // Reported, not rethrown: update:data runs every fetch command in one
+            // process, so throwing here would also skip fetch:vatsim and fetch:bookings
+            if (isset($paths)) {
+                AviationWeatherHelper::cleanup($paths);
+            }
+
+            report($e);
+            $this->warn('Skipping TAF run: ' . $e->getMessage());
+
+            return self::FAILURE;
+        }
 
         $airports = Airport::select('id', 'icao')->whereIn('icao', array_keys($tafDocuments))->get()->keyBy(fn ($airport) => strtoupper($airport->icao));
 
@@ -149,7 +163,25 @@ class FetchTafs extends Command
     private function parseTafDocuments(string $xmlPath): array
     {
         $tafDocuments = [];
-        $xml = simplexml_load_file($xmlPath);
+
+        // Without this libxml reports parse failures as PHP warnings, which Laravel
+        // promotes to ErrorException — a malformed upstream file must not crash the run
+        $previousUseErrors = libxml_use_internal_errors(true);
+
+        try {
+            $xml = simplexml_load_file($xmlPath);
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousUseErrors);
+        }
+
+        if ($xml === false) {
+            throw new WeatherCacheUnavailableException('Could not parse the TAF cache file');
+        }
+
+        if (! isset($xml->data->TAF)) {
+            throw new WeatherCacheUnavailableException('TAF cache file contained no TAF data');
+        }
 
         foreach ($xml->data->TAF as $taf) {
             $icao = strtoupper((string) $taf->station_id);

@@ -2,12 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Exceptions\WeatherCacheUnavailableException;
 use App\Helpers\AviationWeatherHelper;
 use App\Helpers\WeatherScoreHelper;
 use App\Models\Airport;
 use App\Models\AirportScore;
 use App\Models\Metar;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
 use SimpleXMLElement;
 use XMLReader;
@@ -44,46 +46,21 @@ class FetchMetars extends Command
         $processTime = microtime(true);
         $this->info("Starting fetching of METAR's");
 
-        $paths = AviationWeatherHelper::downloadCache('https://aviationweather.gov/data/cache/metars.cache.xml.gz');
-
-        // Stream-parse the METAR nodes — the file is too large to load as one DOM
-        $airportsData = [];
-        $reader = new XMLReader;
-        $reader->open($paths['xml']);
-        while ($reader->read()) {
-            if ($reader->nodeType !== XMLReader::ELEMENT || $reader->name !== 'METAR') {
-                continue;
+        try {
+            $paths = AviationWeatherHelper::downloadCache('https://aviationweather.gov/data/cache/metars.cache.xml.gz');
+            $airportsData = $this->parseMetarNodes($paths['xml']);
+        } catch (WeatherCacheUnavailableException $e) {
+            // Reported, not rethrown: update:data runs every fetch command in one
+            // process, so throwing here would also skip fetch:vatsim and fetch:bookings
+            if (isset($paths)) {
+                AviationWeatherHelper::cleanup($paths);
             }
 
-            $node = new SimpleXMLElement($reader->readOuterXml());
-            $icao = strtoupper((string) $node->station_id);
-            if ($icao === '' || ! isset($node->raw_text, $node->observation_time)) {
-                continue;
-            }
+            report($e);
+            $this->warn('Skipping METAR run: ' . $e->getMessage());
 
-            $observationTime = Carbon::parse((string) $node->observation_time);
-
-            // A station can appear as both a routine METAR and a SPECI — keep the newest
-            if (isset($airportsData[$icao]) && $airportsData[$icao]['last_update']->gte($observationTime)) {
-                continue;
-            }
-
-            // Variable wind is reported as the literal string VRB — no usable direction
-            $windDirection = null;
-            if (isset($node->wind_dir_degrees) && is_numeric((string) $node->wind_dir_degrees)) {
-                $windDirection = (int) $node->wind_dir_degrees;
-            }
-
-            $airportsData[$icao] = [
-                'last_update' => $observationTime,
-                'metar' => preg_replace('/^(?:METAR |SPECI )?' . preg_quote($icao, '/') . ' /', '', (string) $node->raw_text),
-                'wind_direction' => $windDirection,
-                'wind_speed' => (int) $node->wind_speed_kt,
-                'wind_gusts' => (int) $node->wind_gust_kt,
-                'temperature' => isset($node->temp_c) ? (int) round((float) $node->temp_c) : null,
-            ];
+            return self::FAILURE;
         }
-        $reader->close();
 
         // Get the relevant airports
         $upsertData = [];
@@ -118,6 +95,82 @@ class FetchMetars extends Command
 
         $this->info('Fetching and scoring of ' . $metarCount . " METAR's finished in " . round(microtime(true) - $processTime) . ' seconds');
 
+    }
+
+    /**
+     * Stream-parse the METAR nodes into one entry per station — the file is too
+     * large to load as one DOM.
+     *
+     * @return array<string, array>
+     *
+     * @throws WeatherCacheUnavailableException
+     */
+    private function parseMetarNodes(string $xmlPath): array
+    {
+        $airportsData = [];
+
+        // Without this libxml reports parse failures as PHP warnings, which Laravel
+        // promotes to ErrorException — a malformed upstream file must not crash the run
+        $previousUseErrors = libxml_use_internal_errors(true);
+        $reader = new XMLReader;
+
+        try {
+            if ($reader->open($xmlPath) === false) {
+                throw new WeatherCacheUnavailableException('Could not open the METAR cache file');
+            }
+
+            while ($reader->read()) {
+                if ($reader->nodeType !== XMLReader::ELEMENT || $reader->name !== 'METAR') {
+                    continue;
+                }
+
+                // A single malformed node is not worth losing the other ~80k observations
+                try {
+                    $node = new SimpleXMLElement($reader->readOuterXml());
+                } catch (Exception) {
+                    continue;
+                }
+
+                $icao = strtoupper((string) $node->station_id);
+                if ($icao === '' || ! isset($node->raw_text, $node->observation_time)) {
+                    continue;
+                }
+
+                $observationTime = Carbon::parse((string) $node->observation_time);
+
+                // A station can appear as both a routine METAR and a SPECI — keep the newest
+                if (isset($airportsData[$icao]) && $airportsData[$icao]['last_update']->gte($observationTime)) {
+                    continue;
+                }
+
+                // Variable wind is reported as the literal string VRB — no usable direction
+                $windDirection = null;
+                if (isset($node->wind_dir_degrees) && is_numeric((string) $node->wind_dir_degrees)) {
+                    $windDirection = (int) $node->wind_dir_degrees;
+                }
+
+                $airportsData[$icao] = [
+                    'last_update' => $observationTime,
+                    'metar' => preg_replace('/^(?:METAR |SPECI )?' . preg_quote($icao, '/') . ' /', '', (string) $node->raw_text),
+                    'wind_direction' => $windDirection,
+                    'wind_speed' => (int) $node->wind_speed_kt,
+                    'wind_gusts' => (int) $node->wind_gust_kt,
+                    'temperature' => isset($node->temp_c) ? (int) round((float) $node->temp_c) : null,
+                ];
+            }
+        } finally {
+            $reader->close();
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousUseErrors);
+        }
+
+        // An unreadable document yields nothing at all, which is never a real
+        // network-wide outcome — treat it as a bad file rather than wiping the scores
+        if ($airportsData === []) {
+            throw new WeatherCacheUnavailableException('METAR cache file contained no observations');
+        }
+
+        return $airportsData;
     }
 
     /**
