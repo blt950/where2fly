@@ -20,7 +20,7 @@ if (dsn) {
             /^Load failed( \(.+\))?$/,
             /^NetworkError when attempting to fetch resource\.( \(.+\))?$/,
             'Script error.',
-            /\[Cloudflare Turnstile\] Error: (300|600)\d{3}/,
+            /\[Cloudflare Turnstile\] Error: \d{5,6}/,
             /^Importing a module script failed/,
             /error loading dynamically imported module/,
             /Failed to fetch dynamically imported module/,
