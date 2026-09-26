@@ -55,7 +55,7 @@ COPY ./container/configs/apache.conf /etc/apache2/apache2.conf
 
 # Install PHP extension(s) before the custom php.ini lands: excimer comes from PECL, and
 # PEAR's OS_Guess needs popen(), which our php.ini adds to disable_functions.
-COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
+COPY --from=mlocati/php-extension-installer:2.11.33 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_mysql zip opcache intl excimer
 
 # Custom PHP configuration based on $PHP_INI_DIR/php.ini-production
