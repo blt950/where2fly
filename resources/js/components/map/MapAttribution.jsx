@@ -46,12 +46,12 @@ const MapAttribution = () => {
     }
 
     return createPortal(
-        <>
+        <span>
             Map powered by <a href="https://maplibre.org/" target="_blank" rel="noopener">MapLibre</a>
             {', '}
             {/* Source-supplied HTML: CARTO's own TileJSON plus the strings we set on our sources. */}
             <span dangerouslySetInnerHTML={{ __html: attribution }} />
-        </>,
+        </span>,
         slot,
     );
 };
