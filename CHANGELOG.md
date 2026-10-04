@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.1.5](https://github.com/blt950/where2fly/compare/v3.1.4...v3.1.5) (2026-10-04)
+
+
+### Bug Fixes
+
+* **deps:** update sentry-javascript monorepo to v11 ([#352](https://github.com/blt950/where2fly/issues/352)) ([e9c8e28](https://github.com/blt950/where2fly/commit/e9c8e28022edde5f7f532b1bf81f442c79231faf))
+* docker-compose.dev for arm ([4289363](https://github.com/blt950/where2fly/commit/4289363528cb07efa5a2c7d9dfcc654ed8a7a452))
+* map footer breaking ([d956c47](https://github.com/blt950/where2fly/commit/d956c473a71e75119576b43e845523eb2a07476a))
+* ScorePredictionTest time ([abe94e8](https://github.com/blt950/where2fly/commit/abe94e83d42594162f0ccd8b1b69cdd4cd618b1d))
+
 ## [3.1.4](https://github.com/blt950/where2fly/compare/v3.1.3...v3.1.4) (2026-09-20)
 
 
