@@ -9,8 +9,8 @@
     },
     "dependencies": {
         "@popperjs/core": "^2.11.6",
-        "@sentry/browser": "^10.70.0",
-        "@sentry/react": "^10.70.0",
+        "@sentry/browser": "^11.0.0",
+        "@sentry/react": "^11.0.0",
         "@sentry/vite-plugin": "^5.4.0",
         "@u-elements/u-combobox": "^2.0.5",
         "@u-elements/u-datalist": "^2.0.1",
