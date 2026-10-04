@@ -2,10 +2,16 @@ services:
   web:
     container_name: where2fly
     build: .
+    # Oracle ships MySQL client .debs for amd64 only; emulate on Apple Silicon
+    platform: linux/amd64
     ports:
         - 8080:80
         - 8443:443
     extra_hosts:
         - "host.docker.internal:host-gateway"
+    # The image bakes an opcache file cache into /tmp at build time; with validate_timestamps=0
+    # that bytecode would shadow the bind-mounted source, so start each run with an empty /tmp
+    tmpfs:
+      - /tmp
     volumes:
       - ./:/app
