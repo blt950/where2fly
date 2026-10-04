@@ -7,11 +7,18 @@ use App\Models\AirportScore;
 use App\Models\Taf;
 use App\Models\TafForecast;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class ScorePredictionTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Carbon::setTestNow(Carbon::now()->startOfSecond());
+    }
 
     private function makeScore(array $attributes): AirportScore
     {
