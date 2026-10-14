@@ -31,8 +31,8 @@ Returns airports matching your search query
 
 | Param | Required | Type | Description | Default value |
 | --- | --- | --- | --- | --- |
-| `departure` | Yes | string | Departure airport | - |
-| `arrival` | Yes | string | Arrival airport | - |
+| `departure` | Yes* | string | Departure airport | - |
+| `arrival` | Yes* | string | Arrival airport | - |
 | `destinations` | Yes | array | Filter continent, countries and states. Described below | - |
 | `codeletter` | Yes | string | Select aircraft type | - |
 | `airtimeMin` | No | string | Minimum airtime | 0 |
@@ -50,6 +50,8 @@ Returns airports matching your search query
 | `rwyLengthMin` | No | string | Minimum runway length | 0 |
 | `rwyLengthMax` | No | string | Maximum runway length | 16000 |
 | `limit` | No | integer | Limit the number of results 0-30 | 10 |
+
+*=One of these fields need to be filled, not both.
 
 #### Regarding array* and int*
 These parameters should be supplied with an int value standalone or within an array:
