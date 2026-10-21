@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.6](https://github.com/blt950/where2fly/compare/v3.1.5...v3.1.6) (2026-10-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @sentry/vite-plugin to v11 ([#371](https://github.com/blt950/where2fly/issues/371)) ([075127f](https://github.com/blt950/where2fly/commit/075127f48ae77d23ce5998f0de40d5edd0ccd0d5))
+* PHP security update ([c835321](https://github.com/blt950/where2fly/commit/c835321278889e74637fe78b1981b9fcaf572179))
+
 ## [3.1.5](https://github.com/blt950/where2fly/compare/v3.1.4...v3.1.5) (2026-10-04)
 
 
