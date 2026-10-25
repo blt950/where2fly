@@ -32,7 +32,7 @@ RUN apt-get update && \
 
 # Install Oracle MySQL Client from Oracle's own .debs — apt resolves the runtime libs, and
 # MYSQL_CLIENT_DISTRO must track the base image's Debian release (the URL 404s on mismatch).
-ARG MYSQL_CLIENT_VERSION=8.4.11
+ARG MYSQL_CLIENT_VERSION=8.4.13
 ARG MYSQL_CLIENT_DISTRO=debian13
 RUN set -eux; \
     cd /tmp; \
