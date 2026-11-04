@@ -6,6 +6,8 @@
 </label>
 <u-combobox data-multiple id="{{ $id }}" @class(['d-none' => $locked ?? false])>
 
+    <select name="{{ $inputName }}[]" multiple @disabled($locked ?? false)></select>
+
     @foreach($selected as $key)
         @isset($whitelistDatabase[$key])
             <data value="{{ $key }}">{{ $whitelistDatabase[$key]->name }}</data>
@@ -14,7 +16,6 @@
 
     <input list="{{ $id }}-list" id="{{ $id }}-input" placeholder="{{ $placeholder }}" @disabled($locked ?? false)>
     <u-datalist id="{{ $id }}-list" tabindex="-1" hidden>
-        <select name="{{ $inputName }}[]" multiple @disabled($locked ?? false)></select>
         @foreach($lists as $list)
             <u-option value="{{ $list->id }}">{{ $list->name }}</u-option>
         @endforeach
