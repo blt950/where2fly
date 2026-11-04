@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.7](https://github.com/blt950/where2fly/compare/v3.1.6...v3.1.7) (2026-11-04)
+
+
+### Bug Fixes
+
+* MapLibre code updates and cleanup ([e7f5c91](https://github.com/blt950/where2fly/commit/e7f5c91dcccc61b2169e2a48d87f0a12997605b5))
+* u-elements update and tweaks ([348b10c](https://github.com/blt950/where2fly/commit/348b10c88165731e7611840479f3cd962fbdb0fd))
+
 ## [3.1.6](https://github.com/blt950/where2fly/compare/v3.1.5...v3.1.6) (2026-10-21)
 
 
