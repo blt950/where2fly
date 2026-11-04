@@ -34,11 +34,11 @@ export const MAP_THEMES = {
     default: {
         label: 'Dark',
         style: cartoStyle('dark-matter-nolabels'),
-        overrides: [
-            ['background', 'background-color', '#090909'],
-            ['water', 'fill-color', '#262626'],
-            ['waterway', 'line-color', '#3a3a3a'],
-        ],
+        overrides: {
+            background: { 'background-color': '#090909' },
+            water: { 'fill-color': '#262626' },
+            waterway: { 'line-color': '#3a3a3a' },
+        },
         sky: sky('#040404', '#262626', '#090909'),
         palette: DARK_PALETTE,
         hillshade: DARK_HILLSHADE,
@@ -46,7 +46,7 @@ export const MAP_THEMES = {
     light: {
         label: 'Light',
         style: cartoStyle('positron-nolabels'),
-        overrides: [],
+        overrides: {},
         sky: sky('#cfd9e6', '#d4dadc', '#fafaf8'),
         palette: LIGHT_PALETTE,
         hillshade: LIGHT_HILLSHADE,
@@ -84,11 +84,14 @@ export const TERMINATOR_LAYER = 'terminator';
 
 // The first of these layers that exists — where an overlay slots into the stack.
 export const beneath = (map, ids) => ids.find((id) => map.getLayer(id));
-// A style swap resets sky and land colors, so this runs on every load, not once.
-export const applyTheme = (map, theme) => {
-    theme.overrides.forEach(([layer, property, value]) => {
-        if (map.getLayer(layer)) { map.setPaintProperty(layer, property, value); }
-    });
-
-    map.setSky(theme.sky);
-};
+// Our glyphs, projection, sky and land colors, written into the basemap's style JSON before
+// MapLibre commits it — so neither the first frame nor a theme swap ever shows CARTO's own.
+export const themedStyle = (style, theme, projection) => ({
+    ...style,
+    glyphs: GLYPHS_URL,
+    projection: { type: projection },
+    sky: theme.sky,
+    layers: style.layers.map((layer) => (theme.overrides[layer.id]
+        ? { ...layer, paint: { ...layer.paint, ...theme.overrides[layer.id] } }
+        : layer)),
+});
