@@ -44,7 +44,7 @@
 
             <div class="mt-3 mb-3">
                 <label for="icao" class="form-label">ICAO</label>
-                <input type="text" class="form-control" id="icao" name="icao" maxlength="4" value="{{ $scenery->developer->icao }}" required>
+                <input type="text" class="form-control" id="icao" name="icao" maxlength="10" value="{{ $scenery->developer->icao }}" required>
                 @error('icao')
                     <div class="validation-error"><i class="fa-sharp fa-exclamation-triangle"></i> {{ $message }}</div>
                 @enderror

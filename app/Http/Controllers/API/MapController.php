@@ -272,6 +272,8 @@ class MapController extends Controller
         $fsacBody = json_decode($fsacResponse->body(), false);
         $fsacSceneries = collect(is_object($fsacBody) ? ($fsacBody->results ?? []) : []);
         $seenSourceReferenceIds = [];
+        $seenLinks = [];
+        $seenPaywareDevelopers = [];
         foreach ($fsacSceneries as $scenery) {
 
             // Get id for the product
@@ -341,12 +343,16 @@ class MapController extends Controller
                 ]);
 
                 $seenSourceReferenceIds[] = $fsacId;
+                $seenLinks[$simulatorId][] = SceneryHelper::normalizeLink($officialOrMarketStoreLink);
+                if ($cheapestStore->currencyPrice->EUR > 0) {
+                    $seenPaywareDevelopers[$simulatorId][] = mb_strtolower($scenery->developer);
+                }
             }
 
         }
 
         // Add our own local sceneries which are not covered by FSAddonCompare
-        SceneryHelper::fetchW2fSceneries($returnData, $airportIcao, $seenSourceReferenceIds);
+        SceneryHelper::fetchW2fSceneries($returnData, $airportIcao, $seenSourceReferenceIds, $seenLinks, $seenPaywareDevelopers);
 
         return $returnData;
     }

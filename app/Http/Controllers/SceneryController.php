@@ -35,7 +35,7 @@ class SceneryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'icao' => 'required|max:4|min:4|exists:airports,icao',
+            'icao' => 'required|max:10|exists:airports,icao',
             'developer' => 'required|string',
             'link' => 'required|url',
             'payware' => 'required|boolean',
@@ -95,7 +95,7 @@ class SceneryController extends Controller
         $this->authorize('update', $scenery);
 
         $request->validate([
-            'icao' => 'required|max:4|min:4|exists:airports,icao',
+            'icao' => 'required|max:10|exists:airports,icao',
             'developer' => 'required|string',
             'link' => 'required|url',
             'payware' => 'required|boolean',

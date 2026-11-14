@@ -18,6 +18,12 @@ trait CreatesApplication
 
         $app->make(Kernel::class)->bootstrap();
 
+        // RefreshDatabase runs migrate:fresh — refuse to start against anything but the test database
+        $database = $app['config']->get('database.connections.' . $app['config']->get('database.default') . '.database');
+        if ($database !== 'where2fly_test' || ! $app->environment('testing')) {
+            throw new \RuntimeException("Refusing to run tests against database '$database' (env: {$app->environment()}). Is a config cache overriding phpunit.xml?");
+        }
+
         return $app;
     }
 }

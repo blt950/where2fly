@@ -300,6 +300,49 @@ class SceneryTest extends TestCase
         $response->assertJsonPath('data.MSFS2020.0.fsac', true);
     }
 
+    public function test_flightsim_row_sharing_an_fsac_reference_id_is_still_returned(): void
+    {
+        $this->cacheScenery('sim-wings', 1, 4270, 'https://contrail.shop/products/eddm-4270');
+        $this->cacheScenery('freeware-dev', 1, null, 'https://flightsim.to/addon/4270/eddm-freeware')
+            ->update(['source' => 'flightsim.to', 'source_reference_id' => 4270]);
+        $this->fakeFsac([$this->fsacProduct(4270, 'sim-wings')]);
+
+        $sceneries = collect($this->getScenery()->json('data.MSFS2020'));
+
+        $this->assertEquals(2, $sceneries->count());
+        $this->assertFalse($sceneries->firstWhere('developer', 'freeware-dev')['fsac']);
+    }
+
+    public function test_local_row_for_a_store_link_fsac_returned_is_not_duplicated(): void
+    {
+        $this->cacheScenery('freeware-dev', 1, null, 'https://flightsim.to/addon/555/eddm-freeware')
+            ->update(['source' => 'flightsim.to', 'source_reference_id' => 555]);
+        $product = $this->fsacProduct(9001, 'freeware-dev');
+        $product['prices'][0]['link'] = 'https://r.fsaddoncompare.com?url=https%3A%2F%2Fwww.flightsim.to%2Ffile%2F555%2Feddm';
+        $product['prices'][0]['currencyPrice']['EUR'] = 0;
+        $this->fakeFsac([$product]);
+
+        $sceneries = $this->getScenery()->json('data.MSFS2020');
+
+        $this->assertEquals(1, count($sceneries));
+        $this->assertTrue($sceneries[0]['fsac']);
+    }
+
+    public function test_local_payware_copy_is_hidden_when_fsac_lists_the_same_developer(): void
+    {
+        $this->cacheScenery('sim-wings', 1, null, 'https://flightsim.to/addon/777/eddm-pro')
+            ->update(['source' => 'flightsim.to', 'source_reference_id' => 777]);
+        $this->cacheScenery('sim-wings', 1, null, 'https://flightsim.to/addon/778/eddm-lite')
+            ->update(['source' => 'flightsim.to', 'source_reference_id' => 778, 'payware' => false]);
+        $this->fakeFsac([$this->fsacProduct(4270, 'Sim-Wings')]);
+
+        $sceneries = collect($this->getScenery()->json('data.MSFS2020'));
+
+        $this->assertEquals(2, $sceneries->count());
+        $this->assertTrue($sceneries->contains(fn ($s) => $s['fsac']));
+        $this->assertTrue($sceneries->contains(fn ($s) => ! $s['fsac'] && str_contains($s['link'], '/778/')));
+    }
+
     public function test_scenery_endpoint_returns_404_when_nothing_is_cached_and_fsac_is_empty(): void
     {
         $this->fakeFsac([]);

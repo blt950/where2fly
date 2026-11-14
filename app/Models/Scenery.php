@@ -11,6 +11,13 @@ class Scenery extends Model
 
     protected $guarded = [];
 
+    protected function casts(): array
+    {
+        return [
+            'source_checked_at' => 'datetime',
+        ];
+    }
+
     public function airport()
     {
         return $this->belongsTo(Airport::class);

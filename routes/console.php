@@ -27,6 +27,9 @@ Schedule::command('calc:flights')->daily()->sentryMonitor();
 // Fetch Github Issues cache
 Schedule::command('fetch:github')->everyTenMinutes()->sentryMonitor();
 
+// Sync freeware sceneries from flightsim.to
+Schedule::command('fetch:sceneries')->dailyAt('03:15')->sentryMonitor();
+
 // Cleanup sceneries without attached simulators
 Schedule::command('cleanup:sceneries')->daily()->sentryMonitor();
 
