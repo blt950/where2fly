@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 
+import CrashFeedback from '../components/feedback/CrashFeedback';
 import PageTitle from '../components/ui/PageTitle';
 
 const MESSAGES = {
@@ -9,8 +10,9 @@ const MESSAGES = {
     503: ['Down for maintenance', 'Where2Fly is being updated. Please try again in a few minutes.'],
 };
 
-// What the server renders for an error (bootstrap/app.php), inside the shell like any other page
-const ErrorPage = ({ status }) => {
+// What the server renders for an error (bootstrap/app.php), inside the shell like any other page.
+// A 500 also asks what happened, attached to its Sentry event (`sentryEventId`).
+const ErrorPage = ({ status, sentryEventId = null }) => {
     const [title, message] = MESSAGES[status] ?? MESSAGES[500];
 
     return (
@@ -23,6 +25,8 @@ const ErrorPage = ({ status }) => {
                 <Link href={route('front')} className="btn btn-outline-primary">
                     <i className="fa-sharp fa-search" aria-hidden="true"></i> Find a destination
                 </Link>
+
+                {status === 500 && <CrashFeedback eventId={sentryEventId} />}
             </div>
         </>
     );

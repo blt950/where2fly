@@ -112,8 +112,13 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // The shared props query the database; when that is what failed, they throw again.
             // The plain Blade error view needs none of them.
+            // A crash was just reported (reportable() above): its event id lets the page attach what
+            // the visitor tells us, as the Blade 500 view does
+            $eventId = $status === 500 && app()->bound('sentry') ? app('sentry')->getLastEventId() : null;
+
             try {
-                return $response->render('Error', ['status' => $status])->withSharedData()->toResponse($request);
+                return $response->render('Error', ['status' => $status, 'sentryEventId' => $eventId ? (string) $eventId : null])
+                    ->withSharedData()->toResponse($request);
             } catch (Throwable) {
                 return null;
             }

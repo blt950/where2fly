@@ -67,7 +67,9 @@ class ErrorPagesTest extends TestCase
     public function test_a_crash_is_shown_in_the_shell_unless_debugging(): void
     {
         config(['app.debug' => false]);
-        $this->get('/_test/crash')->assertServerError()->assertInertia(fn (Assert $page) => $page->component('Error')->where('status', 500));
+        $this->get('/_test/crash')->assertServerError()->assertInertia(fn (Assert $page) => $page->component('Error')
+            ->where('status', 500)
+            ->has('sentryEventId'));
 
         config(['app.debug' => true]);
         $this->get('/_test/crash')->assertServerError()->assertDontSee('<script data-page="app"', false);
