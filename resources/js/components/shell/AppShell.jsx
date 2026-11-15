@@ -89,12 +89,17 @@ const AppShell = ({ children }) => {
 
     const layout = useMemo(() => ({ compact, getInsets, cardSlot }), [compact, getInsets, cardSlot]);
 
-    // Selecting something, or moving to another page, brings a collapsed drawer back
-    useEffect(() => {
-        if (compact && cardsOpen) {
-            setStop((current) => (current === 'peek' ? 'half' : current));
+    // Selecting an airport settles the drawer at half: the card shows, and so does the airport on
+    // the map (a search box raises the drawer fully, which would leave the map hidden). Done during
+    // render, so the drawer reports its new height before the map pans to the airport.
+    const [settledFor, setSettledFor] = useState(null);
+    const selectedCard = state.showAirportIdCard ?? null;
+    if (selectedCard !== settledFor) {
+        setSettledFor(selectedCard);
+        if (compact && selectedCard) {
+            setStop('half');
         }
-    }, [compact, cardsOpen]);
+    }
 
     const raiseDrawer = useCallback(() => setStop((current) => (current === 'peek' ? 'half' : current)), []);
 

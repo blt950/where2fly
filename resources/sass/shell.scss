@@ -8,8 +8,7 @@ $bottom-nav-height: 3.75rem;
 $drawer-handle-height: 2.75rem;
 
 // Wide screens: the drawer is the plain sidebar and these parts don't exist
-.drawer-handle,
-.bottom-nav {
+.drawer-handle {
     display: none;
 }
 
@@ -87,16 +86,15 @@ body.shell-compact {
         display: none;
     }
 
-    // Attribution has to stay visible: bottom right, resting on the folded drawer, so the
+    // Attribution has to stay visible: a full-width strip resting on the folded drawer, so the
     // drawer covers it once opened (it sits below the drawer's z-index)
     footer {
         display: block;
         top: auto;
         bottom: $drawer-handle-height;
-        left: auto;
+        left: 0;
         right: 0;
-        width: auto;
-        max-width: 85%;
+        width: 100%;
         height: auto;
         padding: 1px 6px;
         font-size: 0.6875rem;
@@ -266,16 +264,32 @@ body.shell-compact {
 
     // In tabs, a card's close button only led back to another tab, and the Scenery tab replaces
     // the airport card's Scenery button
+    // !important: the header row is a Bootstrap .d-flex, itself !important
     .card-tab-panel .popup-card .btn-close,
-    .card-tab-panel .card-open-scenery {
-        display: none;
+    .card-tab-panel .card-open-scenery,
+    .card-tab-panel .card-header-row {
+        display: none !important;
     }
 
     .popup-card {
         display: block;
         background: transparent;
     }
+}
 
+@media (prefers-reduced-motion: reduce) {
+    body.shell-compact main.drawer {
+        transition: none;
+    }
+}
+
+// The bottom nav, below lg: in flow at the bottom of the compact shell, and fixed to the bottom
+// of the scrolling Blade pages (body.has-bottom-nav), which then drop their hamburger header too
+.bottom-nav {
+    display: none;
+}
+
+@include media-breakpoint-down(lg) {
     .bottom-nav {
         display: flex;
         flex: none;
@@ -314,11 +328,71 @@ body.shell-compact {
     .bottom-nav-more {
         flex: 1 1 0;
         display: flex;
+
+        .dropdown-menu {
+            min-width: 15rem;
+            margin-bottom: 0.25rem !important;
+            padding: 0.5rem 0;
+
+            background: $secondary;
+            border: 1px solid $primary;
+            font-size: 1rem;
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1.25rem;
+            color: $bluewhite;
+
+            &:hover, &:focus-visible {
+                color: $white;
+                background: rgba($white, 0.08);
+            }
+
+            &.active {
+                color: $black;
+                background: $primary;
+            }
+        }
+
+        .dropdown-divider {
+            border-color: $gray-700;
+        }
+    }
+
+    body.has-bottom-nav {
+        padding-bottom: calc(#{$bottom-nav-height} + env(safe-area-inset-bottom));
+
+        .bottom-nav {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .navbar-toggler,
+        #navbarMenu,
+        .menu-overlay {
+            display: none !important;
+        }
+
+        .navbar > .d-flex {
+            width: 100%;
+            align-items: center;
+        }
+
+        .donate {
+            margin-left: auto;
+            margin-right: 1rem;
+        }
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    body.shell-compact main.drawer {
-        transition: none;
+// Tablet widths, where Blade pages still show the sidebar and map side by side: they end above
+// the fixed nav instead of under it
+@include media-breakpoint-between(md, lg) {
+    body.has-bottom-nav {
+        main, nav.sidebar, .map {
+            height: calc(100dvh - #{$header-height} - #{$bottom-nav-height} - env(safe-area-inset-bottom));
+        }
     }
 }

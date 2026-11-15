@@ -13,6 +13,7 @@ import MapBackgroundClick from './MapBackgroundClick';
 import MapBound from './MapBound';
 import MapCamera from './MapCamera';
 import MapControls from './MapControls';
+import MapFocusAirport from './MapFocusAirport';
 import MapPan from './MapPan';
 import MapPing from './MapPing';
 import MapProvider from './MapProvider';
@@ -176,6 +177,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
     }, [airports, camera?.type]);
 
     const { palette, hillshade } = themeOf(preferences.theme);
+    const focusedAirport = focusAirport ? findAirport(focusAirport) : undefined;
 
     // `hidden` is one flag shared with the lists page, so the toggle has to reach the server.
     // Applied optimistically — the map redraws now and rolls back if the write fails.
@@ -244,6 +246,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} color={palette.fallback} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {persistView && <MapSaveView />}
+                {focusedAirport && <MapFocusAirport airport={focusedAirport} color={palette.fallback} />}
                 <MapPing ping={ping} />
                 <MapBackgroundClick onClick={onBackgroundClick} />
                 <MapAttribution />

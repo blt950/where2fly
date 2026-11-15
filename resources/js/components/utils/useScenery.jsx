@@ -17,8 +17,13 @@ export const loadScenery = (icao) => {
             },
             body: JSON.stringify({ airportIcao: icao }),
         })
-            .then((response) => response.json())
-            .then((body) => body.data)
+            // The endpoint answers 404 when an airport has no sceneries: that's an empty result
+            .then((response) => {
+                if (response.status === 404) return {};
+                if (!response.ok) throw new Error(`Could not load sceneries (${response.status})`);
+
+                return response.json().then((body) => body.data ?? {});
+            })
             .catch((error) => {
                 cache.delete(icao);
                 throw error;

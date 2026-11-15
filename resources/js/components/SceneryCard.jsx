@@ -37,12 +37,13 @@ function SceneryCard({ airportId, onClose }) {
         <div className="popup-card" ref={cardRef}>
         {data !== null ? (
             <>
-                <div className="d-flex justify-content-between">
+                {/* The drawer's Scenery tab already names the card, so this header hides there */}
+                <div className="d-flex justify-content-between card-header-row">
                     <h2>Scenery</h2>
                     <button className="btn-close" aria-label="Close scenery card" onClick={onClose}></button>
                 </div>
 
-                {!data ? (
+                {Object.keys(data).length === 0 ? (
                     <p>No scenery available</p>
                 ) : (
                     <u-tabs ref={tabsRef} key={Object.keys(data).join('|')}>

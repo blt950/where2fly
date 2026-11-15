@@ -4,7 +4,7 @@
         @include('layouts.header')
     </head>
 
-    <body class="d-flex h-100 text-white bg-dark">
+    <body class="d-flex h-100 text-white bg-dark has-bottom-nav">
 
         <div class="d-flex w-100 h-100 mx-auto flex-column">
 
@@ -54,6 +54,8 @@
             </div>
         </div>
         
+        @include('layouts.bottomnav')
+
         @yield('js')
         @vite('resources/js/functions/tooltip.js')
     </body>

@@ -99,15 +99,15 @@ beforeEach(() => {
 
     vi.stubGlobal('fetch', vi.fn((url) => {
         if (url === 'api.airport.show') {
-            return Promise.resolve({ json: () => Promise.resolve({ data: airportFixture }) });
+            return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: airportFixture }) });
         }
 
         if (url === 'api.airport.scenery') {
-            return Promise.resolve({ json: () => Promise.resolve({ data: sceneryFixture }) });
+            return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: sceneryFixture }) });
         }
 
         if (url === 'api.airport.flights') {
-            return Promise.resolve({ json: () => Promise.resolve({ data: flightsFixture }) });
+            return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: flightsFixture }) });
         }
 
         return Promise.reject(new Error(`unhandled fetch url: ${url}`));
@@ -202,7 +202,7 @@ describe('CardHost / AirportCard', () => {
 
         beforeEach(() => {
             const bodies = { 'api.airport.show': withAirlines, 'api.airport.flights': flightsFixture, 'api.airport.scenery': sceneryFixture };
-            fetch.mockImplementation((url) => Promise.resolve({ json: () => Promise.resolve({ data: bodies[url] }) }));
+            fetch.mockImplementation((url) => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: bodies[url] }) }));
         });
 
         it('opens on the clicked airline, filtering one fetch of every flight on the route', async () => {
@@ -296,6 +296,18 @@ describe('CardHost / AirportCard', () => {
             // The scenery count is loaded up front, from the same request the card will use
             await waitFor(() => expect(slot.querySelector('#card-tab-scenery .card-tab-count')?.textContent).toBe('1'));
             expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.scenery')).toHaveLength(1);
+        });
+
+        it('counts 0 when the airport has no sceneries (the endpoint answers 404)', async () => {
+            fetch.mockImplementation((url) => Promise.resolve(url === 'api.airport.scenery'
+                ? { ok: false, status: 404, json: () => Promise.resolve({ message: 'Scenery not found' }) }
+                : { ok: true, status: 200, json: () => Promise.resolve({ data: airportFixture }) }));
+            const slot = renderTabbed(baseMapContext);
+
+            await waitFor(() => expect(slot.querySelector('#card-tab-scenery .card-tab-count')?.textContent).toBe('0'));
+
+            fireEvent.click(slot.querySelector('#card-tab-scenery'));
+            await screen.findByText('No scenery available');
         });
 
         it('switches to the card the airport card opens, and its close button returns to the airport', async () => {
