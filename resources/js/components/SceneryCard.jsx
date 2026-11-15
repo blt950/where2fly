@@ -4,7 +4,7 @@ import CurrencyDropdown from './ui/CurrencyDropdown';
 import { useScenery } from './utils/useScenery';
 import { useTooltips } from './utils/useTooltips';
 
-function SceneryCard({ airportId, onClose }) {
+function SceneryCard({ airportId, onClose, inTab = false }) {
     const cardRef = useRef(null);
     const tabsRef = useRef(null);
     const data = useScenery(airportId);
@@ -37,11 +37,13 @@ function SceneryCard({ airportId, onClose }) {
         <div className="popup-card" ref={cardRef}>
         {data !== null ? (
             <>
-                {/* The drawer's Scenery tab already names the card, so this header hides there */}
-                <div className="d-flex justify-content-between card-header-row">
-                    <h2>Scenery</h2>
-                    <button className="btn-close" aria-label="Close scenery card" onClick={onClose}></button>
-                </div>
+                {/* In a tab, the tab already names the card and there's nothing to close */}
+                {!inTab && (
+                    <div className="d-flex justify-content-between">
+                        <h2>Scenery</h2>
+                        <button className="btn-close" aria-label="Close scenery card" onClick={onClose}></button>
+                    </div>
+                )}
 
                 {Object.keys(data).length === 0 ? (
                     <p>No scenery available</p>

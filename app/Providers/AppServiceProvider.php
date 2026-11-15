@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Helpers\NavigationHelper;
 use App\Mixins\CollectionAirportFilter;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,6 +33,11 @@ class AppServiceProvider extends ServiceProvider
                 ->line('Thank you for registering an account with Where2Fly! To complete the registration process, please verify your email address by clicking the button below.')
                 ->action('Verify Email Address', $url)
                 ->line('If you did not create this account, no further action is required and your account will be deleted if not verified after a few days.');
+        });
+
+        // The same navigation the React shell gets as its `nav` prop
+        View::composer(['layouts.menu', 'layouts.bottomnav', 'layouts.footer'], function ($view) {
+            $view->with('nav', NavigationHelper::build());
         });
     }
 }

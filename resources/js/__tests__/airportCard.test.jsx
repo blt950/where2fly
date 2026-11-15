@@ -235,6 +235,21 @@ describe('CardHost / AirportCard', () => {
             expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.flights')).toHaveLength(1);
         });
 
+        it('shows the airline logo before each callsign when the route has one airline', async () => {
+            const oneAirline = { airlines: [SAS], airline: null, flights: [flightsFixture.flights[0]] };
+            fetch.mockImplementation((url) => Promise.resolve({
+                ok: true, status: 200, json: () => Promise.resolve({ data: url === 'api.airport.flights' ? oneAirline : withAirlines }),
+            }));
+            renderCard(onRoute);
+            await screen.findByText('Oslo Gardermoen');
+
+            fireEvent.click(screen.getByAltText('See all Scandinavian flights'));
+            await screen.findByText('SAS1');
+
+            expect(document.querySelector('.flights-filter')).toBeNull();
+            expect(document.querySelector('.card-table tbody tr img.airline-logo').getAttribute('alt')).toBe('Scandinavian logo');
+        });
+
         it('closes the flights and scenery cards when another airport is selected', async () => {
             const { rerender } = renderCard(onRoute);
             await screen.findByText('Oslo Gardermoen');
@@ -322,17 +337,23 @@ describe('CardHost / AirportCard', () => {
             await screen.findByText('No scenery available');
         });
 
-        it('switches to the card the airport card opens, and its close button returns to the airport', async () => {
-            const slot = renderTabbed(baseMapContext);
+        it('switches cards from the tab strip, the cards leaving out what the tabs cover', async () => {
+            const slot = renderTabbed({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false });
             await screen.findByText('Oslo Gardermoen');
 
-            fireEvent.click(screen.getByText('Scenery', { selector: '.popup-card button' }));
-            await screen.findByText('Orbx');
-            expect(tabs(slot)).toEqual(['ENGM:false', 'Scenery:true']);
-            expect(screen.queryByText('Oslo Gardermoen')).toBeNull();
+            // No close button, no Scenery button: the tabs and the Back arrow cover them
+            expect(slot.querySelector('[aria-label="Close airport card"]')).toBeNull();
+            expect(screen.queryByText('Scenery', { selector: '.popup-card button' })).toBeNull();
 
-            fireEvent.click(screen.getByLabelText('Close scenery card'));
-            expect(tabs(slot)).toEqual(['ENGM:true', 'Scenery:false']);
+            fireEvent.click(slot.querySelector('#card-tab-scenery'));
+            await screen.findByText('Orbx');
+            expect(tabs(slot)).toEqual(['ENGM:false', 'Flights:false', 'Scenery:true']);
+            expect(screen.queryByText('Oslo Gardermoen')).toBeNull();
+            expect(slot.querySelector('[aria-label="Close scenery card"]')).toBeNull();
+            expect(screen.queryByRole('heading', { name: 'Scenery' })).toBeNull();
+
+            fireEvent.click(slot.querySelector('#card-tab-airport'));
+            expect(tabs(slot)).toEqual(['ENGM:true', 'Flights:false', 'Scenery:false']);
         });
 
         it('opens on the scenery tab where the scene asks for it, and Back closes everything', async () => {

@@ -353,3 +353,19 @@ u-tab[aria-selected="true"] {
     padding: 0;
     background: none;
 }
+
+// The airline filter in the flights card: the logo buttons stand as tall as the "All" button
+.flights-filter {
+    // .btn-sm: 0.875rem text × 1.5 line height + 0.5rem padding + 2px border
+    --filter-height: calc(1.8125rem + 2px);
+
+    > .btn,
+    > .airline-button {
+        height: var(--filter-height);
+    }
+
+    .airline-logo {
+        width: var(--filter-height);
+        height: var(--filter-height);
+    }
+}

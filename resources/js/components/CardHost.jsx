@@ -65,12 +65,13 @@ function CardHost({ airportId }) {
         setFocusAirport(null);
     };
 
-    const airportCard = <AirportCard airportId={airportId} onOpenFlights={openFlights} onOpenScenery={openScenery} onClose={closeAll} />;
+    // In tabs, each card leaves out what the tabs already cover (headers, close buttons, shortcuts)
+    const airportCard = <AirportCard airportId={airportId} onOpenFlights={openFlights} onOpenScenery={openScenery} onClose={closeAll} inTab={compact} />;
     const flightsCard = (onClose) => onRoute && (
         <FlightsCard departureAirportId={departure.id} arrivalAirportId={arrival.id} airline={cards.airline}
-            onAirlineChange={(airline) => update({ airline })} onClose={onClose} />
+            onAirlineChange={(airline) => update({ airline })} onClose={onClose} inTab={compact} />
     );
-    const sceneryCard = (onClose) => focused && <SceneryCard airportId={focused.icao} onClose={onClose} />;
+    const sceneryCard = (onClose) => focused && <SceneryCard airportId={focused.icao} onClose={onClose} inTab={compact} />;
 
     if (compact) {
         if (!cardSlot) {

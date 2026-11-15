@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\NavigationHelper;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
 use Inertia\Middleware;
 use Inertia\Support\Header;
@@ -41,15 +41,15 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * What layouts/app.blade.php reads from the session, the auth user and the View::share calls
-     * of AdminVariables/FeedbackVariables, for the React shell.
+     * What layouts/app.blade.php reads from the session and the auth user, plus the navigation
+     * (NavigationHelper, which the Blade layouts get too), for the React shell.
      */
     public function share(Request $request): array
     {
         return [
             ...parent::share($request),
-            'appVersion' => config('app.version'),
             'isProduction' => app()->isProduction(),
+            'nav' => fn () => NavigationHelper::build(),
             'auth' => [
                 'user' => fn () => ($user = $request->user()) ? [
                     'username' => $user->username,
@@ -65,8 +65,6 @@ class HandleInertiaRequests extends Middleware
                 'warning' => $request->session()->get('warning'),
                 'success' => $request->session()->get('success'),
             ],
-            'unreadFeedback' => fn () => View::shared('unreadFeedback'),
-            'hasNotifications' => fn () => View::shared('hasNotifications'),
         ];
     }
 }

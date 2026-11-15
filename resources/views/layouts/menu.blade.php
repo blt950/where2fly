@@ -1,93 +1,87 @@
+{{-- The header; links from NavigationHelper ($nav). resources/js/components/shell/Menu.jsx is its React twin --}}
+@php
+    $donate = collect($nav['community'])->firstWhere('key', 'donate');
+    $social = collect($nav['community'])->where('key', '!=', 'donate');
+    $feedback = $nav['feedback'];
+    $account = $nav['account'];
+@endphp
 <header class="mb-auto">
     <nav class="navbar navbar-expand-xl navbar-dark">
         <div class="d-flex d-row">
-            <a href="{{ route('front') }}" class="d-block navbar-brand mb-0 logo">
+            <a href="{{ $nav['main'][0]['href'] }}" class="d-block navbar-brand mb-0 logo">
                 Where2Fly
             </a>
-            <a class="donate btn btn-sm btn-light" href="https://ko-fi.com/X7X21V3MEX" target="_blank">
+            <x-nav-link :item="$donate" class="donate btn btn-sm btn-light">
                 <img src="/img/kofi_symbol.svg" alt="Coffee cup with a heart" />
-                Buy me a coffee
-            </a>
+                {{ $donate['label'] }}
+            </x-nav-link>
         </div>
         <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarMenu">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link {{ Route::is('front*') || Route::is('search*') ? 'active' : '' }}" href="{{ route('front') }}">
-                        <i class="fa-sharp fa-search"></i>&nbsp;
-                        Search
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ Route::is('top*') ? 'active' : '' }}" href="{{ route('top') }}">
-                        <i class="fa-sharp fa-list"></i>&nbsp;
-                        Top List
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ Route::is('scenery*') ? 'active' : '' }}" href="{{ route('scenery') }}">
-                        <i class="fa-sharp fa-map"></i>&nbsp;
-                        Scenery
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ Route::is('feedback*') ? 'active' : '' }}" href="{{ route('feedback') }}">
-                        <i class="fa-sharp fa-message {{ isset($unreadFeedback) && $unreadFeedback ? 'unread' : '' }}"></i>&nbsp;
-                        Feedback
-                    </a>
-                </li>
-                
-                @guest
+                @foreach($nav['main'] as $item)
                     <li class="nav-item">
-                        <a class="nav-link {{ Route::is('login') || Route::is('register') ? 'active' : '' }}" href="{{ route('login') }}">
-                            <i class="fa-sharp fa-lock"></i>&nbsp;
-                            Login
-                        </a>
+                        <x-nav-link :item="$item" @class(['nav-link', 'active' => $item['active']])>
+                            <i class="fa-sharp {{ $item['icon'] }}"></i>&nbsp;
+                            {{ $item['label'] }}
+                        </x-nav-link>
                     </li>
-                @endguest
-                @auth
+                @endforeach
+
+                <li class="nav-item">
+                    <x-nav-link :item="$feedback" @class(['nav-link', 'active' => $feedback['active']])>
+                        <i @class(['fa-sharp', $feedback['icon'], 'unread' => $feedback['unread']])></i>&nbsp;
+                        {{ $feedback['label'] }}
+                    </x-nav-link>
+                </li>
+
+                @if($nav['login'])
+                    <li class="nav-item">
+                        <x-nav-link :item="$nav['login']" @class(['nav-link', 'active' => $nav['login']['active']])>
+                            <i class="fa-sharp {{ $nav['login']['icon'] }}"></i>&nbsp;
+                            {{ $nav['login']['label'] }}
+                        </x-nav-link>
+                    </li>
+                @endif
+
+                @if($account)
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {{ Route::is('user.account') ? 'active' : '' }}" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            @if(isset($hasNotifications) && $hasNotifications)
+                        <a @class(['nav-link', 'dropdown-toggle', 'active' => $account['active']]) href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @if($account['notifications'])
                                 <i class="fa-sharp fa-bell text-warning"></i>&nbsp;
                             @else
                                 <i class="fa-sharp fa-user"></i>&nbsp;
                             @endif
-                            {{ Auth::user()->username }}
+                            {{ $account['label'] }}
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{{ route('user.account') }}">Settings</a></li>
-                            <li><a class="dropdown-item" href="{{ route('list.index') }}">My Lists</a></li>
-                            @can('showAdmin', App\Models\User::class)
+                            @foreach($account['items'] as $item)
+                                @if($item['key'] === 'logout')
+                                    <li><hr class="dropdown-divider"></li>
+                                @endif
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('admin') }}">
-                                        Admin
-                                        @if(isset($hasNotifications) && $hasNotifications)
-                                            <span class="badge bg-warning text-dark">{{ $hasNotifications }}</span>
+                                    <x-nav-link :item="$item" @class(['dropdown-item', 'active' => $item['active']])>
+                                        {{ $item['label'] }}
+                                        @if($item['key'] === 'admin' && $account['notifications'])
+                                            <span class="badge bg-warning text-dark">{{ $account['notifications'] }}</span>
                                         @endif
-                                    </a>
+                                    </x-nav-link>
                                 </li>
-                            @endcan
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ route('user.logout') }}">Logout</a></li>
+                            @endforeach
                         </ul>
                     </li>
-                @endauth
-                
-                <li class="nav-item">
-                    <a class="nav-link" href="https://discord.gg/UkFg9Yy4gP" target="_blank">
-                        <i class="fab fa-discord"></i>
-                        <span class="d-lg-none">&nbsp;Discord</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="https://github.com/blt950/where2fly" target="_blank">
-                        <i class="fab fa-github"></i>
-                        <span class="d-lg-none">&nbsp;GitHub</span>
-                    </a>
-                </li>
+                @endif
+
+                @foreach($social as $item)
+                    <li class="nav-item">
+                        <x-nav-link :item="$item" class="nav-link">
+                            <i class="{{ $item['icon'] }}"></i>
+                            <span class="d-lg-none">&nbsp;{{ $item['label'] }}</span>
+                        </x-nav-link>
+                    </li>
+                @endforeach
             </ul>
         </div>
         <div id="menu-overlay" class="menu-overlay d-md-none"></div>

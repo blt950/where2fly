@@ -18,12 +18,13 @@ const flightLinks = (flight, departure, arrival) => {
 
 // Every flight on the route, narrowed by an airline filter. One fetch per route; switching airline
 // only filters, so the card (and a phone tab) keeps a single, stable destination.
-function FlightsCard({ departureAirportId, arrivalAirportId, airline, onAirlineChange, onClose }) {
+function FlightsCard({ departureAirportId, arrivalAirportId, airline, onAirlineChange, onClose, inTab = false }) {
 
     const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts } = useContext(MapContext);
     const data = useFlights(departureAirportId, arrivalAirportId, highlightedAircrafts);
 
     const selected = data?.airlines.find((candidate) => candidate.icao_code === airline);
+    const soleAirline = data?.airlines.length === 1 ? data.airlines[0] : null;
     const flights = data ? data.flights.filter((flight) => !airline || flight.airline.icao_code === airline) : [];
     const departure = findAirport(reverseDirection ? focusAirport : primaryAirport)?.icao;
     const arrival = findAirport(reverseDirection ? primaryAirport : focusAirport)?.icao;
@@ -38,11 +39,11 @@ function FlightsCard({ departureAirportId, arrivalAirportId, airline, onAirlineC
                             {selected ? `${selected.name} flights` : 'Flights'}
                         </h2>
 
-                        <button className="btn-close" aria-label="Close flights card" onClick={onClose}></button>
+                        {!inTab && <button className="btn-close" aria-label="Close flights card" onClick={onClose}></button>}
                     </div>
 
                     {data.airlines.length > 1 && (
-                        <div className="d-flex flex-wrap align-items-center gap-1 mb-2" role="group" aria-label="Filter by airline">
+                        <div className="flights-filter d-flex flex-wrap align-items-center gap-1 mb-2" role="group" aria-label="Filter by airline">
                             <button type="button" className={`btn btn-sm ${airline ? 'btn-outline-primary' : 'btn-primary'}`}
                                 aria-pressed={!airline} onClick={() => onAirlineChange(null)}>All</button>
                             {data.airlines.map((candidate) => (
@@ -72,6 +73,10 @@ function FlightsCard({ departureAirportId, arrivalAirportId, airline, onAirlineC
                                     <tr key={flight.id}>
                                         <td className={tone}>
                                             <div className="dropdown fs-6 text-info link-underline-info link-underline-opacity-25-hover ps-0">
+                                                {/* With one airline there's no filter row to say whose flights these are */}
+                                                {soleAirline && (
+                                                    <img className="airline-logo small me-1" alt={`${soleAirline.name} logo`} src={`/img/airlines/${soleAirline.iata_code}.png`} />
+                                                )}
                                                 <button className="btn btn-xs btn-xs-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{flight.flight_icao}</button>
                                                 <ul className="dropdown-menu">
                                                     {flightLinks(flight, departure, arrival).map(([label, href]) => (

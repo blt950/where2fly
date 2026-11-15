@@ -211,7 +211,9 @@ main, nav.sidebar{
 }
 
 footer{
-    height: $footer-height;
+    // A minimum, not a height: where links and credits don't fit one line (landscape tablets),
+    // it grows upward from the bottom edge instead of spilling below it and scrolling the page
+    min-height: $footer-height;
     font-weight: 300;
     text-align: center;
 
@@ -226,7 +228,10 @@ footer{
 
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
+    column-gap: 1rem;
 
     @include media-breakpoint-down(lg) { 
         display: none;

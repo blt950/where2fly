@@ -8,8 +8,8 @@ import TAF from './ui/TAF';
 import { useTooltips } from './utils/useTooltips';
 
 // The airport itself. The flights and scenery cards beside it belong to CardHost, which opens
-// them through `onOpenFlights` / `onOpenScenery`.
-function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose }) {
+// them through `onOpenFlights` / `onOpenScenery`. `inTab`: shown as a drawer tab, see CardHost.
+function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab = false }) {
     const dataCache = useRef({});
     const cardRef = useRef(null);
     const [data, setData] = useState(null);
@@ -79,7 +79,7 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose }) {
                             />
                             &nbsp;{data.airport.icao}
                         </div>
-                        <button className="btn-close" aria-label="Close airport card" onClick={onClose}></button>
+                        {!inTab && <button className="btn-close" aria-label="Close airport card" onClick={onClose}></button>}
                     </div>
                     <h2>{data.airport.name}</h2>
 
@@ -119,11 +119,11 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose }) {
                             <TAF taf={data.taf}/>
                         </dd>
 
-                        {data.airlines && data.airlines.length > 0 && (
+                        {/* In a tab, the Flights tab replaces these shortcuts */}
+                        {!inTab && data.airlines && data.airlines.length > 0 && (
                             <>
-                                {/* The drawer's Flights tab replaces these shortcuts on the compact layout */}
-                                <dt className="card-airlines">Flights</dt>
-                                <dd className="d-flex flex-wrap gap-1 card-airlines">
+                                <dt>Flights</dt>
+                                <dd className="d-flex flex-wrap gap-1">
                                     {data.airlines.map(airline => (
                                         <button
                                             key={airline.id}
@@ -146,10 +146,12 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose }) {
                     </dl>
 
                     <div className="d-flex flex-wrap gap-2">
-                        {/* The drawer's Scenery tab replaces this button on the compact layout */}
-                        <button className="btn btn-outline-primary btn-sm card-open-scenery" onClick={onOpenScenery}>
-                            <i className="fa-sharp fa-map"></i> Scenery
-                        </button>
+                        {/* In a tab, the Scenery tab replaces this button */}
+                        {!inTab && (
+                            <button className="btn btn-outline-primary btn-sm" onClick={onOpenScenery}>
+                                <i className="fa-sharp fa-map"></i> Scenery
+                            </button>
+                        )}
 
                         {(primaryAirport === undefined || primaryAirport === null) && (
                             <>

@@ -1,37 +1,40 @@
 import { useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 
-// Pages already in the shell link with <Link> and keep the map; the rest are ordinary loads.
-const NavLink = ({ inShell, href, active, children, ...rest }) => {
-    const className = `nav-link${active ? ' active' : ''}`;
+import NavItem from './NavItem';
 
-    return inShell
-        ? <Link className={className} href={href} {...rest}>{children}</Link>
-        : <a className={className} href={href} {...rest}>{children}</a>;
-};
-
-// Port of layouts/menu.blade.php.
+// The header; its links come from NavigationHelper (`nav`), shared with the bottom nav and the
+// Blade layouts. layouts/menu.blade.php is its Blade twin.
 const Menu = () => {
     const { url, props } = usePage();
-    const { auth, unreadFeedback, hasNotifications, isProduction } = props;
-    const user = auth?.user;
-    const is = (name) => route().current(name);
+    const { nav, isProduction } = props;
+    const { main, feedback, account, login, community } = nav;
+    const donate = community.find((item) => item.key === 'donate');
+    const social = community.filter((item) => item.key !== 'donate');
 
-    // A full load used to close the phone menu; a client-side visit has to do it itself.
+    // A full load used to close the phone menu; a client-side visit has to do it itself
     useEffect(() => {
         bootstrap.Collapse.getInstance(document.getElementById('navbarMenu'))?.hide();
     }, [url]);
+
+    const navLink = (item, icon) => (
+        <li className="nav-item" key={item.key}>
+            <NavItem item={item} className={`nav-link${item.active ? ' active' : ''}`}>
+                <i className={`fa-sharp ${icon ?? item.icon}`}></i>&nbsp; {item.label}
+            </NavItem>
+        </li>
+    );
 
     return (
         <>
             <header className="mb-auto">
                 <nav className="navbar navbar-expand-xl navbar-dark">
                     <div className="d-flex d-row">
-                        <Link href={route('front')} className="d-block navbar-brand mb-0 logo">Where2Fly</Link>
-                        <a className="donate btn btn-sm btn-light" href="https://ko-fi.com/X7X21V3MEX" target="_blank">
+                        <Link href={main[0].href} className="d-block navbar-brand mb-0 logo">Where2Fly</Link>
+                        <NavItem item={donate} className="donate btn btn-sm btn-light">
                             <img src="/img/kofi_symbol.svg" alt="Coffee cup with a heart" />
-                            Buy me a coffee
-                        </a>
+                            {donate.label}
+                        </NavItem>
                     </div>
                     <button className="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu"
                         aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,72 +42,43 @@ const Menu = () => {
                     </button>
                     <div className="collapse navbar-collapse" id="navbarMenu">
                         <ul className="navbar-nav ms-auto">
-                            <li className="nav-item">
-                                <NavLink inShell href={route('front')} active={is('front*') || is('search*')}>
-                                    <i className="fa-sharp fa-search"></i>&nbsp; Search
-                                </NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink inShell href={route('top')} active={is('top*')}>
-                                    <i className="fa-sharp fa-list"></i>&nbsp; Top List
-                                </NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink inShell href={route('scenery')} active={is('scenery*')}>
-                                    <i className="fa-sharp fa-map"></i>&nbsp; Scenery
-                                </NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink href={route('feedback')} active={is('feedback*')}>
-                                    <i className={`fa-sharp fa-message${unreadFeedback ? ' unread' : ''}`}></i>&nbsp; Feedback
-                                </NavLink>
-                            </li>
+                            {main.map((item) => navLink(item))}
+                            {navLink(feedback, `${feedback.icon}${feedback.unread ? ' unread' : ''}`)}
 
-                            {!user && (
-                                <li className="nav-item">
-                                    <NavLink href={route('login')} active={is('login') || is('register')}>
-                                        <i className="fa-sharp fa-lock"></i>&nbsp; Login
-                                    </NavLink>
-                                </li>
-                            )}
-                            {user && (
+                            {login && navLink(login)}
+                            {account && (
                                 <li className="nav-item dropdown">
-                                    <a className={`nav-link dropdown-toggle${is('user.account') ? ' active' : ''}`} href="#" id="navbarDropdown"
+                                    <a className={`nav-link dropdown-toggle${account.active ? ' active' : ''}`} href="#" id="navbarDropdown"
                                         role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        {hasNotifications
+                                        {account.notifications
                                             ? <i className="fa-sharp fa-bell text-warning"></i>
                                             : <i className="fa-sharp fa-user"></i>}
-                                        &nbsp;{user.username}
+                                        &nbsp;{account.label}
                                     </a>
                                     <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                                        <li><a className="dropdown-item" href={route('user.account')}>Settings</a></li>
-                                        <li><a className="dropdown-item" href={route('list.index')}>My Lists</a></li>
-                                        {user.isAdmin && (
-                                            <li>
-                                                <a className="dropdown-item" href={route('admin')}>
-                                                    Admin
-                                                    {hasNotifications > 0 && <> <span className="badge bg-warning text-dark">{hasNotifications}</span></>}
-                                                </a>
+                                        {account.items.map((item) => (
+                                            <li key={item.key}>
+                                                {item.key === 'logout' && <hr className="dropdown-divider" />}
+                                                <NavItem item={item} className={`dropdown-item${item.active ? ' active' : ''}`}>
+                                                    {item.label}
+                                                    {item.key === 'admin' && account.notifications > 0 && (
+                                                        <> <span className="badge bg-warning text-dark">{account.notifications}</span></>
+                                                    )}
+                                                </NavItem>
                                             </li>
-                                        )}
-                                        <li><hr className="dropdown-divider" /></li>
-                                        <li><a className="dropdown-item" href={route('user.logout')}>Logout</a></li>
+                                        ))}
                                     </ul>
                                 </li>
                             )}
 
-                            <li className="nav-item">
-                                <a className="nav-link" href="https://discord.gg/UkFg9Yy4gP" target="_blank">
-                                    <i className="fab fa-discord"></i>
-                                    <span className="d-lg-none">&nbsp;Discord</span>
-                                </a>
-                            </li>
-                            <li className="nav-item">
-                                <a className="nav-link" href="https://github.com/blt950/where2fly" target="_blank">
-                                    <i className="fab fa-github"></i>
-                                    <span className="d-lg-none">&nbsp;GitHub</span>
-                                </a>
-                            </li>
+                            {social.map((item) => (
+                                <li className="nav-item" key={item.key}>
+                                    <NavItem item={item} className="nav-link">
+                                        <i className={item.icon}></i>
+                                        <span className="d-lg-none">&nbsp;{item.label}</span>
+                                    </NavItem>
+                                </li>
+                            ))}
                         </ul>
                     </div>
                     <div id="menu-overlay" className="menu-overlay d-md-none"></div>

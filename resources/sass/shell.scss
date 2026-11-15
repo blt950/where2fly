@@ -269,14 +269,6 @@ body.shell-compact {
         overscroll-behavior: contain;
     }
 
-    // In tabs the close buttons only led to another tab, and the tabs replace the airline shortcuts
-    // and Scenery button. !important, as some are Bootstrap's .d-flex, itself !important
-    .card-tab-panel .popup-card .btn-close,
-    .card-tab-panel .card-open-scenery,
-    .card-tab-panel .card-airlines,
-    .card-tab-panel .card-header-row {
-        display: none !important;
-    }
 
     .popup-card {
         display: block;
