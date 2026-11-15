@@ -153,7 +153,7 @@ describe('CardHost / AirportCard', () => {
         renderCard(baseMapContext);
         await screen.findByText('Oslo Gardermoen');
 
-        fireEvent.click(screen.getByText('Scenery'));
+        fireEvent.click(screen.getByRole('button', { name: /^Scenery/ }));
 
         await screen.findByText('Orbx');
         expect(fetch).toHaveBeenCalledWith('api.airport.scenery', expect.objectContaining({
@@ -192,7 +192,7 @@ describe('CardHost / AirportCard', () => {
         renderCard(baseMapContext);
         await screen.findByText('Oslo Gardermoen');
 
-        await waitFor(() => expect(screen.getByRole('button', { name: /Scenery/ }).querySelector('.count-pill')?.textContent).toBe('1'));
+        await waitFor(() => expect(screen.getByRole('button', { name: /Scenery/ }).textContent.trim()).toBe('Scenery (1)'));
         expect(screen.queryByText('Orbx')).toBeNull();
         // Off a route there are no flights to count, so no Flights button
         expect(screen.queryByRole('button', { name: /Flights/ })).toBeNull();
@@ -245,7 +245,7 @@ describe('CardHost / AirportCard', () => {
             await screen.findByText('Oslo Gardermoen');
 
             const button = await screen.findByRole('button', { name: /Flights/ });
-            await waitFor(() => expect(button.querySelector('.count-pill')?.textContent).toBe('2'));
+            await waitFor(() => expect(button.textContent.trim()).toBe('Flights (2)'));
 
             fireEvent.click(button);
             await screen.findByText('SAS1');
@@ -288,7 +288,7 @@ describe('CardHost / AirportCard', () => {
             const { rerender } = renderCard(onRoute);
             await screen.findByText('Oslo Gardermoen');
             fireEvent.click(screen.getByAltText('See all Lufthansa flights'));
-            fireEvent.click(screen.getByText('Scenery'));
+            fireEvent.click(screen.getByRole('button', { name: /^Scenery/ }));
             await screen.findByText('Lufthansa flights');
 
             rerender(

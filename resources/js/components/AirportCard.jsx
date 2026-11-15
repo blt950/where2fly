@@ -7,8 +7,7 @@ import TAF from './ui/TAF';
 import { useCachedPost } from './utils/useCachedPost';
 import { useTooltips } from './utils/useTooltips';
 
-const Count = ({ value }) => (value === null || value === undefined ? null
-    : <span className="count-pill ms-1" aria-label={`${value} available`}>{value}</span>);
+const Count = ({ value }) => (value === null || value === undefined ? null : ` (${value})`);
 
 // The airport itself. CardHost owns the flights and scenery cards beside it, and their `counts`
 // (null while loading; no flights off a route). `inTab`: shown as a drawer tab, see CardHost.
@@ -124,12 +123,12 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
                         {/* In a tab, the Flights and Scenery tabs replace these buttons */}
                         {!inTab && counts.flights !== undefined && (
                             <button className="btn btn-outline-primary btn-sm" onClick={() => onOpenFlights(null)}>
-                                <i className="fa-sharp fa-plane-up"></i> Flights <Count value={counts.flights} />
+                                <i className="fa-sharp fa-plane-up"></i> Flights<Count value={counts.flights} />
                             </button>
                         )}
                         {!inTab && (
                             <button className="btn btn-outline-primary btn-sm" onClick={onOpenScenery}>
-                                <i className="fa-sharp fa-map"></i> Scenery <Count value={counts.scenery} />
+                                <i className="fa-sharp fa-map"></i> Scenery<Count value={counts.scenery} />
                             </button>
                         )}
 
