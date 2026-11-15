@@ -11,6 +11,8 @@ export const focusColor = (focusAirport, palette) => ['case',
 // MapAirportSource is mounted once per data set and builds every id from these prefixes; the
 // overlays stack against the results source's hit layer, so it is named here too.
 export const AIRPORT_SOURCES = { results: 'airports', userLists: 'user-list' };
+// MapFocusAirport's layers, which every airport source stays beneath, even one added after them
+export const FOCUS_LAYERS = { dot: 'focus-airport', label: 'focus-airport-label' };
 export const hitId = (prefix) => `${prefix}-hit`;
 export const clusterIds = (prefix) => [`${prefix}-clusters`, `${prefix}-cluster-count`];
 

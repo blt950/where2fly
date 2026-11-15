@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/react';
 
 import { useShellMap } from '../components/shell/ShellMapContext';
 import { CONTINENT_VIEWS, WORLD_VIEW } from '../components/map/mapScene';
+import Dropdown from '../components/ui/Dropdown';
 import Legend from '../components/ui/Legend';
 import PageTitle from '../components/ui/PageTitle';
 import ScoreIcon from '../components/ui/ScoreIcon';
@@ -25,12 +26,7 @@ const SORT_COLUMNS = {
 };
 
 const FilterDropdown = ({ label, children }) => (
-    <div className="dropdown">
-        <button className="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {label}
-        </button>
-        <ul className="dropdown-menu">{children}</ul>
-    </div>
+    <Dropdown label={label} toggleClassName="btn btn-sm btn-outline-primary">{children}</Dropdown>
 );
 
 const FilterItem = ({ active, href, children }) => (

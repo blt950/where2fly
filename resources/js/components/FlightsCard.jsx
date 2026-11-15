@@ -1,20 +1,8 @@
 import { useContext } from 'react';
 import { MapContext } from './context/MapContext';
 import fromNow from './utils/RelativeTime';
+import FlightMenu from './ui/FlightMenu';
 import { useFlights } from './utils/useFlights';
-
-const flightLinks = (flight, departure, arrival) => {
-    const { airline } = flight;
-    const iataFlight = `${airline.iata_code}${flight.flight_number}`.toLowerCase();
-    const icaoFlight = `${airline.icao_code}${flight.flight_number}`.toLowerCase();
-
-    return [
-        ['Simbrief', `https://dispatch.simbrief.com/options/custom?orig=${departure}&dest=${arrival}&airline=${airline.icao_code}&fltnum=${flight.flight_number}&utm_campaign=where2fly.today`],
-        ['Flightradar24', `https://www.flightradar24.com/data/flights/${iataFlight}?utm_campaign=where2fly.today`],
-        ['FlightAware', `https://www.flightaware.com/live/flight/${icaoFlight}?utm_campaign=where2fly.today`],
-        ['AirNavRadar', `https://www.airnavradar.com/data/flights/${iataFlight}?utm_campaign=where2fly.today`],
-    ];
-};
 
 // Every flight on the route, narrowed by an airline filter. One fetch per route; switching airline
 // only filters, so the card (and a phone tab) keeps a single, stable destination.
@@ -72,18 +60,12 @@ function FlightsCard({ departureAirportId, arrivalAirportId, airline, onAirlineC
                                 return (
                                     <tr key={flight.id}>
                                         <td className={tone}>
-                                            <div className="dropdown fs-6 text-info link-underline-info link-underline-opacity-25-hover ps-0">
-                                                {/* With one airline there's no filter row to say whose flights these are */}
-                                                {soleAirline && (
+                                            {/* With one airline there's no filter row to say whose flights these are */}
+                                            <FlightMenu departure={departure} arrival={arrival}
+                                                flight={{ callsign: flight.flight_icao, airlineIata: flight.airline.iata_code, airlineIcao: flight.airline.icao_code, flightNumber: flight.flight_number }}
+                                                before={soleAirline && (
                                                     <img className="airline-logo small me-1" alt={`${soleAirline.name} logo`} src={`/img/airlines/${soleAirline.iata_code}.png`} />
-                                                )}
-                                                <button className="btn btn-xs btn-xs-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{flight.flight_icao}</button>
-                                                <ul className="dropdown-menu">
-                                                    {flightLinks(flight, departure, arrival).map(([label, href]) => (
-                                                        <li key={label}><a className="dropdown-item" href={href} target="_blank" rel="noreferrer">{label}</a></li>
-                                                    ))}
-                                                </ul>
-                                            </div>
+                                                )} />
                                         </td>
                                         <td className={tone}>{flight.aircrafts.map((aircraft) => aircraft.icao).join(', ')}</td>
                                         <td className={tone}>{fromNow(flight.last_seen_at)}</td>

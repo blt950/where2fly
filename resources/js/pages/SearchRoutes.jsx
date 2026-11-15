@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { Head } from '@inertiajs/react';
 
+import FlightMenu from '../components/ui/FlightMenu';
 import PageTitle from '../components/ui/PageTitle';
 import { useSortableRows } from '../components/utils/useSortableRows';
 import { stopOnTouch } from '../components/utils/touch';
@@ -24,30 +25,6 @@ const Endpoint = ({ label, airport }) => (
         <dd>{airport.name}</dd>
     </dl>
 );
-
-const FlightMenu = ({ flight, departure, arrival }) => {
-    const { airline, flightNumber } = flight;
-    const iataFlight = `${airline.iata}${flightNumber}`.toLowerCase();
-    const icaoFlight = `${airline.icao}${flightNumber}`.toLowerCase();
-
-    return (
-        <div className="dropdown fs-6 text-info link-underline-info link-underline-opacity-25-hover ps-0">
-            <button className="btn btn-xs btn-xs-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                {flight.flightIcao}
-            </button>
-            <ul className="dropdown-menu">
-                <li><a className="dropdown-item" target="_blank"
-                    href={`https://dispatch.simbrief.com/options/custom?orig=${departure.icao}&dest=${arrival.icao}&airline=${airline.icao}&fltnum=${flightNumber}&utm_campaign=where2fly.today`}>Simbrief</a></li>
-                <li><a className="dropdown-item" rel="noreferrer" target="_blank"
-                    href={`https://www.flightradar24.com/data/flights/${iataFlight}?utm_campaign=where2fly.today`}>Flightradar24</a></li>
-                <li><a className="dropdown-item" target="_blank"
-                    href={`https://www.flightaware.com/live/flight/${icaoFlight}?utm_campaign=where2fly.today`}>FlightAware</a></li>
-                <li><a className="dropdown-item" target="_blank"
-                    href={`https://www.airnavradar.com/data/flights/${iataFlight}?utm_campaign=where2fly.today`}>AirNavRadar</a></li>
-            </ul>
-        </div>
-    );
-};
 
 const SearchRoutes = ({ departure, arrival, dataSince, routes }) => {
 
@@ -88,7 +65,10 @@ const SearchRoutes = ({ departure, arrival, dataSince, routes }) => {
                             <tbody>
                                 {rows.map((flight) => (
                                     <tr key={flight.id}>
-                                        <td><FlightMenu flight={flight} departure={departure} arrival={arrival} /></td>
+                                        <td>
+                                            <FlightMenu departure={departure.icao} arrival={arrival.icao}
+                                                flight={{ callsign: flight.flightIcao, airlineIata: flight.airline.iata, airlineIcao: flight.airline.icao, flightNumber: flight.flightNumber }} />
+                                        </td>
                                         <td>
                                             <img className="airline-logo small nopadding" src={`/img/airlines/${flight.airline.iata}.png`} alt="" />
                                             {' '}{flight.airline.name}

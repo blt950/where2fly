@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
 
-import { labelSpec } from '../utils/airportLayerSpec';
+import { FOCUS_LAYERS, labelSpec } from '../utils/airportLayerSpec';
 import { useMapLayer } from './mapLayers';
 
-const DOT = 'focus-airport';
-const LABEL = 'focus-airport-label';
+const { dot: DOT, label: LABEL } = FOCUS_LAYERS;
 
 const pointOf = (airport) => ({
     type: 'Feature',

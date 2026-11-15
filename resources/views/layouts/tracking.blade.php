@@ -1,8 +1,9 @@
 {{-- Ids in URLs (a list being edited) never reach analytics: umami calls this before every send,
-     including the page views the Inertia shell records on client-side visits --}}
+     including the shell's client-side page views. It sends full URLs, and the referrer carries the id too. --}}
 <script>
     window.w2fBeforeSend = (type, payload) => {
-        if (payload?.url) payload.url = payload.url.replace(/^\/lists\/\d+\/edit/, '/lists/x/edit');
+        const mask = (url) => url?.replace(/\/lists\/\d+\/edit/, '/lists/x/edit');
+        if (payload) Object.assign(payload, { url: mask(payload.url), referrer: mask(payload.referrer) });
         return payload;
     };
 </script>

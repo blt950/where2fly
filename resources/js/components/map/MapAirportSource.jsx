@@ -2,8 +2,9 @@ import { useContext, useEffect } from 'react';
 
 import { MapContext } from '../context/MapContext';
 import { useMapGL } from '../context/MapGLContext';
-import { clusterIds, clusterSpecs, focusColor, hitId, labelIds, labelMinzoom, labelSpec, labelTypeFilter, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
+import { clusterIds, clusterSpecs, FOCUS_LAYERS, focusColor, hitId, labelIds, labelMinzoom, labelSpec, labelTypeFilter, NOT_A_CLUSTER } from '../utils/airportLayerSpec';
 import { airportsToGeoJson } from '../utils/airportsGeoJson';
+import { beneath } from './mapConfig';
 
 const pinnedFilter = (icaos) => ['all', NOT_A_CLUSTER, ['in', ['get', 'icao'], ['literal', icaos]]];
 
@@ -28,9 +29,14 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
             clusterMaxZoom: 12,
         });
 
+        // Beneath the focused airport, which may already be on the map: a lists source arriving after
+        // the fetch, or a cluster colour change, would otherwise draw over it
+        const before = beneath(map, [FOCUS_LAYERS.dot]);
+        const add = (spec) => map.addLayer(spec, before);
+
         // A small_airport is a 5px click target. A transparent circle over it fixes that;
         // queryRenderedFeatures tests geometry, not alpha, so the clicks still land.
-        map.addLayer({
+        add({
             id: hit,
             type: 'circle',
             source: id,
@@ -40,10 +46,10 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
 
         if (cluster) {
             clusterSpecs({ idPrefix: id, source: id, color: clusterColor, textColor: clusterTextColor })
-                .forEach((spec) => map.addLayer(spec));
+                .forEach(add);
         }
 
-        map.addLayer({
+        add({
             id: dots,
             type: 'circle',
             source: id,
@@ -51,7 +57,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
             paint: { 'circle-radius': ['get', 'r'], 'circle-color': ['to-color', ['get', 'color']] },
         });
 
-        labels.forEach(([labelId, airportType]) => map.addLayer(labelSpec({
+        labels.forEach(([labelId, airportType]) => add(labelSpec({
             id: labelId,
             source: id,
             filter: ['all', NOT_A_CLUSTER, labelTypeFilter(airportType)],
@@ -59,7 +65,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
         })));
 
         // The focused and primary airports keep their label at every zoom.
-        map.addLayer(labelSpec({ id: pinned, source: id, filter: pinnedFilter([]), overlap: true }));
+        add(labelSpec({ id: pinned, source: id, filter: pinnedFilter([]), overlap: true }));
 
         return () => {
             [hit, ...clusters, dots, ...labels.map(([labelId]) => labelId), pinned]
