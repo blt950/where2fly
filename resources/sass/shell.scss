@@ -86,15 +86,16 @@ body.shell-compact {
         display: none;
     }
 
-    // Attribution has to stay visible: a full-width strip resting on the folded drawer, so the
-    // drawer covers it once opened (it sits below the drawer's z-index)
+    // Attribution has to stay visible: resting on the folded drawer, bottom right, so the drawer
+    // covers it once opened (it sits below the drawer's z-index). Full width on narrow phones.
     footer {
         display: block;
         top: auto;
         bottom: $drawer-handle-height;
-        left: 0;
+        left: auto;
         right: 0;
-        width: 100%;
+        width: auto;
+        max-width: 85%;
         height: auto;
         padding: 1px 6px;
         font-size: 0.6875rem;
@@ -104,6 +105,12 @@ body.shell-compact {
 
         > div:first-child {
             display: none;
+        }
+
+        @include media-breakpoint-down(md) {
+            left: 0;
+            width: 100%;
+            max-width: none;
         }
     }
 
@@ -262,11 +269,11 @@ body.shell-compact {
         overscroll-behavior: contain;
     }
 
-    // In tabs, a card's close button only led back to another tab, and the Scenery tab replaces
-    // the airport card's Scenery button
-    // !important: the header row is a Bootstrap .d-flex, itself !important
+    // In tabs the close buttons only led to another tab, and the tabs replace the airline shortcuts
+    // and Scenery button. !important, as some are Bootstrap's .d-flex, itself !important
     .card-tab-panel .popup-card .btn-close,
     .card-tab-panel .card-open-scenery,
+    .card-tab-panel .card-airlines,
     .card-tab-panel .card-header-row {
         display: none !important;
     }

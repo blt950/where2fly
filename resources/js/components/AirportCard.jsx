@@ -121,8 +121,9 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose }) {
 
                         {data.airlines && data.airlines.length > 0 && (
                             <>
-                                <dt>Flights</dt>
-                                <dd className="d-flex flex-wrap gap-1">
+                                {/* The drawer's Flights tab replaces these shortcuts on the compact layout */}
+                                <dt className="card-airlines">Flights</dt>
+                                <dd className="d-flex flex-wrap gap-1 card-airlines">
                                     {data.airlines.map(airline => (
                                         <button
                                             key={airline.id}

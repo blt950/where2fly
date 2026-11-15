@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef, useContext } from 'react';
-import { captureException } from '@sentry/react';
+import { useContext } from 'react';
 import { MapContext } from './context/MapContext';
 import fromNow from './utils/RelativeTime';
+import { useFlights } from './utils/useFlights';
 
 const flightLinks = (flight, departure, arrival) => {
     const { airline } = flight;
@@ -20,40 +20,8 @@ const flightLinks = (flight, departure, arrival) => {
 // only filters, so the card (and a phone tab) keeps a single, stable destination.
 function FlightsCard({ departureAirportId, arrivalAirportId, airline, onAirlineChange, onClose }) {
 
-    const dataCache = useRef({});
-    const [data, setData] = useState(null);
     const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts } = useContext(MapContext);
-    const routeKey = `${departureAirportId}-${arrivalAirportId}`;
-
-    useEffect(() => {
-        if (dataCache.current[routeKey]) {
-            setData(dataCache.current[routeKey]);
-            return;
-        }
-
-        setData(null);
-
-        fetch(route('api.airport.flights'), {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
-            },
-            body: JSON.stringify({ departureAirportId, arrivalAirportId, highlightedAircrafts }),
-        })
-            .then((response) => response.json())
-            .then((body) => {
-                dataCache.current[routeKey] = body.data;
-                setData(body.data);
-            })
-            .catch((error) => {
-                captureException(error);
-                console.error(error.message);
-            });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [routeKey]);
+    const data = useFlights(departureAirportId, arrivalAirportId, highlightedAircrafts);
 
     const selected = data?.airlines.find((candidate) => candidate.icao_code === airline);
     const flights = data ? data.flights.filter((flight) => !airline || flight.airline.icao_code === airline) : [];

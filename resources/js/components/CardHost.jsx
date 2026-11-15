@@ -6,6 +6,7 @@ import FlightsCard from './FlightsCard';
 import SceneryCard from './SceneryCard';
 import { MapContext } from './context/MapContext';
 import { useMapLayout } from './context/MapLayoutContext';
+import { useFlights } from './utils/useFlights';
 import { sceneryCount, useScenery } from './utils/useScenery';
 
 const track = (interaction) => window.umami?.track('Interactions', { interaction });
@@ -24,7 +25,7 @@ const freshCards = (airportId, initialCard) => ({
 // tabs inside the drawer (portalled into its card slot) on the compact layout.
 function CardHost({ airportId }) {
 
-    const { findAirport, focusAirport, primaryAirport, reverseDirection, initialCard, setFocusAirport, setShowAirportIdCard } = useContext(MapContext);
+    const { findAirport, focusAirport, primaryAirport, reverseDirection, highlightedAircrafts, initialCard, setFocusAirport, setShowAirportIdCard } = useContext(MapContext);
     const { compact, cardSlot } = useMapLayout();
     const [cards, setCards] = useState(() => freshCards(null, initialCard));
 
@@ -39,10 +40,12 @@ function CardHost({ airportId }) {
     const [departure, arrival] = reverseDirection ? [focused, primary] : [primary, focused];
     const onRoute = Boolean(primary && focused);
 
-    // The tab shows how many sceneries there are, so the drawer loads them up front; the card
-    // shares the same request
+    // The drawer's tabs show how many flights and sceneries there are, so it loads them up front;
+    // the cards share the same requests
     const scenery = useScenery(focused?.icao, compact);
     const sceneryTotal = scenery ? sceneryCount(scenery) : null;
+    const flights = useFlights(departure?.id, arrival?.id, highlightedAircrafts, compact && onRoute);
+    const flightsTotal = flights ? flights.flights?.length ?? 0 : null;
 
     const update = (changes) => setCards((current) => ({ ...current, ...changes }));
 
@@ -78,7 +81,7 @@ function CardHost({ airportId }) {
         // through aria-selected and renders only the selected panel, so Flights fetches on demand
         const tabs = [
             { id: 'airport', icon: 'fa-tower-control', label: focused?.icao ?? 'Airport' },
-            ...(onRoute ? [{ id: 'flights', icon: 'fa-plane-up', label: 'Flights' }] : []),
+            ...(onRoute ? [{ id: 'flights', icon: 'fa-plane-up', label: 'Flights', count: flightsTotal }] : []),
             { id: 'scenery', icon: 'fa-map', label: 'Scenery', count: sceneryTotal },
         ];
         const backToAirport = () => update({ tab: 'airport' });

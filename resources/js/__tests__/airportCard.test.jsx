@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MapContext } from '../components/context/MapContext';
 import { MapLayoutContext } from '../components/context/MapLayoutContext';
 import CardHost from '../components/CardHost';
-import { clearSceneryCache } from '../components/utils/useScenery';
+import { clearRequestCache } from '../components/utils/useCachedPost';
 
 // A failed fetch calls captureException; stub it so the test output stays quiet.
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
@@ -79,7 +79,7 @@ const memoryStore = () => {
 };
 
 beforeEach(() => {
-    clearSceneryCache();
+    clearRequestCache();
     document.head.innerHTML = '<meta name="csrf-token" content="test-token">';
     vi.stubGlobal('localStorage', memoryStore());
 
@@ -296,6 +296,18 @@ describe('CardHost / AirportCard', () => {
             // The scenery count is loaded up front, from the same request the card will use
             await waitFor(() => expect(slot.querySelector('#card-tab-scenery .card-tab-count')?.textContent).toBe('1'));
             expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.scenery')).toHaveLength(1);
+        });
+
+        it('counts the flights on a route on its tab, and the card reuses that request', async () => {
+            const bodies = { 'api.airport.show': airportFixture, 'api.airport.flights': flightsFixture, 'api.airport.scenery': sceneryFixture };
+            fetch.mockImplementation((url) => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: bodies[url] }) }));
+            const slot = renderTabbed({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false });
+
+            await waitFor(() => expect(slot.querySelector('#card-tab-flights .card-tab-count')?.textContent).toBe('2'));
+
+            fireEvent.click(slot.querySelector('#card-tab-flights'));
+            await screen.findByText('SAS1');
+            expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.flights')).toHaveLength(1);
         });
 
         it('counts 0 when the airport has no sceneries (the endpoint answers 404)', async () => {
