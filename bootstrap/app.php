@@ -10,6 +10,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\ExceptionResponse;
+use Inertia\Inertia;
 use Sentry\State\Scope;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -83,6 +85,30 @@ return Application::configure(basePath: dirname(__DIR__))
                 });
                 app('sentry')->captureException($e);
             }
+        });
+
+        // Errors look like the site, in the shell (pages/Error.jsx); JSON callers keep their JSON, and
+        // debug mode keeps Laravel's page for crashes. Without a session (maintenance) the Blade views stay.
+        Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
+            $request = $response->request;
+            $status = $response->statusCode();
+
+            if ($request->expectsJson() && ! $request->inertia()) {
+                return null;
+            }
+
+            // An expired session: back to the form with what was typed, not a dead end
+            if ($status === 419) {
+                return back()
+                    ->withInput($request->except(['_token', 'password', 'password_confirmation', 'current_password']))
+                    ->with('error', 'Your session had expired, so that didn\'t go through. Please try again.');
+            }
+
+            $shown = in_array($status, [403, 404], true) || (in_array($status, [500, 503], true) && ! config('app.debug'));
+
+            return $shown && $request->hasSession()
+                ? $response->render('Error', ['status' => $status])->withSharedData()
+                : null;
         });
     })
     ->withCommands()

@@ -154,6 +154,29 @@ describe('AppShell', () => {
         });
     });
 
+    it('announces a new page and moves focus to the panel, but not for a filter or a selection', async () => {
+        const live = () => document.querySelector('[aria-live="polite"]').textContent;
+        const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+        document.title = 'Where2Fly | Top List';
+
+        visit('/top', { continent: null });
+        const { rerender } = render(<AppShell><TopPage {...page.props} /></AppShell>);
+
+        // Same page, same title: a filter and a selection
+        visit('/top/EU?airport=ESSA', { continent: 'EU' });
+        rerender(<AppShell><TopPage {...page.props} /></AppShell>);
+        document.title = 'Where2Fly | Top List';
+        await settle();
+        expect(live()).toBe('');
+
+        // The next page's <Head> sets its title after the visit has rendered
+        visit('/changelog');
+        rerender(<AppShell><OtherPage /></AppShell>);
+        document.title = 'Where2Fly | Changelog';
+        await vi.waitFor(() => expect(live()).toBe('Where2Fly | Changelog'));
+        expect(document.activeElement.tagName).toBe('MAIN');
+    });
+
     it('tells the page about an airport the map could not find, stamped per miss', () => {
         const seen = [];
         const ScenerySearch = () => {

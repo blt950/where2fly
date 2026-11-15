@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import AirportCard from './AirportCard';
@@ -10,6 +10,9 @@ import { useFlights } from './utils/useFlights';
 import { sceneryCount, useScenery } from './utils/useScenery';
 
 const track = (interaction) => window.umami?.track('Interactions', { interaction });
+
+const ESCAPE_OWNERS = 'input, textarea, select, [contenteditable], .map-controls, [data-bs-toggle="dropdown"], .dropdown-menu';
+const ESCAPE_OWNERS_OPEN = () => Boolean(document.querySelector('.dropdown-menu.show, .modal.show'));
 
 const freshCards = (airportId, initialCard) => ({
     airportId,
@@ -64,6 +67,29 @@ function CardHost({ airportId }) {
         setShowAirportIdCard(null);
         setFocusAirport(null);
     };
+
+    // Esc does what the nearest close does: the topmost card on the stack, the tab back to the
+    // airport, then the cards altogether. Not while something else owns Esc (a field, a menu, the map controls).
+    const onEscape = useRef(null);
+    onEscape.current = () => {
+        if (compact ? cards.tab !== 'airport' : cards.scenery || cards.flights) {
+            update(compact ? { tab: 'airport' } : cards.scenery ? { scenery: false } : { flights: false });
+        } else {
+            closeAll();
+        }
+    };
+
+    useEffect(() => {
+        const onKeyDown = (event) => {
+            if (event.key !== 'Escape' || event.defaultPrevented || ESCAPE_OWNERS_OPEN()) return;
+            if (event.target instanceof Element && event.target.closest(ESCAPE_OWNERS)) return;
+
+            onEscape.current();
+        };
+
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, []);
 
     // In tabs, each card leaves out what the tabs already cover (headers, close buttons, shortcuts)
     const airportCard = <AirportCard airportId={airportId} onOpenFlights={openFlights} onOpenScenery={openScenery} onClose={closeAll} inTab={compact} />;

@@ -12,6 +12,11 @@ $drawer-handle-height: 2.75rem;
     display: none;
 }
 
+// Focused after a visit (AppShell) only so screen readers start there; a ring round the whole panel helps no one
+.shell-stage > main:focus {
+    outline: none;
+}
+
 body.shell-compact.d-flex.h-100 {
     height: 100dvh !important;
     min-height: 0;

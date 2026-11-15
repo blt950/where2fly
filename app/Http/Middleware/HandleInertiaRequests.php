@@ -54,6 +54,9 @@ class HandleInertiaRequests extends Middleware
             'nav' => fn () => NavigationHelper::build(),
             'alerts' => fn () => AlertHelper::build(),
             'mapHint' => fn () => MapHintHelper::current(),
+            // Copied into the page's csrf-token meta after each response, which fetch() callers read: a
+            // session that expired and restarted (see the 419 handling in bootstrap/app.php) issues a new one
+            'csrfToken' => fn () => csrf_token(),
             // Changes whenever one of the user's lists is saved, hidden or removed: the map
             // refetches the lists it draws when it does
             'listsRevision' => fn () => ($user = $request->user())

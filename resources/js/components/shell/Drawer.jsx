@@ -98,7 +98,7 @@ const Drawer = ({ enabled, stop, onStopChange, onVisibleChange, children }) => {
 
     return (
         <main ref={mainRef} className={enabled ? 'drawer' : undefined} style={enabled ? { '--drawer-y': `${y}px` } : undefined}
-            scroll-region="" aria-label={enabled ? 'Panel' : undefined}>
+            scroll-region="" aria-label={enabled ? 'Panel' : undefined} tabIndex={-1}>
             {enabled && (
                 <button ref={handleRef} type="button" className="drawer-handle" aria-label={`Resize panel, ${STOP_LABELS[stop]}`}
                     onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerEnd}

@@ -119,3 +119,7 @@ Route::redirect('/donate', 'https://ko-fi.com/X7X21V3MEX');
 // Old routes
 Route::permanentRedirect('/advanced', '/');
 Route::permanentRedirect('/advanced/search', '/');
+
+// Unknown URLs get the site's 404 inside the shell, with a session so it knows who's viewing. Paths
+// that look like files (a missing image, /wp-login.php) skip it and get the plain, cheap 404.
+Route::fallback(fn () => abort(404))->where('fallbackPlaceholder', '[^.]*');

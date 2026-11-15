@@ -161,6 +161,24 @@ describe('CardHost / AirportCard', () => {
         }));
     });
 
+    it('closes the topmost card on Esc, then the rest, but not while a field or menu has it', async () => {
+        const setShowAirportIdCard = vi.fn();
+        renderCard({ ...baseMapContext, initialCard: 'scenery', setShowAirportIdCard });
+        await screen.findByText('Orbx');
+
+        const field = document.body.appendChild(document.createElement('input'));
+        fireEvent.keyDown(field, { key: 'Escape' });
+        field.remove();
+        expect(screen.queryByText('Orbx')).not.toBeNull();
+
+        fireEvent.keyDown(document.body, { key: 'Escape' });
+        expect(screen.queryByText('Orbx')).toBeNull();
+        expect(setShowAirportIdCard).not.toHaveBeenCalled();
+
+        fireEvent.keyDown(document.body, { key: 'Escape' });
+        expect(setShowAirportIdCard).toHaveBeenCalledWith(null);
+    });
+
     it('opens the scenery card straight away when the scene asks for it', async () => {
         renderCard({ ...baseMapContext, initialCard: 'scenery' });
 
@@ -366,6 +384,19 @@ describe('CardHost / AirportCard', () => {
 
             fireEvent.click(screen.getByLabelText('Back to the list'));
             expect(setFocusAirport).toHaveBeenCalledWith(null);
+            expect(setShowAirportIdCard).toHaveBeenCalledWith(null);
+        });
+
+        it('steps back on Esc as the Back arrow would: to the airport tab, then out', async () => {
+            const setShowAirportIdCard = vi.fn();
+            const slot = renderTabbed({ ...baseMapContext, initialCard: 'scenery', setShowAirportIdCard });
+            await screen.findByText('Orbx');
+
+            fireEvent.keyDown(document.body, { key: 'Escape' });
+            expect(tabs(slot)).toEqual(['ENGM:true', 'Scenery:false']);
+            expect(setShowAirportIdCard).not.toHaveBeenCalled();
+
+            fireEvent.keyDown(document.body, { key: 'Escape' });
             expect(setShowAirportIdCard).toHaveBeenCalledWith(null);
         });
     });
