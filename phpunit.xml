@@ -24,6 +24,13 @@
     <env name="QUEUE_CONNECTION" value="sync"/>
     <env name="SESSION_DRIVER" value="array"/>
     <env name="TELESCOPE_ENABLED" value="false"/>
+    <!-- Laravel reads $_SERVER before $_ENV: without these, a real environment variable (say, from
+         a compose file) would win over the forced values above -->
+    <server name="APP_ENV" value="testing" force="true"/>
+    <server name="DB_DATABASE" value="where2fly_test" force="true"/>
+    <server name="APP_CONFIG_CACHE" value="bootstrap/cache/testing-never-built-config.php" force="true"/>
+    <server name="APP_ROUTES_CACHE" value="bootstrap/cache/testing-never-built-routes.php" force="true"/>
+    <server name="APP_EVENTS_CACHE" value="bootstrap/cache/testing-never-built-events.php" force="true"/>
   </php>
   <source>
     <include>

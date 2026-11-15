@@ -7,6 +7,7 @@ import Legend from '../components/ui/Legend';
 import PageTitle from '../components/ui/PageTitle';
 import ScoreIcon from '../components/ui/ScoreIcon';
 import TAF from '../components/ui/TAF';
+import { trackInteraction } from '../components/utils/metrics';
 import { useSortableRows } from '../components/utils/useSortableRows';
 import { stopOnTouch } from '../components/utils/touch';
 import { useTooltips } from '../components/utils/useTooltips';
@@ -14,7 +15,6 @@ import { useTooltips } from '../components/utils/useTooltips';
 const VISIBLE_ROWS = 10;
 const feet = (ft) => ft.toLocaleString('en-US');
 const metres = (ft) => Math.round(ft * 0.3048).toLocaleString('en-US');
-const track = (interaction) => window.umami?.track('Interactions', { interaction });
 
 const SORT_COLUMNS = {
     rank: (airport) => airport.rank,
@@ -38,7 +38,7 @@ const SearchActions = ({ query }) => (
             <i className="fa-sharp fa-pencil"></i> Edit filters
         </button>
         <button id="bookmarkBtn" type="button" className="btn btn-sm btn-outline-warning mb-1" onClick={() => {
-            track('Bookmark search');
+            trackInteraction('Bookmark search');
             alert('To save these search filters, manually bookmark this page in your browser.');
         }}>
             <i className="fa-sharp fa-bookmark"></i> Bookmark search

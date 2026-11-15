@@ -54,7 +54,14 @@ createInertiaApp({
     // Same format as the Blade header's <title>.
     title: (title) => (title ? `Where2Fly | ${title}` : 'Where2Fly'),
     resolve: async (name) => {
-        const page = (await pages[`./pages/${name}.jsx`]()).default;
+        const load = pages[`./pages/${name}.jsx`];
+
+        // A component name with no file is a typo in a controller's Inertia::render()
+        if (!load) {
+            throw new Error(`Inertia page "${name}" not found: no resources/js/pages/${name}.jsx`);
+        }
+
+        const page = (await load()).default;
 
         // One persistent layout for every page: it owns the map, so the map outlives visits.
         page.layout ??= (child) => createElement(AppShell, null, child);

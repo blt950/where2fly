@@ -2,12 +2,13 @@ import { createContext, useContext } from 'react';
 
 const NO_INSETS = { top: 0, right: 0, bottom: 0, left: 0 };
 
-// How the page around the map is laid out. `compact` is the phone/tablet layout (drawer over a
-// full-screen map). `getInsets()` is how much of the map each edge has covered right now
-// (drawer, card stack); read it when the camera moves, never in response to a drag.
+// How the page around the map is laid out: `compact` (drawer layouts), and `getInsets()`, what covers
+// each edge right now, read when the camera moves. The register* callback refs feed it on wide screens.
 export const MapLayoutContext = createContext({
     compact: false,
     getInsets: () => NO_INSETS,
+    registerCards: () => {},
+    registerFooter: () => {},
 });
 
 export const useMapLayout = () => useContext(MapLayoutContext);

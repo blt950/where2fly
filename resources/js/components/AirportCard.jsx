@@ -5,6 +5,7 @@ import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
 import { useCachedPost } from './utils/useCachedPost';
+import { trackInteraction } from './utils/metrics';
 import { useTooltips } from './utils/useTooltips';
 
 const Count = ({ value }) => (value === null || value === undefined ? null : ` (${value})`);
@@ -153,9 +154,7 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
                                     params.set('icao', data.airport.icao);
                                     navigate(`${window.location.pathname}?${params.toString()}`);
 
-                                    if(window.umami){
-                                        umami.track('Interactions', {interaction: `Change airport from card`})
-                                    }
+                                    trackInteraction('Change airport from card');
                                 }}>
                                     <i className="fa-sharp fa-pencil"></i> Use as {reverseDirection ? 'Arrival' : 'Departure'}
                                 </button>

@@ -9,7 +9,6 @@ use App\Helpers\ScoreHelper;
 use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
-use App\Models\AirportScore;
 use App\Models\Flight;
 use App\Models\UserList;
 use App\Rules\AirportExists;
@@ -18,7 +17,7 @@ use App\Rules\ValidAircrafts;
 use App\Rules\ValidAirlines;
 use App\Rules\ValidDestinations;
 use App\Rules\ValidScores;
-use App\View\ScoreIcon;
+use App\View\AirportPresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -427,8 +426,8 @@ class SearchController extends Controller
             $airportCoordinates[$arrival->icao]['type'] = $arrival->type;
 
             return Inertia::render('SearchRoutes', [
-                'departure' => $this->airportSummary($departure),
-                'arrival' => $this->airportSummary($arrival),
+                'departure' => AirportPresenter::summary($departure),
+                'arrival' => AirportPresenter::summary($arrival),
                 'dataSince' => $routes->min('first_seen_at')->format('Y-m-d'),
                 'routes' => $routes->values()->map(fn (Flight $route) => [
                     'id' => $route->id,
@@ -467,34 +466,12 @@ class SearchController extends Controller
     }
 
     /** Identity of an airport as every results page shows it: flag, ICAO, name */
-    private function airportSummary(Airport $airport): array
-    {
-        return [
-            'icao' => $airport->icao,
-            'name' => $airport->name,
-            'isoCountry' => $airport->iso_country,
-            'countryName' => getCountryName($airport->iso_country),
-        ];
-    }
-
-    /** Score icons for one airport; bookings are labelled with the side of the flight they cover */
-    private function scoreIconProps(Airport $airport, string $bookingsLabel, array $highlightReasons = []): array
-    {
-        return $airport->displayScores()
-            ->map(fn (AirportScore $score) => [
-                ...(new ScoreIcon($score, $airport, bookingsLabel: $bookingsLabel))->toArray(),
-                'highlighted' => in_array($score->reason, $highlightReasons),
-            ])
-            ->values()
-            ->all();
-    }
-
     private function primaryAirportProps(Airport $airport, string $direction): array
     {
         return [
-            ...$this->airportSummary($airport),
+            ...AirportPresenter::summary($airport),
             'longestRunwayFt' => (int) $airport->longestRunway(),
-            'scores' => $this->scoreIconProps($airport, 'Bookings on ' . $direction),
+            'scores' => AirportPresenter::scoreIcons($airport, 'Bookings on ' . $direction),
             'metar' => $airport->metar?->metar,
             'taf' => $airport->taf?->raw_text,
         ];
@@ -506,13 +483,13 @@ class SearchController extends Controller
         $highlightReasons = array_keys(array_filter($filterByScores ?? [], fn ($value) => $value === 1));
 
         return $airports->values()->map(fn (Airport $airport, int $index) => [
-            ...$this->airportSummary($airport),
+            ...AirportPresenter::summary($airport),
             'rank' => $index + 1,
             'scoreCount' => $airport->score_count,
             'distance' => $airport->distance,
             'airtime' => $airport->airtime,
             'airtimeLabel' => gmdate('G:i', floor($airport->airtime * 3600)),
-            'scores' => $this->scoreIconProps($airport, 'Bookings on ' . $otherSide, $highlightReasons),
+            'scores' => AirportPresenter::scoreIcons($airport, 'Bookings on ' . $otherSide, $highlightReasons),
         ])->all();
     }
 

@@ -9,6 +9,7 @@ import ToggleGroup, { triState } from '../components/form/ToggleGroup';
 import { formToOld, formUrl } from '../components/form/formQuery';
 import { trackSearch } from '../components/form/searchMetrics';
 import PageTitle from '../components/ui/PageTitle';
+import { trackInteraction } from '../components/utils/metrics';
 import { useTooltips } from '../components/utils/useTooltips';
 
 const LOCALE = 'de-DE';
@@ -57,7 +58,7 @@ const SearchForm = ({
 
     const toggleFilters = () => {
         if (!expanded) {
-            window.umami?.track('Interactions', { interaction: 'Expand Filters' });
+            trackInteraction('Expand Filters');
         }
 
         writeExpanded(!expanded);

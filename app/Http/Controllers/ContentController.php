@@ -17,22 +17,8 @@ class ContentController extends Controller
         'api' => ['title' => 'API Documentation', 'tab' => 'API Docs', 'description' => 'Documentation of the API'],
     ];
 
-    public function changelog(): Response
-    {
-        return $this->show('changelog');
-    }
-
-    public function privacy(): Response
-    {
-        return $this->show('privacy');
-    }
-
-    public function api(): Response
-    {
-        return $this->show('api');
-    }
-
-    private function show(string $page): Response
+    /** `page` comes from the route's defaults (routes/web.php), one route per page so each keeps its name */
+    public function show(string $page): Response
     {
         $meta = self::PAGES[$page];
         $tab = $meta['tab'] ?? $meta['title'];

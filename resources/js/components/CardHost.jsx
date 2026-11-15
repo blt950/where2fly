@@ -5,11 +5,10 @@ import AirportCard from './AirportCard';
 import FlightsCard from './FlightsCard';
 import SceneryCard from './SceneryCard';
 import { MapContext } from './context/MapContext';
+import { trackInteraction } from './utils/metrics';
 import { useMapLayout } from './context/MapLayoutContext';
 import { useFlights } from './utils/useFlights';
 import { sceneryCount, useScenery } from './utils/useScenery';
-
-const track = (interaction) => window.umami?.track('Interactions', { interaction });
 
 const ESCAPE_OWNERS = 'input, textarea, select, [contenteditable], .map-controls, [data-bs-toggle="dropdown"], .dropdown-menu';
 const ESCAPE_OWNERS_OPEN = () => Boolean(document.querySelector('.dropdown-menu.show, .modal.show'));
@@ -29,7 +28,7 @@ const freshCards = (airportId, initialCard) => ({
 function CardHost({ airportId }) {
 
     const { findAirport, focusAirport, primaryAirport, reverseDirection, highlightedAircrafts, initialCard, setFocusAirport, setShowAirportIdCard } = useContext(MapContext);
-    const { compact, cardSlot } = useMapLayout();
+    const { compact, cardSlot, registerCards } = useMapLayout();
     const [cards, setCards] = useState(() => freshCards(null, initialCard));
 
     // A new airport starts from the scene's default cards. Adjusted during render so the first
@@ -53,12 +52,12 @@ function CardHost({ airportId }) {
     const update = (changes) => setCards((current) => ({ ...current, ...changes }));
 
     const openFlights = (airline) => {
-        track('Open flights card');
+        trackInteraction('Open flights card');
         update({ flights: true, airline, tab: 'flights' });
     };
 
     const openScenery = () => {
-        track('Open scenery card');
+        trackInteraction('Open scenery card');
         update({ scenery: true, tab: 'scenery' });
     };
 
@@ -151,7 +150,7 @@ function CardHost({ airportId }) {
     }
 
     return (
-        <div className="popup-container">
+        <div className="popup-container" ref={registerCards}>
             <div className="popup-scroll">
                 {airportCard}
                 {cards.flights && flightsCard(() => update({ flights: false }))}

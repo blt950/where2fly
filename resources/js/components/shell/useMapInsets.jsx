@@ -1,31 +1,36 @@
 import { useCallback, useRef } from 'react';
 
-const FOOTER_HEIGHT = 30;
-
-// What the card stack beside the panel covers of the map, measured when the camera asks
-const cardStackWidth = () => {
-    const stack = document.querySelector('.popup-container');
-    const map = document.querySelector('#map .maplibregl-map');
-
-    if (!stack || !map || !stack.querySelector('.popup-card')) {
-        return 0;
-    }
-
-    return Math.max(0, stack.getBoundingClientRect().right - map.getBoundingClientRect().left);
-};
-
-// What covers the map right now: what the drawer reports covering on the compact layouts (its
-// visible height as a sheet, its width docked to the side), the card stack and footer on wide
-// screens. Read at the moment the camera moves (paddingFor / offsetFor), never cached.
+// What covers the map right now. On the compact layouts, what the drawer reports covering (its
+// visible height as a sheet, its width docked to the side). On wide screens, the card stack and
+// the footer, which hand over their elements (registerCards, registerFooter) to be measured.
+// Read at the moment the camera moves (paddingFor / offsetFor), never cached.
 export const useMapInsets = (mode) => {
     const currentMode = useRef(mode);
     currentMode.current = mode;
     const cover = useRef({ bottom: 0, left: 0 });
+    const mapRef = useRef(null);
+    const cards = useRef(null);
+    const footer = useRef(null);
+
     const onCoverChange = useCallback((covered) => { cover.current = covered; }, []);
+    const registerCards = useCallback((element) => { cards.current = element; }, []);
+    const registerFooter = useCallback((element) => { footer.current = element; }, []);
 
-    const getInsets = useCallback(() => (currentMode.current === 'panel'
-        ? { top: 0, right: 0, bottom: FOOTER_HEIGHT, left: cardStackWidth() }
-        : { top: 0, right: 0, ...cover.current }), []);
+    const getInsets = useCallback(() => {
+        if (currentMode.current !== 'panel') {
+            return { top: 0, right: 0, ...cover.current };
+        }
 
-    return { getInsets, onCoverChange };
+        const mapLeft = mapRef.current?.getBoundingClientRect().left ?? 0;
+        const cardsRight = cards.current?.getBoundingClientRect().right;
+
+        return {
+            top: 0,
+            right: 0,
+            bottom: footer.current?.offsetHeight ?? 0,
+            left: cardsRight === undefined ? 0 : Math.max(0, cardsRight - mapLeft),
+        };
+    }, []);
+
+    return { getInsets, onCoverChange, registerCards, registerFooter, mapRef };
 };

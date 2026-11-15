@@ -109,11 +109,9 @@ Route::controller(FeedbackController::class)->group(function () {
 });
 
 // Pure views
-Route::controller(ContentController::class)->group(function () {
-    Route::get('/changelog', 'changelog')->name('changelog');
-    Route::get('/privacy', 'privacy')->name('privacy');
-    Route::get('/api', 'api')->name('api');
-});
+foreach (['changelog', 'privacy', 'api'] as $page) {
+    Route::get("/{$page}", [ContentController::class, 'show'])->defaults('page', $page)->name($page);
+}
 Route::redirect('/donate', 'https://ko-fi.com/X7X21V3MEX');
 
 // Old routes

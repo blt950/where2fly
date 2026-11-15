@@ -7,7 +7,7 @@ use App\Helpers\MapHelper;
 use App\Helpers\ScoreHelper;
 use App\Models\Airport;
 use App\Models\AirportScore;
-use App\View\ScoreIcon;
+use App\View\AirportPresenter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -47,13 +47,8 @@ class TopController extends Controller
         return Inertia::render('Top', [
             'airports' => $airports->values()->map(fn (Airport $airport, int $index) => [
                 'rank' => $index + 1,
-                'icao' => $airport->icao,
-                'name' => $airport->name,
-                'isoCountry' => $airport->iso_country,
-                'countryName' => getCountryName($airport->iso_country),
-                'scores' => $airport->displayScores()
-                    ->map(fn (AirportScore $score) => (new ScoreIcon($score, $airport))->toArray())
-                    ->values(),
+                ...AirportPresenter::summary($airport),
+                'scores' => AirportPresenter::scoreIcons($airport),
             ]),
             'airportMapData' => (object) MapHelper::generateAirportMapDataFromAirports($airports),
             'continent' => $continent,

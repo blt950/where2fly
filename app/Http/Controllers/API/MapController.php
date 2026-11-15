@@ -199,10 +199,13 @@ class MapController extends Controller
             }
         }
 
+        // The selected airline is among the route's own, already loaded with the flights
+        $airlines = $flights->pluck('airline')->unique('icao_code')->sortBy('name')->values();
+
         return response()->json(['message' => 'Success', 'data' => [
             'flights' => $flights,
-            'airlines' => $flights->pluck('airline')->unique('icao_code')->sortBy('name')->values(),
-            'airline' => $airlineIcao ? Airline::where('icao_code', $airlineIcao)->first() : null,
+            'airlines' => $airlines,
+            'airline' => $airlineIcao ? $airlines->firstWhere('icao_code', $airlineIcao) : null,
         ]], 200);
     }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { trackInteraction } from '../utils/metrics';
 
 function TAF({ taf, label = 'Show', className = 'btn btn-outline-light btn-sm' }) {
     const [revealed, setRevealed] = useState(false);
@@ -9,9 +10,7 @@ function TAF({ taf, label = 'Show', className = 'btn btn-outline-light btn-sm' }
     }, [taf]);
 
     const handleClick = () => {
-        if (window.umami) {
-            umami.track('Interactions', { interaction: 'Fetch TAF' });
-        }
+        trackInteraction('Fetch TAF');
 
         setRevealed(true);
     };

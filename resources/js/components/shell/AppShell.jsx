@@ -49,7 +49,7 @@ const AppShell = ({ children }) => {
         selectInUrl(icao);
     }, [raiseDrawer, selectInUrl]);
     const mapActions = useMemo(() => ({ ...actions, setFocusAirport: select }), [actions, select]);
-    const { getInsets, onCoverChange } = useMapInsets(mode);
+    const { getInsets, onCoverChange, registerCards, registerFooter, mapRef } = useMapInsets(mode);
     const [cardSlot, setCardSlot] = useState(null);
 
     // For the CSS only; the hooks get `mode` itself
@@ -63,7 +63,8 @@ const AppShell = ({ children }) => {
     const wide = Boolean(Page?.wide) && !compact;
     const [wideSlot, setWideSlot] = useState(null);
 
-    const layout = useMemo(() => ({ compact, getInsets, cardSlot, wideSlot: wide ? wideSlot : null }), [compact, getInsets, cardSlot, wide, wideSlot]);
+    const layout = useMemo(() => ({ compact, getInsets, cardSlot, wideSlot: wide ? wideSlot : null, registerCards, registerFooter }),
+        [compact, getInsets, cardSlot, wide, wideSlot, registerCards, registerFooter]);
 
     const announcement = usePageAnnouncement();
 
@@ -102,7 +103,7 @@ const AppShell = ({ children }) => {
                     </Drawer>
 
                     <div className="shell-map">
-                        <aside id="map">
+                        <aside id="map" ref={mapRef}>
                             <MapView state={state} actions={mapActions} onAirportNotFound={onAirportNotFound}
                                 onBackgroundClick={onBackgroundClick} navigate={visit} listsRevision={page.props.listsRevision} />
                         </aside>
