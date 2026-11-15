@@ -1,6 +1,6 @@
 # Responsive redesign, round 2: follow-ups to PR #402
 
-Status: implemented on `feat/responsive-redesign`, one commit per group (A1–A4 and B1–B2; B3–B7 and D1–D3; A5–A6; C2–C6 and E; C1). D2 needed only a larger icon: the back arrow's target was already 44px. A5 and A6 still want the real-device pass.
+Status: implemented on `feat/responsive-redesign`, one commit per group (A1–A4 and B1–B2; B3–B7 and D1–D3; A5–A6; C2–C6 and E; C1). D2 needed only a larger icon: the back arrow's target was already 44px. A5 and A6 still want the real-device pass. Changed afterwards on review: D1, no scenery shows no count instead of being dimmed (it still opens, for "Add missing scenery"); D3 reverted, the phone's airport tab leaves the airline logos to the Flights tab.
 
 This is the outcome of reviewing the implementation of `redesign.md` (branch `feat/responsive-redesign`, PR #402). The design landed as specified and works: the map survives navigation, cards are tabs in the drawer on phones, the selection lives in the URL, and the camera respects what covers the map. The changes below are what the review found worth changing. They are ordered by how much they affect a user.
 

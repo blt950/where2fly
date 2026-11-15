@@ -29,11 +29,6 @@ $drawer-handle-height: 2.75rem;
     text-align: center;
 }
 
-// A Flights or Scenery button with nothing behind it (AirportCard), dimmed like a disabled one
-.btn.is-empty {
-    opacity: 0.65;
-}
-
 body.shell-compact.d-flex.h-100 {
     height: 100dvh !important;
     min-height: 0;
@@ -301,7 +296,7 @@ body.shell-compact {
                 border-bottom-color: $primary;
             }
 
-            // A tab with nothing behind it; Flights at 0 can't be opened at all (CardHost)
+            // Flights at 0: nothing behind it, so it can't be opened (CardHost)
             &.card-tab-empty {
                 opacity: 0.5;
             }

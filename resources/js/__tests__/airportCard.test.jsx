@@ -179,6 +179,19 @@ describe('CardHost / AirportCard', () => {
         expect(setShowAirportIdCard).toHaveBeenCalledWith(null);
     });
 
+    it('shows no count on the Scenery button when there is none, which still opens', async () => {
+        fetch.mockImplementation((url) => Promise.resolve(url === 'api.airport.scenery'
+            ? { ok: false, status: 404, json: () => Promise.resolve({}) }
+            : { ok: true, status: 200, json: () => Promise.resolve({ data: airportFixture }) }));
+        renderCard(baseMapContext);
+        await screen.findByText('Oslo Gardermoen');
+        await waitFor(() => expect(fetch.mock.calls.some(([url]) => url === 'api.airport.scenery')).toBe(true));
+
+        const button = screen.getByRole('button', { name: /^Scenery/ });
+        expect(button.textContent.trim()).toBe('Scenery');
+        expect(button.disabled).toBe(false);
+    });
+
     it('opens the scenery card straight away when the scene asks for it', async () => {
         renderCard({ ...baseMapContext, initialCard: 'scenery' });
 
@@ -195,7 +208,6 @@ describe('CardHost / AirportCard', () => {
         await waitFor(() => expect(screen.getByRole('button', { name: /Scenery/ }).textContent.trim()).toBe('Scenery (1)'));
         expect(screen.queryByText('Orbx')).toBeNull();
         // Off a route there are no flights to count, so no Flights button
-        expect(screen.getByRole('button', { name: /Scenery/ }).classList.contains('is-empty')).toBe(false);
         expect(screen.queryByRole('button', { name: /Flights/ })).toBeNull();
     });
 
@@ -360,15 +372,20 @@ describe('CardHost / AirportCard', () => {
             expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.flights')).toHaveLength(1);
         });
 
-        it('counts 0 when the airport has no sceneries (the endpoint answers 404)', async () => {
+        it('shows no count, and no dimming, when the airport has no sceneries (the endpoint answers 404)', async () => {
             fetch.mockImplementation((url) => Promise.resolve(url === 'api.airport.scenery'
                 ? { ok: false, status: 404, json: () => Promise.resolve({ message: 'Scenery not found' }) }
                 : { ok: true, status: 200, json: () => Promise.resolve({ data: airportFixture }) }));
             const slot = renderTabbed(baseMapContext);
+            await waitFor(() => expect(fetch.mock.calls.some(([url]) => url === 'api.airport.scenery')).toBe(true));
+            await screen.findByText('Oslo Gardermoen');
 
-            await waitFor(() => expect(slot.querySelector('#card-tab-scenery .card-tab-count')?.textContent).toBe('0'));
+            const tab = slot.querySelector('#card-tab-scenery');
+            expect(tab.querySelector('.card-tab-count')).toBeNull();
+            expect(tab.classList.contains('card-tab-empty')).toBe(false);
 
-            fireEvent.click(slot.querySelector('#card-tab-scenery'));
+            // Still opens: its card holds "Add missing scenery"
+            fireEvent.click(tab);
             await screen.findByText('No scenery available');
         });
 
@@ -404,7 +421,7 @@ describe('CardHost / AirportCard', () => {
             expect(setShowAirportIdCard).toHaveBeenCalledWith(null);
         });
 
-        it('dims empty tabs, and a Flights tab with no flights cannot be opened', async () => {
+        it('dims a Flights tab with no flights, which cannot be opened', async () => {
             const noFlights = { ...flightsFixture, flights: [] };
             fetch.mockImplementation((url) => Promise.resolve(url === 'api.airport.scenery'
                 ? { ok: false, status: 404, json: () => Promise.resolve({}) }
@@ -416,28 +433,20 @@ describe('CardHost / AirportCard', () => {
                 expect(tab).not.toBeNull();
                 return tab;
             });
-            await waitFor(() => expect(slot.querySelector('#card-tab-scenery').classList.contains('card-tab-empty')).toBe(true));
             expect(flightsTab.getAttribute('aria-disabled')).toBe('true');
 
             fireEvent.click(flightsTab);
             expect(tabs(slot)[0]).toBe('ENGM:true');
-
-            // Scenery at 0 still opens, for "Add missing scenery"
-            fireEvent.click(slot.querySelector('#card-tab-scenery'));
-            expect(tabs(slot)[2]).toBe('Scenery:true');
         });
 
-        it('keeps the airline shortcuts on the airport tab, opening the Flights tab filtered', async () => {
+        it('leaves the airline shortcuts off the airport tab: the Flights tab covers them', async () => {
             const withAirlines = { ...airportFixture, airlines: [SAS, DLH] };
             const bodies = { 'api.airport.show': withAirlines, 'api.airport.flights': flightsFixture, 'api.airport.scenery': sceneryFixture };
             fetch.mockImplementation((url) => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: bodies[url] }) }));
-            const slot = renderTabbed({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false });
+            renderTabbed({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false });
 
-            fireEvent.click(await screen.findByAltText('See all Lufthansa flights'));
-
-            expect(tabs(slot)).toEqual(['ENGM:false', 'Flights:true', 'Scenery:false']);
-            await screen.findByText('DLH2');
-            expect(screen.queryByText('SAS1')).toBeNull();
+            await screen.findByText('Oslo Gardermoen');
+            expect(screen.queryByAltText('See all Lufthansa flights')).toBeNull();
         });
 
         it('steps back on Esc as the Back arrow would: to the airport tab, then out', async () => {

@@ -8,6 +8,7 @@ import { useCachedPost } from './utils/useCachedPost';
 import { trackInteraction } from './utils/metrics';
 import { useTooltips } from './utils/useTooltips';
 
+// No number while loading, and none for no scenery: its card still has "Add missing scenery"
 const Count = ({ value }) => (value === null || value === undefined ? null : ` (${value})`);
 
 // The airport itself. CardHost owns the flights and scenery cards beside it, and their `counts`
@@ -94,9 +95,8 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
                             <TAF taf={data.taf}/>
                         </dd>
 
-                        {/* Shortcuts into the flights, filtered to one airline: the stacked card on wide
-                            screens, the Flights tab on phones */}
-                        {data.airlines && data.airlines.length > 0 && (
+                        {/* Shortcuts into the flights card, filtered to one airline; in a tab, the Flights tab covers them */}
+                        {!inTab && data.airlines && data.airlines.length > 0 && (
                             <>
                                 <dt>Flights</dt>
                                 <dd className="d-flex flex-wrap gap-1">
@@ -130,8 +130,8 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
                             </button>
                         )}
                         {!inTab && (
-                            <button className={`btn btn-outline-primary btn-sm${counts.scenery === 0 ? ' is-empty' : ''}`} onClick={onOpenScenery}>
-                                <i className="fa-sharp fa-map"></i> Scenery<Count value={counts.scenery} />
+                            <button className="btn btn-outline-primary btn-sm" onClick={onOpenScenery}>
+                                <i className="fa-sharp fa-map"></i> Scenery<Count value={counts.scenery || null} />
                             </button>
                         )}
 
