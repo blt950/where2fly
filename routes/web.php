@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ContentController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\SceneryController;
 use App\Http\Controllers\SearchController;
@@ -108,9 +109,11 @@ Route::controller(FeedbackController::class)->group(function () {
 });
 
 // Pure views
-Route::view('/changelog', 'changelog')->name('changelog');
-Route::view('/privacy', 'privacy')->name('privacy');
-Route::view('/api', 'api')->name('api');
+Route::controller(ContentController::class)->group(function () {
+    Route::get('/changelog', 'changelog')->name('changelog');
+    Route::get('/privacy', 'privacy')->name('privacy');
+    Route::get('/api', 'api')->name('api');
+});
 Route::redirect('/donate', 'https://ko-fi.com/X7X21V3MEX');
 
 // Old routes

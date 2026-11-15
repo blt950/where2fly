@@ -46,9 +46,9 @@ const BottomNav = () => {
                     <li><a className="dropdown-item" href="https://github.com/blt950/where2fly" target="_blank">GitHub</a></li>
                     <li><a className="dropdown-item" href="https://ko-fi.com/X7X21V3MEX" target="_blank">Buy me a coffee</a></li>
                     <li><hr className="dropdown-divider" /></li>
-                    <li><a className="dropdown-item" href={route('changelog')}>Changelog</a></li>
-                    <li><a className="dropdown-item" href={route('privacy')}>Privacy Policy</a></li>
-                    <li><a className="dropdown-item" href={route('api')}>API</a></li>
+                    <li><Link className="dropdown-item" href={route('changelog')}>Changelog</Link></li>
+                    <li><Link className="dropdown-item" href={route('privacy')}>Privacy Policy</Link></li>
+                    <li><Link className="dropdown-item" href={route('api')}>API</Link></li>
                     <li><span className="dropdown-item-text text-white-50 small">{appVersion}</span></li>
                 </ul>
             </div>

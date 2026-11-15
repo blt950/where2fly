@@ -6,8 +6,8 @@ import MapView, { MapFallback } from './map/MapView';
 import { SCENE_DEFAULTS } from './map/mapScene';
 import { useMapState } from './map/useMapState';
 
-// Temporary mount for the Blade pages that still show the map (the search forms and account
-// pages). All of them show the default view, so nothing drives it. Goes with M4.
+// The map on the Blade pages that still show one (account, lists, scenery editing). All of them
+// show the default view, so nothing drives it; the map pages live in the Inertia shell.
 function BladeMap() {
     const [state, actions] = useMapState(SCENE_DEFAULTS);
 
