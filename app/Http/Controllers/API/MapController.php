@@ -175,37 +175,35 @@ class MapController extends Controller
         $data = request()->validate([
             'departureAirportId' => ['required', 'exists:airports,id'],
             'arrivalAirportId' => ['required', 'exists:airports,id'],
-            'airlineId' => ['required', 'exists:airlines,icao_code'],
+            // Without one, every airline's flights on the route: the card filters them itself
+            'airlineId' => ['nullable', 'exists:airlines,icao_code'],
             'highlightedAircrafts' => ['nullable', 'array'],
         ]);
 
-        $departureAirportId = $data['departureAirportId'];
-        $arrivalAirportId = $data['arrivalAirportId'];
-        $airlineIcao = $data['airlineId'];
+        $airlineIcao = $data['airlineId'] ?? null;
         $highlightedAircrafts = isset($data['highlightedAircrafts']) ? collect($data['highlightedAircrafts']) : null;
 
-        $airline = Airline::where('icao_code', $airlineIcao)->first();
-        $flights = Flight::where('seen_counter', '>', 3)->where('airport_dep_id', $departureAirportId)->where('airport_arr_id', $arrivalAirportId)->where('airline_icao', $airlineIcao)->with('aircrafts')->orderByDesc('last_seen_at')->get();
+        $flights = Flight::where('seen_counter', '>', 3)
+            ->where('airport_dep_id', $data['departureAirportId'])
+            ->where('airport_arr_id', $data['arrivalAirportId'])
+            ->when($airlineIcao, fn ($query) => $query->where('airline_icao', $airlineIcao))
+            ->whereHas('airline')
+            ->with('aircrafts', 'airline:id,name,iata_code,icao_code')
+            ->orderByDesc('last_seen_at')
+            ->get();
 
-        // Highlight airlines that have the aircrafts in the list
+        // Highlight flights flown with one of the searched aircraft
         if (isset($highlightedAircrafts)) {
             foreach ($flights as $flight) {
-                foreach ($flight->aircrafts as $aircraft) {
-                    if ($highlightedAircrafts->contains($aircraft->icao)) {
-                        $flight->highlighted = true;
-                    }
-                }
+                $flight->highlighted = $flight->aircrafts->contains(fn ($aircraft) => $highlightedAircrafts->contains($aircraft->icao));
             }
         }
 
-        if (isset($flights)) {
-            return response()->json(['message' => 'Success', 'data' => [
-                'flights' => $flights,
-                'airline' => $airline,
-            ]], 200);
-        } else {
-            return response()->json(['message' => 'Flights not found'], 404);
-        }
+        return response()->json(['message' => 'Success', 'data' => [
+            'flights' => $flights,
+            'airlines' => $flights->pluck('airline')->unique('icao_code')->sortBy('name')->values(),
+            'airline' => $airlineIcao ? Airline::where('icao_code', $airlineIcao)->first() : null,
+        ]], 200);
     }
 
     /**

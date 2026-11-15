@@ -6,18 +6,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 let page = { url: '/top', props: {} };
 const mapViewMounts = vi.fn();
 const mapViewRenders = [];
+const router = { push: vi.fn(), replace: vi.fn(), visit: vi.fn() };
+let mapProps;
 
-vi.mock('@inertiajs/react', () => ({ usePage: () => page }));
+vi.mock('@inertiajs/react', () => ({ usePage: () => page, router }));
 vi.mock('../components/shell/Menu', () => ({ default: () => null }));
 vi.mock('../components/shell/Alerts', () => ({ default: () => null }));
 vi.mock('../components/shell/Footer', () => ({ default: () => null }));
 vi.mock('../components/shell/MapHint', () => ({ default: () => <div data-testid="hint" /> }));
-let reportNotFound;
-
 vi.mock('../components/map/MapView', () => ({
-    default: function MapViewStub({ state, sceneKey, onAirportNotFound }) {
-        reportNotFound = onAirportNotFound;
-        mapViewRenders.push({ sceneKey, stateKey: state.sceneKey, camera: state.camera, focus: state.focusAirport });
+    default: function MapViewStub(props) {
+        mapProps = props;
+        mapViewRenders.push({ version: props.state.sceneVersion, camera: props.state.camera, focus: props.state.focusAirport, card: props.state.showAirportIdCard });
         useEffect(() => { mapViewMounts(); }, []);
         return null;
     },
@@ -35,20 +35,24 @@ TopPage.showMapHint = false;
 
 const OtherPage = () => null;
 
-// Inertia hands the layout a new page object on every visit
-const visit = (url, props) => {
-    page = { url, props };
-};
-
-afterEach(cleanup);
+// Inertia hands the layout a new page object on every visit, and new props unless a client-side
+// visit keeps them
+const visit = (url, props = {}) => { page = { url, props }; };
+const last = () => mapViewRenders.at(-1);
 
 beforeEach(() => {
+    window.history.replaceState(null, '', '/');
+});
+
+afterEach(() => {
+    cleanup();
     mapViewMounts.mockClear();
     mapViewRenders.length = 0;
+    Object.values(router).forEach((fn) => fn.mockClear());
 });
 
 describe('AppShell', () => {
-    it('keeps one map across visits and hands it each page\'s scene with its key', () => {
+    it('keeps one map across visits and hands it each page\'s scene', () => {
         visit('/top', { continent: null });
         const { rerender } = render(<AppShell><TopPage {...page.props} /></AppShell>);
 
@@ -56,39 +60,85 @@ describe('AppShell', () => {
         rerender(<AppShell><TopPage {...page.props} /></AppShell>);
 
         expect(mapViewMounts).toHaveBeenCalledTimes(1);
-        // Never a render that pairs the new visit with the previous scene
-        mapViewRenders.forEach((r) => expect(r.stateKey).toBe(r.sceneKey));
-        expect(mapViewRenders.at(-1).camera).toEqual(EUROPE);
+        expect(last()).toMatchObject({ camera: EUROPE, version: 2 });
     });
 
-    it('starts a fresh scene on a repeat visit to the same URL', () => {
+    it('starts a new scene only when its content changes, not on every visit', () => {
         visit('/top/EU', { continent: 'EU' });
         const { rerender } = render(<AppShell><TopPage {...page.props} /></AppShell>);
-        const firstKey = mapViewRenders.at(-1).sceneKey;
 
+        // A restored history entry: new props objects, same content
         visit('/top/EU', { continent: 'EU' });
         rerender(<AppShell><TopPage {...page.props} /></AppShell>);
+        expect(last().version).toBe(1);
 
-        expect(mapViewRenders.at(-1).sceneKey).not.toBe(firstKey);
-        expect(mapViewMounts).toHaveBeenCalledTimes(1);
+        visit('/top/EU', { continent: null });
+        rerender(<AppShell><TopPage {...page.props} /></AppShell>);
+        expect(last().version).toBe(2);
     });
 
     it('falls back to the default scene for pages without one', () => {
-        visit('/elsewhere', {});
+        visit('/elsewhere');
         render(<AppShell><OtherPage /></AppShell>);
 
-        expect(mapViewRenders.at(-1).camera).toEqual({ type: 'saved' });
+        expect(last().camera).toEqual({ type: 'saved' });
     });
 
     it('shows the map hint unless the page opts out', () => {
-        visit('/top', {});
+        visit('/top');
         const top = render(<AppShell><TopPage /></AppShell>);
         expect(top.queryByTestId('hint')).toBeNull();
         cleanup();
 
-        visit('/elsewhere', {});
+        visit('/elsewhere');
         const other = render(<AppShell><OtherPage /></AppShell>);
         expect(other.queryByTestId('hint')).not.toBeNull();
+    });
+
+    describe('the selected airport', () => {
+        it('comes from the URL, so a link opens it and Back clears it', () => {
+            visit('/top?airport=ESSA', { continent: null });
+            const { rerender } = render(<AppShell><TopPage {...page.props} /></AppShell>);
+            expect(last().focus).toBe('ESSA');
+
+            // The map opens the card for the focused airport
+            act(() => mapProps.actions.set({ showAirportIdCard: 7 }));
+
+            // Back: the previous entry, same scene, no selection, so the card closes too
+            visit('/top', { continent: null });
+            rerender(<AppShell><TopPage {...page.props} /></AppShell>);
+            expect(last()).toMatchObject({ focus: null, card: null, version: 1 });
+        });
+
+        it('is written to the URL: opening pushes a history entry, switching and closing replace it', () => {
+            visit('/top?continent=x&b%5B%5D=1');
+            const { rerender } = render(<AppShell><TopPage /></AppShell>);
+
+            act(() => mapProps.actions.setFocusAirport('ESSA'));
+            expect(router.push).toHaveBeenCalledWith(expect.objectContaining({ url: '/top?continent=x&b%5B%5D=1&airport=ESSA', preserveState: true }));
+
+            visit('/top?continent=x&b%5B%5D=1&airport=ESSA');
+            rerender(<AppShell><TopPage /></AppShell>);
+
+            act(() => mapProps.actions.setFocusAirport('ENGM'));
+            expect(router.replace).toHaveBeenLastCalledWith(expect.objectContaining({ url: '/top?continent=x&b%5B%5D=1&airport=ENGM' }));
+
+            act(() => mapProps.actions.setFocusAirport(null));
+            expect(router.replace).toHaveBeenLastCalledWith(expect.objectContaining({ url: '/top?continent=x&b%5B%5D=1' }));
+            expect(router.push).toHaveBeenCalledTimes(1);
+        });
+
+        it('is the same selection pages get from the shell context', () => {
+            let shell;
+            const Probe = () => { shell = useShellMap(); return null; };
+
+            visit('/top?airport=ESSA');
+            render(<AppShell><Probe /></AppShell>);
+
+            expect(shell.focusAirport).toBe('ESSA');
+            act(() => shell.setFocusAirport('ENGM'));
+            expect(router.replace).toHaveBeenCalledWith(expect.objectContaining({ url: '/top?airport=ENGM' }));
+        });
     });
 
     it('tells the page about an airport the map could not find, stamped per miss', () => {
@@ -98,12 +148,12 @@ describe('AppShell', () => {
             return null;
         };
 
-        visit('/scenery', {});
+        visit('/scenery');
         render(<AppShell><ScenerySearch /></AppShell>);
 
-        act(() => reportNotFound('ZZZZ'));
+        act(() => mapProps.onAirportNotFound('ZZZZ'));
         const first = seen.at(-1);
-        act(() => reportNotFound('ZZZZ'));
+        act(() => mapProps.onAirportNotFound('ZZZZ'));
 
         expect(first.icao).toBe('ZZZZ');
         expect(seen.at(-1)).not.toBe(first);

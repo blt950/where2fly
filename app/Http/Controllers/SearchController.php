@@ -359,7 +359,7 @@ class SearchController extends Controller
                 }
 
                 return Inertia::render('SearchResults', [
-                    'query' => $request->except('_token'),
+                    'query' => $request->except('_token', 'airport'),
                     'direction' => $direction,
                     'suggestedAirport' => $suggestedAirport,
                     'bearingWarning' => $bearingWarning ?: null,

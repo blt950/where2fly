@@ -1,4 +1,4 @@
-import { isValidElement, useCallback, useMemo, useRef, useState } from 'react';
+import { isValidElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 
 import Alerts from './Alerts';
@@ -6,6 +6,7 @@ import Footer from './Footer';
 import MapHint from './MapHint';
 import Menu from './Menu';
 import { ShellMapContext } from './ShellMapContext';
+import { selectedAirportIn, withSelectedAirport } from './selection';
 import MapView from '../map/MapView';
 import { SCENE_DEFAULTS } from '../map/mapScene';
 import { useMapState } from '../map/useMapState';
@@ -19,22 +20,39 @@ const AppShell = ({ children }) => {
     const page = usePage();
     const Page = isValidElement(children) ? children.type : null;
 
-    // Every visit brings a new page object, even to the same URL (Randomise), and each one gets
-    // a fresh scene. Counted rather than keyed on the URL for that reason.
-    const visits = useRef({ page, key: 1 });
-    if (visits.current.page !== page) {
-        visits.current = { page, key: visits.current.key + 1 };
-    }
-    const sceneKey = visits.current.key;
-
     // Pages declare their map as a static `mapScene(props)`, read here during render so the
     // first visit constructs the map with the right camera instead of correcting it afterwards.
-    const scene = useMemo(
-        () => Page?.mapScene?.(page.props) ?? SCENE_DEFAULTS,
+    const scene = useMemo(() => Page?.mapScene?.(page.props) ?? SCENE_DEFAULTS, [Page, page.props]);
+    const [state, actions] = useMapState(scene);
+
+    // Selecting an airport writes the URL; the URL drives the map. Opening a card adds a history
+    // entry, so Back closes it; switching airports or closing replaces the entry instead.
+    const selected = selectedAirportIn(page.url);
+    const pageUrl = useRef(page.url);
+    pageUrl.current = page.url;
+
+    const select = useCallback((icao) => {
+        const current = selectedAirportIn(pageUrl.current);
+        const next = icao || null;
+
+        if (next === current) {
+            return;
+        }
+
+        const method = current === null ? 'push' : 'replace';
+        router[method]({ url: withSelectedAirport(pageUrl.current, next), preserveState: true, preserveScroll: true });
+    }, []);
+
+    // Also re-applied after a new scene, which starts with nothing focused. No selection closes
+    // the cards as well, as their close button does.
+    useEffect(() => {
+        if ((state.focusAirport ?? null) !== selected) {
+            actions.set(selected ? { focusAirport: selected } : { focusAirport: null, showAirportIdCard: null });
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [sceneKey],
-    );
-    const [state, actions] = useMapState(scene, sceneKey);
+    }, [selected, state.sceneVersion]);
+
+    const mapActions = useMemo(() => ({ ...actions, setFocusAirport: select }), [actions, select]);
 
     // Stamped, so a page can tell a repeat miss on the same ICAO from the one it already showed
     const [airportNotFound, setAirportNotFound] = useState(null);
@@ -42,10 +60,10 @@ const AppShell = ({ children }) => {
 
     const shellMap = useMemo(() => ({
         focusAirport: state.focusAirport,
-        setFocusAirport: actions.setFocusAirport,
+        setFocusAirport: select,
         pingAirport: actions.pingAirport,
         airportNotFound,
-    }), [state.focusAirport, actions, airportNotFound]);
+    }), [state.focusAirport, select, actions, airportNotFound]);
 
     return (
         <ShellMapContext.Provider value={shellMap}>
@@ -59,7 +77,7 @@ const AppShell = ({ children }) => {
 
                 <div>
                     <aside id="map">
-                        <MapView state={state} actions={actions} sceneKey={sceneKey} onAirportNotFound={onAirportNotFound} navigate={visit} />
+                        <MapView state={state} actions={mapActions} onAirportNotFound={onAirportNotFound} navigate={visit} />
                     </aside>
 
                     {/* Only plays on the first, full load: the shell, and so this element, persists. */}

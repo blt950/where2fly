@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 
 import { useShellMap } from '../components/shell/ShellMapContext';
+import { withSelectedAirport } from '../components/shell/selection';
 import Legend from '../components/ui/Legend';
 import PageTitle from '../components/ui/PageTitle';
 import ScoreIcon from '../components/ui/ScoreIcon';
@@ -172,7 +173,7 @@ const SearchResults = ({
     };
 
     // Same query, new random anchor. A fresh visit, not reload(), so the page and map start over.
-    const randomise = () => router.visit(window.location.href, {
+    const randomise = () => router.visit(withSelectedAirport(window.location.href, null), {
         onStart: () => setRandomising(true),
         onFinish: () => setRandomising(false),
     });

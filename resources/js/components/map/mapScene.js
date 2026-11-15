@@ -67,7 +67,7 @@ export const initialMapState = (scene) => ({ ...SCENE_DEFAULTS, ...scene, ...TRA
 export const mapStateReducer = (state, action) => {
     switch (action.type) {
         case 'scene':
-            return { ...initialMapState(action.scene), sceneKey: action.sceneKey };
+            return { ...initialMapState(action.scene), signature: action.signature, sceneVersion: state.sceneVersion + 1 };
         case 'set':
             return { ...state, ...action.values };
         case 'addAirport':

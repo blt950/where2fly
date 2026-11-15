@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ErrorBoundary } from '@sentry/react';
 
@@ -9,10 +9,9 @@ import { useMapState } from './map/useMapState';
 // Temporary mount for the Blade pages that still show the map (the search forms and account
 // pages). All of them show the default view, so nothing drives it. Goes with M4.
 function BladeMap() {
-    const [scene] = useState(SCENE_DEFAULTS);
-    const [state, actions] = useMapState(scene, 'blade');
+    const [state, actions] = useMapState(SCENE_DEFAULTS);
 
-    return <MapView state={state} actions={actions} sceneKey="blade" />;
+    return <MapView state={state} actions={actions} />;
 }
 
 const mapElement = document.getElementById('map');

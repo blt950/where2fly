@@ -1,17 +1,15 @@
-import { useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { captureException } from '@sentry/react';
-import { CardContext } from './context/CardContext';
 import CurrencyDropdown from './ui/CurrencyDropdown';
 
 import TooltipRefresh from './utils/TooltipRefresh';
 
-function SceneryCard({ airportId }) {
+function SceneryCard({ airportId, onClose }) {
     const dataCache = useRef({});
     const tabsRef = useRef(null);
     const [data, setData] = useState(null);
     const [selectedSimulator, setSelectedSimulator] = useState(null);
     const [currency, setCurrency] = useState(localStorage.getItem('currency') || 'EUR');
-    const { setShowSceneryIdCard } = useContext(CardContext);
 
     const currencies = [
         { code: 'EUR', symbol: '€' },
@@ -71,7 +69,7 @@ function SceneryCard({ airportId }) {
             <>
                 <div className="d-flex justify-content-between">
                     <h2>Scenery</h2>
-                    <button className="btn-close" aria-label="Close scenery card" onClick={() => setShowSceneryIdCard(null)}></button>
+                    <button className="btn-close" aria-label="Close scenery card" onClick={onClose}></button>
                 </div>
 
                 {!data ? (

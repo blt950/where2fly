@@ -108,12 +108,13 @@ describe('SearchResults', () => {
         });
     });
 
-    it('randomises with a fresh visit to the same search', () => {
+    it('randomises with a fresh visit to the same search, without the selected airport', () => {
+        window.history.replaceState(null, '', '/search?icao=ENGM&airport=ESSA');
         renderWithShell(<SearchResults {...resultsProps(1)} suggestedAirport />);
 
         fireEvent.click(screen.getByText(/Randomise/));
 
-        expect(routerVisit).toHaveBeenCalledWith(window.location.href, expect.any(Object));
+        expect(routerVisit).toHaveBeenCalledWith('/search?icao=ENGM', expect.any(Object));
     });
 
     it('reveals the primary airport TAF on demand', () => {

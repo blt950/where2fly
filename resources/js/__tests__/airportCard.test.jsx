@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MapContext } from '../components/context/MapContext';
-import PopupContainer from '../components/PopupContainer';
+import CardHost from '../components/CardHost';
 
 // A failed fetch calls captureException; stub it so the test output stays quiet.
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
@@ -29,6 +29,19 @@ const airportFixture = {
     notable: null,
 };
 
+const airline = (icao_code, iata_code, name) => ({ id: icao_code, icao_code, iata_code, name });
+const SAS = airline('SAS', 'SK', 'Scandinavian');
+const DLH = airline('DLH', 'LH', 'Lufthansa');
+
+const flightsFixture = {
+    airlines: [DLH, SAS],
+    airline: null,
+    flights: [
+        { id: 1, flight_icao: 'SAS1', flight_number: '1', airline: SAS, aircrafts: [{ icao: 'A320' }], last_seen_at: '2026-11-01T00:00:00Z' },
+        { id: 2, flight_icao: 'DLH2', flight_number: '2', airline: DLH, aircrafts: [{ icao: 'B738' }], last_seen_at: '2026-11-01T00:00:00Z', highlighted: true },
+    ],
+};
+
 const sceneryFixture = {
     MSFS: [{
         id: 1, developer: 'Orbx', payware: 1, link: 'https://x.test', linkDomain: 'x.test',
@@ -48,7 +61,7 @@ const baseMapContext = {
 
 const renderCard = (mapContext, airportId = 1) => render(
     <MapContext.Provider value={mapContext}>
-        <PopupContainer airportId={airportId} />
+        <CardHost airportId={airportId} />
     </MapContext.Provider>,
 );
 
@@ -90,6 +103,10 @@ beforeEach(() => {
             return Promise.resolve({ json: () => Promise.resolve({ data: sceneryFixture }) });
         }
 
+        if (url === 'api.airport.flights') {
+            return Promise.resolve({ json: () => Promise.resolve({ data: flightsFixture }) });
+        }
+
         return Promise.reject(new Error(`unhandled fetch url: ${url}`));
     }));
 });
@@ -100,7 +117,7 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-describe('PopupContainer / AirportCard', () => {
+describe('CardHost / AirportCard', () => {
     it('shows loading, then fetches and renders the airport', async () => {
         const { container } = renderCard(baseMapContext);
 
@@ -114,12 +131,6 @@ describe('PopupContainer / AirportCard', () => {
             headers: expect.objectContaining({ 'X-CSRF-TOKEN': 'test-token' }),
             body: expect.stringContaining('"secondaryAirport":1'),
         }));
-    });
-
-    it('renders no card content when airportId is null', () => {
-        const { container } = renderCard(baseMapContext, null);
-
-        expect(container.querySelector('.popup-card')).toBeNull();
     });
 
     it('clears both map states on close, so clicking the same marker again reopens the card', async () => {
@@ -179,5 +190,75 @@ describe('PopupContainer / AirportCard', () => {
         expect(screen.queryByText('Arrival')).toBeNull();
         expect(screen.queryByText('Departure')).toBeNull();
         expect(screen.getByText(/^Use as/)).toBeTruthy();
+    });
+
+    describe('flights', () => {
+        const onRoute = { ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false };
+        const withAirlines = { ...airportFixture, airlines: [{ ...SAS, highlighted: false }, { ...DLH, highlighted: true }] };
+        const flightRows = () => [...document.querySelectorAll('.card-table tbody tr .dropdown-toggle')].map((cell) => cell.textContent);
+
+        beforeEach(() => {
+            const bodies = { 'api.airport.show': withAirlines, 'api.airport.flights': flightsFixture, 'api.airport.scenery': sceneryFixture };
+            fetch.mockImplementation((url) => Promise.resolve({ json: () => Promise.resolve({ data: bodies[url] }) }));
+        });
+
+        it('opens on the clicked airline, filtering one fetch of every flight on the route', async () => {
+            renderCard(onRoute);
+            await screen.findByText('Oslo Gardermoen');
+
+            fireEvent.click(screen.getByAltText('See all Lufthansa flights'));
+
+            await screen.findByText('Lufthansa flights');
+            expect(flightRows()).toEqual(['DLH2']);
+
+            const [, request] = fetch.mock.calls.find(([url]) => url === 'api.airport.flights');
+            expect(JSON.parse(request.body)).toMatchObject({ departureAirportId: 2, arrivalAirportId: 1 });
+            expect(JSON.parse(request.body)).not.toHaveProperty('airlineId');
+        });
+
+        it('switches airline or shows all without fetching again', async () => {
+            renderCard(onRoute);
+            await screen.findByText('Oslo Gardermoen');
+            fireEvent.click(screen.getByAltText('See all Lufthansa flights'));
+            await screen.findByText('Lufthansa flights');
+
+            fireEvent.click(screen.getByText('All'));
+            expect(flightRows()).toEqual(['SAS1', 'DLH2']);
+            expect(screen.getByRole('heading', { name: 'Flights' })).toBeTruthy();
+
+            fireEvent.click(screen.getByLabelText('Only Scandinavian'));
+            expect(flightRows()).toEqual(['SAS1']);
+
+            expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.flights')).toHaveLength(1);
+        });
+
+        it('closes the flights and scenery cards when another airport is selected', async () => {
+            const { rerender } = renderCard(onRoute);
+            await screen.findByText('Oslo Gardermoen');
+            fireEvent.click(screen.getByAltText('See all Lufthansa flights'));
+            fireEvent.click(screen.getByText('Scenery'));
+            await screen.findByText('Lufthansa flights');
+
+            rerender(
+                <MapContext.Provider value={{ ...onRoute, focusAirport: 'ESSA' }}>
+                    <CardHost airportId={2} />
+                </MapContext.Provider>,
+            );
+
+            expect(screen.queryByText('Lufthansa flights')).toBeNull();
+            expect(document.querySelector('[aria-label="Close scenery card"]')).toBeNull();
+        });
+    });
+
+    it('opens the search form through the map owner, keeping modified clicks for the browser', async () => {
+        const navigate = vi.fn();
+        renderCard({ ...baseMapContext, navigate });
+        await screen.findByText('Oslo Gardermoen');
+
+        fireEvent.click(screen.getByText('Arrival'));
+        expect(navigate).toHaveBeenCalledWith(expect.stringContaining('front?icao=ENGM'));
+
+        fireEvent.click(screen.getByText('Departure'), { ctrlKey: true });
+        expect(navigate).toHaveBeenCalledTimes(1);
     });
 });

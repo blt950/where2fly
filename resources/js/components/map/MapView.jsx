@@ -5,7 +5,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { MapContext } from '../context/MapContext';
 
-import PopupContainer from '../PopupContainer';
+import CardHost from '../CardHost';
 import MapAirportSource from './MapAirportSource';
 import MapAttribution from './MapAttribution';
 import MapBound from './MapBound';
@@ -59,12 +59,12 @@ const reportError = (error) => {
 // state, so pages can read and change focus without DOM events.
 const pageLoad = (url) => window.location.assign(url);
 
-function MapView({ state, actions, sceneKey, onFocusAirport, onAirportNotFound, navigate = pageLoad }) {
+function MapView({ state, actions, onFocusAirport, onAirportNotFound, navigate = pageLoad }) {
 
     const {
         airports, cluster, clusterTone, camera, coordinates, drawRoute, focusAirport, gateLabels,
         highlightedAircrafts, initialCard, mapBounds, persistView, ping, primaryAirport, reverseDirection,
-        showAirportIdCard, showLists,
+        sceneVersion, showAirportIdCard, showLists,
     } = state;
     const { set, addAirport, setFocusAirport, setShowAirportIdCard } = actions;
 
@@ -232,7 +232,7 @@ function MapView({ state, actions, sceneKey, onFocusAirport, onAirportNotFound, 
                     <MapAirportSource id={AIRPORT_SOURCES.userLists} airports={listAirports} palette={palette}
                         cluster {...CLUSTER_COLOURS.muted} />
                 )}
-                <MapCamera camera={camera} sceneKey={sceneKey} />
+                <MapCamera camera={camera} sceneVersion={sceneVersion} />
                 {(mapBounds && camera?.type === 'fit') && <MapBound mapBounds={mapBounds} />}
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} color={palette.fallback} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
@@ -244,10 +244,10 @@ function MapView({ state, actions, sceneKey, onFocusAirport, onAirportNotFound, 
                 lists={lists} onListToggle={setListHidden} />
             {showAirportIdCard && (
                 // A card that throws mid-commit used to hit the root boundary and take the whole
-                // map down with it — the map stays up, only the card goes. Keyed on the visit so
-                // the card's per-airport cache can't outlive the page it was fetched for.
-                <ErrorBoundary key={sceneKey} fallback={null}>
-                    <PopupContainer airportId={showAirportIdCard} />
+                // map down with it — the map stays up, only the card goes. Keyed on the scene so
+                // the cards' per-airport caches can't outlive the results they were fetched for.
+                <ErrorBoundary key={sceneVersion} fallback={null}>
+                    <CardHost airportId={showAirportIdCard} />
                 </ErrorBoundary>
             )}
         </MapContext.Provider>
