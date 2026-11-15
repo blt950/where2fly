@@ -1,6 +1,6 @@
 # Responsive redesign: map-first on mobile
 
-Status: concept agreed, not started. A clickable reference lives at `public/responsive.html` (mock data, real MapLibre). It is a simplified sketch of the behaviour, not a visual spec — see "What the prototype leaves out". Delete it before this ships; anything in `public/` is served.
+Status: concept and open questions decided (see "Decisions"); in progress. A clickable reference lives at `public/responsive.html` (mock data, real MapLibre). It is a simplified sketch of the behaviour, not a visual spec — see "What the prototype leaves out". Delete it before this ships; anything in `public/` is served.
 
 ## Why
 
@@ -118,7 +118,7 @@ Port in order of difficulty, each behind the same shell:
 
 ## Suggested order of work
 
-1. **Decide** the open questions below.
+1. **Decide** the open questions (done, see "Decisions").
 2. **Shell without visual change.** Install Inertia, build the persistent layout around the existing desktop look, move Top List. The map survives navigation between migrated pages; unmigrated pages still reload. Introduce the page-driven map state here and keep the `window.*` setters only as a temporary adapter for Blade pages.
 3. **Migrate the remaining map pages** (order above). Delete the adapter, the inline page scripts, `.map-reveal`, and the route checks in the map code as the last consumer goes.
 4. **Card host** with the stacked wrapper (desktop behaviour stays the same, state now lifted).
@@ -138,13 +138,26 @@ Do not treat it as complete. Missing or faked there, real in the app:
 - loading and error states for cards and the map (WebGL2 fallback), slow networks
 - tablet widths: between `md` and `lg` the card stack covers most of the map today — decide whether the drawer layout should extend up to `lg`
 
-## Open questions
+## Decisions
 
-1. Inertia (recommended) or hand-rolled shell? Is running Inertia SSR in production acceptable, or is client-rendered first paint fine?
-2. Flights: per-airline cards as today, or one flights view with an airline filter?
-3. Which breakpoint switches to the drawer — `md` as now, or `lg`?
-4. Should non-map pages move into the shell eventually, or stay Blade for good?
-5. Does the Top List need its own camera rule on phones (continent views were tuned for a wide map)?
+1. **Shell: Inertia, client-rendered.** No SSR process in production. The root template keeps rendering meta description and OG tags.
+2. **Flights: one Flights view per airport with an airline filter.** The airline logos become shortcuts into that filter, so the phone tab has a single stable destination.
+3. **The drawer applies below `lg`**, so tablets get it too. Between `md` and `lg` the card stack covers too much of the map.
+4. *Still open:* should the non-map pages move into the shell eventually? Decide during clean-up.
+5. *Still open:* does the Top List need its own camera rule on phones? Decide with the phone layout. The default is to fit the listed airports within the uncovered area instead of using the fixed continent views.
+
+## Milestones
+
+The work lands as one commit per milestone on `feat/responsive-redesign`:
+
+- M0: decisions
+- M1: Inertia shell + Top List
+- M2: Scenery
+- M3: search and route results
+- M4: search forms, then delete the Blade adapter
+- M5: card host + unified Flights view
+- M6: phone/tablet layout
+- M7: clean-up
 
 ## Testing
 
