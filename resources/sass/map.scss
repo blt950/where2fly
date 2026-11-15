@@ -352,15 +352,6 @@
         border-right: 10px solid transparent;
         border-bottom: 10px solid $gray-500; /* Same color as the background of the div */
     }
-
-    &.hint-feedback{
-        right: 18.5rem;
-        border: 1px solid $primary;
-
-        &::after {
-            border-bottom: 10px solid $primary; /* Same color as the background of the div */
-        }
-    }
 }
 
 

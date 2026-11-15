@@ -4,32 +4,10 @@
 <div class="map-reveal" aria-hidden="true"></div>
 
 
-@if(!Auth::user())
+{{-- From MapHintHelper ($mapHint); shell/MapHint.jsx is its React twin --}}
+@if($mapHint)
     <div class="hint">
-        <i class="fa-sharp fa-lightbulb-on"></i>
-        Create an account to fill the map with your own scenery list.
+        <i class="fa-sharp {{ $mapHint['icon'] }}"></i>
+        {{ $mapHint['text'] }}
     </div>
-@else
-    @empty(Auth::user()->feedback_last_read_number)
-        <div class="hint hint-feedback">
-            <i class="fa-sharp fa-box-ballot"></i>
-            Have your say on what get built next on our new feedback page.
-        </div>
-    @else
-        @if(Auth::user()->lists->count() == 0)
-            <div class="hint">
-                <i class="fa-sharp fa-lightbulb-on"></i>
-                Create a scenery list to fill the map with your own data.
-            </div>
-        @endif
-    @endempty
 @endif
-
-<!--
-<div class="feedback">
-    <i class="fa-sharp fa-box-ballot"></i>
-    <b>Have your say on what get built next</b>
-    <br>
-    <a href="{{ route('feedback') }}">Check out our new Feedback page</a>
-</div>
--->

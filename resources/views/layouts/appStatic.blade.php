@@ -16,18 +16,7 @@
                 </nav>
                 <main class="nomap @yield('main-class')">
 
-                     @if(Session::has('error') || isset($error))
-                        <div class="alert alert-danger" role="alert">
-                            <i class="fa-sharp fa-lg fa-exclamation-circle"></i> {!! Session::has('error') ? Session::pull("error") : $error !!}
-                        </div>
-                    @endif
-                    
-                    @if(Session::has('success') || isset($success))
-                        <div class="alert alert-success" role="alert">
-                            <i class="fa-sharp fa-lg fa-check-circle"></i>
-                            {!! Session::has('success') ? Session::pull("success") : $success !!}
-                        </div>
-                    @endif
+                    @include('layouts.alerts')
 
                     @yield('content')
                 </main>

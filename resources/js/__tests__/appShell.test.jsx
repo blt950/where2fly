@@ -77,6 +77,19 @@ describe('AppShell', () => {
         expect(last().version).toBe(2);
     });
 
+    it('leaves the map as it was for a page that keeps it', () => {
+        const TextPage = () => null;
+        TextPage.keepsMap = true;
+
+        visit('/top/EU', { continent: 'EU' });
+        const { rerender } = render(<AppShell><TopPage {...page.props} /></AppShell>);
+
+        visit('/changelog', { html: '<p>notes</p>' });
+        rerender(<AppShell><TextPage {...page.props} /></AppShell>);
+
+        expect(last()).toMatchObject({ camera: EUROPE, version: 1 });
+    });
+
     it('falls back to the default scene for pages without one', () => {
         visit('/elsewhere');
         render(<AppShell><OtherPage /></AppShell>);

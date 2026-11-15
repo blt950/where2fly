@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Helpers\AlertHelper;
+use App\Helpers\MapHintHelper;
 use App\Helpers\NavigationHelper;
 use App\Mixins\CollectionAirportFilter;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -35,9 +37,9 @@ class AppServiceProvider extends ServiceProvider
                 ->line('If you did not create this account, no further action is required and your account will be deleted if not verified after a few days.');
         });
 
-        // The same navigation the React shell gets as its `nav` prop
-        View::composer(['layouts.menu', 'layouts.bottomnav', 'layouts.footer'], function ($view) {
-            $view->with('nav', NavigationHelper::build());
-        });
+        // The same navigation, alerts and map hint the React shell gets as shared props
+        View::composer(['layouts.menu', 'layouts.bottomnav', 'layouts.footer'], fn ($view) => $view->with('nav', NavigationHelper::build()));
+        View::composer('layouts.alerts', fn ($view) => $view->with('alerts', AlertHelper::build()));
+        View::composer('parts.map', fn ($view) => $view->with('mapHint', MapHintHelper::current()));
     }
 }

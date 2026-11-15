@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\AlertHelper;
+use App\Helpers\MapHintHelper;
 use App\Helpers\NavigationHelper;
 use Closure;
 use Illuminate\Http\Request;
@@ -41,8 +43,8 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * What layouts/app.blade.php reads from the session and the auth user, plus the navigation
-     * (NavigationHelper, which the Blade layouts get too), for the React shell.
+     * The navigation, alerts and map hint, from the same helpers the Blade layouts use
+     * (through view composers in AppServiceProvider).
      */
     public function share(Request $request): array
     {
@@ -50,21 +52,8 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'isProduction' => app()->isProduction(),
             'nav' => fn () => NavigationHelper::build(),
-            'auth' => [
-                'user' => fn () => ($user = $request->user()) ? [
-                    'username' => $user->username,
-                    'email' => $user->email,
-                    'verified' => $user->hasVerifiedEmail(),
-                    'isAdmin' => $user->can('showAdmin', $user::class),
-                    'hasReadFeedback' => ! empty($user->feedback_last_read_number),
-                    'listsCount' => $user->lists()->count(),
-                ] : null,
-            ],
-            'flash' => fn () => [
-                'error' => $request->session()->get('error'),
-                'warning' => $request->session()->get('warning'),
-                'success' => $request->session()->get('success'),
-            ],
+            'alerts' => fn () => AlertHelper::build(),
+            'mapHint' => fn () => MapHintHelper::current(),
         ];
     }
 }

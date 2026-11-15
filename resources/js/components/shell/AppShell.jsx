@@ -39,7 +39,13 @@ const AppShell = ({ children }) => {
 
     // Pages declare their map as a static `mapScene(props)`, read here during render so the
     // first visit constructs the map with the right camera instead of correcting it afterwards.
-    const scene = useMemo(() => Page?.mapScene?.(page.props) ?? SCENE_DEFAULTS, [Page, page.props]);
+    // A page with `keepsMap` (the text pages) leaves the map exactly as the previous page had it.
+    const lastScene = useRef(SCENE_DEFAULTS);
+    const scene = useMemo(
+        () => (Page?.keepsMap ? lastScene.current : Page?.mapScene?.(page.props) ?? SCENE_DEFAULTS),
+        [Page, page.props],
+    );
+    lastScene.current = scene;
     const [state, actions] = useMapState(scene);
 
     // Selecting an airport writes the URL; the URL drives the map. Opening a card adds a history
