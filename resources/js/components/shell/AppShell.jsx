@@ -8,7 +8,7 @@ import Footer from './Footer';
 import MapHint from './MapHint';
 import Menu from './Menu';
 import { ShellMapContext } from './ShellMapContext';
-import { useCompactLayout } from './useCompactLayout';
+import { useLayoutMode } from './useCompactLayout';
 import { useDrawerStop } from './useDrawerStop';
 import { useMapInsets } from './useMapInsets';
 import { usePageAnnouncement } from './usePageAnnouncement';
@@ -31,11 +31,13 @@ const AppShell = ({ children }) => {
     const [state, actions] = useMapState(scene);
     const selectInUrl = useSelection(page, state, actions);
 
-    // Layout: the compact one moves the panel into a drawer over a full-screen map
-    const compact = useCompactLayout();
+    // Layout: the compact one moves the panel into a drawer over a full-screen map ('sheet'), or
+    // beside it on a phone turned on its side ('side')
+    const mode = useLayoutMode();
+    const compact = mode !== 'panel';
     const cardsOpen = Boolean(state.showAirportIdCard);
     const { stop, setStop, raiseDrawer, onBackgroundClick } = useDrawerStop({
-        compact, Page, sceneVersion: state.sceneVersion, selectedCard: state.showAirportIdCard ?? null,
+        mode, Page, sceneVersion: state.sceneVersion, selectedCard: state.showAirportIdCard ?? null,
     });
 
     // Selecting an airport also brings a collapsed drawer back, even the airport already selected,
@@ -47,12 +49,14 @@ const AppShell = ({ children }) => {
         selectInUrl(icao);
     }, [raiseDrawer, selectInUrl]);
     const mapActions = useMemo(() => ({ ...actions, setFocusAirport: select }), [actions, select]);
-    const { getInsets, onDrawerVisible } = useMapInsets();
+    const { getInsets, onCoverChange } = useMapInsets(mode);
     const [cardSlot, setCardSlot] = useState(null);
 
+    // For the CSS only; the hooks get `mode` itself
     useLayoutEffect(() => {
         document.body.classList.toggle('shell-compact', compact);
-    }, [compact]);
+        document.body.classList.toggle('shell-side', mode === 'side');
+    }, [compact, mode]);
 
     // A `wide` page (feedback) shows its main content over the map area on wide screens; the map
     // stays mounted underneath. On the compact layout that content just sits in the drawer.
@@ -88,7 +92,7 @@ const AppShell = ({ children }) => {
                 <Menu />
 
                 <div className="d-flex flex-row shell-stage">
-                    <Drawer enabled={compact} stop={stop} onStopChange={setStop} onVisibleChange={onDrawerVisible}>
+                    <Drawer mode={mode} stop={stop} onStopChange={setStop} onCoverChange={onCoverChange}>
                         {/* Kept mounted while the cards show, so the page keeps its state and scroll */}
                         <div className="drawer-page" hidden={compact && cardsOpen}>
                             <Alerts notices={notices} />

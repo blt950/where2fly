@@ -4,19 +4,35 @@ import { useEffect, useState } from 'react';
 // of a narrow map.
 export const COMPACT_QUERY = '(max-width: 991.98px)';
 
-const matches = () => typeof window !== 'undefined' && window.matchMedia?.(COMPACT_QUERY).matches === true;
+// A phone on its side: too short for a sheet over the map (header, handle, tabs and nav took 250
+// of 390px), so the drawer docks to the left at full height instead
+export const SIDE_QUERY = '(max-width: 991.98px) and (orientation: landscape) and (max-height: 500px)';
 
-export const useCompactLayout = () => {
-    const [compact, setCompact] = useState(matches);
+const useMedia = (query) => {
+    const [matches, setMatches] = useState(() => typeof window !== 'undefined' && window.matchMedia?.(query).matches === true);
 
     useEffect(() => {
-        const query = window.matchMedia?.(COMPACT_QUERY);
-        const update = () => setCompact(query.matches);
+        const media = window.matchMedia?.(query);
+        const update = () => setMatches(media.matches);
 
-        query?.addEventListener('change', update);
+        media?.addEventListener('change', update);
 
-        return () => query?.removeEventListener('change', update);
-    }, []);
+        return () => media?.removeEventListener('change', update);
+    }, [query]);
 
-    return compact;
+    return matches;
+};
+
+export const useCompactLayout = () => useMedia(COMPACT_QUERY);
+
+// 'panel' on wide screens (the sidebar), 'sheet' (the drawer over the map), 'side' (docked left)
+export const useLayoutMode = () => {
+    const compact = useMedia(COMPACT_QUERY);
+    const side = useMedia(SIDE_QUERY);
+
+    if (!compact) {
+        return 'panel';
+    }
+
+    return side ? 'side' : 'sheet';
 };

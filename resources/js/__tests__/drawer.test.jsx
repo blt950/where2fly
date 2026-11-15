@@ -21,15 +21,16 @@ afterEach(() => {
 
 const renderDrawer = (props = {}) => {
     const onStopChange = vi.fn();
-    const onVisibleChange = vi.fn();
+    const onCoverChange = vi.fn();
     const utils = render(
-        <Drawer enabled stop="half" onStopChange={onStopChange} onVisibleChange={onVisibleChange} {...props}>
+        <Drawer mode="sheet" stop="half" onStopChange={onStopChange} onCoverChange={onCoverChange} {...props}>
             <input id="field" />
             <input id="box" type="checkbox" />
+            <div id="list" style={{ overflowY: 'auto' }}><p id="row">row</p></div>
         </Drawer>,
     );
 
-    return { ...utils, onStopChange, onVisibleChange, handle: utils.container.querySelector('.drawer-handle') };
+    return { ...utils, onStopChange, onCoverChange, handle: utils.container.querySelector('.drawer-handle') };
 };
 
 // fireEvent drops clientY/timeStamp on PointerEvent in jsdom, so build the events by hand
@@ -42,10 +43,10 @@ const pointer = (target, type, clientY, timeStamp) => {
 
 describe('Drawer', () => {
     it('rests at the stop it is given and reports what it covers', () => {
-        const { container, onVisibleChange } = renderDrawer();
+        const { container, onCoverChange } = renderDrawer();
 
         expect(container.querySelector('main').style.getPropertyValue('--drawer-y')).toBe('400px');
-        expect(onVisibleChange).toHaveBeenLastCalledWith(400);
+        expect(onCoverChange).toHaveBeenLastCalledWith({ bottom: 400, left: 0 });
     });
 
     it('settles a slow drag on the nearest stop', () => {
@@ -103,10 +104,63 @@ describe('Drawer', () => {
     });
 
     it('is a plain panel on wide screens', () => {
-        const { container, onVisibleChange } = renderDrawer({ enabled: false });
+        const { container, onCoverChange } = renderDrawer({ mode: 'panel' });
 
         expect(container.querySelector('.drawer-handle')).toBeNull();
         expect(container.querySelector('main').className).toBe('');
-        expect(onVisibleChange).toHaveBeenLastCalledWith(0);
+        expect(onCoverChange).toHaveBeenLastCalledWith({ bottom: 0, left: 0 });
+    });
+
+    it('docks to the side on a phone turned sideways: no handle, no stops, it covers the left', () => {
+        Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, get() { return this.tagName === 'MAIN' ? 350 : 0; } });
+        const { container, onCoverChange } = renderDrawer({ mode: 'side' });
+
+        expect(container.querySelector('.drawer-handle')).toBeNull();
+        expect(container.querySelector('main').style.getPropertyValue('--drawer-y')).toBe('');
+        expect(onCoverChange).toHaveBeenLastCalledWith({ bottom: 0, left: 350 });
+        delete HTMLElement.prototype.clientWidth;
+    });
+
+    describe('dragged by its content (touch)', () => {
+        const touch = (target, type, clientX, clientY, timeStamp) => {
+            const event = new Event(type, { bubbles: true, cancelable: true });
+            Object.defineProperty(event, 'touches', { value: type === 'touchend' ? [] : [{ clientX, clientY }] });
+            Object.defineProperty(event, 'timeStamp', { value: timeStamp });
+            target.dispatchEvent(event);
+            return event;
+        };
+
+        it('follows a downward drag from the top and settles like the handle', () => {
+            const { container, onStopChange } = renderDrawer();
+            const row = container.querySelector('#row');
+
+            touch(row, 'touchstart', 100, 450, 0);
+            touch(row, 'touchmove', 102, 550, 1000);
+            const move = touch(row, 'touchmove', 103, 700, 2000);
+            touch(row, 'touchend', 0, 0, 2100);
+
+            expect(move.defaultPrevented).toBe(true);
+            expect(onStopChange).toHaveBeenCalledWith('peek');
+        });
+
+        it('leaves the content scrolling: an upward drag, a scrolled list, a sideways swipe, a slider', () => {
+            const { container, onStopChange } = renderDrawer();
+            const row = container.querySelector('#row');
+            const gesture = (target, [x1, y1], [x2, y2]) => {
+                touch(target, 'touchstart', x1, y1, 0);
+                const move = touch(target, 'touchmove', x2, y2, 100);
+                touch(target, 'touchend', 0, 0, 200);
+                return move.defaultPrevented;
+            };
+
+            expect(gesture(row, [100, 450], [100, 350])).toBe(false);
+            expect(gesture(row, [100, 450], [200, 470])).toBe(false);
+            expect(gesture(container.querySelector('#field'), [100, 450], [100, 600])).toBe(false);
+
+            container.querySelector('#list').scrollTop = 40;
+            expect(gesture(row, [100, 450], [100, 600])).toBe(false);
+
+            expect(onStopChange).not.toHaveBeenCalled();
+        });
     });
 });

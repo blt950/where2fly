@@ -14,15 +14,18 @@ const cardStackWidth = () => {
     return Math.max(0, stack.getBoundingClientRect().right - map.getBoundingClientRect().left);
 };
 
-// What covers the map right now: the drawer on the compact layout, the card stack and footer
-// otherwise. Read at the moment the camera moves (paddingFor / offsetFor), never cached.
-export const useMapInsets = () => {
-    const drawerVisible = useRef(0);
-    const onDrawerVisible = useCallback((px) => { drawerVisible.current = px; }, []);
+// What covers the map right now: what the drawer reports covering on the compact layouts (its
+// visible height as a sheet, its width docked to the side), the card stack and footer on wide
+// screens. Read at the moment the camera moves (paddingFor / offsetFor), never cached.
+export const useMapInsets = (mode) => {
+    const currentMode = useRef(mode);
+    currentMode.current = mode;
+    const cover = useRef({ bottom: 0, left: 0 });
+    const onCoverChange = useCallback((covered) => { cover.current = covered; }, []);
 
-    const getInsets = useCallback(() => (document.body.classList.contains('shell-compact')
-        ? { top: 0, right: 0, bottom: drawerVisible.current, left: 0 }
-        : { top: 0, right: 0, bottom: FOOTER_HEIGHT, left: cardStackWidth() }), []);
+    const getInsets = useCallback(() => (currentMode.current === 'panel'
+        ? { top: 0, right: 0, bottom: FOOTER_HEIGHT, left: cardStackWidth() }
+        : { top: 0, right: 0, ...cover.current }), []);
 
-    return { getInsets, onDrawerVisible };
+    return { getInsets, onCoverChange };
 };

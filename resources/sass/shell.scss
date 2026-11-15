@@ -326,6 +326,93 @@ body.shell-compact {
     }
 }
 
+// A phone on its side (useLayoutMode 'side'): too short for a sheet, so the drawer docks left at
+// full height and the bottom nav becomes a rail beside it. The header goes; "More" has its links.
+$side-rail-width: 4.25rem;
+
+body.shell-compact.shell-side {
+    > .d-flex.w-100.h-100.mx-auto.flex-column {
+        flex-direction: row !important;
+    }
+
+    header {
+        display: none !important;
+    }
+
+    .shell-stage {
+        height: 100%;
+    }
+
+    main.drawer {
+        right: auto;
+        width: 45%;
+        max-width: 28rem;
+        transform: none;
+        border-top: 0;
+        border-right: 1px solid $gray-700;
+        box-shadow: 8px 0 24px rgba(0, 0, 0, 0.45);
+    }
+
+    .drawer-body {
+        height: 100%;
+    }
+
+    // No handle row to sit in: back in the tab bar, which has less than half the width to share
+    .card-tabs-back {
+        position: static;
+        flex: 0 0 2.75rem;
+        padding: 0;
+    }
+
+    .card-tabs u-tab {
+        gap: 0.3rem;
+        padding: 0 0.35rem;
+        font-size: 0.85rem;
+
+        // Only the open tab spells out its name; the others keep icon and count (and, for
+        // screen readers, the name)
+        &:not([aria-selected='true']) .card-tab-label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+        }
+    }
+
+    .bottom-nav {
+        order: -1;
+        flex-direction: column;
+        width: calc(#{$side-rail-width} + env(safe-area-inset-left));
+        height: 100%;
+        padding: 0 0 0 env(safe-area-inset-left);
+        border-top: 0;
+        border-right: 1px solid $gray-700;
+    }
+
+    .bottom-nav-tab {
+        border-top: 0;
+        border-left: 3px solid transparent;
+        font-size: 0.6875rem;
+
+        &[aria-current='page'] {
+            border-left-color: $primary;
+        }
+    }
+
+    // Opens to the right of the rail, not up off its narrow column
+    .bottom-nav-more .dropdown-menu[data-bs-popper] {
+        top: auto;
+        bottom: 0.25rem;
+        left: 100%;
+        right: auto;
+        margin: 0 0 0 0.25rem !important;
+        max-height: calc(100dvh - 0.5rem);
+        overflow-y: auto;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     body.shell-compact main.drawer {
         transition: none;

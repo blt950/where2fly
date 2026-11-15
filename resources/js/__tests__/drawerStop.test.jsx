@@ -10,7 +10,7 @@ const Text = () => null;
 Text.drawer = 'full';
 
 const mount = (props) => renderHook((p) => useDrawerStop(p), {
-    initialProps: { compact: true, Page: Form, sceneVersion: 1, selectedCard: null, ...props },
+    initialProps: { mode: 'sheet', Page: Form, sceneVersion: 1, selectedCard: null, ...props },
 });
 
 afterEach(() => document.body.classList.remove('shell-compact'));
@@ -20,7 +20,7 @@ describe('useDrawerStop', () => {
         const { result, rerender } = mount();
         act(() => result.current.setStop('full'));
 
-        rerender({ compact: true, Page: Results, sceneVersion: 2, selectedCard: null });
+        rerender({ mode: 'sheet', Page: Results, sceneVersion: 2, selectedCard: null });
         expect(result.current.stop).toBe('half');
     });
 
@@ -28,17 +28,17 @@ describe('useDrawerStop', () => {
         const { result, rerender } = mount({ Page: Results });
         act(() => result.current.setStop('full'));
 
-        rerender({ compact: true, Page: Results, sceneVersion: 2, selectedCard: null });
+        rerender({ mode: 'sheet', Page: Results, sceneVersion: 2, selectedCard: null });
         expect(result.current.stop).toBe('half');
     });
 
     it('opens reading pages fully, and leaves full behind for a map page after them', () => {
         const { result, rerender } = mount();
 
-        rerender({ compact: true, Page: Text, sceneVersion: 1, selectedCard: null });
+        rerender({ mode: 'sheet', Page: Text, sceneVersion: 1, selectedCard: null });
         expect(result.current.stop).toBe('full');
 
-        rerender({ compact: true, Page: Results, sceneVersion: 1, selectedCard: null });
+        rerender({ mode: 'sheet', Page: Results, sceneVersion: 1, selectedCard: null });
         expect(result.current.stop).toBe('half');
     });
 
@@ -55,11 +55,11 @@ describe('useDrawerStop', () => {
 
     it('settles at half when an airport is selected, and moves nothing on wide screens', () => {
         const { result, rerender } = mount({ Page: Text });
-        rerender({ compact: true, Page: Text, sceneVersion: 1, selectedCard: 7 });
+        rerender({ mode: 'sheet', Page: Text, sceneVersion: 1, selectedCard: 7 });
         expect(result.current.stop).toBe('half');
 
-        const wide = mount({ compact: false });
-        wide.rerender({ compact: false, Page: Text, sceneVersion: 2, selectedCard: 3 });
+        const wide = mount({ mode: 'panel' });
+        wide.rerender({ mode: 'panel', Page: Text, sceneVersion: 2, selectedCard: 3 });
         expect(wide.result.current.stop).toBe('half');
     });
 });
