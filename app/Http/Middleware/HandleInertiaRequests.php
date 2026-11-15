@@ -2,13 +2,34 @@
 
 namespace App\Http\Middleware;
 
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
+use Inertia\Inertia;
 use Inertia\Middleware;
+use Inertia\Support\Header;
 
 class HandleInertiaRequests extends Middleware
 {
     protected $rootView = 'inertia';
+
+    /**
+     * A visit from the shell can end on a page that is still Blade, e.g. a failed search redirecting
+     * to the form. The client can't render that, so turn it into a full page load, and reflash so
+     * the errors and old input survive the extra request.
+     */
+    public function handle(Request $request, Closure $next)
+    {
+        $response = parent::handle($request, $next);
+
+        if ($request->header(Header::INERTIA) && $response->isSuccessful() && ! $response->headers->has(Header::INERTIA)) {
+            $request->session()->reflash();
+
+            return Inertia::location($request->fullUrl());
+        }
+
+        return $response;
+    }
 
     /**
      * What layouts/app.blade.php reads from the session, the auth user and the View::share calls

@@ -7,57 +7,10 @@ import {
     cameraView,
     initialMapState,
     mapStateReducer,
-    sceneFromRoute,
 } from '../components/map/mapScene';
-
-// Ziggy's current(): no argument returns the name, a pattern with a trailing * matches prefixes,
-// and a params object must match the route's params.
-const routerAt = (name, params = {}) => ({
-    current: (pattern, wanted) => {
-        if (pattern === undefined) {
-            return name;
-        }
-
-        if (name === undefined) {
-            return false;
-        }
-
-        const matches = pattern.endsWith('*') ? name.startsWith(pattern.slice(0, -1)) : name === pattern;
-
-        return matches && (wanted === undefined || Object.values(params).includes(wanted));
-    },
-});
 
 afterEach(() => {
     localStorage.clear();
-});
-
-describe('sceneFromRoute', () => {
-    it('gives the default view on the front page', () => {
-        const scene = sceneFromRoute(routerAt('front'));
-
-        expect(scene).toMatchObject({
-            camera: { type: 'saved' }, clusterTone: 'muted', persistView: true, showLists: true, gateLabels: false,
-        });
-    });
-
-    it('frames gated, gold results on search', () => {
-        expect(sceneFromRoute(routerAt('search'))).toMatchObject({
-            camera: { type: 'fit' }, clusterTone: 'search', persistView: false, showLists: false, gateLabels: true,
-        });
-    });
-
-    it('frames route results without gating labels', () => {
-        expect(sceneFromRoute(routerAt('search.routes'))).toMatchObject({
-            camera: { type: 'fit' }, gateLabels: false, persistView: false,
-        });
-    });
-
-    it('treats an unnamed route as results that fit and gate labels', () => {
-        expect(sceneFromRoute(routerAt(undefined))).toMatchObject({
-            camera: { type: 'fit' }, gateLabels: true, showLists: false, persistView: false,
-        });
-    });
 });
 
 describe('cameraView', () => {

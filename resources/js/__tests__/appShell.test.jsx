@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const page = { url: '/top', props: {} };
+let page = { url: '/top', props: {} };
 const mapViewMounts = vi.fn();
 const mapViewRenders = [];
 
@@ -35,9 +35,9 @@ TopPage.showMapHint = false;
 
 const OtherPage = () => null;
 
+// Inertia hands the layout a new page object on every visit
 const visit = (url, props) => {
-    page.url = url;
-    page.props = props;
+    page = { url, props };
 };
 
 afterEach(cleanup);
@@ -58,7 +58,19 @@ describe('AppShell', () => {
         expect(mapViewMounts).toHaveBeenCalledTimes(1);
         // Never a render that pairs the new visit with the previous scene
         mapViewRenders.forEach((r) => expect(r.stateKey).toBe(r.sceneKey));
-        expect(mapViewRenders.at(-1)).toMatchObject({ sceneKey: '/top/EU', camera: EUROPE });
+        expect(mapViewRenders.at(-1).camera).toEqual(EUROPE);
+    });
+
+    it('starts a fresh scene on a repeat visit to the same URL', () => {
+        visit('/top/EU', { continent: 'EU' });
+        const { rerender } = render(<AppShell><TopPage {...page.props} /></AppShell>);
+        const firstKey = mapViewRenders.at(-1).sceneKey;
+
+        visit('/top/EU', { continent: 'EU' });
+        rerender(<AppShell><TopPage {...page.props} /></AppShell>);
+
+        expect(mapViewRenders.at(-1).sceneKey).not.toBe(firstKey);
+        expect(mapViewMounts).toHaveBeenCalledTimes(1);
     });
 
     it('falls back to the default scene for pages without one', () => {

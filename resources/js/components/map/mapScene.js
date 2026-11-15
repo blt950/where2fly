@@ -53,25 +53,6 @@ export const SCENE_DEFAULTS = {
 
 export const cameraView = (camera) => (camera?.type === 'view' ? camera.view : savedView());
 
-// Routes that drive the map from a list of results. Everything else (front page, scenery
-// editing, account pages) is the default view. Top and Scenery are Inertia pages now.
-const RESULT_ROUTES = ['search', 'search.routes'];
-
-// The Blade pages' scene, decided from the URL. Inertia pages declare theirs instead.
-export const sceneFromRoute = (router) => {
-    const unnamed = router.current() === undefined;
-    const isDefault = !unnamed && !RESULT_ROUTES.some((name) => router.current(name));
-
-    return {
-        ...SCENE_DEFAULTS,
-        clusterTone: isDefault ? 'muted' : 'search',
-        camera: { type: isDefault ? 'saved' : 'fit' },
-        persistView: isDefault,
-        showLists: isDefault,
-        gateLabels: router.current('search') || unnamed,
-    };
-};
-
 // Everything a reload used to reset. A new scene starts from these, never from the last page's.
 const TRANSIENT_DEFAULTS = {
     focusAirport: null,

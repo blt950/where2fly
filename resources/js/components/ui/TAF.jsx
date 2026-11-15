@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-function TAF({ taf }) {
+function TAF({ taf, label = 'Show', className = 'btn btn-outline-light btn-sm' }) {
     const [revealed, setRevealed] = useState(false);
 
     // Hide the TAF again when the focused airport changes
@@ -21,7 +21,7 @@ function TAF({ taf }) {
             {revealed ? (
                 <>{taf ? taf : 'Not Available'}</>
             ) : (
-                <button className="btn btn-outline-light btn-sm" onClick={handleClick}>Show</button>
+                <button className={className} onClick={handleClick}>{label}</button>
             )}
         </>
     );

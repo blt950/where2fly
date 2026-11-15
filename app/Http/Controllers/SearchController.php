@@ -9,6 +9,7 @@ use App\Helpers\ScoreHelper;
 use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
+use App\Models\AirportScore;
 use App\Models\Flight;
 use App\Models\UserList;
 use App\Rules\AirportExists;
@@ -17,11 +18,14 @@ use App\Rules\ValidAircrafts;
 use App\Rules\ValidAirlines;
 use App\Rules\ValidDestinations;
 use App\Rules\ValidScores;
+use App\View\Components\ScoreIcon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use Inertia\Inertia;
 
 class SearchController extends Controller
 {
@@ -348,12 +352,24 @@ class SearchController extends Controller
                     $searchVersionWarning = 'The search form has changed. Edit the search and bookmark again to ensure correct results.';
                 }
 
-                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning', 'searchVersionWarning'));
+                return Inertia::render('SearchResults', [
+                    'query' => $request->except('_token'),
+                    'direction' => $direction,
+                    'suggestedAirport' => $suggestedAirport,
+                    'bearingWarning' => $bearingWarning ?: null,
+                    'searchVersionWarning' => $searchVersionWarning ?: null,
+                    'noInterestingScores' => ! empty($sortByScores) && $suggestedAirports->first()->scores->count() == 0,
+                    'primaryAirport' => $this->primaryAirportProps($primaryAirport, $direction),
+                    'suggestions' => $this->suggestionProps($suggestedAirports, $primaryAirport, $direction, $filterByScores),
+                    'airportMapData' => $airportCoordinates,
+                    'highlightedAircrafts' => array_values($filterByAircrafts ?? []),
+                    'scoreTypes' => ScoreHelper::TYPES,
+                ])->withViewData(['title' => 'Results', 'metaDescription' => 'Details of your search']);
             }
 
         }
 
-        return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
+        return redirect(route($direction == 'arrival' ? 'front.departures' : 'front'))->withErrors(['airportNotFound' => 'No suitable airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
     }
 
     /**
@@ -376,7 +392,7 @@ class SearchController extends Controller
         $routes = Flight::where('airport_dep_id', $departure->id)->where('airport_arr_id', $arrival->id)->whereHas('airline')->with('airline', 'aircrafts')->get();
 
         if ($routes->count() == 0) {
-            return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
+            return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao])->withInput();
         }
 
         // Sort the routes based on the selected criteria
@@ -404,9 +420,26 @@ class SearchController extends Controller
             $airportCoordinates[$departure->icao]['type'] = $departure->type;
             $airportCoordinates[$arrival->icao]['type'] = $arrival->type;
 
-            return view('search.routes', compact('routes', 'departure', 'arrival', 'airportCoordinates'));
+            return Inertia::render('SearchRoutes', [
+                'departure' => $this->airportSummary($departure),
+                'arrival' => $this->airportSummary($arrival),
+                'dataSince' => $routes->min('first_seen_at')->format('Y-m-d'),
+                'routes' => $routes->values()->map(fn (Flight $route) => [
+                    'id' => $route->id,
+                    'flightIcao' => $route->flight_icao,
+                    'flightNumber' => $route->flight_number,
+                    'airline' => [
+                        'icao' => $route->airline->icao_code,
+                        'iata' => $route->airline->iata_code,
+                        'name' => $route->airline->name,
+                    ],
+                    'aircrafts' => $route->aircrafts->pluck('icao')->sort()->implode(', '),
+                    'lastSeen' => $route->last_seen_at->format('Y-m-d'),
+                ]),
+                'airportMapData' => $airportCoordinates,
+            ])->withViewData(['title' => 'Results', 'metaDescription' => 'Details of your search']);
         } else {
-            return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
+            return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao])->withInput();
         }
 
     }
@@ -425,6 +458,72 @@ class SearchController extends Controller
         }
 
         return redirect()->route('front')->withInput();
+    }
+
+    /** Identity of an airport as every results page shows it: flag, ICAO, name */
+    private function airportSummary(Airport $airport): array
+    {
+        return [
+            'icao' => $airport->icao,
+            'name' => $airport->name,
+            'isoCountry' => $airport->iso_country,
+            'countryName' => getCountryName($airport->iso_country),
+        ];
+    }
+
+    /** Score icons for one airport; bookings are labelled with the side of the flight they cover */
+    private function scoreIconProps(Airport $airport, string $bookingsLabel, array $highlightReasons = []): array
+    {
+        return $airport->displayScores()
+            ->map(fn (AirportScore $score) => [
+                ...(new ScoreIcon($score, $airport, bookingsLabel: $bookingsLabel))->toArray(),
+                'highlighted' => in_array($score->reason, $highlightReasons),
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function primaryAirportProps(Airport $airport, string $direction): array
+    {
+        return [
+            ...$this->airportSummary($airport),
+            'longestRunwayFt' => (int) $airport->longestRunway(),
+            'scores' => $this->scoreIconProps($airport, 'Bookings on ' . $direction),
+            'metar' => $airport->metar?->metar,
+            'taf' => $airport->taf?->raw_text,
+        ];
+    }
+
+    private function suggestionProps(Collection $airports, Airport $primaryAirport, string $direction, ?array $filterByScores): array
+    {
+        $otherSide = $direction == 'departure' ? 'arrival' : 'departure';
+        $highlightReasons = array_keys(array_filter($filterByScores ?? [], fn ($value) => $value === 1));
+
+        return $airports->values()->map(fn (Airport $airport, int $index) => [
+            ...$this->airportSummary($airport),
+            'rank' => $index + 1,
+            'scoreCount' => $airport->score_count,
+            'distance' => $airport->distance,
+            'airtime' => $airport->airtime,
+            'airtimeLabel' => gmdate('G:i', floor($airport->airtime * 3600)),
+            'scores' => $this->scoreIconProps($airport, 'Bookings on ' . $otherSide, $highlightReasons),
+            'runways' => $airport->runways->map(fn ($runway) => [
+                'id' => $runway->id,
+                'ident' => $runway->le_ident . '/' . $runway->he_ident,
+                'lengthFt' => (int) $runway->length_ft,
+            ])->values(),
+            'metar' => $airport->metar?->metar,
+            'taf' => $airport->taf?->raw_text,
+            'sceneries' => $airport->sceneryDevelopers
+                ->flatMap(fn ($developer) => $developer->sceneries)
+                ->pluck('simulator.shortened_name')
+                ->filter()
+                ->unique()
+                ->values(),
+            // The flight always runs departure -> arrival, whichever side the suggestion is
+            'departureIcao' => $direction == 'departure' ? $primaryAirport->icao : $airport->icao,
+            'arrivalIcao' => $direction == 'departure' ? $airport->icao : $primaryAirport->icao,
+        ])->all();
     }
 
     /**
