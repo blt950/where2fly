@@ -316,9 +316,6 @@ class SearchController extends Controller
                 'scores',
                 'metar',
                 'taf.forecasts',
-                'sceneryDevelopers.sceneries' => function ($query) {
-                    $query->where('published', true)->with('simulator');
-                },
             ])
                 ->findMany($airportIds)
                 ->sortBy(fn ($airport) => array_search($airport->id, $airportIds))->values()
@@ -366,7 +363,7 @@ class SearchController extends Controller
                     'searchVersionWarning' => $searchVersionWarning ?: null,
                     'noInterestingScores' => ! empty($sortByScores) && $suggestedAirports->first()->scores->count() == 0,
                     'primaryAirport' => $this->primaryAirportProps($primaryAirport, $direction),
-                    'suggestions' => $this->suggestionProps($suggestedAirports, $primaryAirport, $direction, $filterByScores),
+                    'suggestions' => $this->suggestionProps($suggestedAirports, $direction, $filterByScores),
                     'airportMapData' => $airportCoordinates,
                     'highlightedAircrafts' => array_values($filterByAircrafts ?? []),
                     'scoreTypes' => ScoreHelper::TYPES,
@@ -500,7 +497,7 @@ class SearchController extends Controller
         ];
     }
 
-    private function suggestionProps(Collection $airports, Airport $primaryAirport, string $direction, ?array $filterByScores): array
+    private function suggestionProps(Collection $airports, string $direction, ?array $filterByScores): array
     {
         $otherSide = $direction == 'departure' ? 'arrival' : 'departure';
         $highlightReasons = array_keys(array_filter($filterByScores ?? [], fn ($value) => $value === 1));
@@ -513,22 +510,6 @@ class SearchController extends Controller
             'airtime' => $airport->airtime,
             'airtimeLabel' => gmdate('G:i', floor($airport->airtime * 3600)),
             'scores' => $this->scoreIconProps($airport, 'Bookings on ' . $otherSide, $highlightReasons),
-            'runways' => $airport->runways->map(fn ($runway) => [
-                'id' => $runway->id,
-                'ident' => $runway->le_ident . '/' . $runway->he_ident,
-                'lengthFt' => (int) $runway->length_ft,
-            ])->values(),
-            'metar' => $airport->metar?->metar,
-            'taf' => $airport->taf?->raw_text,
-            'sceneries' => $airport->sceneryDevelopers
-                ->flatMap(fn ($developer) => $developer->sceneries)
-                ->pluck('simulator.shortened_name')
-                ->filter()
-                ->unique()
-                ->values(),
-            // The flight always runs departure -> arrival, whichever side the suggestion is
-            'departureIcao' => $direction == 'departure' ? $primaryAirport->icao : $airport->icao,
-            'arrivalIcao' => $direction == 'departure' ? $airport->icao : $primaryAirport->icao,
         ])->all();
     }
 

@@ -1,6 +1,6 @@
 # Responsive redesign: map-first on mobile
 
-Status: concept and open questions decided (see "Decisions"); in progress. A clickable reference lives at `public/responsive.html` (mock data, real MapLibre). It is a simplified sketch of the behaviour, not a visual spec — see "What the prototype leaves out". Delete it before this ships; anything in `public/` is served.
+Status: done (M0–M7, see "Milestones"). Still needs the manual pass on real devices listed under "Testing". The clickable prototype (`public/responsive.html`) has been removed.
 
 ## Why
 
@@ -26,9 +26,9 @@ Rules that make it feel right:
 - **Tapping the map gets the panel out of the way**; selecting something brings it back.
 - **Touch has no hover.** Anything that today lives in a tooltip (score reasons, flag country, airline name) needs a visible or tappable equivalent on phones.
 
-## Where the code is today
+## Where the code was before
 
-Facts that shape the plan:
+Facts that shaped the plan (historical; CLAUDE.md describes the current code):
 
 - React mounts only into `#map` (`Map.jsx`, dynamically imported from `app.js`). The sidebar (`<main>` in `layouts/app.blade.php`) is Blade, outside React.
 - Every navigation is a full page load, so the map is rebuilt each time. `.map-reveal` exists to soften that.
@@ -105,7 +105,7 @@ Lift card state out of `AirportCard` into a host that knows which airport is sel
 
 Selecting an airport should be part of navigable state (query string or history entry) so the back button closes the card and a link can open one. This also removes the need for `window.setShowSceneryIdCard` and the `airportReady` / `mapFocusAirport` events.
 
-Open design question: flights are per airline today (logo buttons → one card). The prototype folded this into one flights view with an airline filter. Pick one before building the tabbed version, because a tab needs a single, stable destination.
+Open design question: flights are per airline today (logo buttons → one card). The prototype folded this into one flights view with an airline filter. Pick one before building the tabbed version, because a tab needs a single, stable destination. *Decided: one view with an airline filter (see Decisions).*
 
 ### 6. Panel pages
 
@@ -127,23 +127,12 @@ Port in order of difficulty, each behind the same shell:
 
 Steps 4–5 can be pulled ahead of 3 if getting the map onto phones matters more than removing reloads everywhere; the cost is building the phone layout while some pages are still Blade.
 
-## What the prototype leaves out
-
-Do not treat it as complete. Missing or faked there, real in the app:
-
-- the full search form (multi-selects, all sliders, whitelists, validation, flight direction, destination parameters)
-- real airport markers, clustering, user scenery lists, terrain / precipitation / day-night layers, light theme, saved map view
-- sortable tables, "show more", legend, forecast uncertainty badges, flags, airline logos, tooltips
-- session alerts, email-verification notice, hints over the map, cookie consent, logged-in navigation and notifications
-- loading and error states for cards and the map (WebGL2 fallback), slow networks
-- tablet widths: between `md` and `lg` the card stack covers most of the map today — decide whether the drawer layout should extend up to `lg`
-
 ## Decisions
 
 1. **Shell: Inertia, client-rendered.** No SSR process in production. The root template keeps rendering meta description and OG tags.
 2. **Flights: one Flights view per airport with an airline filter.** The airline logos become shortcuts into that filter, so the phone tab has a single stable destination.
 3. **The drawer applies below `lg`**, so tablets get it too. Between `md` and `lg` the card stack covers too much of the map.
-4. *Still open:* should the non-map pages move into the shell eventually? Decide during clean-up.
+4. **The non-map pages stay Blade:** account, lists, scenery create/edit, admin, feedback, changelog, privacy and API docs. They are mostly forms with no use for a persistent map, and porting them would cost more than it gains. Links between them and the shell are ordinary page loads. The trade-off: on phones they keep the Blade layout (hamburger header, map hidden, page scrolls) rather than the bottom nav. Move a page into the shell only if it starts needing the map.
 5. **Top List camera on phones:** a continent's list is framed in the area the drawer leaves uncovered, instead of using its fixed view. The all-continents list keeps the world view, because fitting airports spread across the globe ends at zoom 0.
 
 ## Milestones
@@ -157,7 +146,7 @@ The work lands as one commit per milestone on `feat/responsive-redesign`:
 - M4: search forms (done). The Blade map mount stays, reduced to the default scene, because the account, list, scenery-editing and info pages still extend `layouts.app` and show the map. Whether they move into the shell is open question 4.
 - M5: card host + unified Flights view (done). The selected airport is `?airport=` in the URL.
 - M6: phone/tablet layout (done). The drawer, bottom nav, tabbed cards, camera insets and tap-to-show tooltips are in place. Still needs a pass on real devices (see Testing).
-- M7: clean-up
+- M7: clean-up (done). Removed the phone-only result detail rows (the card covers them), dead CSS, the unused legend partial, the prototype, `TooltipRefresh`'s page-wide sweep (tooltips are scoped per card) and the `sortable-tablesort` package. Open question 4 decided. No tile source changed, so `privacy.blade.php` is unchanged.
 
 ## Testing
 

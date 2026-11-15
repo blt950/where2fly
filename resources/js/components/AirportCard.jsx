@@ -5,12 +5,13 @@ import { MapContext } from './context/MapContext';
 import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
-import TooltipRefresh from './utils/TooltipRefresh';
+import { useTooltips } from './utils/useTooltips';
 
 // The airport itself. The flights and scenery cards beside it belong to CardHost, which opens
 // them through `onOpenFlights` / `onOpenScenery`.
 function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose }) {
     const dataCache = useRef({});
+    const cardRef = useRef(null);
     const [data, setData] = useState(null);
     const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts, navigate } = useContext(MapContext);
 
@@ -58,13 +59,11 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [airportId]);
 
-    // When data changes, initialize tooltips
-    useEffect(() => {
-        TooltipRefresh();
-    }, [data]);
+    // Tooltips for this card only, disposed with it
+    useTooltips(cardRef, [data]);
 
     return (
-        <div className="popup-card">
+        <div className="popup-card" ref={cardRef}>
             {data ? (
                 <>
                     <div className="d-flex justify-content-between">

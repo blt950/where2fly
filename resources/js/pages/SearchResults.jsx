@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 
 import { useShellMap } from '../components/shell/ShellMapContext';
@@ -44,47 +44,6 @@ const SearchActions = ({ query }) => (
             <i className="fa-sharp fa-bookmark"></i> Bookmark search
         </button>
     </div>
-);
-
-// Phones can't open the airport card yet (M6), so the row unfolds the same details in place.
-const DetailRow = ({ airport }) => (
-    <tr data-detail-row={airport.icao}>
-        <td colSpan="1"></td>
-        <td colSpan="4">
-            <dl className="font-kanit">
-                <dt>Runways</dt>
-                {airport.runways.map((runway) => (
-                    <dd className="mb-0" key={runway.id}>
-                        <strong>{runway.ident}:</strong> {feet(runway.lengthFt)}ft <span>({metres(runway.lengthFt)}m)</span>
-                    </dd>
-                ))}
-
-                <dt className="mt-3">METAR</dt>
-                <dd>{airport.metar}</dd>
-
-                <dt className="mt-3">TAF</dt>
-                <dd>{airport.taf ? <TAF taf={airport.taf} /> : 'No TAF available'}</dd>
-
-                <dt className="mt-3">Links</dt>
-                <dd>
-                    <a className="btn btn-outline-light btn-sm" target="_blank"
-                        href={route('search.routes', { departure: airport.departureIcao, arrival: airport.arrivalIcao, sort: 'flight' })}>
-                        <span>Routes</span>
-                    </a>{' '}
-                    <a className="btn btn-outline-light btn-sm" target="_blank"
-                        href={`https://dispatch.simbrief.com/options/custom?orig=${airport.departureIcao}&dest=${airport.arrivalIcao}&utm_campaign=where2fly.today`}>
-                        <span>SimBrief</span> <i className="fa-sharp fa-up-right-from-square"></i>
-                    </a>{' '}
-                    <a className="btn btn-outline-light btn-sm" target="_blank" href={`https://windy.com/${airport.icao}?utm_campaign=where2fly.today`}>
-                        <span>Windy</span> <i className="fa-sharp fa-up-right-from-square"></i>
-                    </a>
-                </dd>
-
-                <dt className="mt-3">Sceneries available</dt>
-                <dd>{airport.sceneries.length > 0 ? airport.sceneries.join(', ') : 'No known sceneries'}</dd>
-            </dl>
-        </td>
-    </tr>
 );
 
 const PrimaryAirport = ({ airport }) => (
@@ -137,7 +96,6 @@ const SearchResults = ({
     const contentRef = useRef(null);
     const rowRefs = useRef({});
     const [expanded, setExpanded] = useState(suggestions.length <= VISIBLE_ROWS);
-    const [openDetail, setOpenDetail] = useState(null);
     const [randomising, setRandomising] = useState(false);
     const { rows, headerProps } = useSortableRows(suggestions, SORT_COLUMNS);
     const suggestionSide = direction === 'departure' ? 'arrival' : 'departure';
@@ -161,12 +119,7 @@ const SearchResults = ({
         }
     }, [focusAirport, suggestions]);
 
-    const selectRow = (icao) => {
-        setFocusAirport(icao);
-        setOpenDetail((open) => (open === icao ? null : icao));
-    };
-
-    // Sorting shows every row, as it did with sortable-tablesort
+    // Sorting shows every row, so the sorted order isn't cut off at the fold
     const sortableHeader = (key) => {
         const props = headerProps(key);
 
@@ -248,31 +201,21 @@ const SearchResults = ({
                         </thead>
                         <tbody>
                             {rows.map((airport, index) => (
-                                <Fragment key={airport.icao}>
-                                    <tr ref={(row) => { rowRefs.current[airport.icao] = row; }}
-                                        className={`pointer${!expanded && index >= VISIBLE_ROWS ? ' showmore-hidden' : ''}${focusAirport === airport.icao ? ' active' : ''}`}
-                                        data-airport-icao={airport.icao}
-                                        onClick={() => selectRow(airport.icao)}>
-                                        <th scope="row">
-                                            <div className="row-number">
-                                                <span className="d-md-none">
-                                                    <i className={`fa-sharp fa-chevron-right expand-chevron${openDetail === airport.icao ? ' expand-chevron--open' : ''}`}></i>
-                                                </span>
-                                                <span className="row-count">{airport.rank}</span>
-                                            </div>
-                                        </th>
-                                        <td>
-                                            <div><Flag airport={airport} /> {airport.icao}</div>
-                                            {airport.name}
-                                        </td>
-                                        <td>{airport.distance}nm</td>
-                                        <td>{airport.airtimeLabel}h</td>
-                                        <td className="fs-5">
-                                            {airport.scores.map((score) => <ScoreIcon key={score.reason} score={score} highlighted={score.highlighted} />)}
-                                        </td>
-                                    </tr>
-                                    {openDetail === airport.icao && <DetailRow airport={airport} />}
-                                </Fragment>
+                                <tr key={airport.icao} ref={(row) => { rowRefs.current[airport.icao] = row; }}
+                                    className={`pointer${!expanded && index >= VISIBLE_ROWS ? ' showmore-hidden' : ''}${focusAirport === airport.icao ? ' active' : ''}`}
+                                    data-airport-icao={airport.icao}
+                                    onClick={() => setFocusAirport(airport.icao)}>
+                                    <th scope="row">{airport.rank}</th>
+                                    <td>
+                                        <div><Flag airport={airport} /> {airport.icao}</div>
+                                        {airport.name}
+                                    </td>
+                                    <td>{airport.distance}nm</td>
+                                    <td>{airport.airtimeLabel}h</td>
+                                    <td className="fs-5">
+                                        {airport.scores.map((score) => <ScoreIcon key={score.reason} score={score} highlighted={score.highlighted} />)}
+                                    </td>
+                                </tr>
                             ))}
 
                             {suggestions.length === 0 && (

@@ -2,10 +2,11 @@ import { useEffect, useState, useRef } from 'react';
 import { captureException } from '@sentry/react';
 import CurrencyDropdown from './ui/CurrencyDropdown';
 
-import TooltipRefresh from './utils/TooltipRefresh';
+import { useTooltips } from './utils/useTooltips';
 
 function SceneryCard({ airportId, onClose }) {
     const dataCache = useRef({});
+    const cardRef = useRef(null);
     const tabsRef = useRef(null);
     const [data, setData] = useState(null);
     const [selectedSimulator, setSelectedSimulator] = useState(null);
@@ -47,9 +48,7 @@ function SceneryCard({ airportId, onClose }) {
         }
     }, [airportId]);
 
-    useEffect(() => {
-        TooltipRefresh();
-    }, [data]);
+    useTooltips(cardRef, [data]);
 
     // Keep the chosen simulator selected between airports.
     useEffect(() => {
@@ -64,7 +63,7 @@ function SceneryCard({ airportId, onClose }) {
     }, [currency]);
 
     return (
-        <div className="popup-card">
+        <div className="popup-card" ref={cardRef}>
         {data !== null ? (
             <>
                 <div className="d-flex justify-content-between">

@@ -93,7 +93,7 @@ beforeEach(() => {
         }
     });
 
-    vi.stubGlobal('bootstrap', { Tooltip: { getOrCreateInstance: vi.fn(), getInstance: vi.fn() } });
+    vi.stubGlobal('bootstrap', { Tooltip: { getOrCreateInstance: vi.fn(() => ({ dispose: vi.fn() })), getInstance: vi.fn() } });
 
     vi.stubGlobal('fetch', vi.fn((url) => {
         if (url === 'api.airport.show') {

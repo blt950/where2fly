@@ -18,8 +18,7 @@ const { default: SearchRoutes } = await import('../pages/SearchRoutes');
 const airport = (icao, rank, extra = {}) => ({
     icao, rank, name: `${icao} Airport`, isoCountry: 'NO', countryName: 'Norway',
     scoreCount: 0, distance: 100 * rank, airtime: rank, airtimeLabel: `${rank}:00`,
-    scores: [], runways: [{ id: rank, ident: '01/19', lengthFt: 10000 }],
-    metar: `${icao} METAR`, taf: null, sceneries: [], departureIcao: 'ENGM', arrivalIcao: icao,
+    scores: [],
     ...extra,
 });
 
@@ -30,7 +29,7 @@ const resultsProps = (count) => ({
     bearingWarning: null,
     searchVersionWarning: null,
     noInterestingScores: false,
-    primaryAirport: { ...airport('ENGM', 0), longestRunwayFt: 11811, taf: 'ENGM TAF TEXT' },
+    primaryAirport: { ...airport('ENGM', 0), longestRunwayFt: 11811, metar: 'ENGM METAR', taf: 'ENGM TAF TEXT' },
     suggestions: Array.from({ length: count }, (_, i) => airport(`EA${String(i + 1).padStart(2, '0')}`, i + 1)),
     scoreTypes: {},
 });
@@ -79,16 +78,13 @@ describe('SearchResults', () => {
         expect(rowIcaos()[0]).toBe('EA14');
     });
 
-    it('focuses the airport and toggles its detail row on click', () => {
+    it('focuses the airport on click; the card shows its details', () => {
         const { shell } = renderWithShell(<SearchResults {...resultsProps(3)} />);
-        const row = document.querySelector('tr[data-airport-icao="EA02"]');
 
-        fireEvent.click(row);
+        fireEvent.click(document.querySelector('tr[data-airport-icao="EA02"]'));
+
         expect(shell.setFocusAirport).toHaveBeenCalledWith('EA02');
-        expect(document.querySelector('tr[data-detail-row="EA02"]')).not.toBeNull();
-
-        fireEvent.click(row);
-        expect(document.querySelector('tr[data-detail-row="EA02"]')).toBeNull();
+        expect(document.querySelector('tr[data-detail-row]')).toBeNull();
     });
 
     it('unfolds the rows when the map focuses an airport behind "Show more"', () => {
