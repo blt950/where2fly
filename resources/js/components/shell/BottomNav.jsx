@@ -2,13 +2,14 @@ import { Link, usePage } from '@inertiajs/react';
 
 // The compact layout's main navigation. The three map pages are tabs; everything the header
 // carries besides them sits behind "More".
-const BottomNav = () => {
+// `onNavigate` lets the shell bring a collapsed drawer back, even when the tab is the page already open
+const BottomNav = ({ onNavigate }) => {
     const { auth, unreadFeedback, hasNotifications, appVersion } = usePage().props;
     const user = auth?.user;
     const is = (name) => route().current(name);
 
     const tab = (href, active, icon, label) => (
-        <Link href={href} className="bottom-nav-tab" aria-current={active ? 'page' : undefined}>
+        <Link href={href} className="bottom-nav-tab" aria-current={active ? 'page' : undefined} onClick={onNavigate}>
             <i className={`fa-sharp ${icon}`} aria-hidden="true"></i>
             <span>{label}</span>
         </Link>

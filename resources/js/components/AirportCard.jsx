@@ -145,7 +145,8 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose }) {
                     </dl>
 
                     <div className="d-flex flex-wrap gap-2">
-                        <button className="btn btn-outline-primary btn-sm" onClick={onOpenScenery}>
+                        {/* The drawer's Scenery tab replaces this button on the compact layout */}
+                        <button className="btn btn-outline-primary btn-sm card-open-scenery" onClick={onOpenScenery}>
                             <i className="fa-sharp fa-map"></i> Scenery
                         </button>
 

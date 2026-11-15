@@ -62,7 +62,9 @@
             margin-left: 1rem;
             margin-bottom: 2px;
     
-            &:hover, &:focus{
+            // focus-visible, not focus: a clicked link keeps focus after a client-side visit,
+            // and plain :focus would outrank .active's underline until the next click
+            &:hover, &:focus-visible{
                 border-bottom-color: rgba(255, 255, 255, .25);
             }
         } 

@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MapContext } from '../components/context/MapContext';
 import { MapLayoutContext } from '../components/context/MapLayoutContext';
 import CardHost from '../components/CardHost';
+import { clearSceneryCache } from '../components/utils/useScenery';
 
 // A failed fetch calls captureException; stub it so the test output stays quiet.
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
@@ -78,6 +79,7 @@ const memoryStore = () => {
 };
 
 beforeEach(() => {
+    clearSceneryCache();
     document.head.innerHTML = '<meta name="csrf-token" content="test-token">';
     vi.stubGlobal('localStorage', memoryStore());
 
@@ -279,7 +281,8 @@ describe('CardHost / AirportCard', () => {
 
             return slot;
         };
-        const tabs = (slot) => [...slot.querySelectorAll('[role=tab]')].map((tab) => `${tab.textContent}:${tab.getAttribute('aria-selected')}`);
+        // The drawer's own tabs, labelled without their count pill; the scenery card has u-tabs of its own
+        const tabs = (slot) => [...slot.querySelectorAll('.card-tabs u-tab')].map((tab) => `${tab.querySelector('.card-tab-label').textContent}:${tab.getAttribute('aria-selected')}`);
 
         it('renders the cards as tabs inside the drawer, not beside the panel', async () => {
             const slot = renderTabbed(baseMapContext);
@@ -289,6 +292,10 @@ describe('CardHost / AirportCard', () => {
             expect(document.querySelector('.popup-container')).toBeNull();
             // No route, so no flights tab
             expect(tabs(slot)).toEqual(['ENGM:true', 'Scenery:false']);
+
+            // The scenery count is loaded up front, from the same request the card will use
+            await waitFor(() => expect(slot.querySelector('#card-tab-scenery .card-tab-count')?.textContent).toBe('1'));
+            expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.scenery')).toHaveLength(1);
         });
 
         it('switches to the card the airport card opens, and its close button returns to the airport', async () => {

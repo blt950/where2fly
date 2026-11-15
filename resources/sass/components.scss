@@ -118,47 +118,82 @@
 * Markdown container
 */
 
+// API docs (API.md), on the panel's own dark background
 #markdown{
-    padding: 2rem;
-    
-    color: black;
-    background: white;
-    
-    overflow-x: scroll;
-    
+    padding: 2rem 1rem 1rem 1rem;
+    color: $bluewhite;
+
+    h1, h2, h3, h4, h5, h6 {
+        color: $white;
+    }
+
     h2{
         padding-top: 1rem;
         padding-bottom: 0.5rem;
-        
+
         &:not(:first-of-type){
-            border-top: 1px solid $gray-200;
+            border-top: 1px solid $gray-700;
         }
-        
     }
-    
+
     h3, h4, h5, h6 {
         padding-top: 0.5rem;
     }
-    
+
     p{
         font-family: "Work Sans", sans-serif;
     }
-    
+
+    a{
+        color: $primary;
+    }
+
     code{
-        color: black;
-        background: #efefef;
+        color: $white;
+        background: rgba($white, 0.08);
         padding: 2px 5px;
     }
-    
-    table{
-        width: 100%;
-        
-        tr{
-            border-top: 1px solid $gray-200;
+
+    pre{
+        padding: 0.75rem;
+        background: rgba($white, 0.05);
+
+        code{
+            padding: 0;
+            background: none;
         }
-        
+    }
+
+    hr{
+        border-color: $gray-700;
+        opacity: 1;
+    }
+
+    // The endpoint tables are wider than the panel: they scroll on their own instead of
+    // stretching the page, and cells don't wrap code into single characters
+    table{
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+        border-collapse: collapse;
+
+        tr{
+            border-top: 1px solid $gray-700;
+        }
+
+        th{
+            color: $white;
+            white-space: nowrap;
+        }
+
         th,td{
-            padding-left: 1rem;
+            padding: 0.4rem 0.75rem 0.4rem 0;
+            vertical-align: top;
+        }
+
+        td code{
+            white-space: nowrap;
         }
     }
 }
@@ -310,4 +345,11 @@ u-tab[aria-selected="true"] {
     .form-text {
         color: $gray-500;
     }
+}
+
+// A scenery row's .title would otherwise pick up the page title look of `main .title` (padding,
+// background) once the card sits inside the drawer
+.scenery-row .title{
+    padding: 0;
+    background: none;
 }

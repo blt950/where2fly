@@ -41,6 +41,17 @@ body.shell-compact {
         display: none !important;
     }
 
+    // With the links gone, the brand row spans the header and the donate button sits right
+    .navbar > .d-flex {
+        width: 100%;
+        align-items: center;
+    }
+
+    .donate {
+        margin-left: auto;
+        margin-right: 1rem;
+    }
+
     .shell-stage {
         position: relative;
         flex: 1 1 auto;
@@ -76,17 +87,20 @@ body.shell-compact {
         display: none;
     }
 
-    // Attribution has to stay visible: a small credit in the map's top-left corner
+    // Attribution has to stay visible: bottom right, resting on the folded drawer, so the
+    // drawer covers it once opened (it sits below the drawer's z-index)
     footer {
         display: block;
-        top: 0;
-        bottom: auto;
-        left: 0;
+        top: auto;
+        bottom: $drawer-handle-height;
+        left: auto;
+        right: 0;
         width: auto;
-        max-width: 70%;
+        max-width: 85%;
         height: auto;
         padding: 1px 6px;
         font-size: 0.6875rem;
+        text-align: right;
         background: rgba($secondary, 0.6);
         z-index: 550;
 
@@ -168,6 +182,11 @@ body.shell-compact {
 
     .drawer-page {
         padding-bottom: 1rem;
+
+        // The title right above already spaces it
+        .container {
+            padding-top: 0;
+        }
     }
 
     // The airport, flights and scenery cards as tabs inside the drawer. The tab bar stays put
@@ -183,22 +202,34 @@ body.shell-compact {
         height: 100%;
     }
 
-    #card-tab-panel {
-        flex: 1 1 auto;
-        min-height: 0;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-    }
-
-    .card-tabs {
+    .card-tabs-bar {
         flex: none;
         display: flex;
         padding: 0 0.5rem;
         background: $secondary;
         border-bottom: 1px solid $gray-700;
+    }
 
-        button {
+    .card-tabs-back {
+        flex: 0 0 2.75rem;
+        min-height: 2.75rem;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        color: $gray-500;
+    }
+
+    // u-tabs owns the semantics; these override its simulator-tab look from components.scss
+    .card-tabs {
+        flex: 1 1 auto;
+        display: flex;
+
+        u-tab {
             flex: 1 1 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
             min-height: 2.75rem;
             padding: 0;
 
@@ -210,13 +241,34 @@ body.shell-compact {
 
             &[aria-selected='true'] {
                 color: $white;
+                background: transparent;
                 border-bottom-color: $primary;
             }
         }
+    }
 
-        .card-tabs-back {
-            flex: 0 0 2.75rem;
-        }
+    .card-tab-count {
+        min-width: 1.4rem;
+        padding: 0 0.3rem;
+        background: $tertiary;
+        color: $bluewhite;
+        font-size: 0.75rem;
+        line-height: 1.4rem;
+        text-align: center;
+    }
+
+    .card-tab-panel:not([hidden]) {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    // In tabs, a card's close button only led back to another tab, and the Scenery tab replaces
+    // the airport card's Scenery button
+    .card-tab-panel .popup-card .btn-close,
+    .card-tab-panel .card-open-scenery {
+        display: none;
     }
 
     .popup-card {

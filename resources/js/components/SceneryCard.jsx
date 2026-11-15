@@ -1,14 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
-import { captureException } from '@sentry/react';
 import CurrencyDropdown from './ui/CurrencyDropdown';
 
+import { useScenery } from './utils/useScenery';
 import { useTooltips } from './utils/useTooltips';
 
 function SceneryCard({ airportId, onClose }) {
-    const dataCache = useRef({});
     const cardRef = useRef(null);
     const tabsRef = useRef(null);
-    const [data, setData] = useState(null);
+    const data = useScenery(airportId);
     const [selectedSimulator, setSelectedSimulator] = useState(null);
     const [currency, setCurrency] = useState(localStorage.getItem('currency') || 'EUR');
 
@@ -19,34 +18,6 @@ function SceneryCard({ airportId, onClose }) {
         { code: 'AUD', symbol: 'A$' },
         { code: 'CAD', symbol: 'C$' },
     ]
-
-    // Fetch airport data if it's not in the cache
-    useEffect(() => {
-        if (dataCache.current[airportId]) {
-            setData(dataCache.current[airportId]);
-        } else {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            fetch(route('api.airport.scenery'), {
-                    method: "POST",    
-                    credentials: 'include',
-                    headers: { 
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({ airportIcao: airportId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    dataCache.current[airportId] = data.data;
-                    setData(data.data);
-                })
-                .catch(error => {
-                    captureException(error);
-                    console.error(error.message)
-                });
-        }
-    }, [airportId]);
 
     useTooltips(cardRef, [data]);
 

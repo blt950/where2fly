@@ -6,6 +6,7 @@ import FlightsCard from './FlightsCard';
 import SceneryCard from './SceneryCard';
 import { MapContext } from './context/MapContext';
 import { useMapLayout } from './context/MapLayoutContext';
+import { sceneryCount, useScenery } from './utils/useScenery';
 
 const track = (interaction) => window.umami?.track('Interactions', { interaction });
 
@@ -38,6 +39,11 @@ function CardHost({ airportId }) {
     const [departure, arrival] = reverseDirection ? [focused, primary] : [primary, focused];
     const onRoute = Boolean(primary && focused);
 
+    // The tab shows how many sceneries there are, so the drawer loads them up front; the card
+    // shares the same request
+    const scenery = useScenery(focused?.icao, compact);
+    const sceneryTotal = scenery ? sceneryCount(scenery) : null;
+
     const update = (changes) => setCards((current) => ({ ...current, ...changes }));
 
     const openFlights = (airline) => {
@@ -68,33 +74,42 @@ function CardHost({ airportId }) {
             return null;
         }
 
-        // One stable destination per tab; a card's own close button returns to the airport
+        // u-tabs supplies the tab semantics and keyboard support; React drives the selection
+        // through aria-selected and renders only the selected panel, so Flights fetches on demand
         const tabs = [
-            { id: 'airport', label: focused?.icao ?? 'Airport' },
-            ...(onRoute ? [{ id: 'flights', label: 'Flights' }] : []),
-            { id: 'scenery', label: 'Scenery' },
+            { id: 'airport', icon: 'fa-tower-control', label: focused?.icao ?? 'Airport' },
+            ...(onRoute ? [{ id: 'flights', icon: 'fa-plane-up', label: 'Flights' }] : []),
+            { id: 'scenery', icon: 'fa-map', label: 'Scenery', count: sceneryTotal },
         ];
         const backToAirport = () => update({ tab: 'airport' });
 
         return createPortal(
-            <div className="card-tabs-host">
-                <div className="card-tabs" role="tablist" aria-label="Airport details">
+            <u-tabs className="card-tabs-host">
+                <div className="card-tabs-bar">
                     <button type="button" className="card-tabs-back" aria-label="Back to the list" onClick={closeAll}>
                         <i className="fa-sharp fa-arrow-left" aria-hidden="true"></i>
                     </button>
-                    {tabs.map((tab) => (
-                        <button key={tab.id} type="button" role="tab" id={`card-tab-${tab.id}`} aria-controls="card-tab-panel"
-                            aria-selected={cards.tab === tab.id} onClick={() => update({ tab: tab.id })}>
-                            {tab.label}
-                        </button>
-                    ))}
+                    <u-tablist className="card-tabs" aria-label="Airport details">
+                        {tabs.map((tab) => (
+                            <u-tab key={tab.id} id={`card-tab-${tab.id}`} aria-controls={`card-panel-${tab.id}`}
+                                aria-selected={cards.tab === tab.id ? 'true' : 'false'} onClick={() => update({ tab: tab.id })}>
+                                <i className={`fa-sharp ${tab.icon}`} aria-hidden="true"></i>
+                                <span className="card-tab-label">{tab.label}</span>
+                                {tab.count !== undefined && tab.count !== null && (
+                                    <span className="card-tab-count" aria-label={`${tab.count} available`}>{tab.count}</span>
+                                )}
+                            </u-tab>
+                        ))}
+                    </u-tablist>
                 </div>
-                <div id="card-tab-panel" role="tabpanel" aria-labelledby={`card-tab-${cards.tab}`}>
-                    {cards.tab === 'airport' && airportCard}
-                    {cards.tab === 'flights' && flightsCard(backToAirport)}
-                    {cards.tab === 'scenery' && sceneryCard(backToAirport)}
-                </div>
-            </div>,
+                {tabs.map((tab) => (
+                    <u-tabpanel key={tab.id} id={`card-panel-${tab.id}`} className="card-tab-panel">
+                        {cards.tab === tab.id && tab.id === 'airport' && airportCard}
+                        {cards.tab === tab.id && tab.id === 'flights' && flightsCard(backToAirport)}
+                        {cards.tab === tab.id && tab.id === 'scenery' && sceneryCard(backToAirport)}
+                    </u-tabpanel>
+                ))}
+            </u-tabs>,
             cardSlot,
         );
     }

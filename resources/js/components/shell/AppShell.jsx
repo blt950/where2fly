@@ -96,9 +96,9 @@ const AppShell = ({ children }) => {
         }
     }, [compact, cardsOpen]);
 
-    useEffect(() => {
-        setStop((current) => (current === 'peek' ? 'half' : current));
-    }, [Page]);
+    const raiseDrawer = useCallback(() => setStop((current) => (current === 'peek' ? 'half' : current)), []);
+
+    useEffect(raiseDrawer, [Page, raiseDrawer]);
 
     // Tapping the map itself gets the drawer out of the way
     const onBackgroundClick = useCallback(() => {
@@ -147,7 +147,7 @@ const AppShell = ({ children }) => {
                     </div>
                 </div>
 
-                {compact && <BottomNav />}
+                {compact && <BottomNav onNavigate={raiseDrawer} />}
             </MapLayoutContext.Provider>
         </ShellMapContext.Provider>
     );
