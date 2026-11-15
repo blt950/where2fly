@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 
 import PageTitle from '../components/ui/PageTitle';
 
@@ -16,8 +16,7 @@ const Account = ({ recoveryUrl }) => (
         <div className="container">
             <h2>Reset password</h2>
             <p>You may reset you password by performing an account reset. Your data will <b>not</b> be lost.</p>
-            {/* The recovery flow is still Blade, so this is an ordinary page load */}
-            <a href={recoveryUrl} className="btn btn-primary">Reset password</a>
+            <Link href={recoveryUrl} className="btn btn-primary">Reset password</Link>
 
             <h2 className="mt-4">Delete account</h2>
             <p>Deleting your account will remove all your data from the system. This action is irreversible.</p>

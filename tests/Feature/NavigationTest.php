@@ -19,7 +19,7 @@ class NavigationTest extends TestCase
             ->where('nav.main.0.active', false)
             ->where('nav.main.1.shell', true)
             ->where('nav.feedback.shell', true)
-            ->where('nav.login.shell', false)
+            ->where('nav.login.shell', true)
             ->where('nav.login.key', 'login')
             ->where('nav.account', null)
             ->where('nav.moreActive', false));
@@ -42,13 +42,12 @@ class NavigationTest extends TestCase
             ->where('nav.account.items', fn ($items) => collect($items)->pluck('key')->all() === ['settings', 'lists', 'logout']));
     }
 
-    public function test_blade_pages_render_the_same_navigation(): void
+    public function test_the_simple_blade_pages_have_a_way_back_and_no_second_navigation(): void
     {
-        $response = $this->get('/login');
-
-        $response->assertOk();
-        $response->assertSee('<nav class="bottom-nav" aria-label="Main">', false);
-        $this->assertMatchesRegularExpression('/class="dropdown-item active"\s+aria-current="page"\s*>Login</', $response->getContent());
-        $response->assertSee(route('changelog'), false);
+        $this->actingAs(User::factory()->create())->get('/scenery/create')
+            ->assertOk()
+            ->assertSee('Back to the map')
+            ->assertDontSee('bottom-nav', false)
+            ->assertDontSee('id="map"', false);
     }
 }

@@ -41,8 +41,6 @@ export default defineConfig({
             input: [
                 'resources/js/app.js',
                 'resources/js/inertia.jsx',
-                'resources/js/functions/tooltip.js',
-                'resources/js/functions/formSubmit.js',
             ],
             refresh: true,
         }),

@@ -5,8 +5,8 @@ namespace App\Helpers;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * The hint over the map, if any, decided once. parts/map.blade.php and shell/MapHint.jsx only
- * lay it out; a page can still opt out of showing it (search results, Top List).
+ * The hint over the map, if any, decided once; shell/MapHint.jsx only lays it out, and a page
+ * can still opt out of showing it (search results, Top List).
  */
 class MapHintHelper
 {

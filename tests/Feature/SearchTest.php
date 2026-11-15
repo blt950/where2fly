@@ -892,10 +892,10 @@ class SearchTest extends TestCase
 
     public function test_a_shell_visit_that_ends_on_a_blade_page_becomes_a_full_page_load(): void
     {
-        $response = $this->withHeaders($this->inertiaHeaders())->get('/login');
+        $response = $this->actingAs(User::factory()->create())->withHeaders($this->inertiaHeaders())->get('/scenery/create');
 
         $response->assertStatus(409);
-        $response->assertHeader('X-Inertia-Location', url('/login'));
+        $response->assertHeader('X-Inertia-Location', url('/scenery/create'));
     }
 
     public function test_flashed_data_survives_the_full_page_load_to_a_blade_page(): void
@@ -905,7 +905,7 @@ class SearchTest extends TestCase
         ])))->assertRedirect(route('front'));
 
         // Without the reflash this request would use the errors up, and the full load would show none
-        $this->withHeaders($this->inertiaHeaders())->get('/login')
+        $this->actingAs(User::factory()->create())->withHeaders($this->inertiaHeaders())->get('/scenery/create')
             ->assertStatus(409)
             ->assertSessionHasErrors('metcondition');
     }

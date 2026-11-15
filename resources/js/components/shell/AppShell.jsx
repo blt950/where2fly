@@ -20,8 +20,8 @@ import { useMapState } from '../map/useMapState';
 
 const visit = (url) => router.visit(url);
 
-// The persistent layout: same DOM as layouts/app.blade.php so the existing SCSS applies, but it
-// is never thrown away between visits, so neither is the map.
+// The persistent layout around every Inertia page. It is never thrown away between visits, so
+// neither is the map.
 const AppShell = ({ children }) => {
 
     const page = usePage();
@@ -105,7 +105,8 @@ const AppShell = ({ children }) => {
                     <div className="shell-map">
                         <aside id="map" ref={mapRef}>
                             <MapView state={state} actions={mapActions} onAirportNotFound={onAirportNotFound}
-                                onBackgroundClick={onBackgroundClick} navigate={visit} listsRevision={page.props.listsRevision} />
+                                onBackgroundClick={onBackgroundClick} navigate={visit} listsRevision={page.props.listsRevision}
+                                authenticated={Boolean(page.props.nav?.account)} />
                         </aside>
 
                         {/* Only plays on the first, full load: the shell, and so this element, persists. */}

@@ -12,7 +12,7 @@ class LayoutHelpersTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_flash_messages_reach_the_shell_and_blade_escaped(): void
+    public function test_flash_messages_reach_the_shell_and_the_simple_blade_pages_escaped(): void
     {
         $text = 'List created, however these airports could not be found: <b>XX</b>';
 
@@ -20,7 +20,8 @@ class LayoutHelpersTest extends TestCase
             ->where('alerts.messages.0', ['key' => 'warning', 'variant' => 'warning', 'text' => $text])
             ->where('alerts.verification', null));
 
-        $this->withSession(['warning' => $text])->get('/login')
+        // The simple Blade layout (admin, scenery create/edit) shows the same messages, escaped too
+        $this->actingAs(User::factory()->create())->withSession(['warning' => $text])->get('/scenery/create')
             ->assertSee(e($text), false)
             ->assertDontSee('<b>XX</b>', false);
     }
@@ -47,7 +48,5 @@ class LayoutHelpersTest extends TestCase
 
         UserList::create(['name' => 'Mine', 'user_id' => $user->id, 'public' => false, 'color' => '#fff']);
         $this->actingAs($user)->get('/scenery')->assertInertia(fn (Assert $page) => $page->where('mapHint', null));
-        // The Blade twin, rendered on its own: a whole page would include Debugbar's source dumps
-        $this->assertStringNotContainsString('class="hint', view('parts.map')->render());
     }
 }

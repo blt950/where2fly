@@ -419,8 +419,7 @@ body.shell-compact.shell-side {
     }
 }
 
-// The bottom nav, below lg: in flow at the bottom of the compact shell, and fixed to the bottom
-// of the scrolling Blade pages (body.has-bottom-nav), which then drop their hamburger header too
+// The bottom nav, below lg: in flow at the bottom of the compact shell
 .bottom-nav {
     display: none;
 }
@@ -496,50 +495,8 @@ body.shell-compact.shell-side {
     }
 
     // While typing on an on-screen keyboard (keyboard.js), the nav would ride up on top of it
-    body.keyboard-open {
-        .bottom-nav {
-            display: none;
-        }
-
-        &.has-bottom-nav {
-            padding-bottom: 0;
-        }
-    }
-
-    body.has-bottom-nav {
-        padding-bottom: calc(#{$bottom-nav-height} + env(safe-area-inset-bottom));
-
-        .bottom-nav {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-
-        .navbar-toggler,
-        #navbarMenu,
-        .menu-overlay {
-            display: none !important;
-        }
-
-        .navbar > .d-flex {
-            width: 100%;
-            align-items: center;
-        }
-
-        .donate {
-            margin-left: auto;
-            margin-right: 1rem;
-        }
+    body.keyboard-open .bottom-nav {
+        display: none;
     }
 }
 
-// Tablet widths, where Blade pages still show the sidebar and map side by side: they end above
-// the fixed nav instead of under it
-@include media-breakpoint-between(md, lg) {
-    body.has-bottom-nav {
-        main, .map {
-            height: calc(100dvh - #{$header-height} - #{$bottom-nav-height} - env(safe-area-inset-bottom));
-        }
-    }
-}

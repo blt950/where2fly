@@ -4,7 +4,8 @@ description: Build, run, and drive Where2Fly (Laravel + React flight-destination
 ---
 
 Where2Fly is a Laravel app. The map pages are Inertia + React pages in a
-persistent shell with a MapLibre map; the account and info pages are Blade. Drive it by starting `php artisan serve`
+persistent shell with a MapLibre map, as are login, register, account and the info pages;
+only admin and scenery create/edit are Blade (a simple map-less layout). Drive it by starting `php artisan serve`
 and scripting a headless Chromium session via
 `.claude/skills/run-where2fly/driver.mjs` (a small chromium-cli-alike
 built for this skill — `chromium-cli` itself isn't installed in this
@@ -111,6 +112,14 @@ test re-runs `migrate:fresh`) — fix `TestAirportSeeder` first, don't
 debug individual tests.
 
 ## Gotchas
+
+- **Logging in headlessly.** Login and register carry a Cloudflare Turnstile widget. With the
+  dev `.env`'s testing site key it passes in headless Chromium ("Success!"), so the real form
+  works. Without it, write a session for a user instead (`login_web_<sha1 of SessionGuard>` in
+  the session store, encrypted cookie via `CookieValuePrefix`), set from a page that starts no
+  session (`/robots.txt`). For pages behind `auth`, prefer a scratch server on the test database
+  (`APP_CONFIG_CACHE` pointed at a missing file, `DB_DATABASE=where2fly_test`) with a throwaway
+  user, so the dev database stays untouched.
 
 - **`chromium-cli` isn't installed in this container** — this skill
   ships its own minimal Playwright REPL (`driver.mjs`) instead. If a

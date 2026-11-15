@@ -3,8 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 
 import NavItem from './NavItem';
 
-// The header; its links come from NavigationHelper (`nav`), shared with the bottom nav and the
-// Blade layouts. layouts/menu.blade.php is its Blade twin.
+// The header; its links come from NavigationHelper (`nav`), shared with the bottom nav and footer
 const Menu = () => {
     const { url, props } = usePage();
     const { nav, isProduction } = props;

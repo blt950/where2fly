@@ -43,8 +43,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * The navigation, alerts and map hint, from the same helpers the Blade layouts use
-     * (through view composers in AppServiceProvider).
+     * The navigation, alerts and map hint, each decided once in its helper
      */
     public function share(Request $request): array
     {

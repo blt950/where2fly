@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react';
 
-// The hint over the map from MapHintHelper (`mapHint`); parts/map.blade.php is its Blade twin
+// The hint over the map from MapHintHelper (`mapHint`)
 const MapHint = () => {
     const hint = usePage().props.mapHint;
 

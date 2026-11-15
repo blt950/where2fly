@@ -5,8 +5,8 @@ namespace App\Helpers;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * The flash messages and the email-verification notice, decided once. layouts/alerts.blade.php and
- * shell/Alerts.jsx only lay them out. Messages are plain text and rendered escaped in both.
+ * The flash messages and the email-verification notice, decided once. shell/Alerts.jsx and the
+ * simple Blade layout (layouts/app) only lay them out. Messages are plain text, rendered escaped.
  */
 class AlertHelper
 {

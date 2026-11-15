@@ -168,29 +168,6 @@ main{
     z-index: 650;
 }
 
-@include media-breakpoint-down(md) {
-    
-    /* Mobile specific styles fixing scroll behavour for browsers to hide UI */
-    /* This fights a bit Bootstrap, but it works. */
-    body.d-flex.h-100 {
-        height: auto !important;
-        min-height: 100dvh;
-    }
-
-    body > .d-flex.w-100.h-100.mx-auto.flex-column {
-        height: auto !important;
-        min-height: 100dvh;
-    }
-
-    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > main {
-        height: auto;
-        min-height: calc(100dvh - $header-height);
-        overflow-y: visible;
-    }
-    /* End of mobile specific styles */
-
-}
-
 footer{
     // A minimum, not a height: where links and credits don't fit one line (landscape tablets),
     // it grows upward from the bottom edge instead of spilling below it and scrolling the page
@@ -224,4 +201,30 @@ footer{
 }
 
 @import "shell.scss";
+
+// The few Blade pages left (admin, scenery create/edit, layouts/app.blade.php): a plain page, no map
+body.simple-page {
+    min-height: 100vh;
+
+    .simple-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1rem;
+    }
+
+    .simple-back {
+        color: $bluewhite;
+        text-decoration: none;
+    }
+
+    main.simple-main {
+        width: 100%;
+        max-width: 48rem;
+        height: auto;
+        margin: 0 auto;
+        padding-bottom: 2rem;
+        overflow: visible;
+    }
+}
 

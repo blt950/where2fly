@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 
 /**
- * Every navigation link, defined once. The header and bottom nav, in both Blade
- * (layouts/menu, layouts/bottomnav, layouts/footer) and React (shell/Menu, BottomNav, Footer), only lay this out.
+ * Every navigation link, defined once. The shell's header, bottom nav and footer (shell/Menu,
+ * BottomNav, Footer) only lay this out.
  */
 class NavigationHelper
 {
@@ -43,7 +43,7 @@ class NavigationHelper
             $account['active'] = collect($account['items'])->contains('active', true);
         }
 
-        $login = $user ? null : self::link('login', 'Login', route('login'), 'fa-lock', ['login', 'register']);
+        $login = $user ? null : self::link('login', 'Login', route('login'), 'fa-lock', ['login', 'register', 'account.recovery', 'password.reset'], shell: true);
 
         $community = [
             self::external('discord', 'Discord', 'https://discord.gg/UkFg9Yy4gP', 'fab fa-discord'),

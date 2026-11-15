@@ -114,9 +114,11 @@ class UserController extends Controller
      *
      * @return Response
      */
-    public function resetRequestForm()
+    public function resetRequestForm(Request $request)
     {
-        return view('account.resetRequest');
+        return Inertia::render('AccountRecovery', [
+            'old' => (object) $request->session()->getOldInput(),
+        ])->withViewData(['title' => 'Reset Account']);
     }
 
     /**
@@ -127,9 +129,13 @@ class UserController extends Controller
      */
     public function resetForm(Request $request, $token)
     {
+        // The token is in the URL (and the email in its query): no automatic page views from here
         View::share('manualTracking', true);
 
-        return view('account.resetForm', ['token' => $token]);
+        return Inertia::render('PasswordReset', [
+            'token' => $token,
+            'email' => $request->session()->getOldInput('email', $request->query('email')),
+        ])->withViewData(['title' => 'Reset Account']);
     }
 
     /**

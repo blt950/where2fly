@@ -2,7 +2,8 @@
      including the shell's client-side page views. It sends full URLs, and the referrer carries the id too. --}}
 <script>
     window.w2fBeforeSend = (type, payload) => {
-        const mask = (url) => url?.replace(/\/lists\/\d+\/edit/, '/lists/x/edit');
+        const mask = (url) => url?.replace(/\/lists\/\d+\/edit/, '/lists/x/edit')
+            .replace(/\/account\/recovery\/reset\/[^#]*/, '/account/recovery/reset/x');
         if (payload) Object.assign(payload, { url: mask(payload.url), referrer: mask(payload.referrer) });
         return payload;
     };

@@ -3,8 +3,6 @@
 namespace App\Providers;
 
 use App\Helpers\AlertHelper;
-use App\Helpers\MapHintHelper;
-use App\Helpers\NavigationHelper;
 use App\Mixins\CollectionAirportFilter;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -37,9 +35,7 @@ class AppServiceProvider extends ServiceProvider
                 ->line('If you did not create this account, no further action is required and your account will be deleted if not verified after a few days.');
         });
 
-        // The same navigation, alerts and map hint the React shell gets as shared props
-        View::composer(['layouts.menu', 'layouts.bottomnav', 'layouts.footer'], fn ($view) => $view->with('nav', NavigationHelper::build()));
-        View::composer('layouts.alerts', fn ($view) => $view->with('alerts', AlertHelper::build()));
-        View::composer('parts.map', fn ($view) => $view->with('mapHint', MapHintHelper::current()));
+        // The flash messages the shell gets as the shared `alerts` prop, for the simple Blade pages
+        View::composer('layouts.app', fn ($view) => $view->with('alerts', AlertHelper::build()));
     }
 }

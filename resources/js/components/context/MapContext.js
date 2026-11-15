@@ -6,7 +6,7 @@ export const MapContext = createContext({
     focusAirport: undefined,
     highlightedAircrafts: [],
     initialCard: null,
-    // Opens a URL: a client-side visit in the Inertia shell, a page load on Blade pages
+    // Opens a URL: the shell's client-side visit; a page load outside one (tests)
     navigate: (url) => window.location.assign(url),
     primaryAirport: undefined,
     reverseDirection: undefined,

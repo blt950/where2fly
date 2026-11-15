@@ -1,33 +1,25 @@
+{{-- The few pages still served by Blade (admin, scenery create/edit): forms that need no map, so a
+     plain page with a way back. Everything else is the Inertia shell (inertia.blade.php). --}}
 <!DOCTYPE html>
-<html lang="en" class="h-100">
+<html lang="en">
     <head>
         @include('layouts.header')
     </head>
 
-    <body class="d-flex h-100 text-white bg-dark has-bottom-nav">
+    <body class="text-white bg-dark simple-page">
+        <header class="simple-header">
+            <a href="{{ route('front') }}" class="navbar-brand logo">Where2Fly</a>
+            <a href="{{ route('front') }}" class="simple-back"><i class="fa-sharp fa-arrow-left" aria-hidden="true"></i> Back to the map</a>
+        </header>
 
-        <div class="d-flex w-100 h-100 mx-auto flex-column">
+        <main class="simple-main">
+            @foreach($alerts['messages'] as $message)
+                <div class="alert alert-{{ $message['variant'] }}" role="alert">{{ $message['text'] }}</div>
+            @endforeach
 
-            @include('layouts.menu')
-
-            <div class="d-flex flex-row">
-                <main>
-
-                    @include('layouts.alerts')
-
-                    @yield('content')
-                </main>
-
-                <div>
-                    @include('parts.map')
-                    @include('layouts.footer')
-                </div>
-            </div>
-        </div>
-        
-        @include('layouts.bottomnav')
+            @yield('content')
+        </main>
 
         @yield('js')
-        @vite('resources/js/functions/tooltip.js')
     </body>
 </html>

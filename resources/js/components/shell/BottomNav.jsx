@@ -2,8 +2,8 @@ import { usePage } from '@inertiajs/react';
 
 import NavItem from './NavItem';
 
-// The compact layout's navigation, from NavigationHelper (`nav`); layouts/bottomnav.blade.php is its
-// Blade twin. `onNavigate` lets the shell bring a collapsed drawer back, even for the page already open
+// The compact layout's navigation, from NavigationHelper (`nav`). `onNavigate` lets the shell bring a
+// collapsed drawer back, even for the page already open
 const BottomNav = ({ onNavigate }) => {
     const { main, feedback, account, login, community, info, moreActive, version } = usePage().props.nav;
 

@@ -30,7 +30,6 @@ import { readPreferences, writePreferences } from '../utils/mapPreferences';
 import { readStored, removeStored, writeStored } from '../utils/storage';
 import { asList, mergeListAirports } from '../utils/userLists';
 
-const userAuthenticated = () => document.querySelector('meta[name="user-authenticated"]')?.content === '1';
 
 // MapLibre needs WebGL2
 const supportsWebGL2 = () => {
@@ -43,12 +42,9 @@ const supportsWebGL2 = () => {
 
 const LISTS_CACHE_KEY = 'userListsCache';
 
-// Draws whatever `state` describes. The owner (the Blade adapter or the Inertia shell) holds the
-// state, so pages can read and change focus without DOM events.
-const pageLoad = (url) => window.location.assign(url);
-
-// `listsRevision` changes when the user's lists change on the server, which refetches them
-function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgroundClick, navigate = pageLoad, listsRevision }) {
+// Draws whatever `state` describes. The shell holds the state, so pages can read and change focus
+// without DOM events; `navigate` is its client-side visit, `authenticated` whether to draw lists.
+function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgroundClick, navigate, listsRevision, authenticated }) {
 
     const {
         airports, cluster, clusterTone, camera: sceneCamera, coordinates, drawRoute, focusAirport, gateLabels,
@@ -70,7 +66,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
 
     useEffect(() => {
         // Signed out: the cached lists were someone's, so forget them
-        if (!userAuthenticated()) {
+        if (!authenticated) {
             removeStored(LISTS_CACHE_KEY);
             setLists([]);
 
@@ -103,7 +99,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
             .catch(reportError);
 
         return () => { cancelled = true; };
-    }, [showLists, listsRevision]);
+    }, [authenticated, showLists, listsRevision]);
 
     const listAirports = useMemo(() => mergeListAirports(lists), [lists]);
 
@@ -213,8 +209,8 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
         reverseDirection,
         setFocusAirport,
         setShowAirportIdCard,
-        userAuthenticated: userAuthenticated(),
-    }), [airports, findAirport, focusAirport, highlightedAircrafts, initialCard, navigate, primaryAirport, reverseDirection,
+        userAuthenticated: authenticated,
+    }), [airports, authenticated, findAirport, focusAirport, highlightedAircrafts, initialCard, navigate, primaryAirport, reverseDirection,
         setFocusAirport, setShowAirportIdCard]);
 
     if (!webgl2) {

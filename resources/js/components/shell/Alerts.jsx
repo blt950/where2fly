@@ -1,7 +1,6 @@
 import { usePage } from '@inertiajs/react';
 
-// Flash messages and the verification notice from AlertHelper (`alerts`);
-// layouts/alerts.blade.php is its Blade twin
+// Flash messages and the verification notice from AlertHelper (`alerts`)
 // `notices` are the shell's own, from this page's map (an airport it couldn't find)
 const Alerts = ({ notices = [] }) => {
     const { alerts: { messages, verification }, csrfToken } = usePage().props;
