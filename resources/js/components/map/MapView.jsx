@@ -61,7 +61,7 @@ function MapView({ state, actions, sceneKey, onFocusAirport, onAirportNotFound }
 
     const {
         airports, cluster, clusterTone, camera, coordinates, drawRoute, focusAirport, gateLabels,
-        highlightedAircrafts, mapBounds, persistView, ping, primaryAirport, reverseDirection,
+        highlightedAircrafts, initialCard, mapBounds, persistView, ping, primaryAirport, reverseDirection,
         showAirportIdCard, showLists,
     } = state;
     const { set, addAirport, setFocusAirport, setShowAirportIdCard } = actions;
@@ -202,12 +202,13 @@ function MapView({ state, actions, sceneKey, onFocusAirport, onAirportNotFound }
         findAirport,
         focusAirport,
         highlightedAircrafts,
+        initialCard,
         primaryAirport,
         reverseDirection,
         setFocusAirport,
         setShowAirportIdCard,
         userAuthenticated: userAuthenticated(),
-    }), [airports, findAirport, focusAirport, highlightedAircrafts, primaryAirport, reverseDirection,
+    }), [airports, findAirport, focusAirport, highlightedAircrafts, initialCard, primaryAirport, reverseDirection,
         setFocusAirport, setShowAirportIdCard]);
 
     if (!webgl2) {

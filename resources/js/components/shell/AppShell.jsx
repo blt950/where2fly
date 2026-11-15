@@ -1,4 +1,4 @@
-import { isValidElement, useMemo } from 'react';
+import { isValidElement, useCallback, useMemo, useState } from 'react';
 import { usePage } from '@inertiajs/react';
 
 import Alerts from './Alerts';
@@ -26,11 +26,16 @@ const AppShell = ({ children }) => {
     );
     const [state, actions] = useMapState(scene, page.url);
 
+    // Stamped, so a page can tell a repeat miss on the same ICAO from the one it already showed
+    const [airportNotFound, setAirportNotFound] = useState(null);
+    const onAirportNotFound = useCallback((icao) => setAirportNotFound({ icao, at: Date.now() }), []);
+
     const shellMap = useMemo(() => ({
         focusAirport: state.focusAirport,
         setFocusAirport: actions.setFocusAirport,
         pingAirport: actions.pingAirport,
-    }), [state.focusAirport, actions]);
+        airportNotFound,
+    }), [state.focusAirport, actions, airportNotFound]);
 
     return (
         <ShellMapContext.Provider value={shellMap}>
@@ -44,7 +49,7 @@ const AppShell = ({ children }) => {
 
                 <div>
                     <aside id="map">
-                        <MapView state={state} actions={actions} sceneKey={page.url} />
+                        <MapView state={state} actions={actions} sceneKey={page.url} onAirportNotFound={onAirportNotFound} />
                     </aside>
 
                     {/* Only plays on the first, full load: the shell, and so this element, persists. */}

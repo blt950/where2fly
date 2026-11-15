@@ -147,6 +147,22 @@ describe('PopupContainer / AirportCard', () => {
         }));
     });
 
+    it('opens the scenery card straight away when the scene asks for it', async () => {
+        renderCard({ ...baseMapContext, initialCard: 'scenery' });
+
+        await screen.findByText('Orbx');
+        expect(fetch).toHaveBeenCalledWith('api.airport.scenery', expect.objectContaining({
+            body: expect.stringContaining('"airportIcao":"ENGM"'),
+        }));
+    });
+
+    it('opens only the airport card by default', async () => {
+        renderCard(baseMapContext);
+        await screen.findByText('Oslo Gardermoen');
+
+        expect(fetch).not.toHaveBeenCalledWith('api.airport.scenery', expect.anything());
+    });
+
     it('shows Arrival/Departure links when there is no primary airport', async () => {
         renderCard({ ...baseMapContext, primaryAirport: null });
         await screen.findByText('Oslo Gardermoen');

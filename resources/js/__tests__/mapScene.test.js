@@ -2,7 +2,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
-    CONTINENT_VIEWS,
     POSITION_KEY,
     WORLD_VIEW,
     cameraView,
@@ -51,18 +50,6 @@ describe('sceneFromRoute', () => {
     it('frames route results without gating labels', () => {
         expect(sceneFromRoute(routerAt('search.routes'))).toMatchObject({
             camera: { type: 'fit' }, gateLabels: false, persistView: false,
-        });
-    });
-
-    it('uses the world view on top and the continent view on top.filtered', () => {
-        expect(sceneFromRoute(routerAt('top')).camera).toEqual({ type: 'view', view: WORLD_VIEW });
-        expect(sceneFromRoute(routerAt('top.filtered', { continent: 'EU' })).camera)
-            .toEqual({ type: 'view', view: CONTINENT_VIEWS.EU });
-    });
-
-    it('persists the view on scenery without fitting or showing lists', () => {
-        expect(sceneFromRoute(routerAt('scenery.filtered', { simulator: 'msfs' }))).toMatchObject({
-            camera: { type: 'saved' }, clusterTone: 'search', persistView: true, showLists: false,
         });
     });
 

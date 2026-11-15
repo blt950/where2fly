@@ -17,7 +17,7 @@ function AirportCard({ airportId }) {
     const [showSceneryIdCard, setShowSceneryIdCard] = useState(null);
     const [departureAirportId, setDepartureAirportId] = useState(null);
     const [arrivalAirportId, setArrivalAirportId] = useState(null);
-    const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts, setFocusAirport, setShowAirportIdCard } = useContext(MapContext);
+    const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts, initialCard, setFocusAirport, setShowAirportIdCard } = useContext(MapContext);
 
     // Closing unmounts the card and its flights/scenery children; focusAirport
     // is cleared too so clicking the same marker again reopens the card
@@ -25,10 +25,6 @@ function AirportCard({ airportId }) {
         setShowAirportIdCard(null);
         setFocusAirport(null);
     };
-
-    useEffect(() => {
-        window.setShowSceneryIdCard = (data) => { setShowSceneryIdCard(data) }
-    }, []);
 
     // Fetch airport data if it's not in the cache
     useEffect(() => {
@@ -63,7 +59,8 @@ function AirportCard({ airportId }) {
         }
 
         setShowFlightsIdCard(null);
-        setShowSceneryIdCard(null);
+        // The page may want a card open beside every airport (Scenery opens the scenery card)
+        setShowSceneryIdCard(initialCard === 'scenery' ? findAirport(focusAirport).icao : null);
 
         if(reverseDirection === false){
             setDepartureAirportId(findAirport(primaryAirport).id);
@@ -72,9 +69,6 @@ function AirportCard({ airportId }) {
             setDepartureAirportId(findAirport(focusAirport).id);
             setArrivalAirportId(findAirport(primaryAirport).id);
         }
-
-        // Dispatch a custom event when the map focuses on an airport
-        window.dispatchEvent(new CustomEvent('airportReady', { detail: { icao: findAirport(focusAirport).icao } }));
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [airportId]);

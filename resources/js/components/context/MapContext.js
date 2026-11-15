@@ -5,6 +5,7 @@ export const MapContext = createContext({
     setAirports: undefined,
     focusAirport: undefined,
     highlightedAircrafts: [],
+    initialCard: null,
     primaryAirport: undefined,
     reverseDirection: undefined,
     setFocusAirport: undefined,

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { useEffect } from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const page = { url: '/top', props: {} };
@@ -12,8 +12,11 @@ vi.mock('../components/shell/Menu', () => ({ default: () => null }));
 vi.mock('../components/shell/Alerts', () => ({ default: () => null }));
 vi.mock('../components/shell/Footer', () => ({ default: () => null }));
 vi.mock('../components/shell/MapHint', () => ({ default: () => <div data-testid="hint" /> }));
+let reportNotFound;
+
 vi.mock('../components/map/MapView', () => ({
-    default: function MapViewStub({ state, sceneKey }) {
+    default: function MapViewStub({ state, sceneKey, onAirportNotFound }) {
+        reportNotFound = onAirportNotFound;
         mapViewRenders.push({ sceneKey, stateKey: state.sceneKey, camera: state.camera, focus: state.focusAirport });
         useEffect(() => { mapViewMounts(); }, []);
         return null;
@@ -21,6 +24,7 @@ vi.mock('../components/map/MapView', () => ({
 }));
 
 const { default: AppShell } = await import('../components/shell/AppShell');
+const { useShellMap } = await import('../components/shell/ShellMapContext');
 
 const WORLD = { type: 'view', view: { center: [0, 30], zoom: 2 } };
 const EUROPE = { type: 'view', view: { center: [15, 55], zoom: 4 } };
@@ -73,5 +77,23 @@ describe('AppShell', () => {
         visit('/elsewhere', {});
         const other = render(<AppShell><OtherPage /></AppShell>);
         expect(other.queryByTestId('hint')).not.toBeNull();
+    });
+
+    it('tells the page about an airport the map could not find, stamped per miss', () => {
+        const seen = [];
+        const ScenerySearch = () => {
+            seen.push(useShellMap().airportNotFound);
+            return null;
+        };
+
+        visit('/scenery', {});
+        render(<AppShell><ScenerySearch /></AppShell>);
+
+        act(() => reportNotFound('ZZZZ'));
+        const first = seen.at(-1);
+        act(() => reportNotFound('ZZZZ'));
+
+        expect(first.icao).toBe('ZZZZ');
+        expect(seen.at(-1)).not.toBe(first);
     });
 });

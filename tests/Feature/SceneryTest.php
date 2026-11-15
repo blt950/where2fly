@@ -9,11 +9,71 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class SceneryTest extends TestCase
 {
     use RefreshDatabase;
+
+    // -------------------------------------------------------------------------
+    // Browse page
+    // -------------------------------------------------------------------------
+
+    public function test_scenery_page_maps_every_airport_with_published_scenery(): void
+    {
+        $this->publishScenery('EDDM', 'MSFS2024');
+        $this->publishScenery('EDDF', 'XP12');
+
+        $response = $this->get('/scenery');
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page) => $page->component('Scenery')
+            ->where('filteredSimulator', null)
+            ->where('simulators', fn ($simulators) => collect($simulators)->sort()->values()->all() === ['MSFS2024', 'XP12'])
+            ->has('airportMapData.EDDM')
+            ->has('airportMapData.EDDF'));
+    }
+
+    public function test_scenery_page_filters_by_simulator(): void
+    {
+        $this->publishScenery('EDDM', 'MSFS2024');
+        $this->publishScenery('EDDF', 'XP12');
+
+        $response = $this->get('/scenery/XP12');
+
+        $response->assertInertia(fn (Assert $page) => $page->component('Scenery')
+            ->where('filteredSimulator', 'XP12')
+            ->has('airportMapData.EDDF')
+            ->missing('airportMapData.EDDM'));
+    }
+
+    public function test_unknown_simulator_shows_every_airport(): void
+    {
+        $this->publishScenery('EDDM', 'MSFS2024');
+
+        $response = $this->get('/scenery/NOPE');
+
+        $response->assertInertia(fn (Assert $page) => $page->where('filteredSimulator', null)->has('airportMapData.EDDM'));
+    }
+
+    private function publishScenery(string $icao, string $simulator): void
+    {
+        $developer = SceneryDeveloper::create([
+            'icao' => $icao,
+            'developer' => "Dev {$icao}",
+            'airport_id' => $this->airports[$icao]->id,
+        ]);
+
+        Scenery::create([
+            'scenery_developer_id' => $developer->id,
+            'simulator_id' => Simulator::where('shortened_name', $simulator)->value('id'),
+            'link' => "https://example.com/{$icao}",
+            'payware' => true,
+            'published' => true,
+            'source' => 'where2fly',
+        ]);
+    }
 
     // -------------------------------------------------------------------------
     // Create page

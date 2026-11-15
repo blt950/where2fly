@@ -47,36 +47,26 @@ export const SCENE_DEFAULTS = {
     showLists: true,
     // Search results are dense enough that labelling every airport at world zoom is unreadable
     gateLabels: false,
+    // A card to open beside the airport card whenever an airport is focused ('scenery' or null)
+    initialCard: null,
 };
 
 export const cameraView = (camera) => (camera?.type === 'view' ? camera.view : savedView());
 
 // Routes that drive the map from a list of results. Everything else (front page, scenery
-// editing, account pages) is the default view.
-const RESULT_ROUTES = ['top', 'top.filtered', 'search', 'search.routes', 'scenery', 'scenery.filtered'];
+// editing, account pages) is the default view. Top and Scenery are Inertia pages now.
+const RESULT_ROUTES = ['search', 'search.routes'];
 
 // The Blade pages' scene, decided from the URL. Inertia pages declare theirs instead.
 export const sceneFromRoute = (router) => {
     const unnamed = router.current() === undefined;
     const isDefault = !unnamed && !RESULT_ROUTES.some((name) => router.current(name));
-    const isScenery = router.current('scenery*');
-
-    const continent = Object.keys(CONTINENT_VIEWS).find((code) => router.current('top.filtered', code));
-    let camera = { type: 'saved' };
-
-    if (continent) {
-        camera = { type: 'view', view: CONTINENT_VIEWS[continent] };
-    } else if (router.current('top')) {
-        camera = { type: 'view', view: WORLD_VIEW };
-    } else if (!isDefault && !router.current('top*') && !isScenery) {
-        camera = { type: 'fit' };
-    }
 
     return {
         ...SCENE_DEFAULTS,
         clusterTone: isDefault ? 'muted' : 'search',
-        camera,
-        persistView: isDefault || isScenery,
+        camera: { type: isDefault ? 'saved' : 'fit' },
+        persistView: isDefault,
         showLists: isDefault,
         gateLabels: router.current('search') || unnamed,
     };

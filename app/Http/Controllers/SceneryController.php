@@ -10,6 +10,8 @@ use App\Models\Simulator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class SceneryController extends Controller
 {
@@ -133,20 +135,20 @@ class SceneryController extends Controller
     /**
      * Index of all airports with scenery
      */
-    public function indexAirports(Request $request, ?string $filteredSim = null)
+    public function indexAirports(Request $request, ?string $filteredSim = null): Response
     {
-        $availableSimulators = Simulator::whereHas('sceneries')->get();
+        $availableSimulators = Simulator::whereHas('sceneries')->get()->sortBy('order');
         $filteredSimulator = $availableSimulators->where('shortened_name', $filteredSim)->first();
 
-        if ($filteredSimulator) {
-            $airports = Airport::publishedSceneries(true, $filteredSimulator->id)->get();
-        } else {
-            $airports = Airport::publishedSceneries(true)->get();
-        }
+        $airports = Airport::publishedSceneries(true, $filteredSimulator?->id)->get();
 
-        $airportMapData = json_encode(MapHelper::generateAirportMapDataFromAirports($airports));
-        $airportsCount = $airports->count();
-
-        return view('scenery', compact('airportsCount', 'airportMapData', 'availableSimulators', 'filteredSimulator'));
+        return Inertia::render('Scenery', [
+            'airportMapData' => (object) MapHelper::generateAirportMapDataFromAirports($airports),
+            'simulators' => $availableSimulators->pluck('shortened_name')->values(),
+            'filteredSimulator' => $filteredSimulator?->shortened_name,
+        ])->withViewData([
+            'title' => 'Scenery',
+            'metaDescription' => 'Find scenery for your flight simulator',
+        ]);
     }
 }

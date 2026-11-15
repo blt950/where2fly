@@ -50,7 +50,7 @@ const Menu = () => {
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink href={route('scenery')} active={is('scenery*')}>
+                                <NavLink inShell href={route('scenery')} active={is('scenery*')}>
                                     <i className="fa-sharp fa-map"></i>&nbsp; Scenery
                                 </NavLink>
                             </li>
