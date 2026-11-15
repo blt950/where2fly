@@ -24,7 +24,7 @@ class NavigationHelper
 
         // Shared by AdminVariables / FeedbackVariables, which run before any view or Inertia response renders
         $feedback = [
-            ...self::link('feedback', 'Feedback', route('feedback'), 'fa-message', ['feedback*']),
+            ...self::link('feedback', 'Feedback', route('feedback'), 'fa-message', ['feedback*'], shell: true),
             'unread' => (bool) View::shared('unreadFeedback'),
         ];
 
@@ -32,8 +32,8 @@ class NavigationHelper
             'label' => $user->username,
             'notifications' => (int) View::shared('hasNotifications', 0),
             'items' => array_values(array_filter([
-                self::link('settings', 'Settings', route('user.account'), null, ['user.account']),
-                self::link('lists', 'My Lists', route('list.index'), null, ['list.*']),
+                self::link('settings', 'Settings', route('user.account'), null, ['user.account'], shell: true),
+                self::link('lists', 'My Lists', route('list.index'), null, ['list.*'], shell: true),
                 $user->can('showAdmin', $user::class) ? self::link('admin', 'Admin', route('admin'), null, ['admin']) : null,
                 self::link('logout', 'Logout', route('user.logout'), null, []),
             ])),

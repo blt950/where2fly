@@ -18,7 +18,8 @@ class NavigationTest extends TestCase
             ->where('nav.main.1.active', true)
             ->where('nav.main.0.active', false)
             ->where('nav.main.1.shell', true)
-            ->where('nav.feedback.shell', false)
+            ->where('nav.feedback.shell', true)
+            ->where('nav.login.shell', false)
             ->where('nav.login.key', 'login')
             ->where('nav.account', null)
             ->where('nav.moreActive', false));

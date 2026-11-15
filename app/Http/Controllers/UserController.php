@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 class UserController extends Controller
@@ -52,7 +53,9 @@ class UserController extends Controller
      */
     public function show()
     {
-        return view('account.settings');
+        return Inertia::render('Account', [
+            'recoveryUrl' => route('account.recovery'),
+        ])->withViewData(['title' => 'Account']);
     }
 
     /**

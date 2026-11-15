@@ -185,6 +185,15 @@ body.shell-compact {
         }
     }
 
+    // A wide page's content (feedback) sits in the drawer here, at its full width
+    .feedback-container {
+        padding: 1rem;
+
+        .card {
+            width: 100%;
+        }
+    }
+
     .drawer-page {
         padding-bottom: 1rem;
 
@@ -390,7 +399,7 @@ body.shell-compact {
 // the fixed nav instead of under it
 @include media-breakpoint-between(md, lg) {
     body.has-bottom-nav {
-        main, nav.sidebar, .map {
+        main, .map {
             height: calc(100dvh - #{$header-height} - #{$bottom-nav-height} - env(safe-area-inset-bottom));
         }
     }

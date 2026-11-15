@@ -305,5 +305,6 @@ class UserAccountTest extends TestCase
             ->get('/account');
 
         $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page->component('Account')->where('recoveryUrl', route('account.recovery')));
     }
 }

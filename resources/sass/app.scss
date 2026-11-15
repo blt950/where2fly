@@ -82,7 +82,7 @@ header {
     background: $secondary;
 }
 
-main, nav.sidebar{
+main{
     width: $sidebar-width;
     height: calc(100vh - $header-height);
     height: calc(100dvh - $header-height);
@@ -125,41 +125,47 @@ main, nav.sidebar{
         }
     }
 
-    .feedback-container{
-        padding: 2rem 1rem 1rem 1rem;
+}
 
-        &.action-text{
-            padding: 0;
-            height: 100%;
-        }
+// The issue view of the feedback page, in the shell's wide panel (or the drawer on phones)
+.feedback-container{
+    padding: 2rem 1rem 1rem 1rem;
 
-        .card-title{
-            border: 0;
-        }
-
-        .card-body{
-            color: $bluewhite;
-        }
-
-        .card-footer{
-            color: $bluewhite;
-            border-top: 1px solid $secondary;
-
-            .author{
-                color: color.adjust($tertiary, $lightness: 45%);
-            }
-        }
+    &.action-text{
+        padding: 0;
+        height: 100%;
     }
 
-    &.nomap{
-        width: calc(100vw - $sidebar-width);
-        background: url('/img/bg2.jpg') no-repeat center center fixed;
-        background-size: cover;
+    .card-title{
+        border: 0;
+    }
 
-        @include media-breakpoint-down(lg) { 
-            width: calc(100vw - $sidebar-width-min);
+    .card-body{
+        color: $bluewhite;
+    }
+
+    .card-footer{
+        color: $bluewhite;
+        border-top: 1px solid $secondary;
+
+        .author{
+            color: color.adjust($tertiary, $lightness: 45%);
         }
     }
+}
+
+// A `wide` page's content (feedback) over the map area, which stays mounted underneath
+.shell-wide{
+    background: url('/img/bg2.jpg') no-repeat center center fixed;
+    background-size: cover;
+
+    position: absolute;
+    top: $header-height;
+    left: $sidebar-width;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    z-index: 650;
 }
 
 @include media-breakpoint-down(md) {
@@ -176,38 +182,13 @@ main, nav.sidebar{
         min-height: 100dvh;
     }
 
-    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > :is(
-        :is(main, nav.sidebar).mobile-focus,
-        main:not(.mobile-focus, .mobile-nofocus)
-    ) {
+    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > main {
         height: auto;
         min-height: calc(100dvh - $header-height);
         overflow-y: visible;
     }
     /* End of mobile specific styles */
 
-    main{
-        &.mobile-nofocus{
-            display: none;
-        }
-
-        &.mobile-focus{
-            width: 100%;
-
-            .feedback-container .card{
-                width: 100%;
-            }
-        }
-    }
-
-    nav.sidebar{
-        &.mobile-nofocus{
-            display: none;
-        }
-        &.mobile-focus{
-            width: 100%;
-        }
-    }
 }
 
 footer{

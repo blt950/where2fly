@@ -93,7 +93,12 @@ const AppShell = ({ children }) => {
         ? { top: 0, right: 0, bottom: drawerVisible.current, left: 0 }
         : { top: 0, right: 0, bottom: FOOTER_HEIGHT, left: cardStackWidth() }), []);
 
-    const layout = useMemo(() => ({ compact, getInsets, cardSlot }), [compact, getInsets, cardSlot]);
+    // A `wide` page (feedback) shows its main content over the map area on wide screens; the map
+    // stays mounted underneath. On the compact layout that content just sits in the drawer.
+    const wide = Boolean(Page?.wide) && !compact;
+    const [wideSlot, setWideSlot] = useState(null);
+
+    const layout = useMemo(() => ({ compact, getInsets, cardSlot, wideSlot: wide ? wideSlot : null }), [compact, getInsets, cardSlot, wide, wideSlot]);
 
     // Selecting an airport settles the drawer at half: the card shows, and so does the airport on
     // the map (a search box raises the drawer fully, which would leave the map hidden). Done during
@@ -109,7 +114,14 @@ const AppShell = ({ children }) => {
 
     const raiseDrawer = useCallback(() => setStop((current) => (current === 'peek' ? 'half' : current)), []);
 
-    useEffect(raiseDrawer, [Page, raiseDrawer]);
+    // A wide page (feedback) has nothing to show on the map: on the compact layout it opens fully
+    useEffect(() => {
+        if (Page?.wide && compact) {
+            setStop('full');
+        } else {
+            raiseDrawer();
+        }
+    }, [Page, compact, raiseDrawer]);
 
     // Tapping the map itself gets the drawer out of the way
     const onBackgroundClick = useCallback(() => {
@@ -147,13 +159,15 @@ const AppShell = ({ children }) => {
                     <div className="shell-map">
                         <aside id="map">
                             <MapView state={state} actions={mapActions} onAirportNotFound={onAirportNotFound}
-                                onBackgroundClick={onBackgroundClick} navigate={visit} />
+                                onBackgroundClick={onBackgroundClick} navigate={visit} listsRevision={page.props.listsRevision} />
                         </aside>
 
                         {/* Only plays on the first, full load: the shell, and so this element, persists. */}
                         <div className="map-reveal" aria-hidden="true"></div>
 
-                        {Page?.showMapHint !== false && <MapHint />}
+                        {wide && <div ref={setWideSlot} className="shell-wide" scroll-region=""></div>}
+
+                        {Page?.showMapHint !== false && !wide && <MapHint />}
                         <Footer />
                     </div>
                 </div>

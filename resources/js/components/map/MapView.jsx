@@ -62,7 +62,8 @@ const reportError = (error) => {
 // state, so pages can read and change focus without DOM events.
 const pageLoad = (url) => window.location.assign(url);
 
-function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgroundClick, navigate = pageLoad }) {
+// `listsRevision` changes when the user's lists change on the server, which refetches them
+function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgroundClick, navigate = pageLoad, listsRevision }) {
 
     const {
         airports, cluster, clusterTone, camera: sceneCamera, coordinates, drawRoute, focusAirport, gateLabels,
@@ -109,7 +110,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
             .catch(reportError);
 
         return () => { cancelled = true; };
-    }, [showLists]);
+    }, [showLists, listsRevision]);
 
     const listAirports = useMemo(() => mergeListAirports(lists), [lists]);
 
