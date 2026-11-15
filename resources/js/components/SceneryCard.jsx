@@ -3,7 +3,6 @@ import { captureException } from '@sentry/react';
 import { CardContext } from './context/CardContext';
 import CurrencyDropdown from './ui/CurrencyDropdown';
 
-import ExternalLinkTracker from './utils/ExternalLinkTracker';
 import TooltipRefresh from './utils/TooltipRefresh';
 
 function SceneryCard({ airportId }) {
@@ -51,7 +50,6 @@ function SceneryCard({ airportId }) {
     }, [airportId]);
 
     useEffect(() => {
-        ExternalLinkTracker();
         TooltipRefresh();
     }, [data]);
 

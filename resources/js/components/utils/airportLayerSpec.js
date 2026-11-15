@@ -27,11 +27,9 @@ export const labelTypeFilter = (airportType) => (airportType === CATCH_ALL
     ? ['!', ['in', ['get', 'type'], ['literal', AIRPORT_TYPES.slice(0, -1)]]]
     : ['==', ['get', 'type'], airportType]);
 
-// Search results are dense enough that labelling every airport at world zoom is unreadable;
-// the curated lists are not, so they label from zoom 0.
-const filtersLabelsByZoom = () => route().current('search') || route().current() === undefined;
+// The scene decides gating (dense search results); curated lists label from zoom 0.
 const ZOOM_GATE = { large_airport: 0, medium_airport: 6, small_airport: 8 };
-export const labelMinzoom = (airportType) => (filtersLabelsByZoom() ? ZOOM_GATE[airportType] : 0);
+export const labelMinzoom = (airportType, gated) => (gated ? ZOOM_GATE[airportType] : 0);
 
 // One ICAO label layer. Shared so the search/top airports and the user's own list render
 // identically rather than drifting apart.

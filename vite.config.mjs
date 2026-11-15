@@ -40,6 +40,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/js/app.js',
+                'resources/js/inertia.jsx',
                 'resources/js/bugReport.js',
                 'resources/js/nouislider.js',
                 'resources/js/sortable.js',

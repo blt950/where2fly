@@ -3,6 +3,7 @@
 use App\Http\Middleware\AdminVariables;
 use App\Http\Middleware\ApiToken;
 use App\Http\Middleware\FeedbackVariables;
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\UserActive;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -61,6 +62,7 @@ return Application::configure(basePath: dirname(__DIR__))
             UserActive::class,
             AdminVariables::class,
             FeedbackVariables::class,
+            HandleInertiaRequests::class,
         ]);
 
         $middleware->statefulApi();

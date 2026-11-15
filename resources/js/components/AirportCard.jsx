@@ -8,7 +8,6 @@ import SceneryCard from './SceneryCard';
 import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
-import ExternalLinkTracker from './utils/ExternalLinkTracker';
 import TooltipRefresh from './utils/TooltipRefresh';
 
 function AirportCard({ airportId }) {
@@ -93,7 +92,6 @@ function AirportCard({ airportId }) {
 
     // When data changes, initialize tooltips
     useEffect(() => {
-        ExternalLinkTracker();
         TooltipRefresh();
     }, [data]);
 

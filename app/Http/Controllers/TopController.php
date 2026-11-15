@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Helpers\AircraftHelper;
 use App\Helpers\MapHelper;
+use App\Helpers\ScoreHelper;
+use App\Models\Airport;
 use App\Models\AirportScore;
+use App\View\Components\ScoreIcon;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TopController extends Controller
 {
@@ -22,7 +26,7 @@ class TopController extends Controller
     /**
      * List all top airports
      */
-    public function index(Request $request, ?string $continent = null): View
+    public function index(Request $request, ?string $continent = null): Response
     {
         $exclude = $request->input('exclude');
         if (isset($continent)) {
@@ -37,15 +41,30 @@ class TopController extends Controller
             $aircraft = 'JM';
         }
 
-        $airportScores = AirportScore::getTopAirports($continent, null, 30, $exclude, $aircraft);
+        $airports = AirportScore::getTopAirports($continent, null, 30, $exclude, $aircraft)
+            ->pluck('airport');
 
-        $airports = collect();
-        foreach ($airportScores as $as) {
-            $airports->push($as->airport);
-        }
-
-        $airportMapData = json_encode(MapHelper::generateAirportMapDataFromAirports($airports));
-
-        return view('top', compact('airports', 'airportMapData', 'continent', 'exclude', 'aircraft'));
+        return Inertia::render('Top', [
+            'airports' => $airports->values()->map(fn (Airport $airport, int $index) => [
+                'rank' => $index + 1,
+                'icao' => $airport->icao,
+                'name' => $airport->name,
+                'isoCountry' => $airport->iso_country,
+                'countryName' => getCountryName($airport->iso_country),
+                'scores' => $airport->displayScores()
+                    ->map(fn (AirportScore $score) => (new ScoreIcon($score, $airport))->toArray())
+                    ->values(),
+            ]),
+            'airportMapData' => (object) MapHelper::generateAirportMapDataFromAirports($airports),
+            'continent' => $continent,
+            'exclude' => $exclude,
+            'aircraft' => $aircraft,
+            'continents' => self::CONTINENTS,
+            'aircraftTypes' => collect(AircraftHelper::TYPES)->map(fn ($type) => ['name' => $type['name']]),
+            'scoreTypes' => ScoreHelper::TYPES,
+        ])->withViewData([
+            'title' => 'Top List',
+            'metaDescription' => 'Destinations with the worst weather right now',
+        ]);
     }
 }

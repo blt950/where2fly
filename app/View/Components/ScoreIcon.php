@@ -90,6 +90,19 @@ class ScoreIcon extends Component
         return $lines;
     }
 
+    /** Same data the Blade view renders, for React pages, so the two never drift apart */
+    public function toArray(): array
+    {
+        return [
+            'reason' => $this->score->reason,
+            'icon' => $this->scoreType['icon'],
+            'tooltipLines' => $this->tooltipLines,
+            'probabilityBadge' => $this->probabilityBadge,
+            'uncertain' => $this->uncertain,
+            'facilityDotCount' => $this->facilityDots->count(),
+        ];
+    }
+
     public function render(): View
     {
         return view('components.score-icon');

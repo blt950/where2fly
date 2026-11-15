@@ -9,7 +9,7 @@ const pinnedFilter = (icaos) => ['all', NOT_A_CLUSTER, ['in', ['get', 'icao'], [
 
 // One clustered GeoJSON source and its hit/cluster/dot/label layers. Both the search results and
 // the user's own lists render through this, so they cluster and label identically.
-const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, clusterTextColor }) => {
+const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, clusterTextColor, gateLabels = false }) => {
 
     const map = useMapGL();
     const { focusAirport, primaryAirport, setFocusAirport } = useContext(MapContext);
@@ -55,7 +55,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
             id: labelId,
             source: id,
             filter: ['all', NOT_A_CLUSTER, labelTypeFilter(airportType)],
-            minzoom: labelMinzoom(airportType),
+            minzoom: labelMinzoom(airportType, gateLabels),
         })));
 
         // The focused and primary airports keep their label at every zoom.
@@ -68,7 +68,7 @@ const MapAirportSource = ({ id, airports, palette, cluster, clusterColor, cluste
             if (map.getSource(id)) { map.removeSource(id); }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [map, id, cluster, clusterColor, clusterTextColor, palette]);
+    }, [map, id, cluster, clusterColor, clusterTextColor, gateLabels, palette]);
 
     useEffect(() => {
         map.getSource(id)?.setData(airportsToGeoJson(airports, palette));
