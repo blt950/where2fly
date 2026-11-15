@@ -214,6 +214,11 @@ body.shell-compact {
     .drawer-page {
         padding-bottom: 1rem;
 
+        // The title loses its top padding in the drawer, so the alerts above it need their own gap
+        > .alert + :not(.alert) {
+            margin-top: 1rem;
+        }
+
         // The title right above already spaces it
         .container {
             padding-top: 0;
@@ -236,18 +241,24 @@ body.shell-compact {
     .card-tabs-bar {
         flex: none;
         display: flex;
-        padding: 0 0.5rem;
         background: $secondary;
         border-bottom: 1px solid $gray-700;
     }
 
+    // In the handle's row, left of the grip, so the tabs get the drawer's full width. The drawer's
+    // transform makes it the containing block, and the button sits above the handle.
     .card-tabs-back {
-        flex: 0 0 2.75rem;
-        min-height: 2.75rem;
-        padding: 0;
+        position: absolute;
+        top: 0;
+        left: 0.5rem;
+        width: 2.75rem;
+        height: $drawer-handle-height;
+        // The full row stays the tap target; the icon lines up with the grip
+        padding: 0 0 1rem;
         background: transparent;
         border: 0;
         color: $gray-500;
+        z-index: 1;
     }
 
     // u-tabs owns the semantics; these override its simulator-tab look from components.scss
@@ -255,14 +266,16 @@ body.shell-compact {
         flex: 1 1 auto;
         display: flex;
 
+        // Sized by their labels, sharing what's left: a short ICAO leaves room for the others
         u-tab {
-            flex: 1 1 0;
+            flex: 1 1 auto;
+            white-space: nowrap;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.4rem;
             min-height: 2.75rem;
-            padding: 0;
+            padding: 0 0.5rem;
 
             background: transparent;
             border: 0;
@@ -371,6 +384,17 @@ body.shell-compact {
 
         .dropdown-divider {
             border-color: $gray-700;
+        }
+    }
+
+    // While typing on an on-screen keyboard (keyboard.js), the nav would ride up on top of it
+    body.keyboard-open {
+        .bottom-nav {
+            display: none;
+        }
+
+        &.has-bottom-nav {
+            padding-bottom: 0;
         }
     }
 

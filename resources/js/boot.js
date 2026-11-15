@@ -8,6 +8,10 @@ import '@u-elements/u-tabs';
 import '@u-elements/u-datalist';
 import '@u-elements/u-combobox';
 
+import { watchKeyboard } from './keyboard';
+
+watchKeyboard();
+
 // Metrics: delegated, so links rendered later by React are tracked as well. Only the domain is
 // sent, never the full URL.
 document.addEventListener('click', (event) => {
