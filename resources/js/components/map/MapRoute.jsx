@@ -1,7 +1,9 @@
 import { useContext, useEffect } from 'react';
 import { MapContext } from '../context/MapContext';
+import { useMapLayout } from '../context/MapLayoutContext';
 import { useMapGL } from '../context/MapGLContext';
 import { arcDegrees, boundsFromCoordinates, greatCircle } from '../utils/geodesic';
+import { fitPadding } from './MapBound';
 import { removeSourceLayer } from './mapLayers';
 
 const SOURCE = 'route';
@@ -20,17 +22,11 @@ const revealTo = (head, color) => {
         1, gone];
 };
 
-const framePadding = (width) => {
-    if (width > 1920) { return { left: 400, top: 350, right: 75, bottom: 50 }; }
-    if (width > 767) { return { left: 50, top: 350, right: 50, bottom: 50 }; }
-
-    return null;
-};
-
 const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
 
     const map = useMapGL();
     const { findAirport } = useContext(MapContext);
+    const { getInsets } = useMapLayout();
 
     useEffect(() => {
         const from = findAirport(reverseDirection ? arrival : departure);
@@ -87,23 +83,20 @@ const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
 
             frame = requestAnimationFrame(reveal);
         };
-        const padding = framePadding(window.innerWidth);
-        const width = map.getContainer().clientWidth;
         let flying = false;
 
-        if (padding && padding.left + padding.right < width) {
-            const camera = map.cameraForBounds(boundsFromCoordinates(line), { padding, maxZoom: 7 });
+        // Framed in what the drawer or card stack leaves uncovered, read now and not on a drag
+        const camera = map.cameraForBounds(boundsFromCoordinates(line), { padding: fitPadding(map, getInsets()), maxZoom: 7 });
 
-            if (camera) {
-                // Under prefers-reduced-motion flyTo falls through to jumpTo, which fires
-                // moveend inside the call — listen first or the reveal never starts.
-                map.once('moveend', startReveal);
+        if (camera) {
+            // Under prefers-reduced-motion flyTo falls through to jumpTo, which fires
+            // moveend inside the call — listen first or the reveal never starts.
+            map.once('moveend', startReveal);
 
-                // Leaflet snapped the fitted zoom down to a whole level, which is where the
-                // route's breathing room came from. MapLibre returns it fractional.
-                map.flyTo({ ...camera, zoom: Math.floor(camera.zoom-0.3), duration: 350 });
-                flying = true;
-            }
+            // Leaflet snapped the fitted zoom down to a whole level, which is where the
+            // route's breathing room came from. MapLibre returns it fractional.
+            map.flyTo({ ...camera, zoom: Math.floor(camera.zoom - 0.3), duration: 350 });
+            flying = true;
         }
 
         if (!flying) {
@@ -115,7 +108,7 @@ const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
             map.off('moveend', startReveal);
             removeSourceLayer(map, LAYER, SOURCE);
         };
-    }, [map, findAirport, departure, arrival, reverseDirection, color]);
+    }, [map, findAirport, getInsets, departure, arrival, reverseDirection, color]);
 
     return null;
 };

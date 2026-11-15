@@ -1,0 +1,272 @@
+// The Inertia shell's compact layout (below lg): a full-screen map, the panel as a drawer over
+// it, and a bottom tab bar. Everything is scoped to body.shell-compact, so Blade pages keep
+// their own layout. Several rules out-specify the "let the page scroll" phone rules in app.scss.
+// `overflow: clip`, not hidden: a hidden box can still be scrolled by scrollIntoView, which
+// would slide the whole map out of its frame when a row is brought into view.
+
+$bottom-nav-height: 3.75rem;
+$drawer-handle-height: 2.75rem;
+
+// Wide screens: the drawer is the plain sidebar and these parts don't exist
+.drawer-handle,
+.bottom-nav {
+    display: none;
+}
+
+body.shell-compact.d-flex.h-100 {
+    height: 100dvh !important;
+    min-height: 0;
+    overflow: hidden;
+    overflow: clip;
+}
+
+body.shell-compact > .d-flex.w-100.h-100.mx-auto.flex-column {
+    height: 100dvh !important;
+    min-height: 0;
+    overflow: hidden;
+    overflow: clip;
+}
+
+body.shell-compact {
+
+    // Navigation moves to the bottom bar; the header keeps the brand
+    header {
+        margin-bottom: 0 !important;
+        flex: none;
+    }
+
+    .navbar-toggler,
+    #navbarMenu,
+    .menu-overlay {
+        display: none !important;
+    }
+
+    .shell-stage {
+        position: relative;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        overflow: clip;
+    }
+
+    .shell-map {
+        position: absolute;
+        inset: 0;
+
+        #map {
+            height: 100%;
+        }
+    }
+
+    .map {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    // Relative to the map now, and visible: the map is too
+    .map-controls {
+        display: flex;
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+
+    .map-reveal,
+    .hint {
+        display: none;
+    }
+
+    // Attribution has to stay visible: a small credit in the map's top-left corner
+    footer {
+        display: block;
+        top: 0;
+        bottom: auto;
+        left: 0;
+        width: auto;
+        max-width: 70%;
+        height: auto;
+        padding: 1px 6px;
+        font-size: 0.6875rem;
+        background: rgba($secondary, 0.6);
+        z-index: 550;
+
+        > div:first-child {
+            display: none;
+        }
+    }
+
+    main.drawer {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        overflow: clip !important;
+
+        display: flex;
+        flex-direction: column;
+
+        background: $secondary;
+        border-top: 1px solid $gray-700;
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+
+        transform: translateY(var(--drawer-y, 50%));
+        transition: transform 220ms ease;
+        will-change: transform;
+        z-index: 700;
+
+        &.dragging {
+            transition: none;
+        }
+    }
+
+    .drawer-handle {
+        display: block;
+        position: relative;
+        flex: none;
+        width: 100%;
+        height: $drawer-handle-height;
+        padding: 0;
+
+        background: transparent;
+        border: 0;
+
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+
+        &:focus-visible {
+            outline: 2px solid $primary;
+            outline-offset: -2px;
+        }
+    }
+
+    .drawer-grip {
+        position: absolute;
+        top: 0.75rem;
+        left: 50%;
+        width: 2.25rem;
+        height: 0.25rem;
+        margin-left: -1.125rem;
+
+        background: $gray-500;
+        border-radius: 2px;
+    }
+
+    // Sized to the visible part, so the last row can always be scrolled into view
+    .drawer-body {
+        height: calc(100% - var(--drawer-y, 50%) - #{$drawer-handle-height});
+        overflow-y: auto;
+        overscroll-behavior: contain;
+
+        .title {
+            padding-top: 0;
+        }
+    }
+
+    .drawer-page {
+        padding-bottom: 1rem;
+    }
+
+    // The airport, flights and scenery cards as tabs inside the drawer. The tab bar stays put
+    // and the panel scrolls under it. Not position: sticky, which inside the transformed drawer
+    // gets composited onto the map as a black band.
+    .drawer-cards:not([hidden]) {
+        height: 100%;
+    }
+
+    .card-tabs-host {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    #card-tab-panel {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .card-tabs {
+        flex: none;
+        display: flex;
+        padding: 0 0.5rem;
+        background: $secondary;
+        border-bottom: 1px solid $gray-700;
+
+        button {
+            flex: 1 1 0;
+            min-height: 2.75rem;
+            padding: 0;
+
+            background: transparent;
+            border: 0;
+            border-bottom: 3px solid transparent;
+            color: $gray-500;
+            font-size: 0.95rem;
+
+            &[aria-selected='true'] {
+                color: $white;
+                border-bottom-color: $primary;
+            }
+        }
+
+        .card-tabs-back {
+            flex: 0 0 2.75rem;
+        }
+    }
+
+    .popup-card {
+        display: block;
+        background: transparent;
+    }
+
+    .bottom-nav {
+        display: flex;
+        flex: none;
+        position: relative;
+        height: calc(#{$bottom-nav-height} + env(safe-area-inset-bottom));
+        padding-bottom: env(safe-area-inset-bottom);
+
+        background: $secondary;
+        border-top: 1px solid $gray-700;
+        z-index: 800;
+    }
+
+    .bottom-nav-tab {
+        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        width: 100%;
+        padding: 0;
+
+        background: transparent;
+        border: 0;
+        border-top: 3px solid transparent;
+        color: $gray-500;
+        font-size: 0.75rem;
+        text-decoration: none;
+
+        &[aria-current='page'] {
+            color: $white;
+            border-top-color: $primary;
+        }
+    }
+
+    .bottom-nav-more {
+        flex: 1 1 0;
+        display: flex;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.shell-compact main.drawer {
+        transition: none;
+    }
+}

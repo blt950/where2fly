@@ -1,3 +1,5 @@
+import { tooltipOptions } from './touch';
+
 
 const TooltipRefresh = () => {
 
@@ -12,9 +14,7 @@ const TooltipRefresh = () => {
     // getOrCreateInstance, never new Tooltip(): re-instantiating an element that
     // already has one leaves two instances fighting, causing stuck-open tooltips.
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => {
-        bootstrap.Tooltip.getOrCreateInstance(tooltipTriggerEl, {
-            container: 'body'
-        });
+        bootstrap.Tooltip.getOrCreateInstance(tooltipTriggerEl, tooltipOptions());
     });
 
 };

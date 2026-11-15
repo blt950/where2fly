@@ -144,7 +144,7 @@ Do not treat it as complete. Missing or faked there, real in the app:
 2. **Flights: one Flights view per airport with an airline filter.** The airline logos become shortcuts into that filter, so the phone tab has a single stable destination.
 3. **The drawer applies below `lg`**, so tablets get it too. Between `md` and `lg` the card stack covers too much of the map.
 4. *Still open:* should the non-map pages move into the shell eventually? Decide during clean-up.
-5. *Still open:* does the Top List need its own camera rule on phones? Decide with the phone layout. The default is to fit the listed airports within the uncovered area instead of using the fixed continent views.
+5. **Top List camera on phones:** a continent's list is framed in the area the drawer leaves uncovered, instead of using its fixed view. The all-continents list keeps the world view, because fitting airports spread across the globe ends at zoom 0.
 
 ## Milestones
 
@@ -156,7 +156,7 @@ The work lands as one commit per milestone on `feat/responsive-redesign`:
 - M3: search and route results (done)
 - M4: search forms (done). The Blade map mount stays, reduced to the default scene, because the account, list, scenery-editing and info pages still extend `layouts.app` and show the map. Whether they move into the shell is open question 4.
 - M5: card host + unified Flights view (done). The selected airport is `?airport=` in the URL.
-- M6: phone/tablet layout
+- M6: phone/tablet layout (done). The drawer, bottom nav, tabbed cards, camera insets and tap-to-show tooltips are in place. Still needs a pass on real devices (see Testing).
 - M7: clean-up
 
 ## Testing

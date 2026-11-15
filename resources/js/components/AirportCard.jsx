@@ -73,6 +73,7 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose }) {
                                 className="flag border-0"
                                 src={`/img/flags/${ data.airport.iso_country.toLowerCase() }.svg`}
                                 height="16"
+                                tabIndex={0}
                                 data-bs-toggle="tooltip"
                                 data-bs-title={ data.airport.country }
                                 alt={`Flag of ${data.airport.country}`}

@@ -8,6 +8,7 @@ import PageTitle from '../components/ui/PageTitle';
 import ScoreIcon from '../components/ui/ScoreIcon';
 import TAF from '../components/ui/TAF';
 import { useSortableRows } from '../components/utils/useSortableRows';
+import { stopOnTouch } from '../components/utils/touch';
 import { useTooltips } from '../components/utils/useTooltips';
 
 const VISIBLE_ROWS = 10;
@@ -25,7 +26,7 @@ const SORT_COLUMNS = {
 
 const Flag = ({ airport }) => (
     <img className="flag" src={`/img/flags/${airport.isoCountry.toLowerCase()}.svg`} height="16"
-        data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
+        tabIndex={0} onClick={stopOnTouch} data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
 );
 
 // "Edit filters" hands the query back to the search form as old input; unchecked sort boxes are

@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 
 import PageTitle from '../components/ui/PageTitle';
 import { useSortableRows } from '../components/utils/useSortableRows';
+import { stopOnTouch } from '../components/utils/touch';
 import { useTooltips } from '../components/utils/useTooltips';
 
 const SORT_COLUMNS = {
@@ -17,7 +18,7 @@ const Endpoint = ({ label, airport }) => (
         <dt>{label}</dt>
         <dd>
             <img className="flag" src={`/img/flags/${airport.isoCountry.toLowerCase()}.svg`} height="16"
-                data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
+                tabIndex={0} onClick={stopOnTouch} data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
             {' '}{airport.icao}
         </dd>
         <dd>{airport.name}</dd>

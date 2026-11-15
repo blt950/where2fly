@@ -7,6 +7,7 @@ import Legend from '../components/ui/Legend';
 import PageTitle from '../components/ui/PageTitle';
 import ScoreIcon from '../components/ui/ScoreIcon';
 import { useSortableRows } from '../components/utils/useSortableRows';
+import { stopOnTouch } from '../components/utils/touch';
 import { useTooltips } from '../components/utils/useTooltips';
 
 // Each dropdown links to a URL keeping the other two filters intact. JM is the default aircraft,
@@ -113,7 +114,7 @@ const Top = ({ airports, continent, exclude, aircraft, continents, aircraftTypes
                                     <td>
                                         <div>
                                             <img className="flag" src={`/img/flags/${airport.isoCountry.toLowerCase()}.svg`} height="16"
-                                                data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
+                                                tabIndex={0} onClick={stopOnTouch} data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
                                             {' '}{airport.icao}
                                         </div>
                                         {airport.name}
@@ -143,7 +144,9 @@ const Top = ({ airports, continent, exclude, aircraft, continents, aircraftTypes
 Top.mapScene = ({ airportMapData, continent }) => ({
     airports: airportMapData,
     clusterTone: 'search',
-    camera: { type: 'view', view: CONTINENT_VIEWS[continent] ?? WORLD_VIEW },
+    // On a phone a continent's view (tuned for a wide map) gives way to framing its airports in
+    // what the drawer leaves; the whole-world list stays on the world view, a fit would be zoom 0
+    camera: { type: 'view', view: CONTINENT_VIEWS[continent] ?? WORLD_VIEW, ...(continent ? { compact: 'fit' } : {}) },
     persistView: false,
     showLists: false,
 });

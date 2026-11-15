@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MapContext } from '../components/context/MapContext';
+import { MapLayoutContext } from '../components/context/MapLayoutContext';
 import CardHost from '../components/CardHost';
 
 // A failed fetch calls captureException; stub it so the test output stays quiet.
@@ -260,5 +261,60 @@ describe('CardHost / AirportCard', () => {
 
         fireEvent.click(screen.getByText('Departure'), { ctrlKey: true });
         expect(navigate).toHaveBeenCalledTimes(1);
+    });
+
+    describe('on the compact layout', () => {
+        const renderTabbed = (mapContext) => {
+            const slot = document.createElement('div');
+            document.body.append(slot);
+            const layout = { compact: true, cardSlot: slot, getInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }) };
+
+            render(
+                <MapLayoutContext.Provider value={layout}>
+                    <MapContext.Provider value={mapContext}>
+                        <CardHost airportId={1} />
+                    </MapContext.Provider>
+                </MapLayoutContext.Provider>,
+            );
+
+            return slot;
+        };
+        const tabs = (slot) => [...slot.querySelectorAll('[role=tab]')].map((tab) => `${tab.textContent}:${tab.getAttribute('aria-selected')}`);
+
+        it('renders the cards as tabs inside the drawer, not beside the panel', async () => {
+            const slot = renderTabbed(baseMapContext);
+            await screen.findByText('Oslo Gardermoen');
+
+            expect(slot.querySelector('.card-tabs')).not.toBeNull();
+            expect(document.querySelector('.popup-container')).toBeNull();
+            // No route, so no flights tab
+            expect(tabs(slot)).toEqual(['ENGM:true', 'Scenery:false']);
+        });
+
+        it('switches to the card the airport card opens, and its close button returns to the airport', async () => {
+            const slot = renderTabbed(baseMapContext);
+            await screen.findByText('Oslo Gardermoen');
+
+            fireEvent.click(screen.getByText('Scenery', { selector: '.popup-card button' }));
+            await screen.findByText('Orbx');
+            expect(tabs(slot)).toEqual(['ENGM:false', 'Scenery:true']);
+            expect(screen.queryByText('Oslo Gardermoen')).toBeNull();
+
+            fireEvent.click(screen.getByLabelText('Close scenery card'));
+            expect(tabs(slot)).toEqual(['ENGM:true', 'Scenery:false']);
+        });
+
+        it('opens on the scenery tab where the scene asks for it, and Back closes everything', async () => {
+            const setFocusAirport = vi.fn();
+            const setShowAirportIdCard = vi.fn();
+            const slot = renderTabbed({ ...baseMapContext, initialCard: 'scenery', setFocusAirport, setShowAirportIdCard });
+
+            await screen.findByText('Orbx');
+            expect(tabs(slot)).toEqual(['ENGM:false', 'Scenery:true']);
+
+            fireEvent.click(screen.getByLabelText('Back to the list'));
+            expect(setFocusAirport).toHaveBeenCalledWith(null);
+            expect(setShowAirportIdCard).toHaveBeenCalledWith(null);
+        });
     });
 });

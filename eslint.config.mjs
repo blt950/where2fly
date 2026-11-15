@@ -47,6 +47,8 @@ export default [
             // Pre-existing target="_blank" links across many components; adding rel=noreferrer
             // to each is a production edit out of scope for this correctness-linting pass.
             'react/jsx-no-target-blank': 'off',
+            // Inertia saves and restores the scroll of elements carrying this attribute.
+            'react/no-unknown-property': ['error', { ignore: ['scroll-region'] }],
         },
     },
 ];

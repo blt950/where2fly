@@ -4,10 +4,12 @@ import { captureException, ErrorBoundary } from '@sentry/react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { MapContext } from '../context/MapContext';
+import { useMapLayout } from '../context/MapLayoutContext';
 
 import CardHost from '../CardHost';
 import MapAirportSource from './MapAirportSource';
 import MapAttribution from './MapAttribution';
+import MapBackgroundClick from './MapBackgroundClick';
 import MapBound from './MapBound';
 import MapCamera from './MapCamera';
 import MapControls from './MapControls';
@@ -59,14 +61,19 @@ const reportError = (error) => {
 // state, so pages can read and change focus without DOM events.
 const pageLoad = (url) => window.location.assign(url);
 
-function MapView({ state, actions, onFocusAirport, onAirportNotFound, navigate = pageLoad }) {
+function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgroundClick, navigate = pageLoad }) {
 
     const {
-        airports, cluster, clusterTone, camera, coordinates, drawRoute, focusAirport, gateLabels,
+        airports, cluster, clusterTone, camera: sceneCamera, coordinates, drawRoute, focusAirport, gateLabels,
         highlightedAircrafts, initialCard, mapBounds, persistView, ping, primaryAirport, reverseDirection,
         sceneVersion, showAirportIdCard, showLists,
     } = state;
     const { set, addAirport, setFocusAirport, setShowAirportIdCard } = actions;
+
+    // A scene can ask to frame its airports instead on the compact layout, where its fixed view
+    // (tuned for a wide map) would leave most of them under the drawer or off a narrow screen
+    const { compact } = useMapLayout();
+    const camera = compact && sceneCamera?.compact === 'fit' ? { type: 'fit' } : sceneCamera;
 
     const [initialView] = useState(() => cameraView(camera));
     const [webgl2] = useState(supportsWebGL2);
@@ -166,7 +173,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, navigate =
 
         set({ mapBounds: Object.values(airports).map(airport => [airport.lon, airport.lat]) });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [airports]);
+    }, [airports, camera?.type]);
 
     const { palette, hillshade } = themeOf(preferences.theme);
 
@@ -238,6 +245,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, navigate =
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {persistView && <MapSaveView />}
                 <MapPing ping={ping} />
+                <MapBackgroundClick onClick={onBackgroundClick} />
                 <MapAttribution />
             </MapProvider>
             <MapControls preferences={preferences} onChange={updatePreferences} weatherStatus={weatherStatus}

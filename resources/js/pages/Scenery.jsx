@@ -28,12 +28,7 @@ const Scenery = ({ simulators, filteredSimulator }) => {
 
             <div className="container">
 
-                {/* Until the phone layout (M6) the map is hidden below md, so there is nothing to search on. */}
-                <div className="d-block d-md-none bg-warning p-3">
-                    <p className="text-black m-0"><i className="fa-sharp fa-exclamation-triangle"></i> Scenery map is only available on desktop or tablet.</p>
-                </div>
-
-                <div className="d-none d-md-block">
+                <div>
                     <div className="mb-4">
                         <div className="filterbox">
                             <span className="m-0"><strong className="d-block">Map Filter</strong>
