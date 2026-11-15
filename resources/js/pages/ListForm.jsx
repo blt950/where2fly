@@ -88,4 +88,7 @@ const ListForm = ({ list, simulators, canMakePublic, old }) => {
     );
 };
 
+// A list to read or a form to fill in: the drawer opens fully on the compact layout
+ListForm.drawer = 'full';
+
 export default ListForm;

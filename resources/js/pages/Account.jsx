@@ -28,5 +28,6 @@ const Account = ({ recoveryUrl }) => (
 
 // Settings have nothing to show on the map; leave it as it was
 Account.keepsMap = true;
+Account.drawer = 'full';
 
 export default Account;

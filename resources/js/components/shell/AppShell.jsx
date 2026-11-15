@@ -29,15 +29,24 @@ const AppShell = ({ children }) => {
 
     const scene = useShellScene(Page, page.props);
     const [state, actions] = useMapState(scene);
-    const select = useSelection(page.url, state, actions);
-    const mapActions = useMemo(() => ({ ...actions, setFocusAirport: select }), [actions, select]);
+    const selectInUrl = useSelection(page, state, actions);
 
     // Layout: the compact one moves the panel into a drawer over a full-screen map
     const compact = useCompactLayout();
     const cardsOpen = Boolean(state.showAirportIdCard);
     const { stop, setStop, raiseDrawer, onBackgroundClick } = useDrawerStop({
-        compact, wide: Boolean(Page?.wide), selectedCard: state.showAirportIdCard ?? null,
+        compact, Page, sceneVersion: state.sceneVersion, selectedCard: state.showAirportIdCard ?? null,
     });
+
+    // Selecting an airport also brings a collapsed drawer back, even the airport already selected,
+    // whose URL (and so card) doesn't change
+    const select = useCallback((icao) => {
+        if (icao) {
+            raiseDrawer();
+        }
+        selectInUrl(icao);
+    }, [raiseDrawer, selectInUrl]);
+    const mapActions = useMemo(() => ({ ...actions, setFocusAirport: select }), [actions, select]);
     const { getInsets, onDrawerVisible } = useMapInsets();
     const [cardSlot, setCardSlot] = useState(null);
 

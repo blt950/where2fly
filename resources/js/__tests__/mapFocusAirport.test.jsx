@@ -2,16 +2,21 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { MapContext } from '../components/context/MapContext';
 import { MapGLContext } from '../components/context/MapGLContext';
 import MapFocusAirport from '../components/map/MapFocusAirport';
 
 const fakeMap = () => {
     const sources = new Map();
     const layers = new Map();
+    const clicks = new Map();
 
     return {
         layers,
         sources,
+        clicks,
+        on: vi.fn((event, layer, handler) => clicks.set(layer, handler)),
+        off: vi.fn((event, layer) => clicks.delete(layer)),
         addSource: vi.fn((id, spec) => sources.set(id, { spec, setData: vi.fn() })),
         addLayer: vi.fn((layer) => layers.set(layer.id, layer)),
         removeLayer: vi.fn((id) => layers.delete(id)),
@@ -22,9 +27,11 @@ const fakeMap = () => {
     };
 };
 
-const renderMarker = (map, airport) => render(
+const renderMarker = (map, airport, setFocusAirport = vi.fn()) => render(
     <MapGLContext.Provider value={map}>
-        <MapFocusAirport airport={airport} color="#ddb81c" />
+        <MapContext.Provider value={{ setFocusAirport }}>
+            <MapFocusAirport airport={airport} color="#ddb81c" />
+        </MapContext.Provider>
     </MapGLContext.Provider>,
 );
 
@@ -56,5 +63,17 @@ describe('MapFocusAirport', () => {
         unmount();
         expect(map.sources.size).toBe(0);
         expect(map.layers.size).toBe(0);
+    });
+
+    it('selects its airport again when tapped, so a collapsed drawer comes back', () => {
+        const map = fakeMap();
+        const setFocusAirport = vi.fn();
+        const { unmount } = renderMarker(map, { icao: 'ENGM', lon: 11.1, lat: 60.2 }, setFocusAirport);
+
+        map.clicks.get('focus-airport')();
+        expect(setFocusAirport).toHaveBeenCalledWith('ENGM');
+
+        unmount();
+        expect(map.clicks.has('focus-airport')).toBe(false);
     });
 });

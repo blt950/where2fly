@@ -42,4 +42,7 @@ const Lists = ({ lists }) => (
     </>
 );
 
+// A list to read or a form to fill in: the drawer opens fully on the compact layout
+Lists.drawer = 'full';
+
 export default Lists;

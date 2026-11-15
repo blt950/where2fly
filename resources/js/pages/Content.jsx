@@ -14,5 +14,6 @@ const Content = ({ title, tab, html }) => (
 
 // Reading the changelog shouldn't move the map: it stays as the previous page left it
 Content.keepsMap = true;
+Content.drawer = 'full';
 
 export default Content;

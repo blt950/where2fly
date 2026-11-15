@@ -141,6 +141,36 @@ describe('AppShell', () => {
             expect(router.push).toHaveBeenCalledTimes(1);
         });
 
+        it('marks the entry opening a card pushed, and closing steps back off it instead of leaving a dead Back', () => {
+            const back = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+            visit('/top');
+            const { rerender } = render(<AppShell><TopPage /></AppShell>);
+
+            act(() => mapProps.actions.setFocusAirport('ESSA'));
+            const { props } = router.push.mock.calls[0][0];
+            expect(props({ continent: null })).toEqual({ continent: null, selectionPushed: true });
+
+            visit('/top?airport=ESSA', { selectionPushed: true });
+            rerender(<AppShell><TopPage /></AppShell>);
+            act(() => mapProps.actions.setFocusAirport(null));
+
+            expect(back).toHaveBeenCalledTimes(1);
+            expect(router.replace).not.toHaveBeenCalled();
+            back.mockRestore();
+        });
+
+        it('replaces the entry when closing a card that came with the URL', () => {
+            const back = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+            visit('/top?airport=ESSA');
+            render(<AppShell><TopPage /></AppShell>);
+
+            act(() => mapProps.actions.setFocusAirport(null));
+
+            expect(back).not.toHaveBeenCalled();
+            expect(router.replace).toHaveBeenCalledWith(expect.objectContaining({ url: '/top' }));
+            back.mockRestore();
+        });
+
         it('is the same selection pages get from the shell context', () => {
             let shell;
             const Probe = () => { shell = useShellMap(); return null; };

@@ -136,6 +136,7 @@ const Feedback = ({ issues, issue, canVote, loginUrl, bugReports }) => {
 
 Feedback.wide = true;
 Feedback.keepsMap = true;
+Feedback.drawer = 'full';
 Feedback.showMapHint = false;
 
 export default Feedback;

@@ -82,6 +82,15 @@ const Drawer = ({ enabled, stop, onStopChange, onVisibleChange, children }) => {
         onStopChange(next);
     };
 
+    // A system gesture or an incoming call took the pointer: put the drawer back, no tap, no move
+    const onPointerCancel = () => {
+        if (!drag.current) return;
+
+        drag.current = null;
+        mainRef.current.classList.remove('dragging');
+        place(offsets[stop]);
+    };
+
     // Pointer taps are handled above; a click without a pointer (detail 0) is the keyboard
     const onClick = (event) => {
         if (event.detail === 0) {
@@ -102,7 +111,7 @@ const Drawer = ({ enabled, stop, onStopChange, onVisibleChange, children }) => {
             {enabled && (
                 <button ref={handleRef} type="button" className="drawer-handle" aria-label={`Resize panel, ${STOP_LABELS[stop]}`}
                     onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerEnd}
-                    onPointerCancel={onPointerEnd} onClick={onClick}>
+                    onPointerCancel={onPointerCancel} onClick={onClick}>
                     <span className="drawer-grip" aria-hidden="true"></span>
                 </button>
             )}

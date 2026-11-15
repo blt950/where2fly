@@ -70,6 +70,17 @@ describe('Drawer', () => {
         expect(onStopChange).toHaveBeenCalledWith('full');
     });
 
+    it('goes back where it was when the pointer is cancelled, without counting a tap', () => {
+        const { container, handle, onStopChange } = renderDrawer();
+
+        pointer(handle, 'pointerdown', 400, 0);
+        pointer(handle, 'pointermove', 500, 100);
+        pointer(handle, 'pointercancel', 500, 150);
+
+        expect(onStopChange).not.toHaveBeenCalled();
+        expect(container.querySelector('main').style.getPropertyValue('--drawer-y')).toBe('400px');
+    });
+
     it('opens further on a tap and steps through stops from the keyboard', () => {
         const { handle, onStopChange } = renderDrawer({ stop: 'peek' });
 

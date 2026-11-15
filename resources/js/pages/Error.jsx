@@ -30,5 +30,6 @@ const ErrorPage = ({ status }) => {
 
 // Nothing to show on the map, so it stays as the previous page left it
 ErrorPage.keepsMap = true;
+ErrorPage.drawer = 'full';
 
 export default ErrorPage;

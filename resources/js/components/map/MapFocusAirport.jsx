@@ -1,4 +1,6 @@
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
+
+import { MapContext } from '../context/MapContext';
 
 import { FOCUS_LAYERS, labelSpec } from '../utils/airportLayerSpec';
 import { useMapLayer } from './mapLayers';
@@ -35,6 +37,15 @@ const MapFocusAirport = ({ airport, color }) => {
         source: { type: 'geojson', data },
         layer: { ...label, paint: { 'text-color': color } },
     }, [color]);
+
+    // Tapping it selects it again, which brings a collapsed drawer back with its card
+    const { setFocusAirport } = useContext(MapContext);
+    useEffect(() => {
+        const onClick = () => setFocusAirport(airport.icao);
+        map.on('click', DOT, onClick);
+
+        return () => { map.off('click', DOT, onClick); };
+    }, [map, setFocusAirport, airport.icao]);
 
     useEffect(() => {
         [DOT, LABEL].forEach((id) => map.getSource(id)?.setData(data));
