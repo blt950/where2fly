@@ -1,6 +1,6 @@
 # Responsive redesign: map-first on mobile
 
-Status: done (M0–M7, see "Milestones"). Still needs the manual pass on real devices listed under "Testing". The clickable prototype is back at `public/responsive.html` for reference. Delete it before this ships: anything in `public/` is served.
+Status: done (M0–M7, see "Milestones"). Still needs the manual pass on real devices listed under "Testing".
 
 ## Why
 
