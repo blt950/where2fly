@@ -1,18 +1,16 @@
-import { useEffect, useState, useRef, useContext } from 'react';
-import { captureException } from '@sentry/react';
+import { useRef, useContext } from 'react';
 import { MapContext } from './context/MapContext';
 
 import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
+import { useCachedPost } from './utils/useCachedPost';
 import { useTooltips } from './utils/useTooltips';
 
 // The airport itself. The flights and scenery cards beside it belong to CardHost, which opens
 // them through `onOpenFlights` / `onOpenScenery`. `inTab`: shown as a drawer tab, see CardHost.
 function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab = false }) {
-    const dataCache = useRef({});
     const cardRef = useRef(null);
-    const [data, setData] = useState(null);
     const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts, navigate } = useContext(MapContext);
 
     // A plain click navigates through the map's owner (keeping the map in the shell); a modified
@@ -24,40 +22,14 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
         navigate(event.currentTarget.href);
     };
 
-    // Fetch airport data if it's not in the cache
-    useEffect(() => {
-        if (dataCache.current[airportId]) {
-            setData(dataCache.current[airportId]);
-        } else {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            fetch(route('api.airport.show'), {
-                    method: "POST",    
-                    credentials: 'include',
-                    headers: { 
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({ 
-                        primaryAirport: (primaryAirport ? findAirport(primaryAirport).id : null),
-                        secondaryAirport: findAirport(focusAirport).id, 
-                        reverseDirection,
-                        highlightedAircrafts
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    dataCache.current[airportId] = data.data;
-                    setData(data.data);
-                })
-                .catch(error => {
-                    captureException(error);
-                    console.error(error.message);
-                });
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [airportId]);
+    // Through the shared request cache, so reopening an airport shows it straight away; the body
+    // carries the route context, which changes what the endpoint answers
+    const data = useCachedPost(route('api.airport.show'), {
+        primaryAirport: primaryAirport ? findAirport(primaryAirport)?.id ?? null : null,
+        secondaryAirport: airportId,
+        reverseDirection,
+        highlightedAircrafts,
+    });
 
     // Tooltips for this card only, disposed with it
     useTooltips(cardRef, [data]);

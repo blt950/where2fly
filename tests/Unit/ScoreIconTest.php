@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\AirportScore;
-use App\View\Components\ScoreIcon;
+use App\View\ScoreIcon;
 use PHPUnit\Framework\TestCase;
 
 class ScoreIconTest extends TestCase

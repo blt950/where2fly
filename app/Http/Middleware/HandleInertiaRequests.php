@@ -59,9 +59,11 @@ class HandleInertiaRequests extends Middleware
             'csrfToken' => fn () => csrf_token(),
             // Changes whenever one of the user's lists is saved, hidden or removed: the map
             // refetches the lists it draws when it does
-            'listsRevision' => fn () => ($user = $request->user())
-                ? $user->lists()->count() . '@' . $user->lists()->max('updated_at')
-                : null,
+            'listsRevision' => function () use ($request) {
+                $revision = $request->user()?->lists()->toBase()->selectRaw('COUNT(*) AS lists, MAX(updated_at) AS saved')->first();
+
+                return $revision ? $revision->lists . '@' . $revision->saved : null;
+            },
         ];
     }
 }

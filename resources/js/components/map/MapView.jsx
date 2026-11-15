@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { captureException, ErrorBoundary } from '@sentry/react';
+import { ErrorBoundary } from '@sentry/react';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -25,6 +25,7 @@ import MapWeather from './MapWeather';
 import { CLUSTER_COLOURS, themeOf } from './mapConfig';
 import { cameraView } from './mapScene';
 import { AIRPORT_SOURCES } from '../utils/airportLayerSpec';
+import { getJson, postJson, reportError } from '../utils/http';
 import { readPreferences, writePreferences } from '../utils/mapPreferences';
 import { readStored, removeStored, writeStored } from '../utils/storage';
 import { asList, mergeListAirports } from '../utils/userLists';
@@ -41,22 +42,6 @@ const supportsWebGL2 = () => {
 };
 
 const LISTS_CACHE_KEY = 'userListsCache';
-
-const postJson = (url, body) => fetch(url, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
-    },
-    body: JSON.stringify(body),
-});
-
-const reportError = (error) => {
-    captureException(error);
-    console.error(error.message);
-};
 
 // Draws whatever `state` describes. The owner (the Blade adapter or the Inertia shell) holds the
 // state, so pages can read and change focus without DOM events.
@@ -84,8 +69,16 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
     const [lists, setLists] = useState([]);
 
     useEffect(() => {
-        if (!userAuthenticated() || !showLists) {
+        // Signed out: the cached lists were someone's, so forget them
+        if (!userAuthenticated()) {
             removeStored(LISTS_CACHE_KEY);
+            setLists([]);
+
+            return undefined;
+        }
+
+        // A page without lists keeps the cache, so the next page with them starts from it
+        if (!showLists) {
             setLists([]);
 
             return undefined;
@@ -96,7 +89,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
         // Seed the overlay from cache so the lists are on screen before the fetch returns.
         setLists(asList(readStored(LISTS_CACHE_KEY)));
 
-        fetch(route('api.lists.airports'), { credentials: 'include', headers: { 'Accept': 'application/json' } })
+        getJson(route('api.lists.airports'))
             .then(response => response.json())
             .then(data => {
                 const fetched = asList(data.data);

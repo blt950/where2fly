@@ -1,15 +1,17 @@
 <?php
 
-namespace App\View\Components;
+namespace App\View;
 
 use App\Helpers\ScoreHelper;
 use App\Models\Airport;
 use App\Models\AirportScore;
 use Illuminate\Support\Collection;
-use Illuminate\View\Component;
-use Illuminate\View\View;
 
-class ScoreIcon extends Component
+/**
+ * A score icon's data (tooltip lines, uncertainty, facility dots), decided once in PHP;
+ * React renders it through ui/ScoreIcon.jsx and decides nothing itself.
+ */
+class ScoreIcon
 {
     public array $scoreType;
 
@@ -26,7 +28,6 @@ class ScoreIcon extends Component
     public function __construct(
         public AirportScore $score,
         public ?Airport $airport = null,
-        public bool $highlighted = false,
         public string $bookingsLabel = 'Bookings',
     ) {
         $this->scoreType = ScoreHelper::TYPES[$score->reason];
@@ -90,7 +91,6 @@ class ScoreIcon extends Component
         return $lines;
     }
 
-    /** Same data the Blade view renders, for React pages, so the two never drift apart */
     public function toArray(): array
     {
         return [
@@ -101,10 +101,5 @@ class ScoreIcon extends Component
             'uncertain' => $this->uncertain,
             'facilityDotCount' => $this->facilityDots->count(),
         ];
-    }
-
-    public function render(): View
-    {
-        return view('components.score-icon');
     }
 }

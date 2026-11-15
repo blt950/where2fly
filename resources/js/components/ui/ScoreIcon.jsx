@@ -1,7 +1,7 @@
 import { stopOnTouch } from '../utils/touch';
 
-// React twin of resources/views/components/score-icon.blade.php. The data comes from
-// ScoreIcon::toArray(), so tooltip lines arrive escaped and safe to render as HTML.
+// The data comes from App\View\ScoreIcon::toArray(), so tooltip lines arrive escaped and safe
+// to render as HTML.
 const FACILITY_DOTS = ['fa-circle-quarter-stroke', 'fa-circle-half-stroke', 'fa-circle-three-quarters-stroke'];
 
 const ScoreIcon = ({ score, highlighted = false }) => {

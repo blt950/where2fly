@@ -1,11 +1,9 @@
 import { usePage } from '@inertiajs/react';
 
-const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
 // Flash messages and the verification notice from AlertHelper (`alerts`);
 // layouts/alerts.blade.php is its Blade twin
 const Alerts = () => {
-    const { messages, verification } = usePage().props.alerts;
+    const { alerts: { messages, verification }, csrfToken } = usePage().props;
 
     return (
         <>
@@ -22,7 +20,7 @@ const Alerts = () => {
 
                     {/* A plain form post: the verification flow is Blade and redirects back */}
                     <form method="POST" action={verification.action}>
-                        <input type="hidden" name="_token" value={csrfToken()} />
+                        <input type="hidden" name="_token" value={csrfToken} />
                         <button className="btn btn-sm btn-primary text-secondary mt-2">
                             Resend verification email to {verification.email}
                         </button>

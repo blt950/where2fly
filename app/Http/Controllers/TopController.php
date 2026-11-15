@@ -7,7 +7,7 @@ use App\Helpers\MapHelper;
 use App\Helpers\ScoreHelper;
 use App\Models\Airport;
 use App\Models\AirportScore;
-use App\View\Components\ScoreIcon;
+use App\View\ScoreIcon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;

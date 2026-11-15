@@ -1,4 +1,4 @@
-import { isValidElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { isValidElement, useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 
 import Alerts from './Alerts';
@@ -8,27 +8,17 @@ import Footer from './Footer';
 import MapHint from './MapHint';
 import Menu from './Menu';
 import { ShellMapContext } from './ShellMapContext';
-import { selectedAirportIn, withSelectedAirport } from './selection';
 import { useCompactLayout } from './useCompactLayout';
+import { useDrawerStop } from './useDrawerStop';
+import { useMapInsets } from './useMapInsets';
+import { usePageAnnouncement } from './usePageAnnouncement';
+import { useSelection } from './useSelection';
+import { useShellScene } from './useShellScene';
 import { MapLayoutContext } from '../context/MapLayoutContext';
 import MapView from '../map/MapView';
-import { SCENE_DEFAULTS } from '../map/mapScene';
 import { useMapState } from '../map/useMapState';
 
 const visit = (url) => router.visit(url);
-const FOOTER_HEIGHT = 30;
-
-// What the card stack beside the panel covers of the map, measured when the camera asks
-const cardStackWidth = () => {
-    const stack = document.querySelector('.popup-container');
-    const map = document.querySelector('#map .maplibregl-map');
-
-    if (!stack || !map || !stack.querySelector('.popup-card')) {
-        return 0;
-    }
-
-    return Math.max(0, stack.getBoundingClientRect().right - map.getBoundingClientRect().left);
-};
 
 // The persistent layout: same DOM as layouts/app.blade.php so the existing SCSS applies, but it
 // is never thrown away between visits, so neither is the map.
@@ -37,61 +27,23 @@ const AppShell = ({ children }) => {
     const page = usePage();
     const Page = isValidElement(children) ? children.type : null;
 
-    // Pages declare their map as a static `mapScene(props)`, read here during render so the
-    // first visit constructs the map with the right camera instead of correcting it afterwards.
-    // A page with `keepsMap` (the text pages) leaves the map exactly as the previous page had it.
-    const lastScene = useRef(SCENE_DEFAULTS);
-    const scene = useMemo(
-        () => (Page?.keepsMap ? lastScene.current : Page?.mapScene?.(page.props) ?? SCENE_DEFAULTS),
-        [Page, page.props],
-    );
-    lastScene.current = scene;
+    const scene = useShellScene(Page, page.props);
     const [state, actions] = useMapState(scene);
-
-    // Selecting an airport writes the URL; the URL drives the map. Opening a card adds a history
-    // entry, so Back closes it; switching airports or closing replaces the entry instead.
-    const selected = selectedAirportIn(page.url);
-    const pageUrl = useRef(page.url);
-    pageUrl.current = page.url;
-
-    const select = useCallback((icao) => {
-        const current = selectedAirportIn(pageUrl.current);
-        const next = icao || null;
-
-        if (next === current) {
-            return;
-        }
-
-        const method = current === null ? 'push' : 'replace';
-        router[method]({ url: withSelectedAirport(pageUrl.current, next), preserveState: true, preserveScroll: true });
-    }, []);
-
-    // Also re-applied after a new scene, which starts with nothing focused. No selection closes
-    // the cards as well, as their close button does.
-    useEffect(() => {
-        if ((state.focusAirport ?? null) !== selected) {
-            actions.set(selected ? { focusAirport: selected } : { focusAirport: null, showAirportIdCard: null });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selected, state.sceneVersion]);
-
+    const select = useSelection(page.url, state, actions);
     const mapActions = useMemo(() => ({ ...actions, setFocusAirport: select }), [actions, select]);
 
     // Layout: the compact one moves the panel into a drawer over a full-screen map
     const compact = useCompactLayout();
-    const [stop, setStop] = useState('half');
-    const [cardSlot, setCardSlot] = useState(null);
-    const drawerVisible = useRef(0);
-    const onDrawerVisible = useCallback((px) => { drawerVisible.current = px; }, []);
     const cardsOpen = Boolean(state.showAirportIdCard);
+    const { stop, setStop, raiseDrawer, onBackgroundClick } = useDrawerStop({
+        compact, wide: Boolean(Page?.wide), selectedCard: state.showAirportIdCard ?? null,
+    });
+    const { getInsets, onDrawerVisible } = useMapInsets();
+    const [cardSlot, setCardSlot] = useState(null);
 
     useLayoutEffect(() => {
         document.body.classList.toggle('shell-compact', compact);
     }, [compact]);
-
-    const getInsets = useCallback(() => (document.body.classList.contains('shell-compact')
-        ? { top: 0, right: 0, bottom: drawerVisible.current, left: 0 }
-        : { top: 0, right: 0, bottom: FOOTER_HEIGHT, left: cardStackWidth() }), []);
 
     // A `wide` page (feedback) shows its main content over the map area on wide screens; the map
     // stays mounted underneath. On the compact layout that content just sits in the drawer.
@@ -100,53 +52,7 @@ const AppShell = ({ children }) => {
 
     const layout = useMemo(() => ({ compact, getInsets, cardSlot, wideSlot: wide ? wideSlot : null }), [compact, getInsets, cardSlot, wide, wideSlot]);
 
-    // Selecting an airport settles the drawer at half: the card shows, and so does the airport on
-    // the map (a search box raises the drawer fully, which would leave the map hidden). Done during
-    // render, so the drawer reports its new height before the map pans to the airport.
-    const [settledFor, setSettledFor] = useState(null);
-    const selectedCard = state.showAirportIdCard ?? null;
-    if (selectedCard !== settledFor) {
-        setSettledFor(selectedCard);
-        if (compact && selectedCard) {
-            setStop('half');
-        }
-    }
-
-    const raiseDrawer = useCallback(() => setStop((current) => (current === 'peek' ? 'half' : current)), []);
-
-    // A wide page (feedback) has nothing to show on the map: on the compact layout it opens fully
-    useEffect(() => {
-        if (Page?.wide && compact) {
-            setStop('full');
-        } else {
-            raiseDrawer();
-        }
-    }, [Page, compact, raiseDrawer]);
-
-    // Tapping the map itself gets the drawer out of the way
-    const onBackgroundClick = useCallback(() => {
-        if (document.body.classList.contains('shell-compact')) {
-            setStop('peek');
-        }
-    }, []);
-
-    // A client-side visit swaps the page silently: announce the new page's title and start reading
-    // from the panel, as a page load would. Keyed on the title, which each page's <Head> sets (later
-    // than the visit itself), so a filter or a selection that keeps the page says nothing.
-    const [announcement, setAnnouncement] = useState('');
-    useEffect(() => {
-        let shown = document.title;
-        const observer = new MutationObserver(() => {
-            if (document.title !== shown) {
-                shown = document.title;
-                setAnnouncement(shown);
-                document.querySelector('.shell-stage > main')?.focus({ preventScroll: true });
-            }
-        });
-        observer.observe(document.head, { subtree: true, childList: true, characterData: true });
-
-        return () => observer.disconnect();
-    }, []);
+    const announcement = usePageAnnouncement();
 
     // Stamped, so a page can tell a repeat miss on the same ICAO from the one it already showed
     const [airportNotFound, setAirportNotFound] = useState(null);

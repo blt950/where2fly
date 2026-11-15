@@ -18,7 +18,7 @@ use App\Rules\ValidAircrafts;
 use App\Rules\ValidAirlines;
 use App\Rules\ValidDestinations;
 use App\Rules\ValidScores;
-use App\View\Components\ScoreIcon;
+use App\View\ScoreIcon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
