@@ -17,13 +17,22 @@ function AirportCard({ airportId }) {
     const [showSceneryIdCard, setShowSceneryIdCard] = useState(null);
     const [departureAirportId, setDepartureAirportId] = useState(null);
     const [arrivalAirportId, setArrivalAirportId] = useState(null);
-    const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts, initialCard, setFocusAirport, setShowAirportIdCard } = useContext(MapContext);
+    const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts, initialCard, navigate, setFocusAirport, setShowAirportIdCard } = useContext(MapContext);
 
     // Closing unmounts the card and its flights/scenery children; focusAirport
     // is cleared too so clicking the same marker again reopens the card
     const closeCard = () => {
         setShowAirportIdCard(null);
         setFocusAirport(null);
+    };
+
+    // A plain click navigates through the map's owner (keeping the map in the shell); a modified
+    // click (new tab, new window) is left to the browser
+    const followLink = (event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+        event.preventDefault();
+        navigate(event.currentTarget.href);
     };
 
     // Fetch airport data if it's not in the cache
@@ -178,11 +187,11 @@ function AirportCard({ airportId }) {
 
                             {(primaryAirport === undefined || primaryAirport === null) && (
                                 <>
-                                    <a className="btn btn-outline-primary btn-sm" href={route('front', {icao: data.airport.icao})}>
-                                    <i className="fa-sharp fa-search"></i> <span>Arrival</span>
+                                    <a className="btn btn-outline-primary btn-sm" href={route('front', {icao: data.airport.icao})} onClick={followLink}>
+                                        <i className="fa-sharp fa-search"></i> <span>Arrival</span>
                                     </a>
-                            
-                                    <a className="btn btn-outline-primary btn-sm" href={route('front.departures', {icao: data.airport.icao})}>
+
+                                    <a className="btn btn-outline-primary btn-sm" href={route('front.departures', {icao: data.airport.icao})} onClick={followLink}>
                                         <i className="fa-sharp fa-search"></i> <span>Departure</span>
                                     </a>
                                 </>
@@ -193,7 +202,7 @@ function AirportCard({ airportId }) {
                                     <button className="btn btn-outline-primary btn-sm" onClick={() => {
                                         const params = new URLSearchParams(window.location.search);
                                         params.set('icao', data.airport.icao);
-                                        window.location.href = `${window.location.pathname}?${params.toString()}`;
+                                        navigate(`${window.location.pathname}?${params.toString()}`);
 
                                         if(window.umami){
                                             umami.track('Interactions', {interaction: `Change airport from card`})

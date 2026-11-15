@@ -5,10 +5,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ShellMapContext } from '../components/shell/ShellMapContext';
 
 const routerVisit = vi.fn();
+const routerPost = vi.fn();
 
 vi.mock('@inertiajs/react', () => ({
     Head: () => null,
-    router: { visit: (...args) => routerVisit(...args) },
+    router: { visit: (...args) => routerVisit(...args), post: (...args) => routerPost(...args) },
 }));
 
 const { default: SearchResults } = await import('../pages/SearchResults');
@@ -54,6 +55,7 @@ afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
     routerVisit.mockClear();
+    routerPost.mockClear();
 });
 
 describe('SearchResults', () => {
@@ -96,12 +98,13 @@ describe('SearchResults', () => {
         expect(document.querySelector('tr.active').dataset.airportIcao).toBe('EA13');
     });
 
-    it('posts the query back to the form for editing, nested fields included', () => {
+    it('posts the query back to the form for editing, unchecked sort boxes as zeros', () => {
         renderWithShell(<SearchResults {...resultsProps(1)} />);
-        const fields = Object.fromEntries([...document.querySelectorAll('#filtersForm input[type=hidden]')].map((input) => [input.name, input.value]));
 
-        expect(fields).toMatchObject({
-            _token: 'test-token', icao: 'ENGM', direction: 'departure', 'scores[METAR_WINDY]': '1', sortByWeather: '0', sortByATC: '0',
+        fireEvent.click(screen.getByText(/Edit filters/));
+
+        expect(routerPost).toHaveBeenCalledWith('search.edit', {
+            icao: 'ENGM', direction: 'departure', scores: { METAR_WINDY: '1' }, sortByWeather: '0', sortByATC: '0',
         });
     });
 

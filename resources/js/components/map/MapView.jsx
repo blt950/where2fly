@@ -57,7 +57,9 @@ const reportError = (error) => {
 
 // Draws whatever `state` describes. The owner (the Blade adapter or the Inertia shell) holds the
 // state, so pages can read and change focus without DOM events.
-function MapView({ state, actions, sceneKey, onFocusAirport, onAirportNotFound }) {
+const pageLoad = (url) => window.location.assign(url);
+
+function MapView({ state, actions, sceneKey, onFocusAirport, onAirportNotFound, navigate = pageLoad }) {
 
     const {
         airports, cluster, clusterTone, camera, coordinates, drawRoute, focusAirport, gateLabels,
@@ -203,12 +205,13 @@ function MapView({ state, actions, sceneKey, onFocusAirport, onAirportNotFound }
         focusAirport,
         highlightedAircrafts,
         initialCard,
+        navigate,
         primaryAirport,
         reverseDirection,
         setFocusAirport,
         setShowAirportIdCard,
         userAuthenticated: userAuthenticated(),
-    }), [airports, findAirport, focusAirport, highlightedAircrafts, initialCard, primaryAirport, reverseDirection,
+    }), [airports, findAirport, focusAirport, highlightedAircrafts, initialCard, navigate, primaryAirport, reverseDirection,
         setFocusAirport, setShowAirportIdCard]);
 
     if (!webgl2) {

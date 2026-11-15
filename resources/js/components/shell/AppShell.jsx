@@ -1,5 +1,5 @@
 import { isValidElement, useCallback, useMemo, useRef, useState } from 'react';
-import { usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 
 import Alerts from './Alerts';
 import Footer from './Footer';
@@ -9,6 +9,8 @@ import { ShellMapContext } from './ShellMapContext';
 import MapView from '../map/MapView';
 import { SCENE_DEFAULTS } from '../map/mapScene';
 import { useMapState } from '../map/useMapState';
+
+const visit = (url) => router.visit(url);
 
 // The persistent layout: same DOM as layouts/app.blade.php so the existing SCSS applies, but it
 // is never thrown away between visits, so neither is the map.
@@ -57,7 +59,7 @@ const AppShell = ({ children }) => {
 
                 <div>
                     <aside id="map">
-                        <MapView state={state} actions={actions} sceneKey={sceneKey} onAirportNotFound={onAirportNotFound} />
+                        <MapView state={state} actions={actions} sceneKey={sceneKey} onAirportNotFound={onAirportNotFound} navigate={visit} />
                     </aside>
 
                     {/* Only plays on the first, full load: the shell, and so this element, persists. */}

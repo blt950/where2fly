@@ -24,58 +24,64 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\View\View;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class SearchController extends Controller
 {
+    private const FORM_DESCRIPTION = 'Always struggling to decide where to fly? Find some suggested destinations with fun weather and coverage!';
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return View
+     * Find arrivals: the user picks the departure
      */
-    public function indexArrivalSearch()
+    public function indexArrivalSearch(Request $request): Response
     {
-        return $this->buildSearchView('front.arrivals');
+        return $this->renderSearchForm($request, anchor: 'departure', area: 'destination', suggestionSide: 'arrival');
     }
 
     /**
-     * Display a listing of the resource.
+     * Find departures: the user picks the arrival
      */
-    public function indexDepartureSearch()
+    public function indexDepartureSearch(Request $request): Response
     {
-        return $this->buildSearchView('front.departures');
+        return $this->renderSearchForm($request, anchor: 'arrival', area: 'origin', suggestionSide: 'departure');
     }
 
     /**
-     * Build the shared view data for the arrival/departure search forms.
+     * The arrival/departure search form. `old` is the session's old input: a failed search, or
+     * "Edit filters" on a result, fills the form back in from it.
      */
-    private function buildSearchView(string $view): View
+    private function renderSearchForm(Request $request, string $anchor, string $area, string $suggestionSide): Response
     {
-        $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
-        $aircrafts = Aircraft::pluck('icao')->sort();
-        $prefilledIcao = request()->input('icao');
-        $destinationInputs = $this->getDestinationInputs();
-
         $lists = UserList::where('public', true)
             ->when(Auth::check(), fn ($q) => $q->orWhere('user_id', Auth::id()))
-            ->get();
+            ->get(['id', 'name']);
 
-        $whitelistDatabase = $this->getWhitelistsFromInput(array_merge(
-            old('arrivalWhitelists', []),
-            old('departureWhitelists', []),
-            old('whitelists', []),
-        ));
-
-        return view($view, compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
+        return Inertia::render('SearchForm', [
+            'anchor' => $anchor,
+            'area' => $area,
+            'suggestionSide' => $suggestionSide,
+            'prefilledIcao' => $request->input('icao'),
+            'old' => (object) $request->session()->getOldInput(),
+            'airlines' => Airline::where('has_flights', true)->orderBy('name')->get(['icao_code', 'name'])
+                ->map(fn (Airline $airline) => ['icao' => $airline->icao_code, 'name' => $airline->name]),
+            'aircrafts' => Aircraft::pluck('icao')->sort()->values(),
+            'destinationInputs' => $this->getDestinationInputs(),
+            'lists' => $lists->map(fn (UserList $list) => ['id' => $list->id, 'name' => $list->name]),
+            'aircraftTypes' => collect(AircraftHelper::TYPES)->map(fn ($type) => ['name' => $type['name'], 'description' => $type['description']]),
+            'scoreTypes' => ScoreHelper::TYPES,
+            'searchVersion' => config('app.searchVersion'),
+        ])->withViewData(['metaDescription' => self::FORM_DESCRIPTION]);
     }
 
     /**
-     * Display a listing of the resource.
+     * Find flights between two airports
      */
-    public function indexRouteSearch()
+    public function indexRouteSearch(Request $request): Response
     {
-        return view('front.routes');
+        return Inertia::render('RouteSearchForm', [
+            'old' => (object) $request->session()->getOldInput(),
+        ])->withViewData(['metaDescription' => self::FORM_DESCRIPTION]);
     }
 
     /**
@@ -530,11 +536,6 @@ class SearchController extends Controller
      * Get the relevant whitelist data, keyed by list id.
      * Note: This allows a user to get whitelists even if they don't own them.
      */
-    private function getWhitelistsFromInput($old)
-    {
-        return UserList::whereIn('id', $old)->get()->keyBy('id');
-    }
-
     /**
      * Resolve the chosen lists into the ICAOs they whitelist, or null for no filter.
      */

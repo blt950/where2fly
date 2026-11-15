@@ -150,11 +150,11 @@ Do not treat it as complete. Missing or faked there, real in the app:
 
 The work lands as one commit per milestone on `feat/responsive-redesign`:
 
-- M0: decisions
-- M1: Inertia shell + Top List
-- M2: Scenery
-- M3: search and route results
-- M4: search forms, then delete the Blade adapter
+- M0: decisions (done)
+- M1: Inertia shell + Top List (done)
+- M2: Scenery (done)
+- M3: search and route results (done)
+- M4: search forms (done). The Blade map mount stays, reduced to the default scene, because the account, list, scenery-editing and info pages still extend `layouts.app` and show the map. Whether they move into the shell is open question 4.
 - M5: card host + unified Flights view
 - M6: phone/tablet layout
 - M7: clean-up

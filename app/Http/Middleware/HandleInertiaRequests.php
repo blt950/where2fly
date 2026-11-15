@@ -32,6 +32,15 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
+     * The page URL exactly as requested. The default, fullUrl(), sorts the query and re-indexes
+     * arrays (destinations[0]=), which would change the shape of every bookmarked search.
+     */
+    public function urlResolver()
+    {
+        return fn (Request $request) => $request->getRequestUri();
+    }
+
+    /**
      * What layouts/app.blade.php reads from the session, the auth user and the View::share calls
      * of AdminVariables/FeedbackVariables, for the React shell.
      */

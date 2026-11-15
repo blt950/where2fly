@@ -27,7 +27,7 @@ const Menu = () => {
             <header className="mb-auto">
                 <nav className="navbar navbar-expand-xl navbar-dark">
                     <div className="d-flex d-row">
-                        <a href={route('front')} className="d-block navbar-brand mb-0 logo">Where2Fly</a>
+                        <Link href={route('front')} className="d-block navbar-brand mb-0 logo">Where2Fly</Link>
                         <a className="donate btn btn-sm btn-light" href="https://ko-fi.com/X7X21V3MEX" target="_blank">
                             <img src="/img/kofi_symbol.svg" alt="Coffee cup with a heart" />
                             Buy me a coffee
@@ -40,7 +40,7 @@ const Menu = () => {
                     <div className="collapse navbar-collapse" id="navbarMenu">
                         <ul className="navbar-nav ms-auto">
                             <li className="nav-item">
-                                <NavLink href={route('front')} active={is('front*') || is('search*')}>
+                                <NavLink inShell href={route('front')} active={is('front*') || is('search*')}>
                                     <i className="fa-sharp fa-search"></i>&nbsp; Search
                                 </NavLink>
                             </li>

@@ -12,7 +12,6 @@ import { useTooltips } from '../components/utils/useTooltips';
 const VISIBLE_ROWS = 10;
 const feet = (ft) => ft.toLocaleString('en-US');
 const metres = (ft) => Math.round(ft * 0.3048).toLocaleString('en-US');
-const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 const track = (interaction) => window.umami?.track('Interactions', { interaction });
 
 const SORT_COLUMNS = {
@@ -23,39 +22,26 @@ const SORT_COLUMNS = {
     forecast: (airport) => airport.scores.length,
 };
 
-// The query as flat form fields, arrays one level deep (`scores[KEY]`), as the Blade form posted it.
-const hiddenFields = (query) => Object.entries(query).flatMap(([key, value]) => (
-    value !== null && typeof value === 'object'
-        ? Object.entries(value).map(([subkey, subvalue]) => [`${key}[${subkey}]`, subvalue])
-        : [[key, value]]
-));
-
 const Flag = ({ airport }) => (
     <img className="flag" src={`/img/flags/${airport.isoCountry.toLowerCase()}.svg`} height="16"
         data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
 );
 
-// "Edit filters" goes back to the Blade search form with the query as old input, so it stays a
-// plain form post; "Bookmark" only explains how.
+// "Edit filters" hands the query back to the search form as old input; unchecked sort boxes are
+// absent from the query, so they're sent as explicit zeros. "Bookmark" only explains how.
 const SearchActions = ({ query }) => (
-    <form id="filtersForm" method="POST" action={route('search.edit')}>
-        <input type="hidden" name="_token" value={csrfToken()} />
-        {hiddenFields(query).map(([name, value]) => <input key={name} type="hidden" name={name} value={value ?? ''} />)}
-        {!('sortByWeather' in query) && <input type="hidden" name="sortByWeather" value="0" />}
-        {!('sortByATC' in query) && <input type="hidden" name="sortByATC" value="0" />}
-
-        <div className="d-flex flex-wrap gap-2" style={{ marginTop: '0.5rem' }}>
-            <button id="editSearchBtn" type="submit" className="btn btn-sm btn-outline-warning mb-1">
-                <i className="fa-sharp fa-pencil"></i> Edit filters
-            </button>
-            <button id="bookmarkBtn" type="button" className="btn btn-sm btn-outline-warning mb-1" onClick={() => {
-                track('Bookmark search');
-                alert('To save these search filters, manually bookmark this page in your browser.');
-            }}>
-                <i className="fa-sharp fa-bookmark"></i> Bookmark search
-            </button>
-        </div>
-    </form>
+    <div className="d-flex flex-wrap gap-2" style={{ marginTop: '0.5rem' }}>
+        <button id="editSearchBtn" type="button" className="btn btn-sm btn-outline-warning mb-1"
+            onClick={() => router.post(route('search.edit'), { sortByWeather: '0', sortByATC: '0', ...query })}>
+            <i className="fa-sharp fa-pencil"></i> Edit filters
+        </button>
+        <button id="bookmarkBtn" type="button" className="btn btn-sm btn-outline-warning mb-1" onClick={() => {
+            track('Bookmark search');
+            alert('To save these search filters, manually bookmark this page in your browser.');
+        }}>
+            <i className="fa-sharp fa-bookmark"></i> Bookmark search
+        </button>
+    </div>
 );
 
 // Phones can't open the airport card yet (M6), so the row unfolds the same details in place.

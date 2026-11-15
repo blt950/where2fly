@@ -146,6 +146,66 @@ class SearchTest extends TestCase
         $response->assertRedirect(route('front.departures'));
     }
 
+    public function test_edit_filters_fills_the_form_back_in(): void
+    {
+        $query = ['icao' => 'ENGM', 'direction' => 'arrival', 'scores' => ['METAR_WINDY' => '1'], 'destinations' => ['C-EU'], 'sortByWeather' => '0'];
+
+        $this->post('/search/edit', $query)->assertRedirect(route('front.departures'));
+
+        $this->get(route('front.departures'))->assertInertia(fn (Assert $page) => $page->component('SearchForm')
+            ->where('anchor', 'arrival')
+            ->where('old.icao', 'ENGM')
+            ->where('old.scores.METAR_WINDY', '1')
+            ->where('old.destinations', ['C-EU'])
+            ->where('old.sortByWeather', '0'));
+    }
+
+    // -------------------------------------------------------------------------
+    // Search forms
+    // -------------------------------------------------------------------------
+
+    public function test_arrival_form_asks_for_the_departure(): void
+    {
+        $this->get('/?icao=ENGM')->assertInertia(fn (Assert $page) => $page->component('SearchForm')
+            ->where('anchor', 'departure')
+            ->where('area', 'destination')
+            ->where('suggestionSide', 'arrival')
+            ->where('prefilledIcao', 'ENGM')
+            ->where('searchVersion', config('app.searchVersion'))
+            ->has('destinationInputs.Continents.C-EU')
+            ->has('aircraftTypes.JM.description'));
+    }
+
+    public function test_departure_form_asks_for_the_arrival(): void
+    {
+        $this->get('/departures/')->assertInertia(fn (Assert $page) => $page->component('SearchForm')
+            ->where('anchor', 'arrival')
+            ->where('area', 'origin')
+            ->where('suggestionSide', 'departure'));
+    }
+
+    public function test_whitelists_offer_public_lists_and_the_users_own(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        UserList::create(['name' => 'Public', 'user_id' => $other->id, 'public' => true, 'color' => '#fff']);
+        UserList::create(['name' => 'Mine', 'user_id' => $user->id, 'public' => false, 'color' => '#fff']);
+        UserList::create(['name' => 'Private', 'user_id' => $other->id, 'public' => false, 'color' => '#fff']);
+
+        $this->actingAs($user)->get('/')->assertInertia(fn (Assert $page) => $page
+            ->where('lists', fn ($lists) => collect($lists)->pluck('name')->sort()->values()->all() === ['Mine', 'Public']));
+    }
+
+    public function test_route_form_gets_its_input_back_after_a_failed_search(): void
+    {
+        $this->get('/search/routes?departure=ENGM&arrival=EDDF&sort=timestamp')->assertRedirect(route('front.routes'));
+
+        $this->get(route('front.routes'))->assertInertia(fn (Assert $page) => $page->component('RouteSearchForm')
+            ->where('old.departure', 'ENGM')
+            ->where('old.sort', 'timestamp')
+            ->has('errors.routeNotFound'));
+    }
+
     // -------------------------------------------------------------------------
     // Search results
     // -------------------------------------------------------------------------
@@ -800,23 +860,42 @@ class SearchTest extends TestCase
 
     public function test_a_shell_visit_that_ends_on_a_blade_page_becomes_a_full_page_load(): void
     {
-        $response = $this->withHeaders($this->inertiaHeaders())->get('/routes/');
+        $response = $this->withHeaders($this->inertiaHeaders())->get('/privacy');
 
         $response->assertStatus(409);
-        $response->assertHeader('X-Inertia-Location', url('/routes'));
+        $response->assertHeader('X-Inertia-Location', url('/privacy'));
     }
 
-    public function test_errors_survive_the_full_page_load_after_a_failed_shell_search(): void
+    public function test_flashed_data_survives_the_full_page_load_to_a_blade_page(): void
     {
-        $failed = $this->withHeaders($this->inertiaHeaders())->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+        $this->withHeaders($this->inertiaHeaders())->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
             'metcondition' => 'INVALID',
-        ])));
-        $failed->assertRedirect(route('front'));
+        ])))->assertRedirect(route('front'));
 
         // Without the reflash this request would use the errors up, and the full load would show none
-        $this->withHeaders($this->inertiaHeaders())->get(route('front'))
+        $this->withHeaders($this->inertiaHeaders())->get('/privacy')
             ->assertStatus(409)
             ->assertSessionHasErrors('metcondition');
+    }
+
+    public function test_the_page_url_keeps_the_query_exactly_as_requested(): void
+    {
+        $query = 'icao=ENGM&direction=departure&destinations%5B%5D=C-EU&codeletter=JM';
+
+        $this->assertSame('/?' . $query, $this->get('/?' . $query)->viewData('page')['url']);
+    }
+
+    public function test_a_failed_shell_search_lands_on_the_form_with_its_errors(): void
+    {
+        $this->withHeaders($this->inertiaHeaders())->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
+            'metcondition' => 'INVALID',
+        ])))->assertRedirect(route('front'));
+
+        $this->withHeaders($this->inertiaHeaders())->get(route('front'))
+            ->assertOk()
+            ->assertJsonPath('component', 'SearchForm')
+            ->assertJsonPath('props.old.metcondition', 'INVALID')
+            ->assertJsonPath('props.errors.metcondition', fn ($message) => filled($message));
     }
 
     private function inertiaHeaders(): array
