@@ -60,9 +60,12 @@ class HandleInertiaRequests extends Middleware
             // Changes whenever one of the user's lists is saved, hidden or removed: the map
             // refetches the lists it draws when it does
             'listsRevision' => function () use ($request) {
-                $revision = $request->user()?->lists()->toBase()->selectRaw('COUNT(*) AS lists, MAX(updated_at) AS saved')->first();
+                // MAX(id) too: deleting a list and creating one within the same second keeps the
+                // count and the newest timestamp, but never the highest id
+                $revision = $request->user()?->lists()->toBase()
+                    ->selectRaw('COUNT(*) AS lists, MAX(id) AS newest, MAX(updated_at) AS saved')->first();
 
-                return $revision ? $revision->lists . '@' . $revision->saved : null;
+                return $revision ? "{$revision->lists}:{$revision->newest}@{$revision->saved}" : null;
             },
         ];
     }

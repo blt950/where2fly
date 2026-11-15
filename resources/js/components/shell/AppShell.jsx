@@ -63,16 +63,24 @@ const AppShell = ({ children }) => {
 
     const announcement = usePageAnnouncement();
 
-    // Stamped, so a page can tell a repeat miss on the same ICAO from the one it already showed
-    const [airportNotFound, setAirportNotFound] = useState(null);
-    const onAirportNotFound = useCallback((icao) => setAirportNotFound({ icao, at: Date.now() }), []);
+    // An airport the map couldn't find (a typo in ?airport=, the Scenery search box), said once in
+    // the alerts on any page; gone with the next page or the next airport found
+    const [missingAirport, setMissingAirport] = useState(null);
+    const onAirportNotFound = useCallback((icao) => setMissingAirport(icao), []);
+    const [missingFor, setMissingFor] = useState({ component: page.component, focus: state.focusAirport });
+    if (page.component !== missingFor.component || (state.focusAirport && state.focusAirport !== missingFor.focus)) {
+        setMissingFor({ component: page.component, focus: state.focusAirport });
+        setMissingAirport(null);
+    }
+    const notices = missingAirport
+        ? [{ key: 'airport-not-found', variant: 'warning', text: `No airport found for "${missingAirport}". Check the ICAO code and try again.` }]
+        : [];
 
     const shellMap = useMemo(() => ({
         focusAirport: state.focusAirport,
         setFocusAirport: select,
         pingAirport: actions.pingAirport,
-        airportNotFound,
-    }), [state.focusAirport, select, actions, airportNotFound]);
+    }), [state.focusAirport, select, actions]);
 
     return (
         <ShellMapContext.Provider value={shellMap}>
@@ -83,7 +91,7 @@ const AppShell = ({ children }) => {
                     <Drawer enabled={compact} stop={stop} onStopChange={setStop} onVisibleChange={onDrawerVisible}>
                         {/* Kept mounted while the cards show, so the page keeps its state and scroll */}
                         <div className="drawer-page" hidden={compact && cardsOpen}>
-                            <Alerts />
+                            <Alerts notices={notices} />
                             {children}
                         </div>
                         <div ref={setCardSlot} className="drawer-cards" hidden={!compact || !cardsOpen}></div>

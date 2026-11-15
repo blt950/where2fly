@@ -30,8 +30,11 @@ router.on('httpException', (event) => {
     }
 
     // Anything else (a proxy's 502, maintenance mode) gets a full page load, so the browser shows it
-    // as a page instead of Inertia's raw-HTML modal
-    captureException(new Error(`Inertia visit got a non-Inertia response (${response.status})`));
+    // as a page instead of Inertia's raw-HTML modal. Maintenance (503) is planned: one report per
+    // visitor per navigation during a deploy would bury the real ones.
+    if (response.status !== 503) {
+        captureException(new Error(`Inertia visit got a non-Inertia response (${response.status})`));
+    }
     event.preventDefault();
     window.location.assign(lastVisit?.method === 'get' ? String(lastVisit.url) : window.location.href);
 });

@@ -6,15 +6,12 @@ import PageTitle from '../components/ui/PageTitle';
 
 const Scenery = ({ simulators, filteredSimulator }) => {
 
-    const { setFocusAirport, airportNotFound } = useShellMap();
+    const { setFocusAirport } = useShellMap();
     const [icao, setIcao] = useState('');
-    const [searched, setSearched] = useState(null);
 
-    const notFound = searched && airportNotFound?.icao === searched.icao && airportNotFound.at >= searched.at;
-
+    // An unknown ICAO is reported by the shell, in the alerts above
     const search = (event) => {
         event.preventDefault();
-        setSearched({ icao, at: Date.now() });
         setFocusAirport(icao);
     };
 
@@ -50,11 +47,6 @@ const Scenery = ({ simulators, filteredSimulator }) => {
                                 value={icao} onChange={(event) => setIcao(event.target.value.toUpperCase())} />
                             <button className="btn btn-primary ms-2" type="submit">Search</button>
                         </div>
-                        {notFound && (
-                            <div className="text-warning mt-2">
-                                <i className="fa-sharp fa-exclamation-triangle"></i> No results for that ICAO. Check the code and try again.
-                            </div>
-                        )}
                     </form>
                 </div>
             </div>

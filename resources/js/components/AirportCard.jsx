@@ -93,8 +93,9 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
                             <TAF taf={data.taf}/>
                         </dd>
 
-                        {/* In a tab, the Flights tab replaces these shortcuts */}
-                        {!inTab && data.airlines && data.airlines.length > 0 && (
+                        {/* Shortcuts into the flights, filtered to one airline: the stacked card on wide
+                            screens, the Flights tab on phones */}
+                        {data.airlines && data.airlines.length > 0 && (
                             <>
                                 <dt>Flights</dt>
                                 <dd className="d-flex flex-wrap gap-1">
@@ -121,13 +122,14 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
 
                     <div className="d-flex flex-wrap gap-2">
                         {/* In a tab, the Flights and Scenery tabs replace these buttons */}
+                        {/* None on the route: nothing to open. No scenery still opens, for "Add missing scenery". */}
                         {!inTab && counts.flights !== undefined && (
-                            <button className="btn btn-outline-primary btn-sm" onClick={() => onOpenFlights(null)}>
+                            <button className="btn btn-outline-primary btn-sm" onClick={() => onOpenFlights(null)} disabled={counts.flights === 0}>
                                 <i className="fa-sharp fa-plane-up"></i> Flights<Count value={counts.flights} />
                             </button>
                         )}
                         {!inTab && (
-                            <button className="btn btn-outline-primary btn-sm" onClick={onOpenScenery}>
+                            <button className={`btn btn-outline-primary btn-sm${counts.scenery === 0 ? ' is-empty' : ''}`} onClick={onOpenScenery}>
                                 <i className="fa-sharp fa-map"></i> Scenery<Count value={counts.scenery} />
                             </button>
                         )}

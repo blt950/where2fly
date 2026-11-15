@@ -195,6 +195,7 @@ describe('CardHost / AirportCard', () => {
         await waitFor(() => expect(screen.getByRole('button', { name: /Scenery/ }).textContent.trim()).toBe('Scenery (1)'));
         expect(screen.queryByText('Orbx')).toBeNull();
         // Off a route there are no flights to count, so no Flights button
+        expect(screen.getByRole('button', { name: /Scenery/ }).classList.contains('is-empty')).toBe(false);
         expect(screen.queryByRole('button', { name: /Flights/ })).toBeNull();
     });
 
@@ -401,6 +402,42 @@ describe('CardHost / AirportCard', () => {
             fireEvent.click(screen.getByLabelText('Back to the list'));
             expect(setFocusAirport).toHaveBeenCalledWith(null);
             expect(setShowAirportIdCard).toHaveBeenCalledWith(null);
+        });
+
+        it('dims empty tabs, and a Flights tab with no flights cannot be opened', async () => {
+            const noFlights = { ...flightsFixture, flights: [] };
+            fetch.mockImplementation((url) => Promise.resolve(url === 'api.airport.scenery'
+                ? { ok: false, status: 404, json: () => Promise.resolve({}) }
+                : { ok: true, status: 200, json: () => Promise.resolve({ data: url === 'api.airport.flights' ? noFlights : airportFixture }) }));
+            const slot = renderTabbed({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false });
+
+            const flightsTab = await waitFor(() => {
+                const tab = slot.querySelector('#card-tab-flights.card-tab-empty');
+                expect(tab).not.toBeNull();
+                return tab;
+            });
+            await waitFor(() => expect(slot.querySelector('#card-tab-scenery').classList.contains('card-tab-empty')).toBe(true));
+            expect(flightsTab.getAttribute('aria-disabled')).toBe('true');
+
+            fireEvent.click(flightsTab);
+            expect(tabs(slot)[0]).toBe('ENGM:true');
+
+            // Scenery at 0 still opens, for "Add missing scenery"
+            fireEvent.click(slot.querySelector('#card-tab-scenery'));
+            expect(tabs(slot)[2]).toBe('Scenery:true');
+        });
+
+        it('keeps the airline shortcuts on the airport tab, opening the Flights tab filtered', async () => {
+            const withAirlines = { ...airportFixture, airlines: [SAS, DLH] };
+            const bodies = { 'api.airport.show': withAirlines, 'api.airport.flights': flightsFixture, 'api.airport.scenery': sceneryFixture };
+            fetch.mockImplementation((url) => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: bodies[url] }) }));
+            const slot = renderTabbed({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false });
+
+            fireEvent.click(await screen.findByAltText('See all Lufthansa flights'));
+
+            expect(tabs(slot)).toEqual(['ENGM:false', 'Flights:true', 'Scenery:false']);
+            await screen.findByText('DLH2');
+            expect(screen.queryByText('SAS1')).toBeNull();
         });
 
         it('steps back on Esc as the Back arrow would: to the airport tab, then out', async () => {

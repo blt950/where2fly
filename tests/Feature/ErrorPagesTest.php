@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -70,6 +71,23 @@ class ErrorPagesTest extends TestCase
 
         config(['app.debug' => true]);
         $this->get('/_test/crash')->assertServerError()->assertDontSee('<script data-page="app"', false);
+    }
+
+    public function test_a_crash_while_rendering_the_error_page_falls_back_to_the_plain_view(): void
+    {
+        config(['app.debug' => false]);
+        // As in a database outage: the shared props query it, and throw again on the error page
+        $this->app->bind(HandleInertiaRequests::class, fn () => new class extends HandleInertiaRequests
+        {
+            public function share(Request $request): array
+            {
+                throw new RuntimeException('database down');
+            }
+        });
+
+        $this->get('/changelog')->assertServerError()
+            ->assertDontSee('<script data-page="app"', false)
+            ->assertSee('<title>Server Error</title>', false);
     }
 
     public function test_an_expired_session_goes_back_with_the_input_and_an_explanation(): void

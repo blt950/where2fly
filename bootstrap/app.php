@@ -106,9 +106,17 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $shown = in_array($status, [403, 404], true) || (in_array($status, [500, 503], true) && ! config('app.debug'));
 
-            return $shown && $request->hasSession()
-                ? $response->render('Error', ['status' => $status])->withSharedData()
-                : null;
+            if (! $shown || ! $request->hasSession()) {
+                return null;
+            }
+
+            // The shared props query the database; when that is what failed, they throw again.
+            // The plain Blade error view needs none of them.
+            try {
+                return $response->render('Error', ['status' => $status])->withSharedData()->toResponse($request);
+            } catch (Throwable) {
+                return null;
+            }
         });
     })
     ->withCommands()

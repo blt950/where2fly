@@ -11,7 +11,8 @@ let mapProps;
 
 vi.mock('@inertiajs/react', () => ({ usePage: () => page, router }));
 vi.mock('../components/shell/Menu', () => ({ default: () => null }));
-vi.mock('../components/shell/Alerts', () => ({ default: () => null }));
+let notices = [];
+vi.mock('../components/shell/Alerts', () => ({ default: (props) => { notices = props.notices; return null; } }));
 vi.mock('../components/shell/Footer', () => ({ default: () => null }));
 vi.mock('../components/shell/MapHint', () => ({ default: () => <div data-testid="hint" /> }));
 vi.mock('../components/map/MapView', () => ({
@@ -207,21 +208,20 @@ describe('AppShell', () => {
         expect(document.activeElement.tagName).toBe('MAIN');
     });
 
-    it('tells the page about an airport the map could not find, stamped per miss', () => {
-        const seen = [];
-        const ScenerySearch = () => {
-            seen.push(useShellMap().airportNotFound);
-            return null;
-        };
-
+    it('says once, in the alerts, that an airport could not be found, until the next page or airport', () => {
+        const OtherPageToo = () => null;
         visit('/scenery');
-        render(<AppShell><ScenerySearch /></AppShell>);
+        const { rerender } = render(<AppShell><OtherPage /></AppShell>);
 
         act(() => mapProps.onAirportNotFound('ZZZZ'));
-        const first = seen.at(-1);
-        act(() => mapProps.onAirportNotFound('ZZZZ'));
+        expect(notices).toEqual([expect.objectContaining({ variant: 'warning', text: expect.stringContaining('ZZZZ') })]);
 
-        expect(first.icao).toBe('ZZZZ');
-        expect(seen.at(-1)).not.toBe(first);
+        act(() => mapProps.actions.set({ focusAirport: 'ENGM' }));
+        expect(notices).toEqual([]);
+
+        act(() => mapProps.onAirportNotFound('YYYY'));
+        page = { url: '/top', component: 'Top', props: {} };
+        rerender(<AppShell><OtherPageToo /></AppShell>);
+        expect(notices).toEqual([]);
     });
 });

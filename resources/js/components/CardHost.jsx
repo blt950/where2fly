@@ -111,7 +111,9 @@ function CardHost({ airportId }) {
         // through aria-selected and renders only the selected panel, so Flights fetches on demand
         const tabs = [
             { id: 'airport', icon: 'fa-tower-control', label: focused?.icao ?? 'Airport' },
-            ...(onRoute ? [{ id: 'flights', icon: 'fa-plane-up', label: 'Flights', count: flightsTotal }] : []),
+            // Dimmed at 0, as the desktop buttons are; no flights is nothing to open, no scenery still
+            // has "Add missing scenery"
+            ...(onRoute ? [{ id: 'flights', icon: 'fa-plane-up', label: 'Flights', count: flightsTotal, inert: flightsTotal === 0 }] : []),
             { id: 'scenery', icon: 'fa-map', label: 'Scenery', count: sceneryTotal },
         ];
         const backToAirport = () => update({ tab: 'airport' });
@@ -125,7 +127,8 @@ function CardHost({ airportId }) {
                     <u-tablist className="card-tabs" aria-label="Airport details">
                         {tabs.map((tab) => (
                             <u-tab key={tab.id} id={`card-tab-${tab.id}`} aria-controls={`card-panel-${tab.id}`}
-                                aria-selected={cards.tab === tab.id ? 'true' : 'false'} onClick={() => update({ tab: tab.id })}>
+                                className={tab.count === 0 ? 'card-tab-empty' : undefined} aria-disabled={tab.inert ? 'true' : undefined}
+                                aria-selected={cards.tab === tab.id ? 'true' : 'false'} onClick={() => !tab.inert && update({ tab: tab.id })}>
                                 <i className={`fa-sharp ${tab.icon}`} aria-hidden="true"></i>
                                 <span className="card-tab-label">{tab.label}</span>
                                 {tab.count !== undefined && tab.count !== null && (
