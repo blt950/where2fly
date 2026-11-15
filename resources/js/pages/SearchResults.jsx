@@ -29,12 +29,12 @@ const Flag = ({ airport }) => (
         tabIndex={0} onClick={stopOnTouch} data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
 );
 
-// "Edit filters" hands the query back to the search form as old input; unchecked sort boxes are
-// absent from the query, so they're sent as explicit zeros. "Bookmark" only explains how.
+// "Edit filters" hands the query back to the search form as old input. The server fills in the
+// sort boxes a form leaves out when unchecked, so they come back as they were. "Bookmark" only explains how.
 const SearchActions = ({ query }) => (
     <div className="d-flex flex-wrap gap-2" style={{ marginTop: '0.5rem' }}>
         <button id="editSearchBtn" type="button" className="btn btn-sm btn-outline-warning mb-1"
-            onClick={() => router.post(route('search.edit'), { sortByWeather: '0', sortByATC: '0', ...query })}>
+            onClick={() => router.post(route('search.edit'), query)}>
             <i className="fa-sharp fa-pencil"></i> Edit filters
         </button>
         <button id="bookmarkBtn" type="button" className="btn btn-sm btn-outline-warning mb-1" onClick={() => {

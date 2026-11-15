@@ -91,6 +91,9 @@ class SearchController extends Controller
      */
     public function search(Request $request)
     {
+        // An unchecked box is absent from the query; record it as 0, so the old input a failed
+        // search redirects back with keeps it unchecked instead of the form's checked default
+        $request->mergeIfMissing(['sortByWeather' => '0', 'sortByATC' => '0']);
 
         /**
          *  Validate the request and mapping of arguments
@@ -159,8 +162,8 @@ class SearchController extends Controller
 
         // Create a filter array based on input
         $sortByScores = [];
-        isset($data['sortByWeather']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::weatherTypes()) : null;
-        isset($data['sortByATC']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::vatsimTypes()) : null;
+        ! empty($data['sortByWeather']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::weatherTypes()) : null;
+        ! empty($data['sortByATC']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::vatsimTypes()) : null;
 
         // The anchor is whichever side the pilot supplied, the suggestions are the other.
         // `whitelists` predates the split and only restricted suggestions in practice —

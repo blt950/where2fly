@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -220,6 +221,37 @@ class SearchTest extends TestCase
         ])));
 
         $response->assertSessionHasErrors('airportNotFound');
+    }
+
+    public function test_unchecked_sort_boxes_stay_unchecked_after_a_failed_search(): void
+    {
+        $unchecked = array_diff_key($this->validSearchParams, array_flip(['sortByWeather', 'sortByATC']));
+
+        $this->get('/search?' . http_build_query(array_merge($unchecked, ['airtimeMax' => '2', 'destinations' => ['C-AS']])))
+            ->assertSessionHasErrors('airportNotFound')
+            ->assertSessionHasInput('sortByWeather', '0')
+            ->assertSessionHasInput('sortByATC', '0');
+
+        $this->get('/search?' . http_build_query(array_merge($unchecked, ['codeletter' => 'INVALID'])))
+            ->assertSessionHasErrors('codeletter')
+            ->assertSessionHasInput('sortByWeather', '0');
+    }
+
+    public function test_sort_flags_of_zero_dont_sort(): void
+    {
+        // Results are shuffled within score buckets, so the ranking pivot in the SQL is the signal
+        $sorts = function (array $flags) {
+            $sql = [];
+            DB::listen(function ($query) use (&$sql) {
+                $sql[] = $query->sql;
+            });
+            $this->get('/search?' . http_build_query(array_merge($this->validSearchParams, $flags)))->assertOk();
+
+            return collect($sql)->contains(fn ($q) => str_contains($q, 'as score_count'));
+        };
+
+        $this->assertFalse($sorts(['sortByWeather' => '0', 'sortByATC' => '0']));
+        $this->assertTrue($sorts(['sortByWeather' => '1', 'sortByATC' => '0']));
     }
 
     public function test_search_doesnt_show_airport_without_metar(): void

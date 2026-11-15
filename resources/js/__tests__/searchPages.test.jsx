@@ -23,7 +23,7 @@ const airport = (icao, rank, extra = {}) => ({
 });
 
 const resultsProps = (count) => ({
-    query: { icao: 'ENGM', direction: 'departure', scores: { METAR_WINDY: '1' } },
+    query: { icao: 'ENGM', direction: 'departure', scores: { METAR_WINDY: '1' }, sortByWeather: '0', sortByATC: '1' },
     direction: 'departure',
     suggestedAirport: false,
     bearingWarning: null,
@@ -94,14 +94,12 @@ describe('SearchResults', () => {
         expect(document.querySelector('tr.active').dataset.airportIcao).toBe('EA13');
     });
 
-    it('posts the query back to the form for editing, unchecked sort boxes as zeros', () => {
+    it('posts the query back to the form for editing as the server sent it', () => {
         renderWithShell(<SearchResults {...resultsProps(1)} />);
 
         fireEvent.click(screen.getByText(/Edit filters/));
 
-        expect(routerPost).toHaveBeenCalledWith('search.edit', {
-            icao: 'ENGM', direction: 'departure', scores: { METAR_WINDY: '1' }, sortByWeather: '0', sortByATC: '0',
-        });
+        expect(routerPost).toHaveBeenCalledWith('search.edit', resultsProps(1).query);
     });
 
     it('randomises with a fresh visit to the same search, without the selected airport', () => {
