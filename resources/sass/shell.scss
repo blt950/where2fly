@@ -17,6 +17,18 @@ $drawer-handle-height: 2.75rem;
     outline: none;
 }
 
+// How many flights or sceneries there are: on the drawer's tabs and the desktop card's buttons alike
+.count-pill {
+    display: inline-block;
+    min-width: 1.4rem;
+    padding: 0 0.3rem;
+    background: $tertiary;
+    color: $bluewhite;
+    font-size: 0.75rem;
+    line-height: 1.4rem;
+    text-align: center;
+}
+
 body.shell-compact.d-flex.h-100 {
     height: 100dvh !important;
     min-height: 0;
@@ -264,16 +276,6 @@ body.shell-compact {
                 border-bottom-color: $primary;
             }
         }
-    }
-
-    .card-tab-count {
-        min-width: 1.4rem;
-        padding: 0 0.3rem;
-        background: $tertiary;
-        color: $bluewhite;
-        font-size: 0.75rem;
-        line-height: 1.4rem;
-        text-align: center;
     }
 
     .card-tab-panel:not([hidden]) {

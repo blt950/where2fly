@@ -7,9 +7,12 @@ import TAF from './ui/TAF';
 import { useCachedPost } from './utils/useCachedPost';
 import { useTooltips } from './utils/useTooltips';
 
-// The airport itself. The flights and scenery cards beside it belong to CardHost, which opens
-// them through `onOpenFlights` / `onOpenScenery`. `inTab`: shown as a drawer tab, see CardHost.
-function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab = false }) {
+const Count = ({ value }) => (value === null || value === undefined ? null
+    : <span className="count-pill ms-1" aria-label={`${value} available`}>{value}</span>);
+
+// The airport itself. CardHost owns the flights and scenery cards beside it, and their `counts`
+// (null while loading; no flights off a route). `inTab`: shown as a drawer tab, see CardHost.
+function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab = false, counts = {} }) {
     const cardRef = useRef(null);
     const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts, navigate } = useContext(MapContext);
 
@@ -118,10 +121,15 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
                     </dl>
 
                     <div className="d-flex flex-wrap gap-2">
-                        {/* In a tab, the Scenery tab replaces this button */}
+                        {/* In a tab, the Flights and Scenery tabs replace these buttons */}
+                        {!inTab && counts.flights !== undefined && (
+                            <button className="btn btn-outline-primary btn-sm" onClick={() => onOpenFlights(null)}>
+                                <i className="fa-sharp fa-plane-up"></i> Flights <Count value={counts.flights} />
+                            </button>
+                        )}
                         {!inTab && (
                             <button className="btn btn-outline-primary btn-sm" onClick={onOpenScenery}>
-                                <i className="fa-sharp fa-map"></i> Scenery
+                                <i className="fa-sharp fa-map"></i> Scenery <Count value={counts.scenery} />
                             </button>
                         )}
 

@@ -188,11 +188,14 @@ describe('CardHost / AirportCard', () => {
         }));
     });
 
-    it('opens only the airport card by default', async () => {
+    it('opens only the airport card by default, counting the sceneries on its button as the tabs do', async () => {
         renderCard(baseMapContext);
         await screen.findByText('Oslo Gardermoen');
 
-        expect(fetch).not.toHaveBeenCalledWith('api.airport.scenery', expect.anything());
+        await waitFor(() => expect(screen.getByRole('button', { name: /Scenery/ }).querySelector('.count-pill')?.textContent).toBe('1'));
+        expect(screen.queryByText('Orbx')).toBeNull();
+        // Off a route there are no flights to count, so no Flights button
+        expect(screen.queryByRole('button', { name: /Flights/ })).toBeNull();
     });
 
     it('shows Arrival/Departure links when there is no primary airport', async () => {
@@ -237,6 +240,19 @@ describe('CardHost / AirportCard', () => {
             expect(JSON.parse(request.body)).not.toHaveProperty('airlineId');
         });
 
+        it('counts the route\'s flights on a Flights button that opens every airline, as the tab does', async () => {
+            renderCard(onRoute);
+            await screen.findByText('Oslo Gardermoen');
+
+            const button = await screen.findByRole('button', { name: /Flights/ });
+            await waitFor(() => expect(button.querySelector('.count-pill')?.textContent).toBe('2'));
+
+            fireEvent.click(button);
+            await screen.findByText('SAS1');
+            expect(flightRows()).toEqual(['SAS1', 'DLH2']);
+            expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.flights')).toHaveLength(1);
+        });
+
         it('switches airline or shows all without fetching again', async () => {
             renderCard(onRoute);
             await screen.findByText('Oslo Gardermoen');
@@ -256,7 +272,7 @@ describe('CardHost / AirportCard', () => {
         it('shows the airline logo before each callsign when the route has one airline', async () => {
             const oneAirline = { airlines: [SAS], airline: null, flights: [flightsFixture.flights[0]] };
             fetch.mockImplementation((url) => Promise.resolve({
-                ok: true, status: 200, json: () => Promise.resolve({ data: url === 'api.airport.flights' ? oneAirline : withAirlines }),
+                ok: true, status: 200, json: () => Promise.resolve({ data: { 'api.airport.flights': oneAirline, 'api.airport.scenery': sceneryFixture }[url] ?? withAirlines }),
             }));
             renderCard(onRoute);
             await screen.findByText('Oslo Gardermoen');

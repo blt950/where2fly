@@ -43,11 +43,11 @@ function CardHost({ airportId }) {
     const [departure, arrival] = reverseDirection ? [focused, primary] : [primary, focused];
     const onRoute = Boolean(primary && focused);
 
-    // The drawer's tabs show how many flights and sceneries there are, so it loads them up front;
-    // the cards share the same requests
-    const scenery = useScenery(focused?.icao, compact);
+    // The drawer's tabs and the desktop card's buttons show how many flights and sceneries there
+    // are, so they load up front; the cards share the same requests
+    const scenery = useScenery(focused?.icao);
     const sceneryTotal = scenery ? sceneryCount(scenery) : null;
-    const flights = useFlights(departure?.id, arrival?.id, highlightedAircrafts, compact && onRoute);
+    const flights = useFlights(departure?.id, arrival?.id, highlightedAircrafts, onRoute);
     const flightsTotal = flights ? flights.flights?.length ?? 0 : null;
 
     const update = (changes) => setCards((current) => ({ ...current, ...changes }));
@@ -92,7 +92,10 @@ function CardHost({ airportId }) {
     }, []);
 
     // In tabs, each card leaves out what the tabs already cover (headers, close buttons, shortcuts)
-    const airportCard = <AirportCard airportId={airportId} onOpenFlights={openFlights} onOpenScenery={openScenery} onClose={closeAll} inTab={compact} />;
+    const airportCard = (
+        <AirportCard airportId={airportId} onOpenFlights={openFlights} onOpenScenery={openScenery} onClose={closeAll} inTab={compact}
+            counts={{ flights: onRoute ? flightsTotal : undefined, scenery: sceneryTotal }} />
+    );
     const flightsCard = (onClose) => onRoute && (
         <FlightsCard departureAirportId={departure.id} arrivalAirportId={arrival.id} airline={cards.airline}
             onAirlineChange={(airline) => update({ airline })} onClose={onClose} inTab={compact} />
@@ -126,7 +129,7 @@ function CardHost({ airportId }) {
                                 <i className={`fa-sharp ${tab.icon}`} aria-hidden="true"></i>
                                 <span className="card-tab-label">{tab.label}</span>
                                 {tab.count !== undefined && tab.count !== null && (
-                                    <span className="card-tab-count" aria-label={`${tab.count} available`}>{tab.count}</span>
+                                    <span className="card-tab-count count-pill" aria-label={`${tab.count} available`}>{tab.count}</span>
                                 )}
                             </u-tab>
                         ))}
