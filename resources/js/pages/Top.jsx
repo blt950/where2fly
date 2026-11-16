@@ -31,7 +31,7 @@ const FilterDropdown = ({ label, children }) => (
 
 const FilterItem = ({ active, href, children }) => (
     <li>
-        <Link className={`dropdown-item${active ? ' active' : ''}`} href={href} preserveScroll>{children}</Link>
+        <Link className={`dropdown-item${active ? ' active' : ''}`} href={href} preserveScroll prefetch>{children}</Link>
     </li>
 );
 
