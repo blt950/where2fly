@@ -56,24 +56,28 @@ export const clearRequestCache = () => cache.clear();
 
 // `body` null (or `enabled` false) means nothing to ask yet
 export const useCachedPost = (url, body, { enabled = true, emptyOn404 = false } = {}) => {
-    const [data, setData] = useState(() => (enabled ? settled(url, body) : null));
-    const key = body ? JSON.stringify(body) : null;
+    const key = body && enabled ? keyOf(url, body) : null;
+    // Kept with the request it answers, so a render for another request never shows it
+    const [loaded, setLoaded] = useState(null);
 
     useEffect(() => {
-        if (!key || !enabled) {
+        if (!key) {
             return undefined;
         }
 
         let live = true;
-        setData(settled(url, JSON.parse(key)));
 
-        cachedPost(url, JSON.parse(key), { emptyOn404 })
-            .then((loaded) => { if (live) setData(loaded); })
+        cachedPost(url, body, { emptyOn404 })
+            .then((data) => { if (live) setLoaded({ key, data }); })
             .catch(reportError);
 
         return () => { live = false; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [url, key, enabled]);
+    }, [key]);
 
-    return data;
+    if (!key) {
+        return null;
+    }
+
+    return loaded?.key === key ? loaded.data : settled(url, body);
 };

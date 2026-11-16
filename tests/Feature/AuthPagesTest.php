@@ -39,7 +39,7 @@ class AuthPagesTest extends TestCase
         $this->get('/account/recovery')->assertOk()->assertInertia(fn (Assert $page) => $page->component('AccountRecovery'));
     }
 
-    public function test_the_reset_form_gets_its_token_and_email_and_stays_out_of_page_views(): void
+    public function test_the_reset_form_gets_its_token_and_email_and_keeps_page_views_on(): void
     {
         $user = User::factory()->create();
         $token = Password::createToken($user);
@@ -49,6 +49,7 @@ class AuthPagesTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->component('PasswordReset')
                 ->where('token', $token)
                 ->where('email', $user->email))
-            ->assertSee('data-auto-track="false"', false);
+            // Auto-tracking stays on for the shell session; w2fBeforeSend masks the token
+            ->assertDontSee('data-auto-track="false"', false);
     }
 }

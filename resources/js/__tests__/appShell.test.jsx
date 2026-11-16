@@ -26,6 +26,7 @@ vi.mock('../components/map/MapView', () => ({
 
 const { default: AppShell } = await import('../components/shell/AppShell');
 const { useShellMap } = await import('../components/shell/ShellMapContext');
+const { restoreSelectionInPlace } = await import('../components/shell/useSelection');
 
 const WORLD = { type: 'view', view: { center: [0, 30], zoom: 2 } };
 const EUROPE = { type: 'view', view: { center: [15, 55], zoom: 4 } };
@@ -151,6 +152,10 @@ describe('AppShell', () => {
             const { props } = router.push.mock.calls[0][0];
             expect(props({ continent: null })).toEqual({ continent: null, selectionPushed: true });
 
+            // Opening also tags the page's own entry, so stepping between the two keeps the page
+            expect(router.replace.mock.calls[0][0].props({ continent: null })).toEqual({ continent: null, selectionOrigin: expect.any(String) });
+            router.replace.mockClear();
+
             visit('/top?airport=ESSA', { selectionPushed: true });
             rerender(<AppShell><TopPage /></AppShell>);
             act(() => mapProps.actions.setFocusAirport(null));
@@ -158,6 +163,28 @@ describe('AppShell', () => {
             expect(back).toHaveBeenCalledTimes(1);
             expect(router.replace).not.toHaveBeenCalled();
             back.mockRestore();
+        });
+
+        it('steps between a page and its card entry in place, ahead of Inertia\'s own restore', () => {
+            const inertia = vi.fn();
+            restoreSelectionInPlace();
+            window.addEventListener('popstate', inertia);
+            page = { component: 'Top', url: '/top?airport=ESSA', props: { selectionOrigin: 'o1', selectionPushed: true } };
+            render(<AppShell><TopPage /></AppShell>);
+
+            const pop = (state) => act(() => { window.dispatchEvent(new PopStateEvent('popstate', { state })); });
+
+            pop({ page: { component: 'Top', url: '/top', props: { selectionOrigin: 'o1' } } });
+            expect(inertia).not.toHaveBeenCalled();
+            const restored = router.replace.mock.calls[0][0];
+            expect(restored).toMatchObject({ url: '/top', preserveState: true });
+            expect(restored.props({ continent: 'EU', selectionOrigin: 'o1', selectionPushed: true }))
+                .toEqual({ continent: 'EU', selectionOrigin: 'o1', selectionPushed: false });
+
+            // Another page's entry, even at the same URL (Randomise), is Inertia's to restore
+            pop({ page: { component: 'Top', url: '/top', props: {} } });
+            expect(inertia).toHaveBeenCalledTimes(1);
+            window.removeEventListener('popstate', inertia);
         });
 
         it('replaces the entry when closing a card that came with the URL', () => {

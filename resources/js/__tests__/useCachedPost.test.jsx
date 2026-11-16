@@ -43,6 +43,21 @@ describe('useCachedPost', () => {
         await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     });
 
+    it('never shows one request\'s answer under another', async () => {
+        const pending = [];
+        fetch.mockImplementation(() => new Promise((resolve) => pending.push(resolve)));
+
+        const { rerender } = render(<Probe body={{ id: 1 }} />);
+        pending[0]({ ok: true, status: 200, json: () => Promise.resolve({ data: { name: 'ENGM' } }) });
+        await waitFor(() => expect(screen.getByTestId('out').textContent).toBe('ENGM'));
+
+        rerender(<Probe body={{ id: 2 }} />);
+        expect(screen.getByTestId('out').textContent).toBe('loading');
+
+        rerender(<Probe body={null} />);
+        expect(screen.getByTestId('out').textContent).toBe('loading');
+    });
+
     it('asks again once an answer is older than five minutes', async () => {
         vi.useFakeTimers({ toFake: ['Date'] });
         await cachedPost('/api/x', { id: 1 });

@@ -41,6 +41,15 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
+describe('SearchForm old input', () => {
+    it('renders when array fields come back as scalars from a mangled bookmark', () => {
+        const old = { arrivalWhitelists: '5', destinations: 'EU', departureWhitelists: '1', aircrafts: 'B738', scores: 'x', destinationAirportSize: 'large_airport' };
+
+        expect(() => render(<SearchForm {...formProps(old)} />)).not.toThrow();
+        expect(checked('destinationAirportSizeLarge')).toBe(true);
+    });
+});
+
 describe('formQuery', () => {
     const form = (html) => {
         document.body.innerHTML = `<form action="http://w2f.test/search">${html}</form>`;

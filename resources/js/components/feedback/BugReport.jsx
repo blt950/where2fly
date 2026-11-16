@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { sendFeedback } from '@sentry/react';
 
 // The bug report button and modal. Sends through the app's own Sentry client (sentry.js), which
@@ -57,6 +58,8 @@ const BugReport = () => {
                 Report a bug <i className="fa-sharp fa-bug"></i>
             </button>
 
+            {/* On <body>, beside Bootstrap's backdrop: the drawer is transformed and clips a fixed modal */}
+            {createPortal(
             <div ref={modalRef} className="modal fade bug-report" id="bugReportModal" tabIndex="-1" aria-labelledby="bugReportModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content">
@@ -101,7 +104,8 @@ const BugReport = () => {
                         )}
                     </div>
                 </div>
-            </div>
+            </div>,
+            document.body)}
         </>
     );
 };

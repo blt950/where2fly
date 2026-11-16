@@ -16,9 +16,8 @@ class HandleInertiaRequests extends Middleware
     protected $rootView = 'inertia';
 
     /**
-     * A visit from the shell can end on a page that is still Blade, e.g. a failed search redirecting
-     * to the form. The client can't render that, so turn it into a full page load, and reflash so
-     * the errors and old input survive the extra request.
+     * A shell visit that ends on a Blade page can't render client-side: make it a full page load,
+     * reflashed so the errors and old input survive the extra request.
      */
     public function handle(Request $request, Closure $next)
     {

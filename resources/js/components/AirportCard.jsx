@@ -4,6 +4,7 @@ import { MapContext } from './context/MapContext';
 import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
+import { AIRPORT_PARAM } from './shell/selection';
 import { useCachedPost } from './utils/useCachedPost';
 import { trackInteraction } from './utils/metrics';
 import { useTooltips } from './utils/useTooltips';
@@ -152,6 +153,8 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
                                 <button className="btn btn-outline-primary btn-sm" onClick={() => {
                                     const params = new URLSearchParams(window.location.search);
                                     params.set('icao', data.airport.icao);
+                                    // The card's own selection would reopen it on the new anchor
+                                    params.delete(AIRPORT_PARAM);
                                     navigate(`${window.location.pathname}?${params.toString()}`);
 
                                     trackInteraction('Change airport from card');

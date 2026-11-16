@@ -1,23 +1,34 @@
 import { useEffect, useState, useRef } from 'react';
 import CurrencyDropdown from './ui/CurrencyDropdown';
 
+import { readStored, readStoredText, writeStored } from './utils/storage';
 import { useScenery } from './utils/useScenery';
 import { useTooltips } from './utils/useTooltips';
+
+const CURRENCY_KEY = 'currency';
+const CURRENCIES = [
+    { code: 'EUR', symbol: '€' },
+    { code: 'USD', symbol: '$' },
+    { code: 'GBP', symbol: '£' },
+    { code: 'AUD', symbol: 'A$' },
+    { code: 'CAD', symbol: 'C$' },
+];
+
+// Earlier versions stored the bare code, not JSON; either way only a known currency counts
+const readCurrency = () => {
+    const stored = readStored(CURRENCY_KEY) ?? readStoredText(CURRENCY_KEY);
+
+    return CURRENCIES.some(({ code }) => code === stored) ? stored : 'EUR';
+};
 
 function SceneryCard({ airportId, onClose, inTab = false }) {
     const cardRef = useRef(null);
     const tabsRef = useRef(null);
     const data = useScenery(airportId);
     const [selectedSimulator, setSelectedSimulator] = useState(null);
-    const [currency, setCurrency] = useState(localStorage.getItem('currency') || 'EUR');
+    const [currency, setCurrency] = useState(readCurrency);
 
-    const currencies = [
-        { code: 'EUR', symbol: '€' },
-        { code: 'USD', symbol: '$' },
-        { code: 'GBP', symbol: '£' },
-        { code: 'AUD', symbol: 'A$' },
-        { code: 'CAD', symbol: 'C$' },
-    ]
+    const currencies = CURRENCIES;
 
     useTooltips(cardRef, [data]);
 
@@ -30,7 +41,7 @@ function SceneryCard({ airportId, onClose, inTab = false }) {
     }, [data, selectedSimulator]);
 
     useEffect(() => {
-        localStorage.setItem('currency', currency);
+        writeStored(CURRENCY_KEY, currency);
     }, [currency]);
 
     return (

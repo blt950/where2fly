@@ -229,6 +229,18 @@ describe('CardHost / AirportCard', () => {
         expect(screen.getByText(/^Use as/)).toBeTruthy();
     });
 
+    it('"Use as ..." searches from the airport without carrying the card\'s own selection', async () => {
+        const navigate = vi.fn();
+        window.history.replaceState(null, '', '/search?icao=ESSA&direction=departure&airport=ENGM');
+        renderCard({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false, navigate });
+        await screen.findByText('Oslo Gardermoen');
+
+        fireEvent.click(screen.getByText(/^Use as/));
+
+        expect(navigate).toHaveBeenCalledWith('/search?icao=ENGM&direction=departure');
+        window.history.replaceState(null, '', '/');
+    });
+
     describe('flights', () => {
         const onRoute = { ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false };
         const withAirlines = { ...airportFixture, airlines: [{ ...SAS, highlighted: false }, { ...DLH, highlighted: true }] };

@@ -6,9 +6,12 @@ import { createInertiaApp, router } from '@inertiajs/react';
 import { captureException, ErrorBoundary } from '@sentry/react';
 
 import AppShell from './components/shell/AppShell';
+import { restoreSelectionInPlace } from './components/shell/useSelection';
 import { MapFallback } from './components/map/MapView';
 
 const pages = import.meta.glob('./pages/**/*.jsx');
+
+restoreSelectionInPlace();
 
 let lastVisit = null;
 router.on('start', (event) => {
@@ -47,6 +50,35 @@ router.on('success', (event) => {
 
     if (token) {
         document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', token);
+    }
+});
+
+// Shared props restored from history are as old as their entry. Its flash messages have been
+// read; and if the login has changed since, the navigation, lists and map hint are asked for again.
+const SESSION_PROPS = ['nav', 'alerts', 'mapHint', 'csrfToken', 'listsRevision'];
+const accountIn = (page) => page.props.nav?.account?.label ?? null;
+let account;
+
+router.on('navigate', (event) => {
+    const { page, type } = event.detail;
+
+    if (type !== 'history') {
+        account = accountIn(page);
+    } else if (account !== undefined && accountIn(page) !== account) {
+        router.reload({ only: SESSION_PROPS });
+    } else if (page.props.alerts?.messages?.length) {
+        router.replace({
+            props: (props) => ({ ...props, alerts: { ...props.alerts, messages: [] } }),
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }
+});
+
+// Back onto a page the browser kept whole (bfcache), e.g. after logging out: same staleness
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        router.reload({ only: SESSION_PROPS });
     }
 });
 

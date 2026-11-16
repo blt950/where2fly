@@ -13,7 +13,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
@@ -129,9 +128,6 @@ class UserController extends Controller
      */
     public function resetForm(Request $request, $token)
     {
-        // The token is in the URL (and the email in its query): no automatic page views from here
-        View::share('manualTracking', true);
-
         return Inertia::render('PasswordReset', [
             'token' => $token,
             'email' => $request->session()->getOldInput('email', $request->query('email')),

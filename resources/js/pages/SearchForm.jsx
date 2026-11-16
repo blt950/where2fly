@@ -20,6 +20,12 @@ const DIRECTION_IDS = { N: 'north', NE: 'northeast', E: 'east', SE: 'southeast',
 const EXCLUSIVE_AREAS = ['Anywhere', 'Domestic'];
 
 const capitalise = (text) => text[0].toUpperCase() + text.slice(1);
+// Old input that failed the `array` rule comes back as whatever was sent: never trust its shape
+const list = (value, fallback = []) => {
+    if (Array.isArray(value)) return value;
+
+    return value !== null && typeof value === 'object' ? Object.values(value) : fallback;
+};
 const thousands = (value) => value.toLocaleString(LOCALE);
 
 // sessionStorage throws where site data is blocked; the panel just starts closed then
@@ -51,8 +57,8 @@ const SearchForm = ({
     // The anchor whitelist only narrows which random airport gets drawn, so a typed ICAO locks it
     const anchorLocked = icao.trim().length > 0;
     const listItems = lists.map((list) => ({ value: String(list.id), label: list.name }));
-    const scoresOld = old.scores;
-    const sizes = old.destinationAirportSize ?? AIRPORT_SIZES.map(([value]) => value);
+    const scoresOld = old.scores !== null && typeof old.scores === 'object' ? old.scores : null;
+    const sizes = list(old.destinationAirportSize, AIRPORT_SIZES.map(([value]) => value));
     const checkedByDefault = (value) => (value === undefined ? true : Boolean(Number(value)));
     const sliderStart = (min, max, defaults) => [Number(old[min] ?? defaults[0]), Number(old[max] ?? defaults[1])];
 
@@ -131,7 +137,7 @@ const SearchForm = ({
                             <label htmlFor="destination-input">{capitalise(area)} Area</label>
                             <Combobox id="destination" name="destinations[]" taller placeholder="Anywhere"
                                 items={areaItems(destinationInputs, { withExclusive: true })}
-                                selected={old.destinations ?? []} exclusive={EXCLUSIVE_AREAS} />
+                                selected={list(old.destinations)} exclusive={EXCLUSIVE_AREAS} />
                             <FieldError message={errors.destinations} />
                         </div>
 
@@ -159,7 +165,7 @@ const SearchForm = ({
                         <div className="col-xs-12 text-start">
                             <label htmlFor="whitelist-input">{capitalise(suggestionSide)} Whitelist</label>
                             <Combobox id="whitelist" name={`${suggestionSide}Whitelists[]`} placeholder="Restrict your search"
-                                items={listItems} selected={(old[`${suggestionSide}Whitelists`] ?? old.whitelists ?? []).map(String)} />
+                                items={listItems} selected={list(old[`${suggestionSide}Whitelists`] ?? old.whitelists).map(String)} />
                         </div>
 
                         <div className="col-xs-12 text-start">
@@ -185,18 +191,18 @@ const SearchForm = ({
                             <div className="col-xs-12 text-start">
                                 <label htmlFor="aircraft-input">Aircraft</label>
                                 <Combobox id="aircraft" name="aircrafts[]" placeholder="All aircraft"
-                                    items={aircrafts.map((code) => ({ value: code, label: code }))} selected={old.aircrafts ?? []} />
+                                    items={aircrafts.map((code) => ({ value: code, label: code }))} selected={list(old.aircrafts)} />
                                 <FieldError message={errors.aircrafts} />
 
                                 <label htmlFor="airlines-input" className="pt-4">Airlines</label>
                                 <Combobox id="airlines" name="airlines[]" placeholder="All airlines"
                                     items={airlines.map((airline) => ({ value: airline.icao, label: `${airline.name} (${airline.icao})` }))}
-                                    selected={old.airlines ?? []} />
+                                    selected={list(old.airlines)} />
                                 <FieldError message={errors.airlines} />
 
                                 <label htmlFor="destinationExclusions-input" className="pt-4">{capitalise(area)} Exclusions</label>
                                 <Combobox id="destinationExclusions" name="destinationExclusions[]" taller placeholder="None"
-                                    items={areaItems(destinationInputs, { withExclusive: false })} selected={old.destinationExclusions ?? []} />
+                                    items={areaItems(destinationInputs, { withExclusive: false })} selected={list(old.destinationExclusions)} />
                                 <FieldError message={errors.destinationExclusions} />
 
                                 <div id="anchorWhitelistGroup">
@@ -205,7 +211,7 @@ const SearchForm = ({
                                         {anchorLocked && <i className="fa-sharp fa-lock" id="anchorWhitelistLockIcon"></i>}
                                     </label>
                                     <Combobox id="anchorWhitelist" name={`${anchor}Whitelists[]`} placeholder="Anywhere"
-                                        items={listItems} selected={(old[`${anchor}Whitelists`] ?? []).map(String)}
+                                        items={listItems} selected={list(old[`${anchor}Whitelists`]).map(String)}
                                         disabled={anchorLocked} hidden={anchorLocked} />
                                     {anchorLocked && <p id="anchorWhitelistLocked" className="filter-hint">Clear the ICAO field to enable</p>}
                                 </div>
