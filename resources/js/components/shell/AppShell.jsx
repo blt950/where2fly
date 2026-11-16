@@ -11,6 +11,7 @@ import { ShellMapContext } from './ShellMapContext';
 import { useLayoutMode } from './useCompactLayout';
 import { useDrawerStop } from './useDrawerStop';
 import { useMapInsets } from './useMapInsets';
+import { useMissingAirport } from './useMissingAirport';
 import { usePageAnnouncement } from './usePageAnnouncement';
 import { useSelection } from './useSelection';
 import { useShellScene } from './useShellScene';
@@ -71,18 +72,7 @@ const AppShell = ({ children }) => {
 
     useEffect(installTooltips, []);
 
-    // An airport the map couldn't find (a typo in ?airport=, the Scenery search box), said once in
-    // the alerts on any page; gone with the next page or the next airport found
-    const [missingAirport, setMissingAirport] = useState(null);
-    const onAirportNotFound = useCallback((icao) => setMissingAirport(icao), []);
-    const [missingFor, setMissingFor] = useState({ component: page.component, focus: state.focusAirport });
-    if (page.component !== missingFor.component || (state.focusAirport && state.focusAirport !== missingFor.focus)) {
-        setMissingFor({ component: page.component, focus: state.focusAirport });
-        setMissingAirport(null);
-    }
-    const notices = missingAirport
-        ? [{ key: 'airport-not-found', variant: 'warning', text: `No airport found for "${missingAirport}". Check the ICAO code and try again.` }]
-        : [];
+    const { notices, onAirportNotFound } = useMissingAirport(page.component, state.focusAirport);
 
     const shellMap = useMemo(() => ({
         focusAirport: state.focusAirport,
