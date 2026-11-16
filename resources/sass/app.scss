@@ -1,37 +1,42 @@
 @use 'sass:color';
 
 /*
-* Fonts
+* Fonts: WOFF2, converted from the TTFs beside them (kept as the source; the map glyphs are built from one)
 */
 
 @font-face {
     font-family: 'Work Sans';
     font-weight: normal;
-    src: url('../fonts/WorkSans-Regular.ttf') format('truetype');
+    font-display: swap;
+    src: url('../fonts/WorkSans-Regular.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Work Sans';
     font-weight: 700;
-    src: url('../fonts/WorkSans-Bold.ttf') format('truetype');
+    font-display: swap;
+    src: url('../fonts/WorkSans-Bold.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Kanit';
     font-weight: normal;
-    src: url('../fonts/Kanit-Regular.ttf') format('truetype');
+    font-display: swap;
+    src: url('../fonts/Kanit-Regular.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Kanit';
     font-weight: 500;
-    src: url('../fonts/Kanit-Medium.ttf') format('truetype');
+    font-display: swap;
+    src: url('../fonts/Kanit-Medium.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Kanit';
     font-weight: 300;
-    src: url('../fonts/Kanit-Light.ttf') format('truetype');
+    font-display: swap;
+    src: url('../fonts/Kanit-Light.woff2') format('woff2');
 }
 
 /*
