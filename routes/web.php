@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ContentController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\SceneryController;
 use App\Http\Controllers\SearchController;
@@ -108,11 +109,15 @@ Route::controller(FeedbackController::class)->group(function () {
 });
 
 // Pure views
-Route::view('/changelog', 'changelog')->name('changelog');
-Route::view('/privacy', 'privacy')->name('privacy');
-Route::view('/api', 'api')->name('api');
+foreach (['changelog', 'privacy', 'api'] as $page) {
+    Route::get("/{$page}", [ContentController::class, 'show'])->defaults('page', $page)->name($page);
+}
 Route::redirect('/donate', 'https://ko-fi.com/X7X21V3MEX');
 
 // Old routes
 Route::permanentRedirect('/advanced', '/');
 Route::permanentRedirect('/advanced/search', '/');
+
+// Unknown URLs get the site's 404 inside the shell, with a session so it knows who's viewing. Paths
+// that look like files (a missing image, /wp-login.php) skip it and get the plain, cheap 404.
+Route::fallback(fn () => abort(404))->where('fallbackPlaceholder', '[^.]*');

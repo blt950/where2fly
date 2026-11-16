@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\FeedbackVote;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class FeedbackController extends Controller
 {
@@ -28,7 +32,7 @@ class FeedbackController extends Controller
 
         [$issues, $groupedVotes, $userVotes] = $this->fetchIssuesAndVotes($userLastReadIssueNumber);
 
-        return view('feedback.index', compact('issues', 'groupedVotes', 'userVotes', 'userLastReadIssueNumber'));
+        return $this->render($issues, $groupedVotes, $userVotes, $userLastReadIssueNumber);
     }
 
     /**
@@ -54,7 +58,50 @@ class FeedbackController extends Controller
             return $response->json();
         });
 
-        return view('feedback.show', compact('issues', 'issue', 'comments', 'groupedVotes', 'userVotes'));
+        return $this->render($issues, $groupedVotes, $userVotes, null, $issue, $comments);
+    }
+
+    /**
+     * The index and an issue are one page: the ideas in the sidebar, the chosen one beside it.
+     * Markdown is rendered here, as before (raw HTML stripped, no unsafe links).
+     */
+    private function render(Collection $issues, Collection $groupedVotes, ?array $userVotes, ?int $lastRead, ?array $issue = null, array $comments = [])
+    {
+        $votes = fn (int $number) => (int) ($groupedVotes[$number] ?? 0);
+        $markdown = fn (?string $body) => (string) Str::of($body ?? '')->markdown(['html_input' => 'strip', 'allow_unsafe_links' => false]);
+        $author = fn (array $item) => [
+            'login' => $item['user']['login'],
+            'avatar' => $item['user']['avatar_url'],
+            'created' => Carbon::parse($item['created_at'])->diffForHumans(),
+        ];
+
+        return Inertia::render('Feedback', [
+            'issues' => $issues->map(fn (array $item) => [
+                'number' => $item['number'],
+                'title' => $item['title'],
+                'votes' => $votes($item['number']),
+                'isNew' => $lastRead !== null && $lastRead < $item['number'],
+                'voted' => in_array($item['number'], $userVotes ?? []),
+                'author' => $author($item),
+            ])->values(),
+            'issue' => $issue ? [
+                'number' => $issue['number'],
+                'title' => $issue['title'],
+                'votes' => $votes($issue['number']),
+                'voted' => in_array($issue['number'], $userVotes ?? []),
+                'html' => $markdown($issue['body']),
+                'author' => $author($issue),
+                'url' => "https://github.com/blt950/where2fly/issues/{$issue['number']}",
+                'comments' => collect($comments)->map(fn (array $comment) => [
+                    'id' => $comment['id'] ?? null,
+                    'html' => $markdown($comment['body']),
+                    'author' => $author($comment),
+                ])->values(),
+            ] : null,
+            'canVote' => auth()->check(),
+            'loginUrl' => route('login'),
+            'bugReports' => filled(config('sentry.dsn')),
+        ])->withViewData(['title' => 'Feedback', 'metaDescription' => 'Have your say on what gets built next']);
     }
 
     /**

@@ -4,7 +4,6 @@
 @yield('meta-description')
 <meta name="author" content="Blt950 / Daniel (1352906)">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<meta name="user-authenticated" content="{{ auth()->check() ? '1' : '0' }}">
 
 @if(config('sentry.dsn'))
     <meta name="sentry-dsn" content="{{ config('sentry.dsn') }}">
@@ -13,11 +12,8 @@
     @auth<meta name="sentry-user-id" content="{{ auth()->id() }}">@endauth
 @endif
 
-@hasSection('title')
-    <title>{{ config('app.name') }} | @yield('title', 'Home')</title>
-@else
-    <title>{{ config('app.name') }}</title>
-@endif
+{{-- <Head> owns the title; data-inertia lets it replace this server-rendered one. --}}
+<title data-inertia>{{ config('app.name') }}@isset($title) | {{ $title }}@endisset</title>
 
 <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
 <link rel="preconnect" href="https://tiles.basemaps.cartocdn.com" crossorigin>
@@ -48,7 +44,4 @@
 
 @routes
 @viteReactRefresh
-@vite('resources/js/app.js')
-
-@yield('resources')
-@yield('css')
+@vite('resources/js/inertia.jsx')

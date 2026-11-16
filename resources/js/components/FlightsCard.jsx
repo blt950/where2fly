@@ -1,129 +1,87 @@
-import { useEffect, useState, useRef, useContext } from 'react';
-import { captureException } from '@sentry/react';
-import { CardContext } from './context/CardContext';
+import { useContext } from 'react';
 import { MapContext } from './context/MapContext';
 import fromNow from './utils/RelativeTime';
+import FlightMenu from './ui/FlightMenu';
+import { useFlights } from './utils/useFlights';
 
-function FlightsCard({ airlineId, departureAirportId, arrivalAirportId, reverseDirection }) {
+// Every flight on the route, narrowed by an airline filter. One fetch per route; switching airline
+// only filters, so the card (and a phone tab) keeps a single, stable destination.
+function FlightsCard({ departureAirportId, arrivalAirportId, airline, onAirlineChange, onClose, inTab = false }) {
 
-    const dataCache = useRef({});
-    const [data, setData] = useState(null);
-    const { findAirport, primaryAirport, focusAirport, highlightedAircrafts } = useContext(MapContext);
-    const { setShowFlightsIdCard } = useContext(CardContext);
-    
-    // Fetch airport data if it's not in the cache
-    useEffect(() => {
-        if (dataCache.current[airlineId]) {
-            setData(dataCache.current[airlineId]);
-        } else {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            fetch(route('api.airport.flights'), {
-                    method: "POST",    
-                    credentials: 'include',
-                    headers: { 
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({ airlineId, departureAirportId, arrivalAirportId, highlightedAircrafts })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    dataCache.current[airlineId] = data.data;
-                    setData(data.data);
-                })
-                .catch(error => {
-                    captureException(error);
-                    console.error(error.message);
-                });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [airlineId]);
+    const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts } = useContext(MapContext);
+    const data = useFlights(departureAirportId, arrivalAirportId, highlightedAircrafts);
+
+    const selected = data?.airlines.find((candidate) => candidate.icao_code === airline);
+    const soleAirline = data?.airlines.length === 1 ? data.airlines[0] : null;
+    const flights = data ? data.flights.filter((flight) => !airline || flight.airline.icao_code === airline) : [];
+    const departure = findAirport(reverseDirection ? focusAirport : primaryAirport)?.icao;
+    const arrival = findAirport(reverseDirection ? primaryAirport : focusAirport)?.icao;
 
     return (
-        <>
-            <div className="popup-card">
+        <div className="popup-card">
             {data ? (
                 <>
                     <div className="d-flex justify-content-between">
                         <h2>
-                            <img className="airline-logo small" alt={`${data.airline.name} logo`} src={`/img/airlines/${data.airline.iata_code}.png`}/> {data.airline.name} flights
+                            {selected && <><img className="airline-logo small" alt={`${selected.name} logo`} src={`/img/airlines/${selected.iata_code}.png`} />{' '}</>}
+                            {selected ? `${selected.name} flights` : 'Flights'}
                         </h2>
 
-                        <button className="btn-close" aria-label="Close flights card" onClick={() => setShowFlightsIdCard(null)}></button>
+                        {!inTab && <button className="btn-close" aria-label="Close flights card" onClick={onClose}></button>}
                     </div>
 
-                    <table className="table card-table no-padding sortable asc">
+                    {data.airlines.length > 1 && (
+                        <div className="flights-filter d-flex flex-wrap align-items-center gap-1 mb-2" role="group" aria-label="Filter by airline">
+                            <button type="button" className={`btn btn-sm ${airline ? 'btn-outline-primary' : 'btn-primary'}`}
+                                aria-pressed={!airline} onClick={() => onAirlineChange(null)}>All</button>
+                            {data.airlines.map((candidate) => (
+                                <button key={candidate.icao_code} type="button" className="airline-button" title={candidate.name}
+                                    aria-label={`Only ${candidate.name}`} aria-pressed={airline === candidate.icao_code}
+                                    onClick={() => onAirlineChange(airline === candidate.icao_code ? null : candidate.icao_code)}>
+                                    <img className={`airline-logo small${airline === candidate.icao_code ? ' button' : ''}`} alt=""
+                                        src={`/img/airlines/${candidate.iata_code}.png`} />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    <table className="table card-table no-padding">
                         <thead>
                             <tr>
-                                <th scope="col" style={{maxWidth: '25%'}}>Flight</th>
-                                <th scope="col" style={{width: '50%'}}>Aircraft</th>
-                                <th scope="col" style={{maxWidth: '25%'}}>Last seen</th>
+                                <th scope="col" style={{ maxWidth: '25%' }}>Flight</th>
+                                <th scope="col" style={{ width: '50%' }}>Aircraft</th>
+                                <th scope="col" style={{ maxWidth: '25%' }}>Last seen</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {data.flights.map(flight => (
-                                <tr key={flight.id}>
-                                    <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.flight_icao}>
-                                        <div className="dropdown fs-6 text-info link-underline-info link-underline-opacity-25-hover ps-0">
-                                            <button className="btn btn-xs btn-xs-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{flight.flight_icao}</button>
-                                            <ul className="dropdown-menu">
-                                                <li>
-                                                    <a
-                                                        className="dropdown-item"
-                                                        href={`https://dispatch.simbrief.com/options/custom?orig=${findAirport(reverseDirection ? focusAirport : primaryAirport).icao}&dest=${findAirport(reverseDirection ? primaryAirport : focusAirport).icao}&airline=${data.airline.icao_code}&fltnum=${flight.flight_number}&utm_campaign=where2fly.today`}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                    >
-                                                        Simbrief
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a
-                                                        className="dropdown-item"
-                                                        href={`https://www.flightradar24.com/data/flights/${(data.airline.iata_code + flight.flight_number).toLowerCase()}?utm_campaign=where2fly.today`}
-                                                        target="_blank"
-                                                    >
-                                                        Flightradar24
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a
-                                                        className="dropdown-item"
-                                                        href={`https://www.flightaware.com/live/flight/${(data.airline.icao_code + flight.flight_number).toLowerCase()}?utm_campaign=where2fly.today`}
-                                                        target="_blank"
-                                                    >
-                                                        FlightAware
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a
-                                                        className="dropdown-item"
-                                                        href={`https://www.airnavradar.com/data/flights/${(data.airline.iata_code + flight.flight_number).toLowerCase()}?utm_campaign=where2fly.today`}
-                                                        target="_blank"
-                                                    >
-                                                        AirNavRadar
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                    <td className={flight.highlighted ? 'text-flight-success' : ''}>
-                                        {flight.aircrafts.map(aircraft => aircraft.icao).join(', ')}
-                                    </td>
-                                    <td className={flight.highlighted ? 'text-flight-success' : ''} data-sort={flight.last_seen_at}>
-                                        {fromNow(flight.last_seen_at)}
-                                    </td>
-                                </tr>
-                            ))}
+                            {flights.map((flight) => {
+                                const tone = flight.highlighted ? 'text-flight-success' : '';
+
+                                return (
+                                    <tr key={flight.id}>
+                                        <td className={tone}>
+                                            {/* With one airline there's no filter row to say whose flights these are */}
+                                            <FlightMenu departure={departure} arrival={arrival}
+                                                flight={{ callsign: flight.flight_icao, airlineIata: flight.airline.iata_code, airlineIcao: flight.airline.icao_code, flightNumber: flight.flight_number }}
+                                                before={soleAirline && (
+                                                    <img className="airline-logo small me-1" alt={`${soleAirline.name} logo`} src={`/img/airlines/${soleAirline.iata_code}.png`} />
+                                                )} />
+                                        </td>
+                                        <td className={tone}>{flight.aircrafts.map((aircraft) => aircraft.icao).join(', ')}</td>
+                                        <td className={tone}>{fromNow(flight.last_seen_at)}</td>
+                                    </tr>
+                                );
+                            })}
+                            {flights.length === 0 && (
+                                <tr><td colSpan="3" className="text-white-50">No recent flights on this route</td></tr>
+                            )}
                         </tbody>
                     </table>
                 </>
             ) : (
                 <p className="mb-0"><i className="fa-sharp fa-spinner-third fa-spin"></i>&nbsp;&nbsp;Loading</p>
             )}
-            </div>
-        </>
+        </div>
     );
 }
 

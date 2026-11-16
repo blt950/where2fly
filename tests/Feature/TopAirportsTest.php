@@ -6,6 +6,7 @@ use App\Models\Airport;
 use App\Models\AirportScore;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class TopAirportsTest extends TestCase
@@ -17,6 +18,24 @@ class TopAirportsTest extends TestCase
         $response = $this->get('/top');
 
         $response->assertStatus(200);
+        $response->assertInertia(fn (Assert $page) => $page->component('Top')->where('continent', null));
+    }
+
+    public function test_continent_is_normalised_and_map_data_matches_the_list(): void
+    {
+        $response = $this->get('/top/eu?aircraft=all');
+
+        $response->assertOk();
+        $response->assertInertia(function (Assert $page) {
+            $props = $page->toArray()['props'];
+
+            $this->assertSame('EU', $props['continent']);
+            $this->assertNotEmpty($props['airports']);
+            $this->assertEqualsCanonicalizing(
+                array_column($props['airports'], 'icao'),
+                array_keys((array) $props['airportMapData'])
+            );
+        });
     }
 
     public function test_top_airports_are_cached_per_variant(): void
@@ -54,7 +73,7 @@ class TopAirportsTest extends TestCase
         $response = $this->get('/top?aircraft=JL');
 
         $response->assertStatus(200);
-        $response->assertViewHas('aircraft', 'JL');
+        $response->assertInertia(fn (Assert $page) => $page->component('Top')->where('aircraft', 'JL'));
     }
 
     public function test_top_page_defaults_to_jm_aircraft(): void
@@ -62,7 +81,7 @@ class TopAirportsTest extends TestCase
         $response = $this->get('/top');
 
         $response->assertStatus(200);
-        $response->assertViewHas('aircraft', 'JM');
+        $response->assertInertia(fn (Assert $page) => $page->component('Top')->where('aircraft', 'JM'));
     }
 
     public function test_top_page_aircraft_all_disables_the_filter(): void
@@ -70,7 +89,7 @@ class TopAirportsTest extends TestCase
         $response = $this->get('/top?aircraft=all');
 
         $response->assertStatus(200);
-        $response->assertViewHas('aircraft', null);
+        $response->assertInertia(fn (Assert $page) => $page->component('Top')->where('aircraft', null));
     }
 
     public function test_top_page_invalid_aircraft_falls_back_to_default(): void
@@ -78,7 +97,7 @@ class TopAirportsTest extends TestCase
         $response = $this->get('/top?aircraft=INVALID');
 
         $response->assertStatus(200);
-        $response->assertViewHas('aircraft', 'JM');
+        $response->assertInertia(fn (Assert $page) => $page->component('Top')->where('aircraft', 'JM'));
     }
 
     public function test_cached_result_is_served_without_recomputing(): void

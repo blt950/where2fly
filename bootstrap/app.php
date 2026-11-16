@@ -3,12 +3,15 @@
 use App\Http\Middleware\AdminVariables;
 use App\Http\Middleware\ApiToken;
 use App\Http\Middleware\FeedbackVariables;
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\UserActive;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\ExceptionResponse;
+use Inertia\Inertia;
 use Sentry\State\Scope;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -61,6 +64,7 @@ return Application::configure(basePath: dirname(__DIR__))
             UserActive::class,
             AdminVariables::class,
             FeedbackVariables::class,
+            HandleInertiaRequests::class,
         ]);
 
         $middleware->statefulApi();
@@ -80,6 +84,42 @@ return Application::configure(basePath: dirname(__DIR__))
                     $scope->setUser(['id' => Auth::id()]);
                 });
                 app('sentry')->captureException($e);
+            }
+        });
+
+        // Errors look like the site, in the shell (pages/Error.jsx); JSON callers keep their JSON, and
+        // debug mode keeps Laravel's page for crashes. Without a session (maintenance) the Blade views stay.
+        Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
+            $request = $response->request;
+            $status = $response->statusCode();
+
+            if ($request->expectsJson() && ! $request->inertia()) {
+                return null;
+            }
+
+            // An expired session: back to the form with what was typed, not a dead end
+            if ($status === 419) {
+                return back()
+                    ->withInput($request->except(['_token', 'password', 'password_confirmation', 'current_password']))
+                    ->with('error', 'Your session had expired, so that didn\'t go through. Please try again.');
+            }
+
+            $shown = in_array($status, [403, 404], true) || (in_array($status, [500, 503], true) && ! config('app.debug'));
+
+            if (! $shown || ! $request->hasSession()) {
+                return null;
+            }
+
+            // A crash was just reported (reportable() above): its event id lets the page attach what
+            // the visitor tells us, as the Blade 500 view does
+            $eventId = $status === 500 && app()->bound('sentry') ? app('sentry')->getLastEventId() : null;
+
+            // The shared props query the database: if that is what failed, fall back to the Blade view
+            try {
+                return $response->render('Error', ['status' => $status, 'sentryEventId' => $eventId ? (string) $eventId : null])
+                    ->withSharedData()->toResponse($request);
+            } catch (Throwable) {
+                return null;
             }
         });
     })

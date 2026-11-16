@@ -9,16 +9,28 @@
     </testsuite>
   </testsuites>
   <php>
-    <env name="APP_ENV" value="testing"/>
+    <!-- Forced, and caches pointed at files that are never built: the container caches config
+         from .env on start, and a cached config would send tests (and RefreshDatabase) to the dev DB -->
+    <env name="APP_ENV" value="testing" force="true"/>
+    <env name="APP_CONFIG_CACHE" value="bootstrap/cache/testing-never-built-config.php" force="true"/>
+    <env name="APP_ROUTES_CACHE" value="bootstrap/cache/testing-never-built-routes.php" force="true"/>
+    <env name="APP_EVENTS_CACHE" value="bootstrap/cache/testing-never-built-events.php" force="true"/>
     <env name="BCRYPT_ROUNDS" value="4"/>
     <env name="CACHE_DRIVER" value="array"/>
     <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
     <!-- <env name="DB_DATABASE" value=":memory:"/> -->
-    <env name="DB_DATABASE" value="where2fly_test"/>
+    <env name="DB_DATABASE" value="where2fly_test" force="true"/>
     <env name="MAIL_MAILER" value="array"/>
     <env name="QUEUE_CONNECTION" value="sync"/>
     <env name="SESSION_DRIVER" value="array"/>
     <env name="TELESCOPE_ENABLED" value="false"/>
+    <!-- Laravel reads $_SERVER before $_ENV: without these, a real environment variable (say, from
+         a compose file) would win over the forced values above -->
+    <server name="APP_ENV" value="testing" force="true"/>
+    <server name="DB_DATABASE" value="where2fly_test" force="true"/>
+    <server name="APP_CONFIG_CACHE" value="bootstrap/cache/testing-never-built-config.php" force="true"/>
+    <server name="APP_ROUTES_CACHE" value="bootstrap/cache/testing-never-built-routes.php" force="true"/>
+    <server name="APP_EVENTS_CACHE" value="bootstrap/cache/testing-never-built-events.php" force="true"/>
   </php>
   <source>
     <include>

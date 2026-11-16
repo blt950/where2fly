@@ -11,7 +11,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\View;
+use Inertia\Inertia;
 
 class UserListController extends Controller
 {
@@ -24,9 +24,18 @@ class UserListController extends Controller
      */
     public function index(Request $request)
     {
-        $lists = UserList::where('user_id', Auth::id())->withCount('airports')->get()->sortBy('name');
+        $lists = UserList::where('user_id', Auth::id())->with('simulator')->withCount('airports')->get()->sortBy('name');
 
-        return view('list.index', compact('lists'));
+        return Inertia::render('Lists', [
+            'lists' => $lists->values()->map(fn (UserList $list) => [
+                'id' => $list->id,
+                'name' => $list->name,
+                'color' => $list->color,
+                'simulator' => $list->simulator?->shortened_name,
+                'airportsCount' => $list->airports_count,
+                'hidden' => (bool) $list->hidden,
+            ]),
+        ])->withViewData(['title' => 'My Lists']);
     }
 
     /**
@@ -36,9 +45,7 @@ class UserListController extends Controller
      */
     public function create(Request $request)
     {
-        $simulators = Simulator::all()->sortBy('order');
-
-        return view('list.create', compact('simulators'));
+        return $this->renderForm($request, null);
     }
 
     /**
@@ -75,12 +82,8 @@ class UserListController extends Controller
     public function edit(UserList $list)
     {
         $this->authorize('update', $list);
-        $simulators = Simulator::all()->sortBy('order');
 
-        // Use the manual umami tracking script on this page
-        View::share('manualTracking', true);
-
-        return view('list.edit', compact('list', 'simulators'));
+        return $this->renderForm(request(), $list);
     }
 
     /**
@@ -101,9 +104,31 @@ class UserListController extends Controller
             $list->save();
 
             $list->airports()->sync($airportIds);
+            // A change to the airports alone leaves the row clean; the map's lists revision needs it to move
+            $list->touch();
         });
 
         return $this->listSavedRedirect('updated', $notFoundAirports);
+    }
+
+    /**
+     * The create and edit form. A failed save comes back here with the input as old input.
+     */
+    private function renderForm(Request $request, ?UserList $list)
+    {
+        return Inertia::render('ListForm', [
+            'list' => $list ? [
+                'id' => $list->id,
+                'name' => $list->name,
+                'color' => $list->color,
+                'simulator' => $list->simulator_id,
+                'public' => (bool) $list->public,
+                'airports' => $list->airports->pluck('icao')->sort()->implode("\r\n"),
+            ] : null,
+            'simulators' => Simulator::all()->sortBy('order')->values()->map(fn ($simulator) => ['id' => $simulator->id, 'name' => $simulator->name]),
+            'canMakePublic' => $request->user()->can('public', UserList::class),
+            'old' => (object) $request->session()->getOldInput(),
+        ])->withViewData(['title' => $list ? 'Edit list' : 'Your lists']);
     }
 
     /**
@@ -140,7 +165,8 @@ class UserListController extends Controller
      */
     private function resolveAirports(string $input): array
     {
-        $airportsInput = collect(explode("\r\n", $input))
+        // Any line ending: a native form posts \r\n, the Inertia form posts \n
+        $airportsInput = collect(preg_split('/\r\n|\r|\n/', $input))
             ->map(fn ($v) => strtoupper(trim($v)))
             ->filter()
             ->all();

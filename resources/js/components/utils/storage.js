@@ -10,6 +10,15 @@ export const readStored = (key, fallback = null) => {
     }
 };
 
+// For values written before this module, as bare text rather than JSON
+export const readStoredText = (key) => {
+    try {
+        return localStorage.getItem(key);
+    } catch {
+        return null;
+    }
+};
+
 export const writeStored = (key, value) => {
     try {
         localStorage.setItem(key, JSON.stringify(value));

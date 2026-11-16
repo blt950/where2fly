@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class AdminTest extends TestCase
@@ -34,9 +35,9 @@ class AdminTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $response = $this->actingAs($admin)->get('/admin');
-
-        $response->assertStatus(200);
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Admin')
+            ->where('stats.users', 1)
+            ->where('contributions', []));
     }
 
     // -------------------------------------------------------------------------

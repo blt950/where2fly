@@ -1,0 +1,544 @@
+// The Inertia shell's compact layout (below lg): a full-screen map, the panel as a drawer over
+// it, and a bottom tab bar. Everything is scoped to body.shell-compact, so the wide layout is
+// untouched. Several rules out-specify the "let the page scroll" phone rules in app.scss.
+// `overflow: clip`, not hidden: a hidden box can still be scrolled by scrollIntoView, which
+// would slide the whole map out of its frame when a row is brought into view.
+
+$bottom-nav-height: 3.75rem;
+$drawer-handle-height: 2.75rem;
+
+// Wide screens: the drawer is the plain sidebar and these parts don't exist
+.drawer-handle {
+    display: none;
+}
+
+// Focused after a visit (AppShell) only so screen readers start there; a ring round the whole panel helps no one
+.shell-stage > main:focus {
+    outline: none;
+}
+
+// How many flights or sceneries there are, on the drawer's tabs (the desktop card says it in text)
+.count-pill {
+    display: inline-block;
+    min-width: 1.4rem;
+    padding: 0 0.3rem;
+    background: $tertiary;
+    color: $bluewhite;
+    font-size: 0.75rem;
+    line-height: 1.4rem;
+    text-align: center;
+}
+
+body.shell-compact.d-flex.h-100 {
+    height: 100dvh !important;
+    min-height: 0;
+    overflow: hidden;
+    overflow: clip;
+}
+
+body.shell-compact > .d-flex.w-100.h-100.mx-auto.flex-column {
+    height: 100dvh !important;
+    min-height: 0;
+    overflow: hidden;
+    overflow: clip;
+}
+
+body.shell-compact {
+
+    // Navigation moves to the bottom bar; the header keeps the brand, over the map rather than above
+    // it for the room, and see-through. Taps go through it to the map except on its own links.
+    header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 650;
+        margin-bottom: 0 !important;
+        background: transparent;
+        pointer-events: none;
+
+        a,
+        button {
+            pointer-events: auto;
+        }
+    }
+
+    .navbar-toggler,
+    #navbarMenu,
+    .menu-overlay {
+        display: none !important;
+    }
+
+    // With the links gone, the brand row spans the header and the donate button sits right
+    .navbar > .d-flex {
+        width: 100%;
+        align-items: center;
+    }
+
+    .donate {
+        margin-left: auto;
+        margin-right: 1rem;
+    }
+
+    .shell-stage {
+        position: relative;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        overflow: clip;
+    }
+
+    .shell-map {
+        position: absolute;
+        inset: 0;
+
+        #map {
+            height: 100%;
+        }
+    }
+
+    .map {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    // Relative to the map now, and visible: the map is too
+    .map-controls {
+        display: flex;
+        top: calc(#{$header-height} + 0.75rem);
+        right: 0.75rem;
+    }
+
+    .map-reveal,
+    .hint {
+        display: none;
+    }
+
+    // The layers panel opens to the left of the button column, level with its button, so the ⓘ below
+    // stays clear (it sat under the panel when the panel opened downward)
+    .map-controls-panel {
+        position: absolute;
+        top: 0;
+        right: calc(100% + 0.5rem);
+        // Signed in, the user's lists make it taller than a phone on its side
+        max-height: calc(100dvh - #{$header-height} - 1.5rem);
+        overflow-y: auto;
+    }
+
+    // The credits: behind an ⓘ under the layers button, so they stay reachable at every stop that
+    // shows the map. Only the attribution; the site links are in "More". They open to its left.
+    .attribution-toggle {
+        position: absolute;
+        top: calc(#{$header-height} + 0.75rem + 2.4rem + 0.5rem);
+        right: 0.75rem;
+        z-index: 600;
+    }
+
+    footer {
+        display: none;
+        top: calc(#{$header-height} + 0.75rem + 2.4rem + 0.5rem);
+        right: calc(0.75rem + 2.5rem + 0.5rem);
+        bottom: auto;
+        left: auto;
+        width: auto;
+        max-width: calc(100% - 4.5rem);
+        min-height: 0;
+        padding: 4px 8px;
+        font-size: 0.6875rem;
+        text-align: right;
+        background: rgba($secondary, 0.92);
+        border: 1px solid $gray-600;
+        z-index: 600;
+
+        > div:first-child {
+            display: none;
+        }
+
+        &.open {
+            display: block;
+        }
+    }
+
+    // Fully open, it stops below the header
+    main.drawer {
+        position: absolute;
+        inset: $header-height 0 0 0;
+        width: 100%;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        overflow: clip !important;
+
+        display: flex;
+        flex-direction: column;
+
+        background: $secondary;
+        border-top: 1px solid $gray-700;
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+
+        transform: translateY(var(--drawer-y, 50%));
+        transition: transform 220ms ease;
+        will-change: transform;
+        z-index: 700;
+
+        &.dragging {
+            transition: none;
+        }
+    }
+
+    .drawer-handle {
+        display: block;
+        position: relative;
+        flex: none;
+        width: 100%;
+        height: $drawer-handle-height;
+        padding: 0;
+
+        background: transparent;
+        border: 0;
+
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+
+        &:focus-visible {
+            outline: 2px solid $primary;
+            outline-offset: -2px;
+        }
+    }
+
+    .drawer-grip {
+        position: absolute;
+        top: 0.75rem;
+        left: 50%;
+        width: 2.25rem;
+        height: 0.25rem;
+        margin-left: -1.125rem;
+
+        background: $gray-500;
+        border-radius: 2px;
+    }
+
+    // Sized to the visible part, so the last row can always be scrolled into view
+    .drawer-body {
+        height: calc(100% - var(--drawer-y, 50%) - #{$drawer-handle-height});
+        overflow-y: auto;
+        overscroll-behavior: contain;
+
+        .title {
+            padding-top: 0;
+        }
+    }
+
+    // A wide page's content (feedback) sits in the drawer here, at its full width
+    .feedback-container {
+        padding: 1rem;
+
+        .card {
+            width: 100%;
+        }
+    }
+
+    .drawer-page {
+        padding-bottom: 1rem;
+
+        // The title loses its top padding in the drawer, so the alerts above it need their own gap
+        > .alert + :not(.alert) {
+            margin-top: 1rem;
+        }
+
+        // The title right above already spaces it
+        .container {
+            padding-top: 0;
+        }
+    }
+
+    // The airport, flights and scenery cards as tabs inside the drawer. The tab bar stays put
+    // and the panel scrolls under it. Not position: sticky, which inside the transformed drawer
+    // gets composited onto the map as a black band.
+    .drawer-cards:not([hidden]) {
+        height: 100%;
+    }
+
+    .card-tabs-host {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .card-tabs-bar {
+        flex: none;
+        display: flex;
+        background: $secondary;
+        border-bottom: 1px solid $gray-700;
+    }
+
+    // In the handle's row, left of the grip, so the tabs get the drawer's full width. The drawer's
+    // transform makes it the containing block, and the button sits above the handle.
+    .card-tabs-back {
+        position: absolute;
+        top: 0;
+        left: 0.5rem;
+        width: 2.75rem;
+        height: $drawer-handle-height;
+        // The full row stays the tap target; centred in it, the icon's top meets the grip's
+        padding: 0;
+        background: transparent;
+        border: 0;
+        color: $gray-400;
+        font-size: 1.25rem;
+        z-index: 1;
+    }
+
+    // u-tabs owns the semantics; these override its simulator-tab look from components.scss
+    .card-tabs {
+        flex: 1 1 auto;
+        display: flex;
+
+        // Sized by their labels, sharing what's left: a short ICAO leaves room for the others
+        u-tab {
+            flex: 1 1 auto;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            min-height: 2.75rem;
+            padding: 0 0.5rem;
+
+            background: transparent;
+            border: 0;
+            border-bottom: 3px solid transparent;
+            color: $gray-500;
+            font-size: 0.95rem;
+
+            &[aria-selected='true'] {
+                color: $white;
+                background: transparent;
+                border-bottom-color: $primary;
+            }
+
+            // Flights at 0: nothing behind it, so it can't be opened (CardHost)
+            &.card-tab-empty {
+                opacity: 0.5;
+            }
+
+            &[aria-disabled='true'] {
+                cursor: default;
+            }
+        }
+    }
+
+    .card-tab-panel:not([hidden]) {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+
+    .popup-card {
+        display: block;
+        background: transparent;
+    }
+}
+
+// A phone on its side (useLayoutMode 'side'): too short for a sheet, so the drawer docks left at
+// full height and the bottom nav becomes a rail beside it. The header goes; "More" has its links.
+$side-rail-width: 4.25rem;
+
+body.shell-compact.shell-side {
+    > .d-flex.w-100.h-100.mx-auto.flex-column {
+        flex-direction: row !important;
+    }
+
+    header {
+        display: none !important;
+    }
+
+    .shell-stage {
+        height: 100%;
+    }
+
+    main.drawer {
+        top: 0;
+        right: auto;
+        width: 45%;
+        max-width: 28rem;
+        transform: none;
+        border-top: 0;
+        border-right: 1px solid $gray-700;
+        box-shadow: 8px 0 24px rgba(0, 0, 0, 0.45);
+    }
+
+    .drawer-body {
+        height: 100%;
+    }
+
+    .map-controls {
+        top: 0.75rem;
+    }
+
+    .attribution-toggle,
+    footer {
+        top: calc(0.75rem + 2.4rem + 0.5rem);
+    }
+
+    // No handle row to sit in: back in the tab bar, which has less than half the width to share
+    .card-tabs-back {
+        position: static;
+        flex: 0 0 2.75rem;
+        padding: 0;
+    }
+
+    .card-tabs u-tab {
+        gap: 0.3rem;
+        padding: 0 0.35rem;
+        font-size: 0.85rem;
+
+        // Only the open tab spells out its name; the others keep icon and count (and, for
+        // screen readers, the name)
+        &:not([aria-selected='true']) .card-tab-label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+        }
+    }
+
+    .bottom-nav {
+        order: -1;
+        flex-direction: column;
+        width: calc(#{$side-rail-width} + env(safe-area-inset-left));
+        height: 100%;
+        padding: 0 0 0 env(safe-area-inset-left);
+        border-top: 0;
+        border-right: 1px solid $gray-700;
+    }
+
+    .bottom-nav-tab {
+        border-top: 0;
+        border-left: 3px solid transparent;
+        font-size: 0.6875rem;
+
+        &[aria-current='page'] {
+            border-left-color: $primary;
+        }
+    }
+
+    // Opens to the right of the rail, not up off its narrow column
+    .bottom-nav-more .dropdown-menu[data-bs-popper] {
+        top: auto;
+        bottom: 0.25rem;
+        left: 100%;
+        right: auto;
+        margin: 0 0 0 0.25rem !important;
+        max-height: calc(100dvh - 0.5rem);
+        overflow-y: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.shell-compact main.drawer {
+        transition: none;
+    }
+}
+
+// The bottom nav, below lg: in flow at the bottom of the compact shell
+.bottom-nav {
+    display: none;
+}
+
+@include media-breakpoint-down(lg) {
+    .bottom-nav {
+        display: flex;
+        flex: none;
+        position: relative;
+        height: calc(#{$bottom-nav-height} + env(safe-area-inset-bottom));
+        padding-bottom: env(safe-area-inset-bottom);
+
+        background: $secondary;
+        border-top: 1px solid $gray-700;
+        z-index: 800;
+    }
+
+    .bottom-nav-tab {
+        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        width: 100%;
+        padding: 0;
+
+        background: transparent;
+        border: 0;
+        border-top: 3px solid transparent;
+        color: $gray-500;
+        font-size: 0.75rem;
+        text-decoration: none;
+
+        &[aria-current='page'] {
+            color: $white;
+            border-top-color: $primary;
+        }
+
+        // "More" while its menu is open; hover only where there is one (a tap leaves it stuck)
+        &[aria-expanded='true'] {
+            color: $white;
+            background: rgba($white, 0.08);
+        }
+
+        @media (hover: hover) {
+            &:hover {
+                color: $white;
+                background: rgba($white, 0.05);
+            }
+        }
+    }
+
+    .bottom-nav-more {
+        flex: 1 1 0;
+        display: flex;
+
+        .dropdown-menu {
+            min-width: 15rem;
+            margin-bottom: 0.25rem !important;
+            padding: 0.5rem 0;
+
+            background: $secondary;
+            border: 1px solid $primary;
+            font-size: 1rem;
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1.25rem;
+            color: $bluewhite;
+
+            &:hover, &:focus-visible {
+                color: $white;
+                background: rgba($white, 0.08);
+            }
+
+            &.active {
+                color: $black;
+                background: $primary;
+            }
+        }
+
+        .dropdown-divider {
+            border-color: $gray-700;
+        }
+    }
+
+    // While typing on an on-screen keyboard (keyboard.js), the nav would ride up on top of it
+    body.keyboard-open .bottom-nav {
+        display: none;
+    }
+}
+

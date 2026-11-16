@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MapContext } from '../components/context/MapContext';
-import PopupContainer from '../components/PopupContainer';
+import { MapLayoutContext } from '../components/context/MapLayoutContext';
+import CardHost from '../components/CardHost';
+import { clearRequestCache } from '../components/utils/useCachedPost';
 
 // A failed fetch calls captureException; stub it so the test output stays quiet.
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
@@ -29,6 +31,19 @@ const airportFixture = {
     notable: null,
 };
 
+const airline = (icao_code, iata_code, name) => ({ id: icao_code, icao_code, iata_code, name });
+const SAS = airline('SAS', 'SK', 'Scandinavian');
+const DLH = airline('DLH', 'LH', 'Lufthansa');
+
+const flightsFixture = {
+    airlines: [DLH, SAS],
+    airline: null,
+    flights: [
+        { id: 1, flight_icao: 'SAS1', flight_number: '1', airline: SAS, aircrafts: [{ icao: 'A320' }], last_seen_at: '2026-11-01T00:00:00Z' },
+        { id: 2, flight_icao: 'DLH2', flight_number: '2', airline: DLH, aircrafts: [{ icao: 'B738' }], last_seen_at: '2026-11-01T00:00:00Z', highlighted: true },
+    ],
+};
+
 const sceneryFixture = {
     MSFS: [{
         id: 1, developer: 'Orbx', payware: 1, link: 'https://x.test', linkDomain: 'x.test',
@@ -48,7 +63,7 @@ const baseMapContext = {
 
 const renderCard = (mapContext, airportId = 1) => render(
     <MapContext.Provider value={mapContext}>
-        <PopupContainer airportId={airportId} />
+        <CardHost airportId={airportId} />
     </MapContext.Provider>,
 );
 
@@ -64,6 +79,7 @@ const memoryStore = () => {
 };
 
 beforeEach(() => {
+    clearRequestCache();
     document.head.innerHTML = '<meta name="csrf-token" content="test-token">';
     vi.stubGlobal('localStorage', memoryStore());
 
@@ -79,15 +95,17 @@ beforeEach(() => {
         }
     });
 
-    vi.stubGlobal('bootstrap', { Tooltip: { getOrCreateInstance: vi.fn(), getInstance: vi.fn() } });
-
     vi.stubGlobal('fetch', vi.fn((url) => {
         if (url === 'api.airport.show') {
-            return Promise.resolve({ json: () => Promise.resolve({ data: airportFixture }) });
+            return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: airportFixture }) });
         }
 
         if (url === 'api.airport.scenery') {
-            return Promise.resolve({ json: () => Promise.resolve({ data: sceneryFixture }) });
+            return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: sceneryFixture }) });
+        }
+
+        if (url === 'api.airport.flights') {
+            return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: flightsFixture }) });
         }
 
         return Promise.reject(new Error(`unhandled fetch url: ${url}`));
@@ -100,7 +118,7 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-describe('PopupContainer / AirportCard', () => {
+describe('CardHost / AirportCard', () => {
     it('shows loading, then fetches and renders the airport', async () => {
         const { container } = renderCard(baseMapContext);
 
@@ -114,12 +132,6 @@ describe('PopupContainer / AirportCard', () => {
             headers: expect.objectContaining({ 'X-CSRF-TOKEN': 'test-token' }),
             body: expect.stringContaining('"secondaryAirport":1'),
         }));
-    });
-
-    it('renders no card content when airportId is null', () => {
-        const { container } = renderCard(baseMapContext, null);
-
-        expect(container.querySelector('.popup-card')).toBeNull();
     });
 
     it('clears both map states on close, so clicking the same marker again reopens the card', async () => {
@@ -139,12 +151,62 @@ describe('PopupContainer / AirportCard', () => {
         renderCard(baseMapContext);
         await screen.findByText('Oslo Gardermoen');
 
-        fireEvent.click(screen.getByText('Scenery'));
+        fireEvent.click(screen.getByRole('button', { name: /^Scenery/ }));
 
         await screen.findByText('Orbx');
         expect(fetch).toHaveBeenCalledWith('api.airport.scenery', expect.objectContaining({
             body: expect.stringContaining('"airportIcao":"ENGM"'),
         }));
+    });
+
+    it('closes the topmost card on Esc, then the rest, but not while a field or menu has it', async () => {
+        const setShowAirportIdCard = vi.fn();
+        renderCard({ ...baseMapContext, initialCard: 'scenery', setShowAirportIdCard });
+        await screen.findByText('Orbx');
+
+        const field = document.body.appendChild(document.createElement('input'));
+        fireEvent.keyDown(field, { key: 'Escape' });
+        field.remove();
+        expect(screen.queryByText('Orbx')).not.toBeNull();
+
+        fireEvent.keyDown(document.body, { key: 'Escape' });
+        expect(screen.queryByText('Orbx')).toBeNull();
+        expect(setShowAirportIdCard).not.toHaveBeenCalled();
+
+        fireEvent.keyDown(document.body, { key: 'Escape' });
+        expect(setShowAirportIdCard).toHaveBeenCalledWith(null);
+    });
+
+    it('shows no count on the Scenery button when there is none, which still opens', async () => {
+        fetch.mockImplementation((url) => Promise.resolve(url === 'api.airport.scenery'
+            ? { ok: false, status: 404, json: () => Promise.resolve({}) }
+            : { ok: true, status: 200, json: () => Promise.resolve({ data: airportFixture }) }));
+        renderCard(baseMapContext);
+        await screen.findByText('Oslo Gardermoen');
+        await waitFor(() => expect(fetch.mock.calls.some(([url]) => url === 'api.airport.scenery')).toBe(true));
+
+        const button = screen.getByRole('button', { name: /^Scenery/ });
+        expect(button.textContent.trim()).toBe('Scenery');
+        expect(button.disabled).toBe(false);
+    });
+
+    it('opens the scenery card straight away when the scene asks for it', async () => {
+        renderCard({ ...baseMapContext, initialCard: 'scenery' });
+
+        await screen.findByText('Orbx');
+        expect(fetch).toHaveBeenCalledWith('api.airport.scenery', expect.objectContaining({
+            body: expect.stringContaining('"airportIcao":"ENGM"'),
+        }));
+    });
+
+    it('opens only the airport card by default, counting the sceneries on its button as the tabs do', async () => {
+        renderCard(baseMapContext);
+        await screen.findByText('Oslo Gardermoen');
+
+        await waitFor(() => expect(screen.getByRole('button', { name: /Scenery/ }).textContent.trim()).toBe('Scenery (1)'));
+        expect(screen.queryByText('Orbx')).toBeNull();
+        // Off a route there are no flights to count, so no Flights button
+        expect(screen.queryByRole('button', { name: /Flights/ })).toBeNull();
     });
 
     it('shows Arrival/Departure links when there is no primary airport', async () => {
@@ -163,5 +225,251 @@ describe('PopupContainer / AirportCard', () => {
         expect(screen.queryByText('Arrival')).toBeNull();
         expect(screen.queryByText('Departure')).toBeNull();
         expect(screen.getByText(/^Use as/)).toBeTruthy();
+    });
+
+    it('"Use as ..." searches from the airport without carrying the card\'s own selection', async () => {
+        const navigate = vi.fn();
+        window.history.replaceState(null, '', '/search?icao=ESSA&direction=departure&airport=ENGM');
+        renderCard({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false, navigate });
+        await screen.findByText('Oslo Gardermoen');
+
+        fireEvent.click(screen.getByText(/^Use as/));
+
+        expect(navigate).toHaveBeenCalledWith('/search?icao=ENGM&direction=departure');
+        window.history.replaceState(null, '', '/');
+    });
+
+    describe('flights', () => {
+        const onRoute = { ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false };
+        const withAirlines = { ...airportFixture, airlines: [{ ...SAS, highlighted: false }, { ...DLH, highlighted: true }] };
+        const flightRows = () => [...document.querySelectorAll('.card-table tbody tr .dropdown-toggle')].map((cell) => cell.textContent);
+
+        beforeEach(() => {
+            const bodies = { 'api.airport.show': withAirlines, 'api.airport.flights': flightsFixture, 'api.airport.scenery': sceneryFixture };
+            fetch.mockImplementation((url) => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: bodies[url] }) }));
+        });
+
+        it('opens on the clicked airline, filtering one fetch of every flight on the route', async () => {
+            renderCard(onRoute);
+            await screen.findByText('Oslo Gardermoen');
+
+            fireEvent.click(screen.getByAltText('See all Lufthansa flights'));
+
+            await screen.findByText('Lufthansa flights');
+            expect(flightRows()).toEqual(['DLH2']);
+
+            const [, request] = fetch.mock.calls.find(([url]) => url === 'api.airport.flights');
+            expect(JSON.parse(request.body)).toMatchObject({ departureAirportId: 2, arrivalAirportId: 1 });
+            expect(JSON.parse(request.body)).not.toHaveProperty('airlineId');
+        });
+
+        it('counts the route\'s flights on a Flights button that opens every airline, as the tab does', async () => {
+            renderCard(onRoute);
+            await screen.findByText('Oslo Gardermoen');
+
+            const button = await screen.findByRole('button', { name: /Flights/ });
+            await waitFor(() => expect(button.textContent.trim()).toBe('Flights (2)'));
+
+            fireEvent.click(button);
+            await screen.findByText('SAS1');
+            expect(flightRows()).toEqual(['SAS1', 'DLH2']);
+            expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.flights')).toHaveLength(1);
+        });
+
+        it('switches airline or shows all without fetching again', async () => {
+            renderCard(onRoute);
+            await screen.findByText('Oslo Gardermoen');
+            fireEvent.click(screen.getByAltText('See all Lufthansa flights'));
+            await screen.findByText('Lufthansa flights');
+
+            fireEvent.click(screen.getByText('All'));
+            expect(flightRows()).toEqual(['SAS1', 'DLH2']);
+            expect(screen.getByRole('heading', { name: 'Flights' })).toBeTruthy();
+
+            fireEvent.click(screen.getByLabelText('Only Scandinavian'));
+            expect(flightRows()).toEqual(['SAS1']);
+
+            expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.flights')).toHaveLength(1);
+        });
+
+        it('shows the airline logo before each callsign when the route has one airline', async () => {
+            const oneAirline = { airlines: [SAS], airline: null, flights: [flightsFixture.flights[0]] };
+            fetch.mockImplementation((url) => Promise.resolve({
+                ok: true, status: 200, json: () => Promise.resolve({ data: { 'api.airport.flights': oneAirline, 'api.airport.scenery': sceneryFixture }[url] ?? withAirlines }),
+            }));
+            renderCard(onRoute);
+            await screen.findByText('Oslo Gardermoen');
+
+            fireEvent.click(screen.getByAltText('See all Scandinavian flights'));
+            await screen.findByText('SAS1');
+
+            expect(document.querySelector('.flights-filter')).toBeNull();
+            expect(document.querySelector('.card-table tbody tr img.airline-logo').getAttribute('alt')).toBe('Scandinavian logo');
+        });
+
+        it('closes the flights and scenery cards when another airport is selected', async () => {
+            const { rerender } = renderCard(onRoute);
+            await screen.findByText('Oslo Gardermoen');
+            fireEvent.click(screen.getByAltText('See all Lufthansa flights'));
+            fireEvent.click(screen.getByRole('button', { name: /^Scenery/ }));
+            await screen.findByText('Lufthansa flights');
+
+            rerender(
+                <MapContext.Provider value={{ ...onRoute, focusAirport: 'ESSA' }}>
+                    <CardHost airportId={2} />
+                </MapContext.Provider>,
+            );
+
+            expect(screen.queryByText('Lufthansa flights')).toBeNull();
+            expect(document.querySelector('[aria-label="Close scenery card"]')).toBeNull();
+        });
+    });
+
+    it('opens the search form through the map owner, keeping modified clicks for the browser', async () => {
+        const navigate = vi.fn();
+        renderCard({ ...baseMapContext, navigate });
+        await screen.findByText('Oslo Gardermoen');
+
+        fireEvent.click(screen.getByText('Arrival'));
+        expect(navigate).toHaveBeenCalledWith(expect.stringContaining('front?icao=ENGM'));
+
+        fireEvent.click(screen.getByText('Departure'), { ctrlKey: true });
+        expect(navigate).toHaveBeenCalledTimes(1);
+    });
+
+    describe('on the compact layout', () => {
+        const renderTabbed = (mapContext) => {
+            const slot = document.createElement('div');
+            document.body.append(slot);
+            const layout = { compact: true, cardSlot: slot, getInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }) };
+
+            render(
+                <MapLayoutContext.Provider value={layout}>
+                    <MapContext.Provider value={mapContext}>
+                        <CardHost airportId={1} />
+                    </MapContext.Provider>
+                </MapLayoutContext.Provider>,
+            );
+
+            return slot;
+        };
+        // The drawer's own tabs, labelled without their count pill; the scenery card has u-tabs of its own
+        const tabs = (slot) => [...slot.querySelectorAll('.card-tabs u-tab')].map((tab) => `${tab.querySelector('.card-tab-label').textContent}:${tab.getAttribute('aria-selected')}`);
+
+        it('renders the cards as tabs inside the drawer, not beside the panel', async () => {
+            const slot = renderTabbed(baseMapContext);
+            await screen.findByText('Oslo Gardermoen');
+
+            expect(slot.querySelector('.card-tabs')).not.toBeNull();
+            expect(document.querySelector('.popup-container')).toBeNull();
+            // No route, so no flights tab
+            expect(tabs(slot)).toEqual(['ENGM:true', 'Scenery:false']);
+
+            // The scenery count is loaded up front, from the same request the card will use
+            await waitFor(() => expect(slot.querySelector('#card-tab-scenery .card-tab-count')?.textContent).toBe('1'));
+            expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.scenery')).toHaveLength(1);
+        });
+
+        it('counts the flights on a route on its tab, and the card reuses that request', async () => {
+            const bodies = { 'api.airport.show': airportFixture, 'api.airport.flights': flightsFixture, 'api.airport.scenery': sceneryFixture };
+            fetch.mockImplementation((url) => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: bodies[url] }) }));
+            const slot = renderTabbed({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false });
+
+            await waitFor(() => expect(slot.querySelector('#card-tab-flights .card-tab-count')?.textContent).toBe('2'));
+
+            fireEvent.click(slot.querySelector('#card-tab-flights'));
+            await screen.findByText('SAS1');
+            expect(fetch.mock.calls.filter(([url]) => url === 'api.airport.flights')).toHaveLength(1);
+        });
+
+        it('shows no count, and no dimming, when the airport has no sceneries (the endpoint answers 404)', async () => {
+            fetch.mockImplementation((url) => Promise.resolve(url === 'api.airport.scenery'
+                ? { ok: false, status: 404, json: () => Promise.resolve({ message: 'Scenery not found' }) }
+                : { ok: true, status: 200, json: () => Promise.resolve({ data: airportFixture }) }));
+            const slot = renderTabbed(baseMapContext);
+            await waitFor(() => expect(fetch.mock.calls.some(([url]) => url === 'api.airport.scenery')).toBe(true));
+            await screen.findByText('Oslo Gardermoen');
+
+            const tab = slot.querySelector('#card-tab-scenery');
+            expect(tab.querySelector('.card-tab-count')).toBeNull();
+            expect(tab.classList.contains('card-tab-empty')).toBe(false);
+
+            // Still opens: its card holds "Add missing scenery"
+            fireEvent.click(tab);
+            await screen.findByText('No scenery available');
+        });
+
+        it('switches cards from the tab strip, the cards leaving out what the tabs cover', async () => {
+            const slot = renderTabbed({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false });
+            await screen.findByText('Oslo Gardermoen');
+
+            // No close button, no Scenery button: the tabs and the Back arrow cover them
+            expect(slot.querySelector('[aria-label="Close airport card"]')).toBeNull();
+            expect(screen.queryByText('Scenery', { selector: '.popup-card button' })).toBeNull();
+
+            fireEvent.click(slot.querySelector('#card-tab-scenery'));
+            await screen.findByText('Orbx');
+            expect(tabs(slot)).toEqual(['ENGM:false', 'Scenery:true', 'Flights:false']);
+            expect(screen.queryByText('Oslo Gardermoen')).toBeNull();
+            expect(slot.querySelector('[aria-label="Close scenery card"]')).toBeNull();
+            expect(screen.queryByRole('heading', { name: 'Scenery' })).toBeNull();
+
+            fireEvent.click(slot.querySelector('#card-tab-airport'));
+            expect(tabs(slot)).toEqual(['ENGM:true', 'Scenery:false', 'Flights:false']);
+        });
+
+        it('opens on the scenery tab where the scene asks for it, and Back closes everything', async () => {
+            const setFocusAirport = vi.fn();
+            const setShowAirportIdCard = vi.fn();
+            const slot = renderTabbed({ ...baseMapContext, initialCard: 'scenery', setFocusAirport, setShowAirportIdCard });
+
+            await screen.findByText('Orbx');
+            expect(tabs(slot)).toEqual(['ENGM:false', 'Scenery:true']);
+
+            fireEvent.click(screen.getByLabelText('Back to the list'));
+            expect(setFocusAirport).toHaveBeenCalledWith(null);
+            expect(setShowAirportIdCard).toHaveBeenCalledWith(null);
+        });
+
+        it('dims a Flights tab with no flights, which cannot be opened', async () => {
+            const noFlights = { ...flightsFixture, flights: [] };
+            fetch.mockImplementation((url) => Promise.resolve(url === 'api.airport.scenery'
+                ? { ok: false, status: 404, json: () => Promise.resolve({}) }
+                : { ok: true, status: 200, json: () => Promise.resolve({ data: url === 'api.airport.flights' ? noFlights : airportFixture }) }));
+            const slot = renderTabbed({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false });
+
+            const flightsTab = await waitFor(() => {
+                const tab = slot.querySelector('#card-tab-flights.card-tab-empty');
+                expect(tab).not.toBeNull();
+                return tab;
+            });
+            expect(flightsTab.getAttribute('aria-disabled')).toBe('true');
+
+            fireEvent.click(flightsTab);
+            expect(tabs(slot)[0]).toBe('ENGM:true');
+        });
+
+        it('leaves the airline shortcuts off the airport tab: the Flights tab covers them', async () => {
+            const withAirlines = { ...airportFixture, airlines: [SAS, DLH] };
+            const bodies = { 'api.airport.show': withAirlines, 'api.airport.flights': flightsFixture, 'api.airport.scenery': sceneryFixture };
+            fetch.mockImplementation((url) => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: bodies[url] }) }));
+            renderTabbed({ ...baseMapContext, primaryAirport: 'ESSA', reverseDirection: false });
+
+            await screen.findByText('Oslo Gardermoen');
+            expect(screen.queryByAltText('See all Lufthansa flights')).toBeNull();
+        });
+
+        it('steps back on Esc as the Back arrow would: to the airport tab, then out', async () => {
+            const setShowAirportIdCard = vi.fn();
+            const slot = renderTabbed({ ...baseMapContext, initialCard: 'scenery', setShowAirportIdCard });
+            await screen.findByText('Orbx');
+
+            fireEvent.keyDown(document.body, { key: 'Escape' });
+            expect(tabs(slot)).toEqual(['ENGM:true', 'Scenery:false']);
+            expect(setShowAirportIdCard).not.toHaveBeenCalled();
+
+            fireEvent.keyDown(document.body, { key: 'Escape' });
+            expect(setShowAirportIdCard).toHaveBeenCalledWith(null);
+        });
     });
 });

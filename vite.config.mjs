@@ -38,18 +38,7 @@ export default defineConfig({
     },
     plugins: [
         laravel({
-            input: [
-                'resources/js/app.js',
-                'resources/js/bugReport.js',
-                'resources/js/nouislider.js',
-                'resources/js/sortable.js',
-                'resources/js/functions/searchResults.js',
-                'resources/js/functions/searchForm.js',
-                'resources/js/functions/tooltip.js',
-                'resources/js/functions/taf.js',
-                'resources/js/functions/combobox.js',
-                'resources/js/functions/formSubmit.js',
-            ],
+            input: ['resources/js/inertia.jsx'],
             refresh: true,
         }),
         react(),

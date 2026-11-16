@@ -1,59 +1,32 @@
-import { useEffect, useState, useRef, useContext } from 'react';
-import { captureException } from '@sentry/react';
-import { CardContext } from './context/CardContext';
+import { useEffect, useState, useRef } from 'react';
 import CurrencyDropdown from './ui/CurrencyDropdown';
 
-import ExternalLinkTracker from './utils/ExternalLinkTracker';
-import TooltipRefresh from './utils/TooltipRefresh';
+import { readStored, readStoredText, writeStored } from './utils/storage';
+import { useScenery } from './utils/useScenery';
 
-function SceneryCard({ airportId }) {
-    const dataCache = useRef({});
+const CURRENCY_KEY = 'currency';
+const CURRENCIES = [
+    { code: 'EUR', symbol: '€' },
+    { code: 'USD', symbol: '$' },
+    { code: 'GBP', symbol: '£' },
+    { code: 'AUD', symbol: 'A$' },
+    { code: 'CAD', symbol: 'C$' },
+];
+
+// Earlier versions stored the bare code, not JSON; either way only a known currency counts
+const readCurrency = () => {
+    const stored = readStored(CURRENCY_KEY) ?? readStoredText(CURRENCY_KEY);
+
+    return CURRENCIES.some(({ code }) => code === stored) ? stored : 'EUR';
+};
+
+function SceneryCard({ airportId, onClose, inTab = false }) {
     const tabsRef = useRef(null);
-    const [data, setData] = useState(null);
+    const data = useScenery(airportId);
     const [selectedSimulator, setSelectedSimulator] = useState(null);
-    const [currency, setCurrency] = useState(localStorage.getItem('currency') || 'EUR');
-    const { setShowSceneryIdCard } = useContext(CardContext);
+    const [currency, setCurrency] = useState(readCurrency);
 
-    const currencies = [
-        { code: 'EUR', symbol: '€' },
-        { code: 'USD', symbol: '$' },
-        { code: 'GBP', symbol: '£' },
-        { code: 'AUD', symbol: 'A$' },
-        { code: 'CAD', symbol: 'C$' },
-    ]
-
-    // Fetch airport data if it's not in the cache
-    useEffect(() => {
-        if (dataCache.current[airportId]) {
-            setData(dataCache.current[airportId]);
-        } else {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            fetch(route('api.airport.scenery'), {
-                    method: "POST",    
-                    credentials: 'include',
-                    headers: { 
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({ airportIcao: airportId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    dataCache.current[airportId] = data.data;
-                    setData(data.data);
-                })
-                .catch(error => {
-                    captureException(error);
-                    console.error(error.message)
-                });
-        }
-    }, [airportId]);
-
-    useEffect(() => {
-        ExternalLinkTracker();
-        TooltipRefresh();
-    }, [data]);
+    const currencies = CURRENCIES;
 
     // Keep the chosen simulator selected between airports.
     useEffect(() => {
@@ -64,19 +37,22 @@ function SceneryCard({ airportId }) {
     }, [data, selectedSimulator]);
 
     useEffect(() => {
-        localStorage.setItem('currency', currency);
+        writeStored(CURRENCY_KEY, currency);
     }, [currency]);
 
     return (
         <div className="popup-card">
         {data !== null ? (
             <>
-                <div className="d-flex justify-content-between">
-                    <h2>Scenery</h2>
-                    <button className="btn-close" aria-label="Close scenery card" onClick={() => setShowSceneryIdCard(null)}></button>
-                </div>
+                {/* In a tab, the tab already names the card and there's nothing to close */}
+                {!inTab && (
+                    <div className="d-flex justify-content-between">
+                        <h2>Scenery</h2>
+                        <button className="btn-close" aria-label="Close scenery card" onClick={onClose}></button>
+                    </div>
+                )}
 
-                {!data ? (
+                {Object.keys(data).length === 0 ? (
                     <p>No scenery available</p>
                 ) : (
                     <u-tabs ref={tabsRef} key={Object.keys(data).join('|')}>
@@ -149,7 +125,7 @@ function SceneryCard({ airportId }) {
                     <span className="pb-1">
                         Prices are excl. tax.
                     </span>
-                    <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm mt-3" target="_blank">
+                    <a href={route('scenery.create', {icao: airportId})} className="btn btn-outline-success btn-sm mt-3" target="_blank">
                         <i className="fa-sharp fa-plus"></i> Add missing scenery
                     </a>
                 </div>

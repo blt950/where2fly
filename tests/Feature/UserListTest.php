@@ -6,6 +6,7 @@ use App\Models\Simulator;
 use App\Models\User;
 use App\Models\UserList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class UserListTest extends TestCase
@@ -398,5 +399,50 @@ class UserListTest extends TestCase
         $response->assertRedirect(route('list.index'));
         $list->refresh();
         $this->assertTrue((bool) $list->public);
+    }
+
+    // -------------------------------------------------------------------------
+    // In the shell
+    // -------------------------------------------------------------------------
+
+    public function test_the_lists_page_and_form_are_shell_pages(): void
+    {
+        $user = User::factory()->create();
+        $list = UserList::create(['name' => 'Mine', 'color' => '#ff0000', 'user_id' => $user->id, 'simulator_id' => Simulator::first()->id]);
+
+        $this->actingAs($user)->get('/lists')->assertInertia(fn (Assert $page) => $page->component('Lists')
+            ->where('lists.0.name', 'Mine')
+            ->where('lists.0.airportsCount', 0));
+
+        $this->actingAs($user)->get("/lists/{$list->id}/edit")->assertInertia(fn (Assert $page) => $page->component('ListForm')
+            ->where('list.name', 'Mine')
+            ->where('canMakePublic', false)
+            ->has('simulators.0.name'));
+    }
+
+    public function test_airports_separated_by_plain_newlines_are_all_saved(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/lists/create', [
+            'color' => '#ff0000', 'name' => 'Newlines', 'simulator' => Simulator::first()->id, 'airports' => "EDDM\nEGLL\nKJFK",
+        ])->assertRedirect(route('list.index'));
+
+        $this->assertSame(3, UserList::where('name', 'Newlines')->first()->airports()->count());
+    }
+
+    public function test_the_maps_lists_revision_moves_when_only_the_airports_change(): void
+    {
+        $user = User::factory()->create();
+        $list = UserList::create(['name' => 'Mine', 'color' => '#ff0000', 'user_id' => $user->id, 'simulator_id' => Simulator::first()->id]);
+        $revision = fn () => $this->actingAs($user)->get('/lists')->inertiaProps('listsRevision');
+        $before = $revision();
+
+        $this->travel(5)->seconds();
+        $this->actingAs($user)->post("/lists/{$list->id}/edit", [
+            'color' => '#ff0000', 'name' => 'Mine', 'simulator' => $list->simulator_id, 'airports' => 'EDDM',
+        ]);
+
+        $this->assertNotSame($before, $revision());
     }
 }

@@ -8,6 +8,7 @@
         "lint": "eslint resources/js"
     },
     "dependencies": {
+        "@inertiajs/react": "^3.11.0",
         "@popperjs/core": "^2.11.6",
         "@sentry/browser": "^11.0.0",
         "@sentry/react": "^11.0.0",
@@ -25,7 +26,6 @@
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
         "sass": "^1.77.6",
-        "sortable-tablesort": "^4.0.2",
         "vite": "^8.0.0"
     },
     "devDependencies": {
