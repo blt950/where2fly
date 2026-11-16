@@ -62,10 +62,11 @@ class SearchController extends Controller
             'suggestionSide' => $suggestionSide,
             'prefilledIcao' => $request->input('icao'),
             'old' => (object) $request->session()->getOldInput(),
-            'airlines' => Airline::where('has_flights', true)->orderBy('name')->get(['icao_code', 'name'])
-                ->map(fn (Airline $airline) => ['icao' => $airline->icao_code, 'name' => $airline->name]),
-            'aircrafts' => Aircraft::pluck('icao')->sort()->values(),
-            'destinationInputs' => $this->getDestinationInputs(),
+            // The option lists (~50 KB) are the same on every visit: sent once, then kept by the client
+            'airlines' => Inertia::once(fn () => Airline::where('has_flights', true)->orderBy('name')->get(['icao_code', 'name'])
+                ->map(fn (Airline $airline) => ['icao' => $airline->icao_code, 'name' => $airline->name])),
+            'aircrafts' => Inertia::once(fn () => Aircraft::pluck('icao')->sort()->values()),
+            'destinationInputs' => Inertia::once(fn () => $this->getDestinationInputs()),
             'lists' => $lists->map(fn (UserList $list) => ['id' => $list->id, 'name' => $list->name]),
             'aircraftTypes' => collect(AircraftHelper::TYPES)->map(fn ($type) => ['name' => $type['name'], 'description' => $type['description']]),
             'scoreTypes' => ScoreHelper::TYPES,
