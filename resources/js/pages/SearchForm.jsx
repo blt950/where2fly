@@ -10,7 +10,6 @@ import { formToOld, formUrl } from '../components/form/formQuery';
 import { trackSearch } from '../components/form/searchMetrics';
 import PageTitle from '../components/ui/PageTitle';
 import { trackInteraction } from '../components/utils/metrics';
-import { useTooltips } from '../components/utils/useTooltips';
 
 const LOCALE = 'de-DE';
 const FILTERS_KEY = 'filterExpanded';
@@ -51,8 +50,6 @@ const SearchForm = ({
     const [icao, setIcao] = useState(prefilledIcao ?? old.icao ?? '');
     const [expanded, setExpanded] = useState(readExpanded);
     const [submitting, setSubmitting] = useState(false);
-
-    useTooltips(formRef, []);
 
     // The anchor whitelist only narrows which random airport gets drawn, so a typed ICAO locks it
     const anchorLocked = icao.trim().length > 0;

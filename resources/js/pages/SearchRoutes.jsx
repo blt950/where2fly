@@ -1,11 +1,9 @@
-import { useRef } from 'react';
 import { Head } from '@inertiajs/react';
 
 import Flag from '../components/ui/Flag';
 import FlightMenu from '../components/ui/FlightMenu';
 import PageTitle from '../components/ui/PageTitle';
 import { useSortableRows } from '../components/utils/useSortableRows';
-import { useTooltips } from '../components/utils/useTooltips';
 
 const SORT_COLUMNS = {
     flight: (route) => route.flightIcao,
@@ -27,13 +25,10 @@ const Endpoint = ({ label, airport }) => (
 
 const SearchRoutes = ({ departure, arrival, dataSince, routes }) => {
 
-    const contentRef = useRef(null);
     const { rows, headerProps } = useSortableRows(routes, SORT_COLUMNS);
 
-    useTooltips(contentRef, [departure, arrival]);
-
     return (
-        <div ref={contentRef}>
+        <div>
             <Head title="Results" />
 
             <PageTitle title="Search results" />

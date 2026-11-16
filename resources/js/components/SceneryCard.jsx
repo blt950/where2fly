@@ -3,7 +3,6 @@ import CurrencyDropdown from './ui/CurrencyDropdown';
 
 import { readStored, readStoredText, writeStored } from './utils/storage';
 import { useScenery } from './utils/useScenery';
-import { useTooltips } from './utils/useTooltips';
 
 const CURRENCY_KEY = 'currency';
 const CURRENCIES = [
@@ -22,15 +21,12 @@ const readCurrency = () => {
 };
 
 function SceneryCard({ airportId, onClose, inTab = false }) {
-    const cardRef = useRef(null);
     const tabsRef = useRef(null);
     const data = useScenery(airportId);
     const [selectedSimulator, setSelectedSimulator] = useState(null);
     const [currency, setCurrency] = useState(readCurrency);
 
     const currencies = CURRENCIES;
-
-    useTooltips(cardRef, [data]);
 
     // Keep the chosen simulator selected between airports.
     useEffect(() => {
@@ -45,7 +41,7 @@ function SceneryCard({ airportId, onClose, inTab = false }) {
     }, [currency]);
 
     return (
-        <div className="popup-card" ref={cardRef}>
+        <div className="popup-card">
         {data !== null ? (
             <>
                 {/* In a tab, the tab already names the card and there's nothing to close */}

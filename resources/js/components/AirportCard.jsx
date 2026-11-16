@@ -1,4 +1,4 @@
-import { useRef, useContext } from 'react';
+import { useContext } from 'react';
 import { MapContext } from './context/MapContext';
 
 import Flag from './ui/Flag';
@@ -8,7 +8,6 @@ import TAF from './ui/TAF';
 import { AIRPORT_PARAM } from './shell/selection';
 import { useCachedPost } from './utils/useCachedPost';
 import { trackInteraction } from './utils/metrics';
-import { useTooltips } from './utils/useTooltips';
 
 // No number while loading, and none for no scenery: its card still has "Add missing scenery"
 const Count = ({ value }) => (value === null || value === undefined ? null : ` (${value})`);
@@ -16,7 +15,6 @@ const Count = ({ value }) => (value === null || value === undefined ? null : ` (
 // The airport itself. CardHost owns the flights and scenery cards beside it, and their `counts`
 // (null while loading; no flights off a route). `inTab`: shown as a drawer tab, see CardHost.
 function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab = false, counts = {} }) {
-    const cardRef = useRef(null);
     const { findAirport, primaryAirport, focusAirport, reverseDirection, highlightedAircrafts, navigate } = useContext(MapContext);
 
     // A plain click navigates through the map's owner (keeping the map in the shell); a modified
@@ -37,11 +35,8 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
         highlightedAircrafts,
     });
 
-    // Tooltips for this card only, disposed with it
-    useTooltips(cardRef, [data]);
-
     return (
-        <div className="popup-card" ref={cardRef}>
+        <div className="popup-card">
             {data ? (
                 <>
                     <div className="d-flex justify-content-between">

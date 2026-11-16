@@ -9,7 +9,6 @@ import Legend from '../components/ui/Legend';
 import PageTitle from '../components/ui/PageTitle';
 import ScoreIcon from '../components/ui/ScoreIcon';
 import { useSortableRows } from '../components/utils/useSortableRows';
-import { useTooltips } from '../components/utils/useTooltips';
 
 // Each dropdown links to a URL keeping the other two filters intact. JM is the default aircraft,
 // so "no filter" must travel as an explicit aircraft=all rather than an absent param.
@@ -38,12 +37,9 @@ const FilterItem = ({ active, href, children }) => (
 const Top = ({ airports, continent, exclude, aircraft, continents, aircraftTypes, scoreTypes }) => {
 
     const { focusAirport, setFocusAirport, pingAirport } = useShellMap();
-    const tableRef = useRef(null);
     const rowRefs = useRef({});
     const { rows, headerProps } = useSortableRows(airports, SORT_COLUMNS);
     const aircraftParam = aircraft ?? 'all';
-
-    useTooltips(tableRef, [airports]);
 
     // Focus can come from a click on the map: bring that row into view, unless it already is.
     useEffect(() => {
@@ -92,7 +88,7 @@ const Top = ({ airports, continent, exclude, aircraft, continents, aircraftTypes
                     </FilterDropdown>
                 </div>
 
-                <div className="table-responsive" ref={tableRef}>
+                <div className="table-responsive">
                     <table className="table table-hover text-start sortable asc mb-0">
                         <thead>
                             <tr>

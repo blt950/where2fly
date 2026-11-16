@@ -1,4 +1,4 @@
-import { isValidElement, useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import { isValidElement, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 
 import Alerts from './Alerts';
@@ -17,6 +17,7 @@ import { useShellScene } from './useShellScene';
 import { MapLayoutContext } from '../context/MapLayoutContext';
 import MapView from '../map/MapView';
 import { useMapState } from '../map/useMapState';
+import { installTooltips } from '../utils/tooltips';
 
 const visit = (url) => router.visit(url);
 
@@ -67,6 +68,8 @@ const AppShell = ({ children }) => {
         [compact, getInsets, cardSlot, wide, wideSlot, registerCards, registerFooter, registerHeader]);
 
     const announcement = usePageAnnouncement();
+
+    useEffect(installTooltips, []);
 
     // An airport the map couldn't find (a typo in ?airport=, the Scenery search box), said once in
     // the alerts on any page; gone with the next page or the next airport found

@@ -10,7 +10,6 @@ import ScoreIcon from '../components/ui/ScoreIcon';
 import TAF from '../components/ui/TAF';
 import { trackInteraction } from '../components/utils/metrics';
 import { useSortableRows } from '../components/utils/useSortableRows';
-import { useTooltips } from '../components/utils/useTooltips';
 
 const VISIBLE_ROWS = 10;
 const feet = (ft) => ft.toLocaleString('en-US');
@@ -88,14 +87,11 @@ const SearchResults = ({
 }) => {
 
     const { focusAirport, setFocusAirport } = useShellMap();
-    const contentRef = useRef(null);
     const rowRefs = useRef({});
     const [expanded, setExpanded] = useState(suggestions.length <= VISIBLE_ROWS);
     const [randomising, setRandomising] = useState(false);
     const { rows, headerProps } = useSortableRows(suggestions, SORT_COLUMNS);
     const suggestionSide = direction === 'departure' ? 'arrival' : 'departure';
-
-    useTooltips(contentRef, [suggestions, expanded]);
 
     // Focus can come from the map: unfold the rows if it is hidden behind "Show more", and bring
     // it into view unless it already is. The primary airport has no row.
@@ -128,7 +124,7 @@ const SearchResults = ({
     });
 
     return (
-        <div ref={contentRef}>
+        <div>
             <Head title="Results" />
 
             <PageTitle title="Search results">

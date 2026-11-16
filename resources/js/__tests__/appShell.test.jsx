@@ -11,6 +11,7 @@ let mapProps;
 
 vi.mock('@inertiajs/react', () => ({ usePage: () => page, router }));
 vi.mock('../components/shell/Menu', () => ({ default: () => null }));
+vi.mock('../components/utils/tooltips', () => ({ installTooltips: () => () => {} }));
 let notices = [];
 vi.mock('../components/shell/Alerts', () => ({ default: (props) => { notices = props.notices; return null; } }));
 vi.mock('../components/shell/Footer', () => ({ default: () => null }));
