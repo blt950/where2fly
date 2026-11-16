@@ -49,7 +49,7 @@ const AppShell = ({ children }) => {
         selectInUrl(icao);
     }, [raiseDrawer, selectInUrl]);
     const mapActions = useMemo(() => ({ ...actions, setFocusAirport: select }), [actions, select]);
-    const { getInsets, onCoverChange, registerCards, registerFooter, mapRef } = useMapInsets(mode);
+    const { getInsets, onCoverChange, registerCards, registerFooter, registerHeader, mapRef } = useMapInsets(mode);
     const [cardSlot, setCardSlot] = useState(null);
 
     // For the CSS only; the hooks get `mode` itself
@@ -63,8 +63,8 @@ const AppShell = ({ children }) => {
     const wide = Boolean(Page?.wide) && !compact;
     const [wideSlot, setWideSlot] = useState(null);
 
-    const layout = useMemo(() => ({ compact, getInsets, cardSlot, wideSlot: wide ? wideSlot : null, registerCards, registerFooter }),
-        [compact, getInsets, cardSlot, wide, wideSlot, registerCards, registerFooter]);
+    const layout = useMemo(() => ({ compact, getInsets, cardSlot, wideSlot: wide ? wideSlot : null, registerCards, registerFooter, registerHeader }),
+        [compact, getInsets, cardSlot, wide, wideSlot, registerCards, registerFooter, registerHeader]);
 
     const announcement = usePageAnnouncement();
 

@@ -2,11 +2,13 @@ import { useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 
 import NavItem from './NavItem';
+import { useMapLayout } from '../context/MapLayoutContext';
 
 // The header; its links come from NavigationHelper (`nav`), shared with the bottom nav and footer
 const Menu = () => {
     const { url, props } = usePage();
     const { nav, isProduction } = props;
+    const { registerHeader } = useMapLayout();
     const { main, feedback, account, login, community } = nav;
     const donate = community.find((item) => item.key === 'donate');
     const social = community.filter((item) => item.key !== 'donate');
@@ -26,7 +28,7 @@ const Menu = () => {
 
     return (
         <>
-            <header className="mb-auto">
+            <header className="mb-auto" ref={registerHeader}>
                 <nav className="navbar navbar-expand-xl navbar-dark">
                     <div className="d-flex d-row">
                         <Link href={main[0].href} className="d-block navbar-brand mb-0 logo">Where2Fly</Link>

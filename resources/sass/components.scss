@@ -98,6 +98,11 @@
     bottom: 3rem;
     font-size: 1rem;
     z-index: 2000;
+
+    // On a phone it sits on the map in the way of the drawer and markers
+    @include media-breakpoint-down(sm) {
+        display: none;
+    }
 }
 
 .badge{

@@ -9,6 +9,7 @@ export const MapLayoutContext = createContext({
     getInsets: () => NO_INSETS,
     registerCards: () => {},
     registerFooter: () => {},
+    registerHeader: () => {},
 });
 
 export const useMapLayout = () => useContext(MapLayoutContext);

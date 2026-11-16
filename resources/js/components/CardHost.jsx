@@ -110,10 +110,10 @@ function CardHost({ airportId }) {
         // through aria-selected and renders only the selected panel, so Flights fetches on demand
         const tabs = [
             { id: 'airport', icon: 'fa-tower-control', label: focused?.icao ?? 'Airport' },
-            // No flights is nothing to open: dimmed and inert, as the desktop button is. No scenery
-            // still opens, for "Add missing scenery", and just shows no count.
-            ...(onRoute ? [{ id: 'flights', icon: 'fa-plane-up', label: 'Flights', count: flightsTotal, inert: flightsTotal === 0 }] : []),
+            // No scenery still opens, for "Add missing scenery", and just shows no count. No flights is
+            // nothing to open: dimmed and inert, as the desktop button is.
             { id: 'scenery', icon: 'fa-map', label: 'Scenery', count: sceneryTotal || null },
+            ...(onRoute ? [{ id: 'flights', icon: 'fa-plane-up', label: 'Flights', count: flightsTotal, inert: flightsTotal === 0 }] : []),
         ];
         const backToAirport = () => update({ tab: 'airport' });
 

@@ -8,6 +8,8 @@ const Results = () => null;
 const Form = () => null;
 const Text = () => null;
 Text.drawer = 'full';
+const Kept = () => null;
+Kept.drawer = 'keep';
 
 const mount = (props) => renderHook((p) => useDrawerStop(p), {
     initialProps: { mode: 'sheet', Page: Form, sceneVersion: 1, selectedCard: null, ...props },
@@ -61,5 +63,21 @@ describe('useDrawerStop', () => {
         const wide = mount({ mode: 'panel' });
         wide.rerender({ mode: 'panel', Page: Text, sceneVersion: 2, selectedCard: 3 });
         expect(wide.result.current.stop).toBe('half');
+    });
+
+    it('keeps results as the search left the drawer, raised or half, but never collapsed', () => {
+        const { result, rerender } = mount();
+        act(() => result.current.setStop('full'));
+
+        rerender({ mode: 'sheet', Page: Kept, sceneVersion: 2, selectedCard: null });
+        expect(result.current.stop).toBe('full');
+
+        // Choosing an airport still brings the map back for its route
+        rerender({ mode: 'sheet', Page: Kept, sceneVersion: 2, selectedCard: 5 });
+        expect(result.current.stop).toBe('half');
+
+        act(() => result.current.setStop('peek'));
+        rerender({ mode: 'sheet', Page: Kept, sceneVersion: 3, selectedCard: 5 });
+        expect(result.current.stop).toBe('half');
     });
 });

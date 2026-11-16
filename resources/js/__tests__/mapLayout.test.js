@@ -18,7 +18,14 @@ describe('camera insets', () => {
     it('frames within the uncovered area while it leaves room, else the whole map', () => {
         const drawer = { top: 0, right: 0, bottom: 365, left: 0 };
 
-        expect(fitPadding(mapOf(390, 729), drawer)).toEqual(paddingFor(drawer));
-        expect(fitPadding(mapOf(390, 500), drawer)).toEqual({ top: 50, right: 50, bottom: 50, left: 50 });
+        expect(fitPadding(mapOf(1400, 900), drawer)).toEqual(paddingFor(drawer));
+        expect(fitPadding(mapOf(1000, 400), drawer)).toEqual({ top: 24, right: 24, bottom: 24, left: 24 });
+    });
+
+    it('keeps a phone-sized margin on a phone, not the desktop 50px', () => {
+        const drawer = { top: 55, right: 0, bottom: 365, left: 0 };
+
+        // 6% of the narrow side of a 390px-wide map
+        expect(fitPadding(mapOf(390, 729), drawer)).toEqual(paddingFor(drawer, 23));
     });
 });

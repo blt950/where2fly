@@ -95,4 +95,7 @@ SearchRoutes.mapScene = ({ airportMapData, departure, arrival }) => ({
     showLists: false,
 });
 
+// Results stay as the search left the drawer: searched from a raised form, they show raised
+SearchRoutes.drawer = 'keep';
+
 export default SearchRoutes;

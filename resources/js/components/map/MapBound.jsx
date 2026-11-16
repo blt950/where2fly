@@ -21,14 +21,16 @@ const MapBound = ({ mapBounds }) => {
     return null;
 };
 
-// Covered edges plus a margin, unless that leaves no room: then the margin alone
+// Covered edges plus a margin, unless that leaves no room: then the margin alone. The margin
+// shrinks with the screen: a flat 50px took a fifth of a phone's uncovered map.
 const fitPadding = (map, insets) => {
-    const padding = paddingFor(insets);
     const { clientWidth, clientHeight } = map.getContainer();
+    const margin = Math.min(50, Math.round(Math.min(clientWidth, clientHeight) * 0.06));
+    const padding = paddingFor(insets, margin);
 
     return padding.left + padding.right < clientWidth - 50 && padding.top + padding.bottom < clientHeight - 50
         ? padding
-        : paddingFor({ top: 0, right: 0, bottom: 0, left: 0 });
+        : paddingFor({ top: 0, right: 0, bottom: 0, left: 0 }, margin);
 };
 
 export { fitPadding };

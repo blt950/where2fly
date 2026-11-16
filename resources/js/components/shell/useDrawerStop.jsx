@@ -1,8 +1,10 @@
 import { useCallback, useRef, useState } from 'react';
 
 // A page's resting stop on the compact layout: `Page.drawer = 'full'` for pages to read or fill
-// in (text pages, account, lists, feedback), where the map has nothing to show; half otherwise.
+// in (text pages, account, lists, feedback); 'keep' for results, which stay as the search left them
+// (a collapsed drawer comes back to half); half otherwise.
 export const preferredStop = (Page) => Page?.drawer ?? 'half';
+const settleTo = (preferred, current) => (preferred !== 'keep' ? preferred : current === 'peek' ? 'half' : current);
 
 // Where the compact layout's drawer rests (drawerStops.js), as the page and the selection ask.
 // Both are settled during render, so the drawer reports its new height before the map moves.
@@ -13,7 +15,7 @@ export const useDrawerStop = ({ mode, Page, sceneVersion, selectedCard }) => {
     const preferred = preferredStop(Page);
     const currentMode = useRef(mode);
     currentMode.current = mode;
-    const [stop, setStop] = useState(compact ? preferred : 'half');
+    const [stop, setStop] = useState(compact ? settleTo(preferred, 'half') : 'half');
 
     // A new page, or new content on the same page (results after a search from a raised form,
     // another filter), starts at the page's own stop; so does a new layout (turning the phone)
@@ -21,7 +23,7 @@ export const useDrawerStop = ({ mode, Page, sceneVersion, selectedCard }) => {
     if (Page !== settledPage.Page || sceneVersion !== settledPage.sceneVersion || mode !== settledPage.mode) {
         setSettledPage({ Page, sceneVersion, mode });
         if (compact) {
-            setStop(preferred);
+            setStop((current) => settleTo(preferred, current));
         }
     }
 
@@ -36,7 +38,7 @@ export const useDrawerStop = ({ mode, Page, sceneVersion, selectedCard }) => {
     }
 
     // A collapsed drawer comes back: the bottom nav, or a tap on the airport already selected
-    const raiseDrawer = useCallback(() => setStop((current) => (current === 'peek' ? preferred : current)), [preferred]);
+    const raiseDrawer = useCallback(() => setStop((current) => (current === 'peek' ? settleTo(preferred, current) : current)), [preferred]);
 
     // Tapping the map itself gets a sheet out of the way
     const onBackgroundClick = useCallback(() => {

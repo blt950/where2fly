@@ -45,10 +45,22 @@ body.shell-compact > .d-flex.w-100.h-100.mx-auto.flex-column {
 
 body.shell-compact {
 
-    // Navigation moves to the bottom bar; the header keeps the brand
+    // Navigation moves to the bottom bar; the header keeps the brand, over the map rather than above
+    // it for the room. Taps go through it to the map except on its own links; a fade keeps it legible.
     header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 650;
         margin-bottom: 0 !important;
-        flex: none;
+        background: linear-gradient(to bottom, rgba($secondary, 0.9) 35%, rgba($secondary, 0));
+        pointer-events: none;
+
+        a,
+        button {
+            pointer-events: auto;
+        }
     }
 
     .navbar-toggler,
@@ -94,7 +106,7 @@ body.shell-compact {
     // Relative to the map now, and visible: the map is too
     .map-controls {
         display: flex;
-        top: 0.75rem;
+        top: calc(#{$header-height} + 0.75rem);
         right: 0.75rem;
     }
 
@@ -107,14 +119,14 @@ body.shell-compact {
     // every stop that shows the map. Only the attribution, not the site links (in "More").
     .attribution-toggle {
         position: absolute;
-        top: calc(0.75rem + 2.4rem + 0.5rem);
+        top: calc(#{$header-height} + 0.75rem + 2.4rem + 0.5rem);
         right: 0.75rem;
         z-index: 600;
     }
 
     footer {
         display: none;
-        top: calc(0.75rem + 2.4rem + 0.5rem);
+        top: calc(#{$header-height} + 0.75rem + 2.4rem + 0.5rem);
         right: calc(0.75rem + 2.5rem + 0.5rem);
         bottom: auto;
         left: auto;
@@ -137,11 +149,12 @@ body.shell-compact {
         }
     }
 
+    // Fully open, it stops below the header
     main.drawer {
         position: absolute;
-        inset: 0;
+        inset: $header-height 0 0 0;
         width: 100%;
-        height: 100% !important;
+        height: auto !important;
         min-height: 0 !important;
         overflow: hidden !important;
         overflow: clip !important;
@@ -259,8 +272,8 @@ body.shell-compact {
         left: 0.5rem;
         width: 2.75rem;
         height: $drawer-handle-height;
-        // The full row stays the tap target; the icon lines up with the grip
-        padding: 0 0 1rem;
+        // The full row stays the tap target; centred in it, the icon's top meets the grip's
+        padding: 0;
         background: transparent;
         border: 0;
         color: $gray-400;
@@ -339,6 +352,7 @@ body.shell-compact.shell-side {
     }
 
     main.drawer {
+        top: 0;
         right: auto;
         width: 45%;
         max-width: 28rem;
@@ -350,6 +364,15 @@ body.shell-compact.shell-side {
 
     .drawer-body {
         height: 100%;
+    }
+
+    .map-controls {
+        top: 0.75rem;
+    }
+
+    .attribution-toggle,
+    footer {
+        top: calc(0.75rem + 2.4rem + 0.5rem);
     }
 
     // No handle row to sit in: back in the tab bar, which has less than half the width to share
@@ -452,6 +475,19 @@ body.shell-compact.shell-side {
         &[aria-current='page'] {
             color: $white;
             border-top-color: $primary;
+        }
+
+        // "More" while its menu is open; hover only where there is one (a tap leaves it stuck)
+        &[aria-expanded='true'] {
+            color: $white;
+            background: rgba($white, 0.08);
+        }
+
+        @media (hover: hover) {
+            &:hover {
+                color: $white;
+                background: rgba($white, 0.05);
+            }
         }
     }
 

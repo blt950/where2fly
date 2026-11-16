@@ -64,7 +64,10 @@ const Drawer = ({ mode = 'panel', stop, onStopChange, onCoverChange, children })
     // One drag, from the handle (pointer events) or from the content (touch events, A6). Read
     // through a ref, so the content's listeners, added once, always see this render's stops.
     const gestures = useRef(null);
+    const onStopChangeRef = useRef(onStopChange);
+    onStopChangeRef.current = onStopChange;
     gestures.current = {
+        stop,
         begin: (clientY, at) => {
             drag.current = { startY: clientY, base: y, y, at, velocity: 0, moved: false };
         },
@@ -123,8 +126,9 @@ const Drawer = ({ mode = 'panel', stop, onStopChange, onCoverChange, children })
         if (drag.current) gestures.current.abandon();
     };
 
-    // A6: dragging the content down moves the drawer too, as sheets do, once nothing under the
-    // finger can scroll up any further. Touch events, as only those can stop the scroll natively.
+    // Dragging the content moves the drawer too, as sheets do: up while it isn't fully open (the
+    // content scrolls once it is), down once nothing under the finger can scroll up any further.
+    // Touch events, as only those can stop the scroll natively.
     useEffect(() => {
         if (!sheet) {
             return undefined;
@@ -145,14 +149,16 @@ const Drawer = ({ mode = 'panel', stop, onStopChange, onCoverChange, children })
 
             const point = event.touches[0];
 
-            // Decided once, on the first clear movement: down and mostly vertical, from the top
+            // Decided once, on the first clear movement: mostly vertical, and up from below full or
+            // down from the top
             if (touch.ours === null) {
                 const dx = point.clientX - touch.x;
                 const dy = point.clientY - touch.y;
 
                 if (Math.abs(dx) <= TAP_SLOP && Math.abs(dy) <= TAP_SLOP) return;
 
-                touch.ours = touch.top && dy > 0 && Math.abs(dy) > Math.abs(dx);
+                const vertical = Math.abs(dy) > Math.abs(dx);
+                touch.ours = vertical && (dy < 0 ? gestures.current.stop !== 'full' : touch.top);
                 if (touch.ours) gestures.current.begin(touch.y, event.timeStamp);
             }
 
@@ -169,12 +175,32 @@ const Drawer = ({ mode = 'panel', stop, onStopChange, onCoverChange, children })
             touch = null;
         };
 
+        // A wheel or trackpad does the same a stop at a time; one gesture's trailing events are let go
+        let wheelUntil = 0;
+        const onWheel = (event) => {
+            const { stop: current } = gestures.current;
+            const step = event.deltaY > 0 && current !== 'full' ? (current === 'peek' ? 'half' : 'full')
+                : event.deltaY < 0 && current === 'full' && scrolledToTop(event.target, mainRef.current) ? 'half'
+                    : null;
+
+            if (event.timeStamp < wheelUntil || !step || event.target.closest?.(OWN_DRAG)) {
+                if (event.timeStamp < wheelUntil && step) event.preventDefault();
+                return;
+            }
+
+            event.preventDefault();
+            wheelUntil = event.timeStamp + 500;
+            onStopChangeRef.current(step);
+        };
+
+        body.addEventListener('wheel', onWheel, { passive: false });
         body.addEventListener('touchstart', onStart, { passive: true });
         body.addEventListener('touchmove', onMove, { passive: false });
         body.addEventListener('touchend', onEnd);
         body.addEventListener('touchcancel', onEnd);
 
         return () => {
+            body.removeEventListener('wheel', onWheel);
             body.removeEventListener('touchstart', onStart);
             body.removeEventListener('touchmove', onMove);
             body.removeEventListener('touchend', onEnd);

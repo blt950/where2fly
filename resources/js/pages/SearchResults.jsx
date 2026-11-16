@@ -257,4 +257,7 @@ SearchResults.mapScene = ({ airportMapData, primaryAirport, direction, highlight
 
 SearchResults.showMapHint = false;
 
+// Results stay as the search left the drawer: searched from a raised form, they show raised
+SearchResults.drawer = 'keep';
+
 export default SearchResults;

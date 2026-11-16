@@ -399,13 +399,13 @@ describe('CardHost / AirportCard', () => {
 
             fireEvent.click(slot.querySelector('#card-tab-scenery'));
             await screen.findByText('Orbx');
-            expect(tabs(slot)).toEqual(['ENGM:false', 'Flights:false', 'Scenery:true']);
+            expect(tabs(slot)).toEqual(['ENGM:false', 'Scenery:true', 'Flights:false']);
             expect(screen.queryByText('Oslo Gardermoen')).toBeNull();
             expect(slot.querySelector('[aria-label="Close scenery card"]')).toBeNull();
             expect(screen.queryByRole('heading', { name: 'Scenery' })).toBeNull();
 
             fireEvent.click(slot.querySelector('#card-tab-airport'));
-            expect(tabs(slot)).toEqual(['ENGM:true', 'Flights:false', 'Scenery:false']);
+            expect(tabs(slot)).toEqual(['ENGM:true', 'Scenery:false', 'Flights:false']);
         });
 
         it('opens on the scenery tab where the scene asks for it, and Back closes everything', async () => {

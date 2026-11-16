@@ -143,8 +143,21 @@ describe('Drawer', () => {
             expect(onStopChange).toHaveBeenCalledWith('peek');
         });
 
-        it('leaves the content scrolling: an upward drag, a scrolled list, a sideways swipe, a slider', () => {
+        it('raises the drawer on an upward drag while it is not fully open, as Google Maps does', () => {
             const { container, onStopChange } = renderDrawer();
+            const row = container.querySelector('#row');
+
+            touch(row, 'touchstart', 100, 450, 0);
+            const move = touch(row, 'touchmove', 100, 380, 20);
+            touch(row, 'touchmove', 100, 300, 40);
+            touch(row, 'touchend', 0, 0, 45);
+
+            expect(move.defaultPrevented).toBe(true);
+            expect(onStopChange).toHaveBeenCalledWith('full');
+        });
+
+        it('leaves the content scrolling: upward when full, a scrolled list, a sideways swipe, a slider', () => {
+            const { container, onStopChange } = renderDrawer({ stop: 'full' });
             const row = container.querySelector('#row');
             const gesture = (target, [x1, y1], [x2, y2]) => {
                 touch(target, 'touchstart', x1, y1, 0);
@@ -162,5 +175,27 @@ describe('Drawer', () => {
 
             expect(onStopChange).not.toHaveBeenCalled();
         });
+
+        it('steps on a wheel too, once per gesture: down from half to full, up from the top of full to half', () => {
+            const wheel = (target, deltaY, timeStamp) => {
+                const event = new Event('wheel', { bubbles: true, cancelable: true });
+                Object.defineProperty(event, 'deltaY', { value: deltaY });
+                Object.defineProperty(event, 'timeStamp', { value: timeStamp });
+                target.dispatchEvent(event);
+                return event;
+            };
+
+            const half = renderDrawer();
+            expect(wheel(half.container.querySelector('#row'), 30, 1000).defaultPrevented).toBe(true);
+            wheel(half.container.querySelector('#row'), 30, 1100);
+            expect(half.onStopChange).toHaveBeenCalledTimes(1);
+            expect(half.onStopChange).toHaveBeenCalledWith('full');
+            cleanup();
+
+            const full = renderDrawer({ stop: 'full' });
+            expect(wheel(full.container.querySelector('#row'), 30, 1000).defaultPrevented).toBe(false);
+            wheel(full.container.querySelector('#row'), -30, 2000);
+            expect(full.onStopChange).toHaveBeenCalledWith('half');
+    });
     });
 });

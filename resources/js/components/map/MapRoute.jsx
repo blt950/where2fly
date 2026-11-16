@@ -86,16 +86,27 @@ const MapRoute = ({ departure, arrival, reverseDirection = false, color }) => {
         let flying = false;
 
         // Framed in what the drawer or card stack leaves uncovered, read now and not on a drag
-        const camera = map.cameraForBounds(boundsFromCoordinates(line), { padding: fitPadding(map, getInsets()), maxZoom: 7 });
+        const bounds = boundsFromCoordinates(line);
+        const padding = fitPadding(map, getInsets());
+        const camera = map.cameraForBounds(bounds, { padding, maxZoom: 7 });
 
         if (camera) {
             // Under prefers-reduced-motion flyTo falls through to jumpTo, which fires
             // moveend inside the call — listen first or the reveal never starts.
             map.once('moveend', startReveal);
 
-            // Leaflet snapped the fitted zoom down to a whole level, which is where the
-            // route's breathing room came from. MapLibre returns it fractional.
-            map.flyTo({ ...camera, zoom: Math.floor(camera.zoom - 0.3), duration: 350 });
+            // Leaflet snapped the fitted zoom down to a whole level, which is where the route's
+            // breathing room came from. Zoomed out around the middle of the uncovered area: around
+            // the canvas centre, a half-open drawer pulled the route down behind it.
+            const [[west, south], [east, north]] = bounds;
+
+            map.flyTo({
+                center: [(west + east) / 2, (south + north) / 2],
+                zoom: Math.floor(camera.zoom - 0.3),
+                bearing: camera.bearing,
+                offset: [(padding.left - padding.right) / 2, (padding.top - padding.bottom) / 2],
+                duration: 350,
+            });
             flying = true;
         }
 
