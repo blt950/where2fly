@@ -62,6 +62,14 @@ let account;
 router.on('navigate', (event) => {
     const { page, type } = event.detail;
 
+    // umami only watches pushState/replaceState: Back and Forward are page views it never sees.
+    // Sent once <Head> has set the title.
+    if (type === 'history') {
+        setTimeout(() => window.umami?.track((props) => ({
+            ...props, url: window.location.pathname + window.location.search, title: document.title,
+        })), 300);
+    }
+
     if (type !== 'history') {
         account = accountIn(page);
     } else if (account !== undefined && accountIn(page) !== account) {

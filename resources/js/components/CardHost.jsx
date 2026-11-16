@@ -116,6 +116,11 @@ function CardHost({ airportId }) {
             ...(onRoute ? [{ id: 'flights', icon: 'fa-plane-up', label: 'Flights', count: flightsTotal, inert: flightsTotal === 0 }] : []),
         ];
         const backToAirport = () => update({ tab: 'airport' });
+        // The same interactions the desktop card's Flights and Scenery buttons report
+        const selectTab = (id) => {
+            if (id !== cards.tab && id !== 'airport') trackInteraction(`Open ${id} card`);
+            update({ tab: id });
+        };
 
         return createPortal(
             <u-tabs className="card-tabs-host">
@@ -127,7 +132,7 @@ function CardHost({ airportId }) {
                         {tabs.map((tab) => (
                             <u-tab key={tab.id} id={`card-tab-${tab.id}`} aria-controls={`card-panel-${tab.id}`}
                                 className={tab.inert ? 'card-tab-empty' : undefined} aria-disabled={tab.inert ? 'true' : undefined}
-                                aria-selected={cards.tab === tab.id ? 'true' : 'false'} onClick={() => !tab.inert && update({ tab: tab.id })}>
+                                aria-selected={cards.tab === tab.id ? 'true' : 'false'} onClick={() => !tab.inert && selectTab(tab.id)}>
                                 <i className={`fa-sharp ${tab.icon}`} aria-hidden="true"></i>
                                 <span className="card-tab-label">{tab.label}</span>
                                 {tab.count !== undefined && tab.count !== null && (
