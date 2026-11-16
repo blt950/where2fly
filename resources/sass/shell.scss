@@ -46,7 +46,7 @@ body.shell-compact > .d-flex.w-100.h-100.mx-auto.flex-column {
 body.shell-compact {
 
     // Navigation moves to the bottom bar; the header keeps the brand, over the map rather than above
-    // it for the room. Taps go through it to the map except on its own links; a fade keeps it legible.
+    // it for the room, and see-through. Taps go through it to the map except on its own links.
     header {
         position: absolute;
         top: 0;
@@ -54,7 +54,7 @@ body.shell-compact {
         right: 0;
         z-index: 650;
         margin-bottom: 0 !important;
-        background: linear-gradient(to bottom, rgba($secondary, 0.9) 35%, rgba($secondary, 0));
+        background: transparent;
         pointer-events: none;
 
         a,
