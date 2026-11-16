@@ -115,12 +115,23 @@ body.shell-compact {
         display: none;
     }
 
-    // The credits: behind an ⓘ beside the layers button (not under it, where its panel opens), so they
-    // stay reachable at every stop that shows the map. Only the attribution; the site links are in "More".
+    // The layers panel opens to the left of the button column, level with its button, so the ⓘ below
+    // stays clear (it sat under the panel when the panel opened downward)
+    .map-controls-panel {
+        position: absolute;
+        top: 0;
+        right: calc(100% + 0.5rem);
+        // Signed in, the user's lists make it taller than a phone on its side
+        max-height: calc(100dvh - #{$header-height} - 1.5rem);
+        overflow-y: auto;
+    }
+
+    // The credits: behind an ⓘ under the layers button, so they stay reachable at every stop that
+    // shows the map. Only the attribution; the site links are in "More". They open to its left.
     .attribution-toggle {
         position: absolute;
-        top: calc(#{$header-height} + 0.75rem);
-        right: calc(0.75rem + 2.5rem + 0.5rem);
+        top: calc(#{$header-height} + 0.75rem + 2.4rem + 0.5rem);
+        right: 0.75rem;
         z-index: 600;
     }
 
@@ -370,10 +381,7 @@ body.shell-compact.shell-side {
         top: 0.75rem;
     }
 
-    .attribution-toggle {
-        top: 0.75rem;
-    }
-
+    .attribution-toggle,
     footer {
         top: calc(0.75rem + 2.4rem + 0.5rem);
     }

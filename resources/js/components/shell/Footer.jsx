@@ -5,7 +5,7 @@ import NavItem from './NavItem';
 import { useMapLayout } from '../context/MapLayoutContext';
 
 // The links come from NavigationHelper (`nav.info`). On the compact layout the credits sit behind an
-// ⓘ beside the layers button, as MapLibre does on compact maps: reachable at every stop showing the map.
+// ⓘ under the layers button, as MapLibre does on compact maps: reachable at every stop showing the map.
 const Footer = () => {
     const { info, version } = usePage().props.nav;
     const { compact, registerFooter } = useMapLayout();
