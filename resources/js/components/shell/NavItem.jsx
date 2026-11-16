@@ -7,7 +7,8 @@ const NavItem = ({ item, className, onClick, children, ...rest }) => {
     const content = children ?? item.label;
 
     if (item.shell) {
-        return <Link {...props} prefetch onClick={onClick}>{content}</Link>;
+        // Opening Feedback marks it read on the server, so a hover must not request it
+        return <Link {...props} prefetch={item.key !== 'feedback'} onClick={onClick}>{content}</Link>;
     }
 
     return <a {...props} {...(item.external ? { target: '_blank', rel: 'noopener' } : {})}>{content}</a>;
