@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
 
 import { useShellMap } from '../components/shell/ShellMapContext';
@@ -8,6 +7,7 @@ import Flag from '../components/ui/Flag';
 import Legend from '../components/ui/Legend';
 import PageTitle from '../components/ui/PageTitle';
 import ScoreIcon from '../components/ui/ScoreIcon';
+import { useRowInView } from '../components/utils/useRowInView';
 import { useSortableRows } from '../components/utils/useSortableRows';
 
 // Each dropdown links to a URL keeping the other two filters intact. JM is the default aircraft,
@@ -37,19 +37,9 @@ const FilterItem = ({ active, href, children }) => (
 const Top = ({ airports, continent, exclude, aircraft, continents, aircraftTypes, scoreTypes }) => {
 
     const { focusAirport, setFocusAirport, pingAirport } = useShellMap();
-    const rowRefs = useRef({});
+    const rowRef = useRowInView(focusAirport);
     const { rows, headerProps } = useSortableRows(airports, SORT_COLUMNS);
     const aircraftParam = aircraft ?? 'all';
-
-    // Focus can come from a click on the map: bring that row into view, unless it already is.
-    useEffect(() => {
-        const row = rowRefs.current[focusAirport];
-        const rect = row?.getBoundingClientRect();
-
-        if (rect && (rect.top < 0 || rect.bottom > window.innerHeight)) {
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }, [focusAirport]);
 
     const focus = (icao) => {
         setFocusAirport(icao);
@@ -99,7 +89,7 @@ const Top = ({ airports, continent, exclude, aircraft, continents, aircraftTypes
                         </thead>
                         <tbody>
                             {rows.map((airport) => (
-                                <tr key={airport.icao} ref={(row) => { rowRefs.current[airport.icao] = row; }}
+                                <tr key={airport.icao} ref={rowRef(airport.icao)}
                                     className={`pointer${focusAirport === airport.icao ? ' active' : ''}`}
                                     onClick={() => focus(airport.icao)}>
                                     <th scope="row">{airport.rank}</th>
