@@ -54,9 +54,8 @@ const Scenery = ({ simulators, filteredSimulator }) => {
     );
 };
 
-// The browse view: the user's own position is kept and restored, and every focused airport opens
-// its scenery card straight away.
-// The airports are a deferred prop: the map starts empty and fills when they arrive.
+// The browse view: the saved position is restored, and a focused airport opens its scenery card
+// straight away. The airports are a deferred prop: the map starts empty and fills when they arrive.
 Scenery.mapScene = ({ airportMapData }) => ({
     airports: airportMapData ?? {},
     clusterTone: 'search',

@@ -1,6 +1,5 @@
-// The cards as tabs, for the drawer. u-tabs supplies the tab semantics and keyboard support;
-// React drives the selection and renders only the selected card, so the others fetch on demand.
-// A tab: { id, icon, label, card, count?, inert? }. An inert tab is dimmed and can't be opened.
+// The cards as drawer tabs ({ id, icon, label, card, count?, inert? }; inert can't be opened).
+// u-tabs gives semantics and keys; only the selected card renders, so the others fetch on demand.
 const CardTabs = ({ tabs, selected, onSelect, onBack }) => (
     <u-tabs className="card-tabs-host">
         <div className="card-tabs-bar">
