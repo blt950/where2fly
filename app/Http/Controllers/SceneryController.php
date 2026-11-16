@@ -9,24 +9,44 @@ use App\Models\SceneryDeveloper;
 use App\Models\Simulator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class SceneryController extends Controller
 {
     /**
-     * Show the form for creating a new resource.
+     * The contribution form. `?icao=` lists what the airport already has; not `?airport=`, which
+     * in the shell selects an airport on the map.
      */
     public function create(Request $request)
     {
-        $availableSimulators = Simulator::all()->sortBy('order');
-
-        $airport = Airport::where('icao', $request->get('airport'))->with('sceneryDevelopers', 'sceneryDevelopers.sceneries')->first();
-        $existingDevelopers = null;
-        if ($airport) {
-            $existingDevelopers = $airport->sceneryDevelopers;
+        if ($request->filled('airport')) {
+            return redirect()->route('scenery.create', ['icao' => $request->query('airport')]);
         }
 
-        return view('scenery.create', compact('availableSimulators', 'existingDevelopers'));
+        $icao = strtoupper((string) $request->query('icao'));
+        $airport = Airport::where('icao', $icao)->with('sceneryDevelopers.sceneries.simulator', 'sceneryDevelopers.sceneries.developer')->first();
+
+        return Inertia::render('SceneryCreate', [
+            'icao' => $icao,
+            'simulators' => Simulator::all()->sortBy('order')->values()->map(fn (Simulator $simulator) => ['id' => $simulator->id, 'name' => $simulator->name]),
+            'existing' => $airport ? $this->existingSceneries($airport->sceneryDevelopers->flatMap->sceneries) : null,
+        ])->withViewData(['title' => 'Scenery Contribution']);
+    }
+
+    /**
+     * The sceneries an airport or developer already has, as the forms list them
+     */
+    private function existingSceneries(iterable $sceneries, ?Scenery $current = null): array
+    {
+        return collect($sceneries)->map(fn (Scenery $scenery) => [
+            'id' => $scenery->id,
+            'simulator' => $scenery->simulator->shortened_name,
+            'payware' => (int) $scenery->payware,
+            'developer' => $scenery->developer->developer,
+            'published' => (bool) $scenery->published,
+            'current' => $scenery->is($current),
+        ])->values()->all();
     }
 
     /**
@@ -77,14 +97,22 @@ class SceneryController extends Controller
     {
         $this->authorize('update', $scenery);
 
-        $availableSimulators = Simulator::all()->sortBy('order');
-        $existingSceneries = $scenery->developer->sceneries;
-        $suggestedByUser = $scenery->suggestedByUser;
+        $developer = $scenery->developer->load('sceneries.simulator', 'sceneries.developer');
 
-        // Use the manual umami tracking script on this page
-        View::share('manualTracking', true);
-
-        return view('scenery.edit', compact('scenery', 'availableSimulators', 'existingSceneries', 'suggestedByUser'));
+        return Inertia::render('SceneryEdit', [
+            'scenery' => [
+                'id' => $scenery->id,
+                'simulator' => $scenery->simulator->shortened_name,
+                'link' => $scenery->link,
+                'payware' => (int) $scenery->payware,
+                'published' => (bool) $scenery->published,
+                'suggestedByUserId' => $scenery->suggested_by_user_id,
+                'icao' => $developer->icao,
+                'developer' => $developer->developer,
+            ],
+            'existing' => $this->existingSceneries($developer->sceneries, $scenery),
+            'suggestedBy' => $scenery->suggestedByUser?->username,
+        ])->withViewData(['title' => 'Scenery Contribution']);
     }
 
     /**
@@ -100,7 +128,7 @@ class SceneryController extends Controller
             'link' => 'required|url',
             'payware' => 'required|boolean',
             'published' => 'boolean',
-            'suggested_by_user_id' => 'integer',
+            'suggested_by_user_id' => 'nullable|integer',
         ]);
 
         $sceneryDeveloper = $scenery->developer;
@@ -133,20 +161,21 @@ class SceneryController extends Controller
     /**
      * Index of all airports with scenery
      */
-    public function indexAirports(Request $request, ?string $filteredSim = null)
+    public function indexAirports(Request $request, ?string $filteredSim = null): Response
     {
-        $availableSimulators = Simulator::whereHas('sceneries')->get();
+        $availableSimulators = Simulator::whereHas('sceneries')->get()->sortBy('order');
         $filteredSimulator = $availableSimulators->where('shortened_name', $filteredSim)->first();
 
-        if ($filteredSimulator) {
-            $airports = Airport::publishedSceneries(true, $filteredSimulator->id)->get();
-        } else {
-            $airports = Airport::publishedSceneries(true)->get();
-        }
-
-        $airportMapData = json_encode(MapHelper::generateAirportMapDataFromAirports($airports));
-        $airportsCount = $airports->count();
-
-        return view('scenery', compact('airportsCount', 'airportMapData', 'availableSimulators', 'filteredSimulator'));
+        return Inertia::render('Scenery', [
+            // Thousands of airports (~350 KB): fetched after the page is up, not inlined in its HTML
+            'airportMapData' => Inertia::defer(fn () => (object) MapHelper::generateAirportMapDataFromAirports(
+                Airport::publishedSceneries(true, $filteredSimulator?->id)->get()
+            )),
+            'simulators' => $availableSimulators->pluck('shortened_name')->values(),
+            'filteredSimulator' => $filteredSimulator?->shortened_name,
+        ])->withViewData([
+            'title' => 'Scenery',
+            'metaDescription' => 'Find scenery for your flight simulator',
+        ]);
     }
 }

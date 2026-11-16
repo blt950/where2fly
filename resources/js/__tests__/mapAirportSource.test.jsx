@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MapContext } from '../components/context/MapContext';
 import { MapGLContext } from '../components/context/MapGLContext';
-import { clusterIds, hitId, labelIds } from '../components/utils/airportLayerSpec';
+import { clusterIds, FOCUS_LAYERS, hitId, labelIds } from '../components/utils/airportLayerSpec';
 import MapAirportSource from '../components/map/MapAirportSource';
 
 // Sets back getLayer/getSource; on/off record handlers keyed by event so tests can invoke them.
@@ -195,5 +195,29 @@ describe('MapAirportSource focus repaint', () => {
         expect(labelCalls.length).toBeGreaterThan(0);
 
         expect(map.setFilter).toHaveBeenCalledWith('airports-label-pinned', ['all', ['!', ['has', 'point_count']], ['in', ['get', 'icao'], ['literal', ['ENGM', 'ESSA']]]]);
+    });
+});
+
+describe('MapAirportSource stacking', () => {
+    it('stays beneath a focused airport already on the map, e.g. lists arriving after the fetch', () => {
+        const { map, layerIds } = createFakeMap();
+        layerIds.add(FOCUS_LAYERS.dot);
+
+        render(<MapAirportSource {...baseProps} id="user-list" />, {
+            wrapper: wrapperFor(map, { focusAirport: 'ENGM', primaryAirport: null, setFocusAirport: vi.fn() }),
+        });
+
+        expect(map.addLayer.mock.calls.length).toBeGreaterThan(0);
+        map.addLayer.mock.calls.forEach(([, before]) => expect(before).toBe(FOCUS_LAYERS.dot));
+    });
+
+    it('goes on top when nothing is focused', () => {
+        const { map } = createFakeMap();
+
+        render(<MapAirportSource {...baseProps} />, {
+            wrapper: wrapperFor(map, { focusAirport: null, primaryAirport: null, setFocusAirport: vi.fn() }),
+        });
+
+        map.addLayer.mock.calls.forEach(([, before]) => expect(before).toBeUndefined());
     });
 });

@@ -17,61 +17,71 @@ use App\Rules\ValidAircrafts;
 use App\Rules\ValidAirlines;
 use App\Rules\ValidDestinations;
 use App\Rules\ValidScores;
+use App\View\AirportPresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class SearchController extends Controller
 {
+    private const FORM_DESCRIPTION = 'Always struggling to decide where to fly? Find some suggested destinations with fun weather and coverage!';
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return View
+     * Find arrivals: the user picks the departure
      */
-    public function indexArrivalSearch()
+    public function indexArrivalSearch(Request $request): Response
     {
-        return $this->buildSearchView('front.arrivals');
+        return $this->renderSearchForm($request, anchor: 'departure', area: 'destination', suggestionSide: 'arrival');
     }
 
     /**
-     * Display a listing of the resource.
+     * Find departures: the user picks the arrival
      */
-    public function indexDepartureSearch()
+    public function indexDepartureSearch(Request $request): Response
     {
-        return $this->buildSearchView('front.departures');
+        return $this->renderSearchForm($request, anchor: 'arrival', area: 'origin', suggestionSide: 'departure');
     }
 
     /**
-     * Build the shared view data for the arrival/departure search forms.
+     * The arrival/departure search form. `old` is the session's old input: a failed search, or
+     * "Edit filters" on a result, fills the form back in from it.
      */
-    private function buildSearchView(string $view): View
+    private function renderSearchForm(Request $request, string $anchor, string $area, string $suggestionSide): Response
     {
-        $airlines = Airline::where('has_flights', true)->orderBy('name')->get();
-        $aircrafts = Aircraft::pluck('icao')->sort();
-        $prefilledIcao = request()->input('icao');
-        $destinationInputs = $this->getDestinationInputs();
-
         $lists = UserList::where('public', true)
             ->when(Auth::check(), fn ($q) => $q->orWhere('user_id', Auth::id()))
-            ->get();
+            ->get(['id', 'name']);
 
-        $whitelistDatabase = $this->getWhitelistsFromInput(array_merge(
-            old('arrivalWhitelists', []),
-            old('departureWhitelists', []),
-            old('whitelists', []),
-        ));
-
-        return view($view, compact('airlines', 'aircrafts', 'prefilledIcao', 'lists', 'destinationInputs', 'whitelistDatabase'));
+        return Inertia::render('SearchForm', [
+            'anchor' => $anchor,
+            'area' => $area,
+            'suggestionSide' => $suggestionSide,
+            'prefilledIcao' => $request->input('icao'),
+            'old' => (object) $request->session()->getOldInput(),
+            // The option lists (~50 KB) are the same on every visit: sent once, then kept by the client
+            'airlines' => Inertia::once(fn () => Airline::where('has_flights', true)->orderBy('name')->get(['icao_code', 'name'])
+                ->map(fn (Airline $airline) => ['icao' => $airline->icao_code, 'name' => $airline->name])),
+            'aircrafts' => Inertia::once(fn () => Aircraft::pluck('icao')->sort()->values()),
+            'destinationInputs' => Inertia::once(fn () => $this->getDestinationInputs()),
+            'lists' => $lists->map(fn (UserList $list) => ['id' => $list->id, 'name' => $list->name]),
+            'aircraftTypes' => collect(AircraftHelper::TYPES)->map(fn ($type) => ['name' => $type['name'], 'description' => $type['description']]),
+            'scoreTypes' => ScoreHelper::TYPES,
+            'searchVersion' => config('app.searchVersion'),
+        ])->withViewData(['metaDescription' => self::FORM_DESCRIPTION]);
     }
 
     /**
-     * Display a listing of the resource.
+     * Find flights between two airports
      */
-    public function indexRouteSearch()
+    public function indexRouteSearch(Request $request): Response
     {
-        return view('front.routes');
+        return Inertia::render('RouteSearchForm', [
+            'old' => (object) $request->session()->getOldInput(),
+        ])->withViewData(['metaDescription' => self::FORM_DESCRIPTION]);
     }
 
     /**
@@ -81,6 +91,9 @@ class SearchController extends Controller
      */
     public function search(Request $request)
     {
+        // An unchecked box is absent from the query; record it as 0, so the old input a failed
+        // search redirects back with keeps it unchecked instead of the form's checked default
+        $request->mergeIfMissing(['sortByWeather' => '0', 'sortByATC' => '0']);
 
         /**
          *  Validate the request and mapping of arguments
@@ -149,8 +162,8 @@ class SearchController extends Controller
 
         // Create a filter array based on input
         $sortByScores = [];
-        isset($data['sortByWeather']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::weatherTypes()) : null;
-        isset($data['sortByATC']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::vatsimTypes()) : null;
+        ! empty($data['sortByWeather']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::weatherTypes()) : null;
+        ! empty($data['sortByATC']) ? $sortByScores = array_merge($sortByScores, ScoreHelper::vatsimTypes()) : null;
 
         // The anchor is whichever side the pilot supplied, the suggestions are the other.
         // `whitelists` predates the split and only restricted suggestions in practice —
@@ -306,9 +319,6 @@ class SearchController extends Controller
                 'scores',
                 'metar',
                 'taf.forecasts',
-                'sceneryDevelopers.sceneries' => function ($query) {
-                    $query->where('published', true)->with('simulator');
-                },
             ])
                 ->findMany($airportIds)
                 ->sortBy(fn ($airport) => array_search($airport->id, $airportIds))->values()
@@ -348,12 +358,24 @@ class SearchController extends Controller
                     $searchVersionWarning = 'The search form has changed. Edit the search and bookmark again to ensure correct results.';
                 }
 
-                return view('search.airports', compact('suggestedAirports', 'primaryAirport', 'direction', 'airportCoordinates', 'suggestedAirport', 'filterByScores', 'sortByScores', 'filterByAircrafts', 'bearingWarning', 'searchVersionWarning'));
+                return Inertia::render('SearchResults', [
+                    'query' => $request->except('_token', 'airport'),
+                    'direction' => $direction,
+                    'suggestedAirport' => $suggestedAirport,
+                    'bearingWarning' => $bearingWarning ?: null,
+                    'searchVersionWarning' => $searchVersionWarning ?: null,
+                    'noInterestingScores' => ! empty($sortByScores) && $suggestedAirports->first()->scores->count() == 0,
+                    'primaryAirport' => $this->primaryAirportProps($primaryAirport, $direction),
+                    'suggestions' => $this->suggestionProps($suggestedAirports, $direction, $filterByScores),
+                    'airportMapData' => $airportCoordinates,
+                    'highlightedAircrafts' => array_values($filterByAircrafts ?? []),
+                    'scoreTypes' => ScoreHelper::TYPES,
+                ])->withViewData(['title' => 'Results', 'metaDescription' => 'Details of your search']);
             }
 
         }
 
-        return redirect(route('front'))->withErrors(['airportNotFound' => 'No suitable airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
+        return redirect(route($direction == 'arrival' ? 'front.departures' : 'front'))->withErrors(['airportNotFound' => 'No suitable airport could be found with given criteria', 'bearingWarning' => $bearingWarning])->withInput();
     }
 
     /**
@@ -376,7 +398,7 @@ class SearchController extends Controller
         $routes = Flight::where('airport_dep_id', $departure->id)->where('airport_arr_id', $arrival->id)->whereHas('airline')->with('airline', 'aircrafts')->get();
 
         if ($routes->count() == 0) {
-            return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
+            return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao])->withInput();
         }
 
         // Sort the routes based on the selected criteria
@@ -404,9 +426,26 @@ class SearchController extends Controller
             $airportCoordinates[$departure->icao]['type'] = $departure->type;
             $airportCoordinates[$arrival->icao]['type'] = $arrival->type;
 
-            return view('search.routes', compact('routes', 'departure', 'arrival', 'airportCoordinates'));
+            return Inertia::render('SearchRoutes', [
+                'departure' => AirportPresenter::summary($departure),
+                'arrival' => AirportPresenter::summary($arrival),
+                'dataSince' => $routes->min('first_seen_at')->format('Y-m-d'),
+                'routes' => $routes->values()->map(fn (Flight $route) => [
+                    'id' => $route->id,
+                    'flightIcao' => $route->flight_icao,
+                    'flightNumber' => $route->flight_number,
+                    'airline' => [
+                        'icao' => $route->airline->icao_code,
+                        'iata' => $route->airline->iata_code,
+                        'name' => $route->airline->name,
+                    ],
+                    'aircrafts' => $route->aircrafts->pluck('icao')->sort()->implode(', '),
+                    'lastSeen' => $route->last_seen_at->format('Y-m-d'),
+                ]),
+                'airportMapData' => $airportCoordinates,
+            ])->withViewData(['title' => 'Results', 'metaDescription' => 'Details of your search']);
         } else {
-            return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao]);
+            return redirect()->route('front.routes')->withErrors(['routeNotFound' => 'No routes found between ' . $departure->icao . ' and ' . $arrival->icao])->withInput();
         }
 
     }
@@ -427,15 +466,38 @@ class SearchController extends Controller
         return redirect()->route('front')->withInput();
     }
 
+    /** Identity of an airport as every results page shows it: flag, ICAO, name */
+    private function primaryAirportProps(Airport $airport, string $direction): array
+    {
+        return [
+            ...AirportPresenter::summary($airport),
+            'longestRunwayFt' => (int) $airport->longestRunway(),
+            'scores' => AirportPresenter::scoreIcons($airport, 'Bookings on ' . $direction),
+            'metar' => $airport->metar?->metar,
+            'taf' => $airport->taf?->raw_text,
+        ];
+    }
+
+    private function suggestionProps(Collection $airports, string $direction, ?array $filterByScores): array
+    {
+        $otherSide = $direction == 'departure' ? 'arrival' : 'departure';
+        $highlightReasons = array_keys(array_filter($filterByScores ?? [], fn ($value) => $value === 1));
+
+        return $airports->values()->map(fn (Airport $airport, int $index) => [
+            ...AirportPresenter::summary($airport),
+            'rank' => $index + 1,
+            'scoreCount' => $airport->score_count,
+            'distance' => $airport->distance,
+            'airtime' => $airport->airtime,
+            'airtimeLabel' => gmdate('G:i', floor($airport->airtime * 3600)),
+            'scores' => AirportPresenter::scoreIcons($airport, 'Bookings on ' . $otherSide, $highlightReasons),
+        ])->all();
+    }
+
     /**
      * Get the relevant whitelist data, keyed by list id.
      * Note: This allows a user to get whitelists even if they don't own them.
      */
-    private function getWhitelistsFromInput($old)
-    {
-        return UserList::whereIn('id', $old)->get()->keyBy('id');
-    }
-
     /**
      * Resolve the chosen lists into the ICAOs they whitelist, or null for no filter.
      */

@@ -7,6 +7,7 @@
     "require": {
         "php": "^8.5.8",
         "graham-campbell/markdown": "^16.0",
+        "inertiajs/inertia-laravel": "^3",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",

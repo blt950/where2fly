@@ -3,8 +3,8 @@ name: run-where2fly
 description: Build, run, and drive Where2Fly (Laravel + React flight-destination finder). Use when asked to start the app, take a screenshot of it, run its PHP test suite, or interact with the running search/map UI.
 ---
 
-Where2Fly is a Laravel app that serves server-rendered Blade pages with
-a React-driven Leaflet map. Drive it by starting `php artisan serve`
+Where2Fly is a Laravel app. Every page is an Inertia + React page in a
+persistent shell with a MapLibre map (admin and the scenery forms included). Drive it by starting `php artisan serve`
 and scripting a headless Chromium session via
 `.claude/skills/run-where2fly/driver.mjs` (a small chromium-cli-alike
 built for this skill — `chromium-cli` itself isn't installed in this
@@ -112,6 +112,14 @@ debug individual tests.
 
 ## Gotchas
 
+- **Logging in headlessly.** Login and register carry a Cloudflare Turnstile widget. With the
+  dev `.env`'s testing site key it passes in headless Chromium ("Success!"), so the real form
+  works. Without it, write a session for a user instead (`login_web_<sha1 of SessionGuard>` in
+  the session store, encrypted cookie via `CookieValuePrefix`), set from a page that starts no
+  session (`/robots.txt`). For pages behind `auth`, prefer a scratch server on the test database
+  (`APP_CONFIG_CACHE` pointed at a missing file, `DB_DATABASE=where2fly_test`) with a throwaway
+  user, so the dev database stays untouched.
+
 - **`chromium-cli` isn't installed in this container** — this skill
   ships its own minimal Playwright REPL (`driver.mjs`) instead. If a
   future environment does have `chromium-cli`, prefer that.
@@ -140,10 +148,28 @@ debug individual tests.
   straight to
   `/search?icao=EGLL&direction=departure&codeletter=JM&airtimeMin=0&airtimeMax=8&metcondition=ANY&destinationWithRoutesOnly=0&destinationRunwayLights=0&destinationAirbases=0&flightDirection=0&temperatureMin=-60&temperatureMax=60&elevationMin=-2000&elevationMax=18000&rwyLengthMin=0&rwyLengthMax=17000`
   (all listed params are required by validation) instead of filling the
-  multi-tab form. On any page with the map, `eval
-  window.setFocusAirport('KORD')` opens the React airport card directly
-  without hunting for Leaflet markers.
-- **Map tiles need a moment.** Right after `nav`, the Leaflet map pane
+  multi-tab form. To open an airport card directly, add `&airport=KORD`
+  (or `?airport=KORD`) to a map page's URL; the selection lives in the
+  URL, and there are no `window.*` map setters any more.
+- **Map tiles need a moment.** Right after `nav`, the map canvas
   renders solid black until tiles load — `sleep 2000-3000` (or
   `wait-for` a marker/selector you expect) before screenshotting if you
   need the map itself, not just the form.
+- **The driver's viewport is fixed at 1400×900.** The phone/tablet
+  layout (below 992px: drawer, bottom nav) needs another Playwright
+  context, e.g. `browser.newContext({ viewport: { width: 390, height: 844 },
+  isMobile: true, hasTouch: true })`, using the playwright installed in
+  this skill directory.
+- **Full-page screenshots dim the map** in headless Chromium; use
+  `screenshot-element #map` to judge the map itself.
+- **Stale PHP after code changes.** opcache runs with
+  `validate_timestamps=Off`, in Apache (which already serves the app on
+  port 80) and in the CLI, which also keeps a file cache under
+  `/tmp/<system-id>*`. After changing PHP: `php artisan optimize`, then
+  `chown -R www-data:www-data storage bootstrap/cache` (CLI runs as root),
+  then `apachectl -k graceful`. `php artisan serve` doesn't pass
+  `PHP_INI_SCAN_DIR` on to its `php -S` child, so to get fresh code from
+  a scratch server, run `php -S 0.0.0.0:8000
+  vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php`
+  from `public/`, with an ini setting `opcache.enable=0` and
+  `opcache.enable_cli=0`.

@@ -9,12 +9,12 @@
     </testsuite>
   </testsuites>
   <php>
-    <!-- The container entrypoint runs `artisan optimize`; a cached config would ignore every env below
-         and point RefreshDatabase at the real database. Tests read their own (never-built) cache paths. -->
-    <env name="APP_CONFIG_CACHE" value="bootstrap/cache/testing-config.php" force="true"/>
-    <env name="APP_ROUTES_CACHE" value="bootstrap/cache/testing-routes.php" force="true"/>
-    <env name="APP_EVENTS_CACHE" value="bootstrap/cache/testing-events.php" force="true"/>
+    <!-- Forced, and caches pointed at files that are never built: the container caches config
+         from .env on start, and a cached config would send tests (and RefreshDatabase) to the dev DB -->
     <env name="APP_ENV" value="testing" force="true"/>
+    <env name="APP_CONFIG_CACHE" value="bootstrap/cache/testing-never-built-config.php" force="true"/>
+    <env name="APP_ROUTES_CACHE" value="bootstrap/cache/testing-never-built-routes.php" force="true"/>
+    <env name="APP_EVENTS_CACHE" value="bootstrap/cache/testing-never-built-events.php" force="true"/>
     <env name="BCRYPT_ROUNDS" value="4"/>
     <env name="CACHE_DRIVER" value="array"/>
     <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
@@ -24,6 +24,13 @@
     <env name="QUEUE_CONNECTION" value="sync"/>
     <env name="SESSION_DRIVER" value="array"/>
     <env name="TELESCOPE_ENABLED" value="false"/>
+    <!-- Laravel reads $_SERVER before $_ENV: without these, a real environment variable (say, from
+         a compose file) would win over the forced values above -->
+    <server name="APP_ENV" value="testing" force="true"/>
+    <server name="DB_DATABASE" value="where2fly_test" force="true"/>
+    <server name="APP_CONFIG_CACHE" value="bootstrap/cache/testing-never-built-config.php" force="true"/>
+    <server name="APP_ROUTES_CACHE" value="bootstrap/cache/testing-never-built-routes.php" force="true"/>
+    <server name="APP_EVENTS_CACHE" value="bootstrap/cache/testing-never-built-events.php" force="true"/>
   </php>
   <source>
     <include>

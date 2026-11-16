@@ -1,37 +1,42 @@
 @use 'sass:color';
 
 /*
-* Fonts
+* Fonts: WOFF2, converted from the TTFs beside them (kept as the source; the map glyphs are built from one)
 */
 
 @font-face {
     font-family: 'Work Sans';
     font-weight: normal;
-    src: url('../fonts/WorkSans-Regular.ttf') format('truetype');
+    font-display: swap;
+    src: url('../fonts/WorkSans-Regular.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Work Sans';
     font-weight: 700;
-    src: url('../fonts/WorkSans-Bold.ttf') format('truetype');
+    font-display: swap;
+    src: url('../fonts/WorkSans-Bold.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Kanit';
     font-weight: normal;
-    src: url('../fonts/Kanit-Regular.ttf') format('truetype');
+    font-display: swap;
+    src: url('../fonts/Kanit-Regular.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Kanit';
     font-weight: 500;
-    src: url('../fonts/Kanit-Medium.ttf') format('truetype');
+    font-display: swap;
+    src: url('../fonts/Kanit-Medium.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Kanit';
     font-weight: 300;
-    src: url('../fonts/Kanit-Light.ttf') format('truetype');
+    font-display: swap;
+    src: url('../fonts/Kanit-Light.woff2') format('woff2');
 }
 
 /*
@@ -82,7 +87,7 @@ header {
     background: $secondary;
 }
 
-main, nav.sidebar{
+main{
     width: $sidebar-width;
     height: calc(100vh - $header-height);
     height: calc(100dvh - $header-height);
@@ -125,93 +130,53 @@ main, nav.sidebar{
         }
     }
 
-    .feedback-container{
-        padding: 2rem 1rem 1rem 1rem;
+}
 
-        &.action-text{
-            padding: 0;
-            height: 100%;
-        }
+// The issue view of the feedback page, in the shell's wide panel (or the drawer on phones)
+.feedback-container{
+    padding: 2rem 1rem 1rem 1rem;
 
-        .card-title{
-            border: 0;
-        }
-
-        .card-body{
-            color: $bluewhite;
-        }
-
-        .card-footer{
-            color: $bluewhite;
-            border-top: 1px solid $secondary;
-
-            .author{
-                color: color.adjust($tertiary, $lightness: 45%);
-            }
-        }
+    &.action-text{
+        padding: 0;
+        height: 100%;
     }
 
-    &.nomap{
-        width: calc(100vw - $sidebar-width);
-        background: url('/img/bg2.jpg') no-repeat center center fixed;
-        background-size: cover;
+    .card-title{
+        border: 0;
+    }
 
-        @include media-breakpoint-down(lg) { 
-            width: calc(100vw - $sidebar-width-min);
+    .card-body{
+        color: $bluewhite;
+    }
+
+    .card-footer{
+        color: $bluewhite;
+        border-top: 1px solid $secondary;
+
+        .author{
+            color: color.adjust($tertiary, $lightness: 45%);
         }
     }
 }
 
-@include media-breakpoint-down(md) {
-    
-    /* Mobile specific styles fixing scroll behavour for browsers to hide UI */
-    /* This fights a bit Bootstrap, but it works. */
-    body.d-flex.h-100 {
-        height: auto !important;
-        min-height: 100dvh;
-    }
+// A `wide` page's content (feedback) over the map area, which stays mounted underneath
+.shell-wide{
+    background: url('/img/bg2.jpg') no-repeat center center fixed;
+    background-size: cover;
 
-    body > .d-flex.w-100.h-100.mx-auto.flex-column {
-        height: auto !important;
-        min-height: 100dvh;
-    }
-
-    body > .d-flex.w-100.h-100.mx-auto.flex-column > .d-flex.flex-row > :is(
-        :is(main, nav.sidebar).mobile-focus,
-        main:not(.mobile-focus, .mobile-nofocus)
-    ) {
-        height: auto;
-        min-height: calc(100dvh - $header-height);
-        overflow-y: visible;
-    }
-    /* End of mobile specific styles */
-
-    main{
-        &.mobile-nofocus{
-            display: none;
-        }
-
-        &.mobile-focus{
-            width: 100%;
-
-            .feedback-container .card{
-                width: 100%;
-            }
-        }
-    }
-
-    nav.sidebar{
-        &.mobile-nofocus{
-            display: none;
-        }
-        &.mobile-focus{
-            width: 100%;
-        }
-    }
+    position: absolute;
+    top: $header-height;
+    left: $sidebar-width;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    z-index: 650;
 }
 
 footer{
-    height: $footer-height;
+    // A minimum, not a height: where links and credits don't fit one line (landscape tablets),
+    // it grows upward from the bottom edge instead of spilling below it and scrolling the page
+    min-height: $footer-height;
     font-weight: 300;
     text-align: center;
 
@@ -226,7 +191,10 @@ footer{
 
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
+    column-gap: 1rem;
 
     @include media-breakpoint-down(lg) { 
         display: none;
@@ -236,3 +204,6 @@ footer{
 .font-size-1rem {
     font-size: 1rem;
 }
+
+@import "shell.scss";
+

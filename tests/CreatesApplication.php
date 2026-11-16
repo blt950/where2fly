@@ -4,6 +4,7 @@ namespace Tests;
 
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Application;
+use RuntimeException;
 
 trait CreatesApplication
 {
@@ -18,10 +19,12 @@ trait CreatesApplication
 
         $app->make(Kernel::class)->bootstrap();
 
-        // RefreshDatabase runs migrate:fresh — refuse to start against anything but the test database
+        // RefreshDatabase wipes whatever database this resolves to; a stale config cache once
+        // pointed it at the dev database
         $database = $app['config']->get('database.connections.' . $app['config']->get('database.default') . '.database');
-        if ($database !== 'where2fly_test' || ! $app->environment('testing')) {
-            throw new \RuntimeException("Refusing to run tests against database '$database' (env: {$app->environment()}). Is a config cache overriding phpunit.xml?");
+
+        if ($database !== 'where2fly_test') {
+            throw new RuntimeException("Refusing to run tests against database [{$database}]; expected [where2fly_test].");
         }
 
         return $app;

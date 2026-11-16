@@ -2,14 +2,13 @@ import { useEffect } from 'react';
 
 import { useMapGL } from '../context/MapGLContext';
 import { writeStored } from '../utils/storage';
-
-export const POSITION_KEY = 'mapPosition';
+import { POSITION_KEY } from './mapScene';
 
 const MapSaveView = () => {
     const map = useMapGL();
 
     useEffect(() => {
-        // getCenter() alone yields {lng, lat}; getInitMapPosition also restores the zoom.
+        // getCenter() alone yields {lng, lat}; savedView() also restores the zoom.
         const save = () => writeStored(POSITION_KEY, { ...map.getCenter(), zoom: map.getZoom() });
 
         map.on('moveend', save);

@@ -68,28 +68,16 @@ describe('labelTypeFilter', () => {
 });
 
 describe('labelMinzoom', () => {
-    it('gates by size when the route filters labels by zoom', () => {
-        vi.stubGlobal('route', () => ({ current: (name) => name === 'search' }));
-
-        expect(labelMinzoom('large_airport')).toBe(0);
-        expect(labelMinzoom('medium_airport')).toBe(6);
-        expect(labelMinzoom('small_airport')).toBe(8);
+    it('gates by size when the scene asks for it', () => {
+        expect(labelMinzoom('large_airport', true)).toBe(0);
+        expect(labelMinzoom('medium_airport', true)).toBe(6);
+        expect(labelMinzoom('small_airport', true)).toBe(8);
     });
 
-    it('also gates when route().current() returns undefined', () => {
-        vi.stubGlobal('route', () => ({ current: () => undefined }));
-
-        expect(labelMinzoom('large_airport')).toBe(0);
-        expect(labelMinzoom('medium_airport')).toBe(6);
-        expect(labelMinzoom('small_airport')).toBe(8);
-    });
-
-    it('labels from zoom 0 for every size on other routes', () => {
-        vi.stubGlobal('route', () => ({ current: (name) => name === 'top' }));
-
-        expect(labelMinzoom('large_airport')).toBe(0);
-        expect(labelMinzoom('medium_airport')).toBe(0);
-        expect(labelMinzoom('small_airport')).toBe(0);
+    it('labels from zoom 0 for every size otherwise', () => {
+        expect(labelMinzoom('large_airport', false)).toBe(0);
+        expect(labelMinzoom('medium_airport', false)).toBe(0);
+        expect(labelMinzoom('small_airport', false)).toBe(0);
     });
 });
 

@@ -13,8 +13,8 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 class UserController extends Controller
@@ -52,7 +52,9 @@ class UserController extends Controller
      */
     public function show()
     {
-        return view('account.settings');
+        return Inertia::render('Account', [
+            'recoveryUrl' => route('account.recovery'),
+        ])->withViewData(['title' => 'Account']);
     }
 
     /**
@@ -111,9 +113,11 @@ class UserController extends Controller
      *
      * @return Response
      */
-    public function resetRequestForm()
+    public function resetRequestForm(Request $request)
     {
-        return view('account.resetRequest');
+        return Inertia::render('AccountRecovery', [
+            'old' => (object) $request->session()->getOldInput(),
+        ])->withViewData(['title' => 'Reset Account']);
     }
 
     /**
@@ -124,9 +128,10 @@ class UserController extends Controller
      */
     public function resetForm(Request $request, $token)
     {
-        View::share('manualTracking', true);
-
-        return view('account.resetForm', ['token' => $token]);
+        return Inertia::render('PasswordReset', [
+            'token' => $token,
+            'email' => $request->session()->getOldInput('email', $request->query('email')),
+        ])->withViewData(['title' => 'Reset Account']);
     }
 
     /**
@@ -185,12 +190,15 @@ class UserController extends Controller
     {
         $this->authorize('showAdmin', User::class);
 
-        $usersCount = User::count();
-        $listsCount = UserList::count();
-        $sceneriesCount = Scenery::count();
-
-        $sceneries = Scenery::where('published', false)->get();
-
-        return view('account.admin', compact('usersCount', 'listsCount', 'sceneriesCount', 'sceneries'));
+        return Inertia::render('Admin', [
+            'stats' => ['users' => User::count(), 'lists' => UserList::count(), 'sceneries' => Scenery::count()],
+            'contributions' => Scenery::where('published', false)->with('simulator', 'developer', 'suggestedByUser')->get()
+                ->map(fn (Scenery $scenery) => [
+                    'id' => $scenery->id,
+                    'simulator' => $scenery->simulator->shortened_name,
+                    'icao' => $scenery->developer->icao,
+                    'suggestedBy' => $scenery->suggestedByUser?->username ?? 'System',
+                ]),
+        ])->withViewData(['title' => 'Admin']);
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 class LoginController extends Controller
@@ -62,9 +63,12 @@ class LoginController extends Controller
      *
      * @return Response
      */
-    public function showRegister()
+    public function showRegister(Request $request)
     {
-        return view('account.register');
+        return Inertia::render('Register', [
+            'turnstileKey' => config('services.turnstile.key'),
+            'old' => (object) $request->session()->getOldInput(),
+        ])->withViewData(['title' => 'Register', 'metaDescription' => 'Register for an Where2Fly account.']);
     }
 
     /**
@@ -72,8 +76,11 @@ class LoginController extends Controller
      *
      * @return Response
      */
-    public function showLogin()
+    public function showLogin(Request $request)
     {
-        return view('account.login');
+        return Inertia::render('Login', [
+            'turnstileKey' => config('services.turnstile.key'),
+            'old' => (object) $request->session()->getOldInput(),
+        ])->withViewData(['title' => 'Login', 'metaDescription' => 'Login into your account']);
     }
 }
