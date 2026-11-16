@@ -45,3 +45,27 @@ table{
     }
 
 }
+// A phone-width panel can't fit the suggestions' five columns without scrolling sideways: Time
+// folds under Distance there (also in the side-docked drawer, which is as narrow)
+.results-time-folded {
+    display: none;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+@mixin fold-results-time {
+    .results-time {
+        display: none;
+    }
+
+    .results-time-folded {
+        display: block;
+    }
+}
+
+@include media-breakpoint-down(sm) {
+    @include fold-results-time;
+}
+
+body.shell-side {
+    @include fold-results-time;
+}

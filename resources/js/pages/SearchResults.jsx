@@ -188,7 +188,7 @@ const SearchResults = ({
                                 <th scope="col" {...sortableHeader('rank')}>#</th>
                                 <th scope="col" {...sortableHeader('airport')}>Airport</th>
                                 <th scope="col" {...sortableHeader('distance')}>Distance</th>
-                                <th scope="col" {...sortableHeader('time')}>Time</th>
+                                <th scope="col" className="results-time" {...sortableHeader('time')}>Time</th>
                                 <th scope="col" {...sortableHeader('forecast')}>Forecast</th>
                             </tr>
                             {noInterestingScores && (
@@ -210,8 +210,11 @@ const SearchResults = ({
                                         <div><Flag airport={airport} /> {airport.icao}</div>
                                         {airport.name}
                                     </td>
-                                    <td>{airport.distance}nm</td>
-                                    <td>{airport.airtimeLabel}h</td>
+                                    <td>
+                                        {airport.distance}nm
+                                        <span className="results-time-folded">{airport.airtimeLabel}h</span>
+                                    </td>
+                                    <td className="results-time">{airport.airtimeLabel}h</td>
                                     <td className="fs-5">
                                         {airport.scores.map((score) => <ScoreIcon key={score.reason} score={score} highlighted={score.highlighted} />)}
                                     </td>
