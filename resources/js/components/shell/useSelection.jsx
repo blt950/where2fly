@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 
 import { selectedAirportIn, withSelectedAirport } from './selection';
@@ -11,6 +11,7 @@ export const ORIGIN = 'selectionOrigin';
 
 const newOrigin = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
+// The page as last rendered, for the handlers below: there is one shell, so one page
 let livePage = null;
 
 // Inertia restores a history entry as a new page, remounting it and dropping what was typed.
@@ -39,12 +40,10 @@ export const restoreSelectionInPlace = () => window.addEventListener('popstate',
 // back off a pushed entry, or replaces a card that came with the URL: see CLAUDE.md, "The map".
 export const useSelection = (page, state, actions) => {
     const selected = selectedAirportIn(page.url);
-    const current = useRef(page);
-    current.current = page;
     livePage = page;
 
     const select = useCallback((icao) => {
-        const { url, props } = current.current;
+        const { url, props } = livePage;
         const was = selectedAirportIn(url);
         const next = icao || null;
 
