@@ -48,7 +48,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
 
     const {
         airports, cluster, clusterTone, camera: sceneCamera, coordinates, drawRoute, focusAirport, gateLabels,
-        highlightedAircrafts, initialCard, mapBounds, persistView, ping, primaryAirport, reverseDirection,
+        highlightedAircrafts, initialCard, persistView, ping, primaryAirport, reverseDirection,
         sceneVersion, showAirportIdCard, showLists,
     } = state;
     const { set, addAirport, setFocusAirport, setShowAirportIdCard } = actions;
@@ -156,15 +156,12 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [focusAirport]);
 
-    // When airports data change, frame them if the scene asks for it
-    useEffect(() => {
-        if (camera?.type !== 'fit' || Object.keys(airports).length === 0) {
-            return;
-        }
-
-        set({ mapBounds: Object.values(airports).map(airport => [airport.lon, airport.lat]) });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [airports, camera?.type]);
+    // What a 'fit' scene frames: its airports, again whenever they change
+    const fit = camera?.type === 'fit';
+    const mapBounds = useMemo(
+        () => (fit ? Object.values(airports).map((airport) => [airport.lon, airport.lat]) : []),
+        [airports, fit],
+    );
 
     const { palette, hillshade } = themeOf(preferences.theme);
     const focusedAirport = focusAirport ? findAirport(focusAirport) : undefined;
@@ -196,7 +193,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
         writePreferences(next);
     };
 
-    // Memoise the context value so unrelated state changes (coordinates, mapBounds,
+    // Memoise the context value so unrelated state changes (coordinates,
     // showAirportIdCard, panning) don't give it a new identity and re-render every marker.
     const mapContextValue = useMemo(() => ({
         airports,
@@ -232,7 +229,7 @@ function MapView({ state, actions, onFocusAirport, onAirportNotFound, onBackgrou
                         cluster {...CLUSTER_COLOURS.muted} />
                 )}
                 <MapCamera camera={camera} sceneVersion={sceneVersion} />
-                {(mapBounds && camera?.type === 'fit') && <MapBound mapBounds={mapBounds} />}
+                {mapBounds.length > 0 && <MapBound mapBounds={mapBounds} />}
                 {drawRoute && <MapRoute departure={drawRoute[0]} arrival={drawRoute[1]} reverseDirection={reverseDirection} color={palette.fallback} />}
                 {!drawRoute && <MapPan flyToCoordinates={coordinates} />}
                 {persistView && <MapSaveView />}

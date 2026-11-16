@@ -57,7 +57,6 @@ export const cameraView = (camera) => (camera?.type === 'view' ? camera.view : s
 const TRANSIENT_DEFAULTS = {
     focusAirport: null,
     coordinates: null,
-    mapBounds: null,
     ping: null,
     showAirportIdCard: null,
 };

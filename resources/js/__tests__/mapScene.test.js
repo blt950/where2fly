@@ -29,14 +29,14 @@ describe('mapStateReducer', () => {
     it('replaces the whole scene and every transient value on a new scene', () => {
         const before = {
             ...initialMapState({ cluster: false, primaryAirport: 'ENGM', drawRoute: ['ENGM', 'ESSA'] }),
-            focusAirport: 'ESSA', coordinates: [1, 2], mapBounds: [[1, 2]], ping: { icao: 'ESSA' }, showAirportIdCard: 7,
+            focusAirport: 'ESSA', coordinates: [1, 2], ping: { icao: 'ESSA' }, showAirportIdCard: 7,
         };
 
         const after = mapStateReducer(before, { type: 'scene', scene: { airports: { EGLL: {} } } });
 
         expect(after).toMatchObject({
             airports: { EGLL: {} }, cluster: true, primaryAirport: null, drawRoute: null,
-            focusAirport: null, coordinates: null, mapBounds: null, ping: null, showAirportIdCard: null,
+            focusAirport: null, coordinates: null, ping: null, showAirportIdCard: null,
         });
     });
 
