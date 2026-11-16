@@ -33,7 +33,6 @@ const checked = (id) => document.getElementById(id).checked;
 beforeEach(() => {
     const router = Object.assign(() => 'search', { current: () => false });
     vi.stubGlobal('route', (name) => (name ? name : router));
-    vi.stubGlobal('bootstrap', { Tooltip: { getOrCreateInstance: () => ({ dispose: vi.fn() }) } });
 });
 
 afterEach(() => {

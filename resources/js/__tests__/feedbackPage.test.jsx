@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MapLayoutContext } from '../components/context/MapLayoutContext';
@@ -13,6 +13,7 @@ vi.mock('@inertiajs/react', () => ({
 vi.mock('@sentry/react', () => ({ sendFeedback: vi.fn() }));
 
 const { default: Feedback } = await import('../pages/Feedback');
+const { sendFeedback } = await import('@sentry/react');
 
 const author = { login: 'pilot', avatar: 'a.png', created: '1 day ago' };
 const issues = [{ number: 7, title: 'Night mode', votes: 2, isNew: false, voted: false, author }];
@@ -47,6 +48,35 @@ describe('Feedback', () => {
         expect(wideSlot.textContent).toContain('Please add it');
         expect(screen.getByText('Night mode', { selector: '.card-title' })).toBeTruthy();
         expect(screen.getByText('Log in to vote')).toBeTruthy();
+    });
+
+    it('puts the bug report modal on <body>, outside the drawer that would clip it', () => {
+        const show = vi.fn();
+        vi.stubGlobal('bootstrap', { Modal: { getOrCreateInstance: () => ({ show, dispose: vi.fn() }) } });
+
+        renderPage({ bugReports: true }, { compact: true });
+        const modal = document.getElementById('bugReportModal');
+
+        expect(modal.parentElement).toBe(document.body);
+        fireEvent.click(screen.getByRole('button', { name: /Report a bug/ }));
+        expect(show).toHaveBeenCalled();
+    });
+
+    it('sends the report through Sentry and thanks the reporter', async () => {
+        vi.stubGlobal('bootstrap', { Modal: { getOrCreateInstance: () => ({ show: vi.fn(), dispose: vi.fn() }) } });
+        sendFeedback.mockResolvedValue('event-id');
+        renderPage({ bugReports: true }, { compact: true });
+
+        fireEvent.click(screen.getByText('Send report'));
+        // The modal is aria-hidden until Bootstrap shows it, so query by text, not by role
+        expect(screen.getByText('Please describe what went wrong.')).toBeTruthy();
+        expect(sendFeedback).not.toHaveBeenCalled();
+
+        fireEvent.change(screen.getByLabelText('What went wrong?'), { target: { value: '  The map is blank  ' } });
+        fireEvent.click(screen.getByText('Send report'));
+
+        expect(sendFeedback).toHaveBeenCalledWith({ message: 'The map is blank' });
+        expect(await screen.findByText(/Thank you for reporting/)).toBeTruthy();
     });
 
     it('asks for a choice in the wide panel when no idea is open', () => {

@@ -9,11 +9,15 @@ const routerPost = vi.fn();
 
 vi.mock('@inertiajs/react', () => ({
     Head: () => null,
+    // eslint-disable-next-line no-unused-vars
+    Link: ({ children, preserveScroll, prefetch, ...props }) => <a {...props}>{children}</a>,
     router: { visit: (...args) => routerVisit(...args), post: (...args) => routerPost(...args) },
 }));
 
 const { default: SearchResults } = await import('../pages/SearchResults');
 const { default: SearchRoutes } = await import('../pages/SearchRoutes');
+const { default: Scenery } = await import('../pages/Scenery');
+const { default: Top } = await import('../pages/Top');
 
 const airport = (icao, rank, extra = {}) => ({
     icao, rank, name: `${icao} Airport`, isoCountry: 'NO', countryName: 'Norway',
@@ -47,7 +51,6 @@ const hiddenRows = () => document.querySelectorAll('tr.showmore-hidden').length;
 beforeEach(() => {
     document.head.innerHTML = '<meta name="csrf-token" content="test-token">';
     vi.stubGlobal('route', (name, params) => (params ? `${name}?${new URLSearchParams(params)}` : name));
-    vi.stubGlobal('bootstrap', { Tooltip: { getOrCreateInstance: () => ({ dispose: vi.fn() }) } });
 });
 
 afterEach(() => {
@@ -76,6 +79,15 @@ describe('SearchResults', () => {
 
         expect(hiddenRows()).toBe(0);
         expect(rowIcaos()[0]).toBe('EA14');
+    });
+
+    it('carries the airtime in the distance cell too, for the phone layout that folds the Time column', () => {
+        renderWithShell(<SearchResults {...resultsProps(1)} />);
+        const cells = document.querySelectorAll('tr[data-airport-icao] td');
+
+        expect(cells[1].textContent).toBe('100nm1:00h');
+        expect(cells[1].querySelector('.results-time-folded').textContent).toBe('1:00h');
+        expect(cells[2].className).toBe('results-time');
     });
 
     it('focuses the airport on click; the card shows its details', () => {
@@ -148,5 +160,92 @@ describe('SearchRoutes', () => {
         fireEvent.click(screen.getByText('Last seen'));
 
         expect(flightOf(document.querySelector('tbody tr'))).toBe('DLH2');
+    });
+});
+
+describe('Top', () => {
+    const topProps = (extra = {}) => ({
+        airports: [airport('ENGM', 1), airport('ESSA', 2, { scores: [] }), airport('EKCH', 3)],
+        continent: 'EU', exclude: null, aircraft: 'JM',
+        continents: { EU: 'Europe', NA: 'North America' },
+        aircraftTypes: { JM: { name: 'Narrow Body' }, JH: { name: 'Wide Body' } },
+        scoreTypes: {},
+        ...extra,
+    });
+    const rows = () => [...document.querySelectorAll('tbody tr')].map((row) => row.querySelector('th').textContent);
+
+    it('focuses and pings the airport of a clicked row', () => {
+        const { shell } = renderWithShell(<Top {...topProps()} />);
+
+        fireEvent.click(screen.getByText('ESSA Airport'));
+
+        expect(shell.setFocusAirport).toHaveBeenCalledWith('ESSA');
+        expect(shell.pingAirport).toHaveBeenCalledWith('ESSA');
+    });
+
+    it('sorts by a column, then the other way on a second click', () => {
+        renderWithShell(<Top {...topProps()} />);
+        const header = screen.getByRole('columnheader', { name: 'Airport' });
+
+        fireEvent.click(header);
+        expect(rows()).toEqual(['3', '1', '2']);
+        expect(header.getAttribute('aria-sort')).toBe('ascending');
+
+        fireEvent.click(header);
+        expect(rows()).toEqual(['2', '1', '3']);
+    });
+
+    it('links each filter to a URL that keeps the other two', () => {
+        renderWithShell(<Top {...topProps({ exclude: 'vatsim' })} />);
+
+        const hrefs = [...document.querySelectorAll('a.dropdown-item')].map((link) => link.getAttribute('href'));
+
+        expect(hrefs).toContain('top.filtered?continent=NA&exclude=vatsim&aircraft=JM');
+        // "No aircraft filter" travels as aircraft=all: an absent param means the default type
+        expect(hrefs).toContain('top.filtered?continent=EU&exclude=vatsim&aircraft=all');
+        // No continent: the unfiltered route, the other two kept
+        expect(hrefs).toContain('top?exclude=vatsim&aircraft=JM');
+        expect(screen.getByRole('link', { name: 'Included' }).getAttribute('href')).toBe('top.filtered?continent=EU&aircraft=JM');
+    });
+
+    it('brings a row the map focused into view, unless it is already', () => {
+        const scrollIntoView = vi.fn();
+        Element.prototype.scrollIntoView = scrollIntoView;
+        const rect = vi.spyOn(Element.prototype, 'getBoundingClientRect');
+
+        rect.mockReturnValue({ top: 2000, bottom: 2040 });
+        const { rerender, shell } = renderWithShell(<Top {...topProps()} />, { focusAirport: 'EKCH' });
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+
+        rect.mockReturnValue({ top: 100, bottom: 140 });
+        rerender(<ShellMapContext.Provider value={{ ...shell, focusAirport: 'ESSA' }}><Top {...topProps()} /></ShellMapContext.Provider>);
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+
+        rect.mockRestore();
+        delete Element.prototype.scrollIntoView;
+    });
+
+    it('says so when there are no airports', () => {
+        renderWithShell(<Top {...topProps({ airports: [] })} />);
+
+        expect(screen.getByText(/No top airports available/)).toBeTruthy();
+    });
+});
+
+describe('Scenery', () => {
+    it('focuses the airport typed into the search box, upper-cased', () => {
+        const { shell } = renderWithShell(<Scenery simulators={['MSFS2024', 'XP12']} filteredSimulator="XP12" />);
+
+        fireEvent.change(screen.getByLabelText(/Search for airport/), { target: { value: 'engm' } });
+        fireEvent.submit(screen.getByLabelText(/Search for airport/).closest('form'));
+
+        expect(shell.setFocusAirport).toHaveBeenCalledWith('ENGM');
+        expect(screen.getByRole('link', { name: 'XP12' }).className).toContain('btn-primary');
+        expect(screen.getByRole('link', { name: 'All' }).className).toContain('btn-outline-primary');
+    });
+
+    it('starts the map empty until the deferred airports arrive, each opening its scenery card', () => {
+        expect(Scenery.mapScene({})).toMatchObject({ airports: {}, initialCard: 'scenery', showLists: false });
+        expect(Scenery.mapScene({ airportMapData: { ENGM: { id: 1 } } }).airports).toEqual({ ENGM: { id: 1 } });
     });
 });
