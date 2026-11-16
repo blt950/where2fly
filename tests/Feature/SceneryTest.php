@@ -31,8 +31,8 @@ class SceneryTest extends TestCase
         $response->assertInertia(fn (Assert $page) => $page->component('Scenery')
             ->where('filteredSimulator', null)
             ->where('simulators', fn ($simulators) => collect($simulators)->sort()->values()->all() === ['MSFS2024', 'XP12'])
-            ->has('airportMapData.EDDM')
-            ->has('airportMapData.EDDF'));
+            ->missing('airportMapData')
+            ->loadDeferredProps(fn (Assert $loaded) => $loaded->has('airportMapData.EDDM')->has('airportMapData.EDDF')));
     }
 
     public function test_scenery_page_filters_by_simulator(): void
@@ -44,8 +44,7 @@ class SceneryTest extends TestCase
 
         $response->assertInertia(fn (Assert $page) => $page->component('Scenery')
             ->where('filteredSimulator', 'XP12')
-            ->has('airportMapData.EDDF')
-            ->missing('airportMapData.EDDM'));
+            ->loadDeferredProps(fn (Assert $loaded) => $loaded->has('airportMapData.EDDF')->missing('airportMapData.EDDM')));
     }
 
     public function test_unknown_simulator_shows_every_airport(): void
@@ -54,7 +53,8 @@ class SceneryTest extends TestCase
 
         $response = $this->get('/scenery/NOPE');
 
-        $response->assertInertia(fn (Assert $page) => $page->where('filteredSimulator', null)->has('airportMapData.EDDM'));
+        $response->assertInertia(fn (Assert $page) => $page->where('filteredSimulator', null)
+            ->loadDeferredProps(fn (Assert $loaded) => $loaded->has('airportMapData.EDDM')));
     }
 
     private function publishScenery(string $icao, string $simulator): void

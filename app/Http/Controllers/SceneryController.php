@@ -140,10 +140,11 @@ class SceneryController extends Controller
         $availableSimulators = Simulator::whereHas('sceneries')->get()->sortBy('order');
         $filteredSimulator = $availableSimulators->where('shortened_name', $filteredSim)->first();
 
-        $airports = Airport::publishedSceneries(true, $filteredSimulator?->id)->get();
-
         return Inertia::render('Scenery', [
-            'airportMapData' => (object) MapHelper::generateAirportMapDataFromAirports($airports),
+            // Thousands of airports (~350 KB): fetched after the page is up, not inlined in its HTML
+            'airportMapData' => Inertia::defer(fn () => (object) MapHelper::generateAirportMapDataFromAirports(
+                Airport::publishedSceneries(true, $filteredSimulator?->id)->get()
+            )),
             'simulators' => $availableSimulators->pluck('shortened_name')->values(),
             'filteredSimulator' => $filteredSimulator?->shortened_name,
         ])->withViewData([
