@@ -34,7 +34,7 @@ class NavigationHelper
             'items' => array_values(array_filter([
                 self::link('settings', 'Settings', route('user.account'), null, ['user.account'], shell: true),
                 self::link('lists', 'My Lists', route('list.index'), null, ['list.*'], shell: true),
-                $user->can('showAdmin', $user::class) ? self::link('admin', 'Admin', route('admin'), null, ['admin']) : null,
+                $user->can('showAdmin', $user::class) ? self::link('admin', 'Admin', route('admin'), null, ['admin'], shell: true) : null,
                 self::link('logout', 'Logout', route('user.logout'), null, []),
             ])),
         ] : null;

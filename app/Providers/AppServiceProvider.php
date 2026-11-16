@@ -2,12 +2,10 @@
 
 namespace App\Providers;
 
-use App\Helpers\AlertHelper;
 use App\Mixins\CollectionAirportFilter;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -34,8 +32,5 @@ class AppServiceProvider extends ServiceProvider
                 ->action('Verify Email Address', $url)
                 ->line('If you did not create this account, no further action is required and your account will be deleted if not verified after a few days.');
         });
-
-        // The flash messages the shell gets as the shared `alerts` prop, for the simple Blade pages
-        View::composer('layouts.app', fn ($view) => $view->with('alerts', AlertHelper::build()));
     }
 }

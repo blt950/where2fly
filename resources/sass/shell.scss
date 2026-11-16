@@ -1,6 +1,6 @@
 // The Inertia shell's compact layout (below lg): a full-screen map, the panel as a drawer over
-// it, and a bottom tab bar. Everything is scoped to body.shell-compact, so Blade pages keep
-// their own layout. Several rules out-specify the "let the page scroll" phone rules in app.scss.
+// it, and a bottom tab bar. Everything is scoped to body.shell-compact, so the wide layout is
+// untouched. Several rules out-specify the "let the page scroll" phone rules in app.scss.
 // `overflow: clip`, not hidden: a hidden box can still be scrolled by scrollIntoView, which
 // would slide the whole map out of its frame when a row is brought into view.
 

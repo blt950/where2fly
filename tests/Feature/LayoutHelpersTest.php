@@ -12,18 +12,13 @@ class LayoutHelpersTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_flash_messages_reach_the_shell_and_the_simple_blade_pages_escaped(): void
+    public function test_flash_messages_reach_the_shell_as_plain_text(): void
     {
         $text = 'List created, however these airports could not be found: <b>XX</b>';
 
         $this->withSession(['warning' => $text])->get('/top')->assertInertia(fn (Assert $page) => $page
             ->where('alerts.messages.0', ['key' => 'warning', 'variant' => 'warning', 'text' => $text])
             ->where('alerts.verification', null));
-
-        // The simple Blade layout (admin, scenery create/edit) shows the same messages, escaped too
-        $this->actingAs(User::factory()->create())->withSession(['warning' => $text])->get('/scenery/create')
-            ->assertSee(e($text), false)
-            ->assertDontSee('<b>XX</b>', false);
     }
 
     public function test_an_unverified_user_gets_the_verification_notice_unless_a_success_shows(): void

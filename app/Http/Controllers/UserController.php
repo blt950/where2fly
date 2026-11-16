@@ -190,12 +190,15 @@ class UserController extends Controller
     {
         $this->authorize('showAdmin', User::class);
 
-        $usersCount = User::count();
-        $listsCount = UserList::count();
-        $sceneriesCount = Scenery::count();
-
-        $sceneries = Scenery::where('published', false)->get();
-
-        return view('account.admin', compact('usersCount', 'listsCount', 'sceneriesCount', 'sceneries'));
+        return Inertia::render('Admin', [
+            'stats' => ['users' => User::count(), 'lists' => UserList::count(), 'sceneries' => Scenery::count()],
+            'contributions' => Scenery::where('published', false)->with('simulator', 'developer', 'suggestedByUser')->get()
+                ->map(fn (Scenery $scenery) => [
+                    'id' => $scenery->id,
+                    'simulator' => $scenery->simulator->shortened_name,
+                    'icao' => $scenery->developer->icao,
+                    'suggestedBy' => $scenery->suggestedByUser?->username ?? 'System',
+                ]),
+        ])->withViewData(['title' => 'Admin']);
     }
 }

@@ -125,7 +125,7 @@ function SceneryCard({ airportId, onClose, inTab = false }) {
                     <span className="pb-1">
                         Prices are excl. tax.
                     </span>
-                    <a href={route('scenery.create', {airport: airportId})} className="btn btn-outline-success btn-sm mt-3" target="_blank">
+                    <a href={route('scenery.create', {icao: airportId})} className="btn btn-outline-success btn-sm mt-3" target="_blank">
                         <i className="fa-sharp fa-plus"></i> Add missing scenery
                     </a>
                 </div>

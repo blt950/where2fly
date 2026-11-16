@@ -5,8 +5,8 @@ namespace App\Helpers;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * The flash messages and the email-verification notice, decided once. shell/Alerts.jsx and the
- * simple Blade layout (layouts/app) only lay them out. Messages are plain text, rendered escaped.
+ * The flash messages and the email-verification notice, decided once. shell/Alerts.jsx only
+ * lays them out. Messages are plain text, rendered escaped.
  */
 class AlertHelper
 {

@@ -42,12 +42,11 @@ class NavigationTest extends TestCase
             ->where('nav.account.items', fn ($items) => collect($items)->pluck('key')->all() === ['settings', 'lists', 'logout']));
     }
 
-    public function test_the_simple_blade_pages_have_a_way_back_and_no_second_navigation(): void
+    public function test_an_admin_gets_the_admin_page_as_a_shell_link(): void
     {
-        $this->actingAs(User::factory()->create())->get('/scenery/create')
-            ->assertOk()
-            ->assertSee('Back to the map')
-            ->assertDontSee('bottom-nav', false)
-            ->assertDontSee('id="map"', false);
+        $this->actingAs(User::factory()->admin()->create())->get('/admin')->assertInertia(fn (Assert $page) => $page
+            ->where('nav.account.items.2.key', 'admin')
+            ->where('nav.account.items.2.shell', true)
+            ->where('nav.account.items.2.active', true));
     }
 }

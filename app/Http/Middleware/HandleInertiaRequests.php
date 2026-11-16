@@ -5,32 +5,12 @@ namespace App\Http\Middleware;
 use App\Helpers\AlertHelper;
 use App\Helpers\MapHintHelper;
 use App\Helpers\NavigationHelper;
-use Closure;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Inertia\Middleware;
-use Inertia\Support\Header;
 
 class HandleInertiaRequests extends Middleware
 {
     protected $rootView = 'inertia';
-
-    /**
-     * A shell visit that ends on a Blade page can't render client-side: make it a full page load,
-     * reflashed so the errors and old input survive the extra request.
-     */
-    public function handle(Request $request, Closure $next)
-    {
-        $response = parent::handle($request, $next);
-
-        if ($request->header(Header::INERTIA) && $response->isSuccessful() && ! $response->headers->has(Header::INERTIA)) {
-            $request->session()->reflash();
-
-            return Inertia::location($request->fullUrl());
-        }
-
-        return $response;
-    }
 
     /**
      * The page URL exactly as requested. The default, fullUrl(), sorts the query and re-indexes

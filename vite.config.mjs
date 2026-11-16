@@ -38,10 +38,7 @@ export default defineConfig({
     },
     plugins: [
         laravel({
-            input: [
-                'resources/js/app.js',
-                'resources/js/inertia.jsx',
-            ],
+            input: ['resources/js/inertia.jsx'],
             refresh: true,
         }),
         react(),

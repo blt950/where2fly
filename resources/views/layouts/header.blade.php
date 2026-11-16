@@ -12,16 +12,8 @@
     @auth<meta name="sentry-user-id" content="{{ auth()->id() }}">@endauth
 @endif
 
-{{-- On Inertia pages <Head> owns the title; data-inertia lets it replace this server-rendered one. --}}
-@isset($inertiaManagedTitle)
-    <title data-inertia>{{ config('app.name') }}@isset($title) | {{ $title }}@endisset</title>
-@else
-    @hasSection('title')
-        <title>{{ config('app.name') }} | @yield('title', 'Home')</title>
-    @else
-        <title>{{ config('app.name') }}</title>
-    @endif
-@endisset
+{{-- <Head> owns the title; data-inertia lets it replace this server-rendered one. --}}
+<title data-inertia>{{ config('app.name') }}@isset($title) | {{ $title }}@endisset</title>
 
 <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
 <link rel="preconnect" href="https://tiles.basemaps.cartocdn.com" crossorigin>
@@ -52,7 +44,4 @@
 
 @routes
 @viteReactRefresh
-@vite($viteEntry ?? 'resources/js/app.js')
-
-@yield('resources')
-@yield('css')
+@vite('resources/js/inertia.jsx')

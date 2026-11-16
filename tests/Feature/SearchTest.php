@@ -886,30 +886,6 @@ class SearchTest extends TestCase
         $response->assertSessionHasInput('departure', 'ENGM');
     }
 
-    // -------------------------------------------------------------------------
-    // Shell visits that end on a Blade page
-    // -------------------------------------------------------------------------
-
-    public function test_a_shell_visit_that_ends_on_a_blade_page_becomes_a_full_page_load(): void
-    {
-        $response = $this->actingAs(User::factory()->create())->withHeaders($this->inertiaHeaders())->get('/scenery/create');
-
-        $response->assertStatus(409);
-        $response->assertHeader('X-Inertia-Location', url('/scenery/create'));
-    }
-
-    public function test_flashed_data_survives_the_full_page_load_to_a_blade_page(): void
-    {
-        $this->withHeaders($this->inertiaHeaders())->get('/search?' . http_build_query(array_merge($this->validSearchParams, [
-            'metcondition' => 'INVALID',
-        ])))->assertRedirect(route('front'));
-
-        // Without the reflash this request would use the errors up, and the full load would show none
-        $this->actingAs(User::factory()->create())->withHeaders($this->inertiaHeaders())->get('/scenery/create')
-            ->assertStatus(409)
-            ->assertSessionHasErrors('metcondition');
-    }
-
     public function test_the_page_url_keeps_the_query_exactly_as_requested(): void
     {
         $query = 'icao=ENGM&direction=departure&destinations%5B%5D=C-EU&codeletter=JM';

@@ -1,4 +1,4 @@
-// Shared by every entry point: the Blade pages (app.js) and the Inertia shell (inertia.jsx).
+// What the page needs before React: Sentry, Bootstrap, the stylesheet, the custom elements.
 import './sentry';
 
 import './bootstrap';

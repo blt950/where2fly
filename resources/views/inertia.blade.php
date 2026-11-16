@@ -4,7 +4,7 @@
         @section('meta-description')
             <meta name="description" content="{{ $metaDescription ?? '' }}">
         @endsection
-        @include('layouts.header', ['viteEntry' => 'resources/js/inertia.jsx', 'inertiaManagedTitle' => true])
+        @include('layouts.header')
         <x-inertia::head />
     </head>
 

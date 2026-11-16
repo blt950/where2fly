@@ -3,9 +3,8 @@ name: run-where2fly
 description: Build, run, and drive Where2Fly (Laravel + React flight-destination finder). Use when asked to start the app, take a screenshot of it, run its PHP test suite, or interact with the running search/map UI.
 ---
 
-Where2Fly is a Laravel app. The map pages are Inertia + React pages in a
-persistent shell with a MapLibre map, as are login, register, account and the info pages;
-only admin and scenery create/edit are Blade (a simple map-less layout). Drive it by starting `php artisan serve`
+Where2Fly is a Laravel app. Every page is an Inertia + React page in a
+persistent shell with a MapLibre map (admin and the scenery forms included). Drive it by starting `php artisan serve`
 and scripting a headless Chromium session via
 `.claude/skills/run-where2fly/driver.mjs` (a small chromium-cli-alike
 built for this skill — `chromium-cli` itself isn't installed in this

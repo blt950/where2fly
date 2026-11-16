@@ -90,18 +90,84 @@ class SceneryTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/scenery/create');
-
-        $response->assertStatus(200);
+        $this->actingAs($user)->get('/scenery/create')->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->component('SceneryCreate')
+            ->where('icao', '')
+            ->where('existing', null)
+            ->has('simulators.0.name'));
     }
 
     public function test_scenery_create_page_shows_existing_developers_for_known_icao(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/scenery/create?airport=EDDM');
+        $this->publishScenery('EDDM', 'MSFS2024');
 
-        $response->assertStatus(200);
+        $this->actingAs($user)->get('/scenery/create?icao=eddm')->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->where('icao', 'EDDM')
+            ->has('existing', 1)
+            ->where('existing.0.simulator', 'MSFS2024')
+            ->where('existing.0.published', true)
+            ->where('existing.0.current', false));
+    }
+
+    public function test_the_old_airport_param_moves_to_icao_so_the_shell_does_not_select_it(): void
+    {
+        $this->actingAs(User::factory()->create())->get('/scenery/create?airport=EDDM')
+            ->assertRedirect(route('scenery.create', ['icao' => 'EDDM']));
+    }
+
+    // -------------------------------------------------------------------------
+    // Review (admin)
+    // -------------------------------------------------------------------------
+
+    public function test_the_admin_page_lists_unpublished_contributions_with_who_suggested_them(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->publishScenery('EDDF', 'XP12');
+        $this->publishScenery('EDDM', 'MSFS2024');
+        $pending = Scenery::whereHas('developer', fn ($q) => $q->where('icao', 'EDDM'))->first();
+        $pending->update(['published' => false, 'suggested_by_user_id' => $admin->id]);
+
+        $this->actingAs($admin)->get('/admin')->assertInertia(fn (Assert $page) => $page
+            ->where('stats.sceneries', 2)
+            ->where('contributions', [['id' => $pending->id, 'simulator' => 'MSFS2024', 'icao' => 'EDDM', 'suggestedBy' => $admin->username]]));
+    }
+
+    public function test_only_an_admin_reviews_a_scenery_and_the_form_gets_it_marked_among_the_existing(): void
+    {
+        $this->publishScenery('EDDM', 'MSFS2024');
+        $scenery = Scenery::first();
+
+        $this->actingAs(User::factory()->create())->get("/scenery/{$scenery->id}/edit")->assertForbidden();
+
+        $this->actingAs(User::factory()->admin()->create())->get("/scenery/{$scenery->id}/edit")->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('SceneryEdit')
+                ->where('scenery.icao', 'EDDM')
+                ->where('scenery.developer', 'Dev EDDM')
+                ->where('scenery.payware', 1)
+                ->where('scenery.published', true)
+                ->where('suggestedBy', null)
+                ->has('existing', 1)
+                ->where('existing.0.current', true));
+    }
+
+    public function test_an_admin_updates_and_unpublishes_a_scenery(): void
+    {
+        $this->publishScenery('EDDM', 'MSFS2024');
+        $scenery = Scenery::first();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->post("/scenery/{$scenery->id}/edit", [
+            'icao' => 'eddm', 'developer' => 'Renamed', 'link' => 'https://example.com/new', 'payware' => '0',
+            'published' => false, 'suggested_by_user_id' => null,
+        ])->assertRedirect(route('admin'));
+
+        $scenery->refresh();
+        $this->assertSame('Renamed', $scenery->developer->developer);
+        $this->assertSame('https://example.com/new', $scenery->link);
+        $this->assertFalse((bool) $scenery->published);
+        $this->assertSame($admin->id, $scenery->suggested_by_user_id);
     }
 
     // -------------------------------------------------------------------------
