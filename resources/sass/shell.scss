@@ -115,12 +115,12 @@ body.shell-compact {
         display: none;
     }
 
-    // The credits: behind an ⓘ under the layers control (Footer.jsx), so they stay reachable at
-    // every stop that shows the map. Only the attribution, not the site links (in "More").
+    // The credits: behind an ⓘ beside the layers button (not under it, where its panel opens), so they
+    // stay reachable at every stop that shows the map. Only the attribution; the site links are in "More".
     .attribution-toggle {
         position: absolute;
-        top: calc(#{$header-height} + 0.75rem + 2.4rem + 0.5rem);
-        right: 0.75rem;
+        top: calc(#{$header-height} + 0.75rem);
+        right: calc(0.75rem + 2.5rem + 0.5rem);
         z-index: 600;
     }
 
@@ -370,7 +370,10 @@ body.shell-compact.shell-side {
         top: 0.75rem;
     }
 
-    .attribution-toggle,
+    .attribution-toggle {
+        top: 0.75rem;
+    }
+
     footer {
         top: calc(0.75rem + 2.4rem + 0.5rem);
     }
