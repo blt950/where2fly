@@ -1,10 +1,10 @@
 import { useRef } from 'react';
 import { Head } from '@inertiajs/react';
 
+import Flag from '../components/ui/Flag';
 import FlightMenu from '../components/ui/FlightMenu';
 import PageTitle from '../components/ui/PageTitle';
 import { useSortableRows } from '../components/utils/useSortableRows';
-import { stopOnTouch } from '../components/utils/touch';
 import { useTooltips } from '../components/utils/useTooltips';
 
 const SORT_COLUMNS = {
@@ -18,8 +18,7 @@ const Endpoint = ({ label, airport }) => (
     <dl>
         <dt>{label}</dt>
         <dd>
-            <img className="flag" src={`/img/flags/${airport.isoCountry.toLowerCase()}.svg`} height="16"
-                tabIndex={0} onClick={stopOnTouch} data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
+            <Flag country={airport.isoCountry} name={airport.countryName} />
             {' '}{airport.icao}
         </dd>
         <dd>{airport.name}</dd>

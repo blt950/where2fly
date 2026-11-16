@@ -4,11 +4,11 @@ import { Head, Link } from '@inertiajs/react';
 import { useShellMap } from '../components/shell/ShellMapContext';
 import { CONTINENT_VIEWS, WORLD_VIEW } from '../components/map/mapScene';
 import Dropdown from '../components/ui/Dropdown';
+import Flag from '../components/ui/Flag';
 import Legend from '../components/ui/Legend';
 import PageTitle from '../components/ui/PageTitle';
 import ScoreIcon from '../components/ui/ScoreIcon';
 import { useSortableRows } from '../components/utils/useSortableRows';
-import { stopOnTouch } from '../components/utils/touch';
 import { useTooltips } from '../components/utils/useTooltips';
 
 // Each dropdown links to a URL keeping the other two filters intact. JM is the default aircraft,
@@ -109,8 +109,7 @@ const Top = ({ airports, continent, exclude, aircraft, continents, aircraftTypes
                                     <th scope="row">{airport.rank}</th>
                                     <td>
                                         <div>
-                                            <img className="flag" src={`/img/flags/${airport.isoCountry.toLowerCase()}.svg`} height="16"
-                                                tabIndex={0} onClick={stopOnTouch} data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
+                                            <Flag country={airport.isoCountry} name={airport.countryName} />
                                             {' '}{airport.icao}
                                         </div>
                                         {airport.name}

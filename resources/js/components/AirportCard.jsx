@@ -1,6 +1,7 @@
 import { useRef, useContext } from 'react';
 import { MapContext } from './context/MapContext';
 
+import Flag from './ui/Flag';
 import SimbriefLink from './ui/SimbriefLink';
 import TAF from './ui/TAF';
 
@@ -45,15 +46,7 @@ function AirportCard({ airportId, onOpenFlights, onOpenScenery, onClose, inTab =
                 <>
                     <div className="d-flex justify-content-between">
                         <div>
-                            <img
-                                className="flag border-0"
-                                src={`/img/flags/${ data.airport.iso_country.toLowerCase() }.svg`}
-                                height="16"
-                                tabIndex={0}
-                                data-bs-toggle="tooltip"
-                                data-bs-title={ data.airport.country }
-                                alt={`Flag of ${data.airport.country}`}
-                            />
+                            <Flag country={data.airport.iso_country} name={data.airport.country} className="flag border-0" />
                             &nbsp;{data.airport.icao}
                         </div>
                         {!inTab && <button className="btn-close" aria-label="Close airport card" onClick={onClose}></button>}

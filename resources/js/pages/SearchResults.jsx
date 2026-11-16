@@ -3,13 +3,13 @@ import { Head, router } from '@inertiajs/react';
 
 import { useShellMap } from '../components/shell/ShellMapContext';
 import { withSelectedAirport } from '../components/shell/selection';
+import Flag from '../components/ui/Flag';
 import Legend from '../components/ui/Legend';
 import PageTitle from '../components/ui/PageTitle';
 import ScoreIcon from '../components/ui/ScoreIcon';
 import TAF from '../components/ui/TAF';
 import { trackInteraction } from '../components/utils/metrics';
 import { useSortableRows } from '../components/utils/useSortableRows';
-import { stopOnTouch } from '../components/utils/touch';
 import { useTooltips } from '../components/utils/useTooltips';
 
 const VISIBLE_ROWS = 10;
@@ -23,11 +23,6 @@ const SORT_COLUMNS = {
     time: (airport) => airport.airtime,
     forecast: (airport) => airport.scores.length,
 };
-
-const Flag = ({ airport }) => (
-    <img className="flag" src={`/img/flags/${airport.isoCountry.toLowerCase()}.svg`} height="16"
-        tabIndex={0} onClick={stopOnTouch} data-bs-toggle="tooltip" data-bs-title={airport.countryName} alt={`Flag of ${airport.countryName}`} />
-);
 
 // "Edit filters" hands the query back to the search form as old input. The server fills in the
 // sort boxes a form leaves out when unchecked, so they come back as they were. "Bookmark" only explains how.
@@ -50,7 +45,7 @@ const PrimaryAirport = ({ airport }) => (
     <div className="results-container">
         <dl>
             <dt>Airport</dt>
-            <dd><Flag airport={airport} /> {airport.icao}</dd>
+            <dd><Flag country={airport.isoCountry} name={airport.countryName} /> {airport.icao}</dd>
             <dd>{airport.name}</dd>
         </dl>
 
@@ -207,7 +202,7 @@ const SearchResults = ({
                                     onClick={() => setFocusAirport(airport.icao)}>
                                     <th scope="row">{airport.rank}</th>
                                     <td>
-                                        <div><Flag airport={airport} /> {airport.icao}</div>
+                                        <div><Flag country={airport.isoCountry} name={airport.countryName} /> {airport.icao}</div>
                                         {airport.name}
                                     </td>
                                     <td>
