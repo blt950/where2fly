@@ -235,3 +235,97 @@ u-datalist {
         background: $secondary;     
     }
 }
+/*
+* The MSFS import under the list form's Airports field
+*/
+
+.list-import{
+    margin-top: 0.5rem;
+
+    .btn-link{
+        padding: 0;
+        color: $bluewhite;
+    }
+
+    &-actions{
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 1rem;
+    }
+
+    &-help, &-result{
+        margin-top: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: $dark;
+        overflow-wrap: anywhere;
+
+        ul{
+            margin: 0.25rem 0 0;
+            padding-left: 1.2rem;
+        }
+
+        // A file can list hundreds of packages
+        details ul{
+            max-height: 11rem;
+            overflow-y: auto;
+        }
+    }
+
+    &-help{
+        color: $bluewhite;
+
+        dl, p{
+            margin-bottom: 0.5rem;
+        }
+
+        dt{
+            font-weight: 500;
+        }
+
+        dd{
+            margin-bottom: 0.25rem;
+        }
+    }
+
+    &-result{
+        border-top: 1px solid $primary;
+
+        > * + *{
+            margin-top: 0.75rem;
+        }
+
+        fieldset legend{
+            float: none;
+            margin-bottom: 0;
+            font-size: inherit;
+            font-weight: 500;
+            color: $bluewhite;
+        }
+
+        summary{
+            color: $bluewhite;
+            cursor: pointer;
+        }
+    }
+
+    &-summary{
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+
+        .fa-check{
+            color: $primary;
+        }
+    }
+
+    &-hint, &-package{
+        color: rgba($offwhite, 0.6);
+        font-size: 0.8rem;
+    }
+
+    &-hint{
+        margin-bottom: 0.25rem;
+    }
+}

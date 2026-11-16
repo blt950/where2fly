@@ -26,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/lists', 'index')->name('list.index');
         Route::get('/lists/create', 'create')->name('list.create');
         Route::post('/lists/create', 'store')->name('list.store');
+        Route::post('/lists/import/msfs', 'importMsfs')->middleware('throttle:20,1')->name('list.import.msfs');
         Route::get('/lists/{list}/edit', 'edit')->name('list.edit');
         Route::post('/lists/{list}/edit', 'update')->name('list.update');
         Route::get('/lists/{list}/delete', 'destroy')->name('list.delete');

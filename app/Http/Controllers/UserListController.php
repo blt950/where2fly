@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ImportContentXmlRequest;
 use App\Models\Airport;
 use App\Models\Simulator;
 use App\Models\UserList;
+use App\Services\Msfs\AirportCodeLookup;
+use App\Services\Msfs\ContentXmlException;
+use App\Services\Msfs\ContentXmlReader;
+use App\Services\Msfs\SceneryPackageClassifier;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
@@ -109,6 +115,22 @@ class UserListController extends Controller
         });
 
         return $this->listSavedRedirect('updated', $notFoundAirports);
+    }
+
+    /**
+     * Suggest a list from an uploaded MSFS 2024 Content.xml. The file is read in place and never stored.
+     */
+    public function importMsfs(ImportContentXmlRequest $request, ContentXmlReader $reader, AirportCodeLookup $lookup): JsonResponse
+    {
+        try {
+            $packages = $reader->read($request->file('content_xml')->getRealPath(), config('msfs_scenery.max_upload_kb') * 1024);
+        } catch (ContentXmlException $e) {
+            return response()->json(['message' => $e->getMessage(), 'reason' => $e->reason], 422);
+        }
+
+        $classifier = new SceneryPackageClassifier(config('msfs_scenery'), $lookup(...));
+
+        return response()->json($classifier->classify($packages, $request->boolean('include_native')));
     }
 
     /**

@@ -34,7 +34,6 @@ class AirportFactory extends Factory
             'gps_code' => null,
             'iata_code' => null,
             'local_code' => null,
-            'total_score' => null,
             'coordinates' => new Point($lat, $lon, Srid::WGS84->value),
         ];
     }

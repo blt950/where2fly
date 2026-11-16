@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 
 import FieldError from '../components/form/FieldError';
+import MsfsImport from '../components/form/MsfsImport';
 import PageTitle from '../components/ui/PageTitle';
 
 const DEFAULT_COLOR = '#8596e7';
@@ -55,10 +56,11 @@ const ListForm = ({ list, simulators, canMakePublic, old }) => {
                     </div>
                     <div className="mb-3">
                         <label htmlFor="airports" className="form-label">Airports</label>
-                        <small className="form-text text-white-50"> Separate airports by new line</small>
-                        <textarea className="form-control h-100" id="airports" rows="8" required
+                        <small className="form-text text-white-50" id="airports-hint"> Separate airports by new line</small>
+                        <textarea className="form-control h-100" id="airports" rows="8" required aria-describedby="airports-hint"
                             value={data.airports} onChange={(e) => setData('airports', e.target.value)}></textarea>
                         <FieldError message={errors.airports} />
+                        <MsfsImport airports={data.airports} onChange={(airports) => setData('airports', airports)} />
                     </div>
 
                     {canMakePublic && (

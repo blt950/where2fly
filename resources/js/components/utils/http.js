@@ -20,6 +20,14 @@ export const postJson = (url, body) => fetch(url, {
     body: JSON.stringify(body),
 });
 
+// Multipart (file uploads): the browser sets the Content-Type with its boundary
+export const postForm = (url, formData) => fetch(url, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
+    body: formData,
+});
+
 export const reportError = (error) => {
     captureException(error);
     console.error(error.message);
