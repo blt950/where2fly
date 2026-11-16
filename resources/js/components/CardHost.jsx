@@ -1,17 +1,16 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import AirportCard from './AirportCard';
+import CardTabs from './CardTabs';
 import FlightsCard from './FlightsCard';
 import SceneryCard from './SceneryCard';
 import { MapContext } from './context/MapContext';
 import { trackInteraction } from './utils/metrics';
 import { useMapLayout } from './context/MapLayoutContext';
+import { useEscape } from './utils/useEscape';
 import { useFlights } from './utils/useFlights';
 import { sceneryCount, useScenery } from './utils/useScenery';
-
-const ESCAPE_OWNERS = 'input, textarea, select, [contenteditable], .map-controls, [data-bs-toggle="dropdown"], .dropdown-menu';
-const ESCAPE_OWNERS_OPEN = () => Boolean(document.querySelector('.dropdown-menu.show, .modal.show'));
 
 const freshCards = (airportId, initialCard) => ({
     airportId,
@@ -24,7 +23,7 @@ const freshCards = (airportId, initialCard) => ({
 // Which cards sit beside the selected airport: the airport card always; flights only on a route
 // (a primary airport); scenery on request, or straight away where the scene asks for it. The
 // card bodies are shared; only the wrapper differs: a stack beside the panel on wide screens,
-// tabs inside the drawer (portalled into its card slot) on the compact layout.
+// tabs (CardTabs) portalled into the drawer's card slot on the compact layout.
 function CardHost({ airportId }) {
 
     const { findAirport, focusAirport, primaryAirport, reverseDirection, highlightedAircrafts, initialCard, setFocusAirport, setShowAirportIdCard } = useContext(MapContext);
@@ -68,27 +67,14 @@ function CardHost({ airportId }) {
     };
 
     // Esc does what the nearest close does: the topmost card on the stack, the tab back to the
-    // airport, then the cards altogether. Not while something else owns Esc (a field, a menu, the map controls).
-    const onEscape = useRef(null);
-    onEscape.current = () => {
+    // airport, then the cards altogether
+    useEscape(() => {
         if (compact ? cards.tab !== 'airport' : cards.scenery || cards.flights) {
             update(compact ? { tab: 'airport' } : cards.scenery ? { scenery: false } : { flights: false });
         } else {
             closeAll();
         }
-    };
-
-    useEffect(() => {
-        const onKeyDown = (event) => {
-            if (event.key !== 'Escape' || event.defaultPrevented || ESCAPE_OWNERS_OPEN()) return;
-            if (event.target instanceof Element && event.target.closest(ESCAPE_OWNERS)) return;
-
-            onEscape.current();
-        };
-
-        document.addEventListener('keydown', onKeyDown);
-        return () => document.removeEventListener('keydown', onKeyDown);
-    }, []);
+    });
 
     // In tabs, each card leaves out what the tabs already cover (headers, close buttons, shortcuts)
     const airportCard = (
@@ -106,52 +92,21 @@ function CardHost({ airportId }) {
             return null;
         }
 
-        // u-tabs supplies the tab semantics and keyboard support; React drives the selection
-        // through aria-selected and renders only the selected panel, so Flights fetches on demand
-        const tabs = [
-            { id: 'airport', icon: 'fa-tower-control', label: focused?.icao ?? 'Airport' },
-            // No scenery still opens, for "Add missing scenery", and just shows no count. No flights is
-            // nothing to open: dimmed and inert, as the desktop button is.
-            { id: 'scenery', icon: 'fa-map', label: 'Scenery', count: sceneryTotal || null },
-            ...(onRoute ? [{ id: 'flights', icon: 'fa-plane-up', label: 'Flights', count: flightsTotal, inert: flightsTotal === 0 }] : []),
-        ];
         const backToAirport = () => update({ tab: 'airport' });
+        // No scenery still opens, for "Add missing scenery", and just shows no count. No flights is
+        // nothing to open: inert, as the desktop button is.
+        const tabs = [
+            { id: 'airport', icon: 'fa-tower-control', label: focused?.icao ?? 'Airport', card: airportCard },
+            { id: 'scenery', icon: 'fa-map', label: 'Scenery', count: sceneryTotal || null, card: sceneryCard(backToAirport) },
+            ...(onRoute ? [{ id: 'flights', icon: 'fa-plane-up', label: 'Flights', count: flightsTotal, inert: flightsTotal === 0, card: flightsCard(backToAirport) }] : []),
+        ];
         // The same interactions the desktop card's Flights and Scenery buttons report
         const selectTab = (id) => {
             if (id !== cards.tab && id !== 'airport') trackInteraction(`Open ${id} card`);
             update({ tab: id });
         };
 
-        return createPortal(
-            <u-tabs className="card-tabs-host">
-                <div className="card-tabs-bar">
-                    <button type="button" className="card-tabs-back" aria-label="Back to the list" onClick={closeAll}>
-                        <i className="fa-sharp fa-arrow-left" aria-hidden="true"></i>
-                    </button>
-                    <u-tablist className="card-tabs" aria-label="Airport details">
-                        {tabs.map((tab) => (
-                            <u-tab key={tab.id} id={`card-tab-${tab.id}`} aria-controls={`card-panel-${tab.id}`}
-                                className={tab.inert ? 'card-tab-empty' : undefined} aria-disabled={tab.inert ? 'true' : undefined}
-                                aria-selected={cards.tab === tab.id ? 'true' : 'false'} onClick={() => !tab.inert && selectTab(tab.id)}>
-                                <i className={`fa-sharp ${tab.icon}`} aria-hidden="true"></i>
-                                <span className="card-tab-label">{tab.label}</span>
-                                {tab.count !== undefined && tab.count !== null && (
-                                    <span className="card-tab-count count-pill" aria-label={`${tab.count} available`}>{tab.count}</span>
-                                )}
-                            </u-tab>
-                        ))}
-                    </u-tablist>
-                </div>
-                {tabs.map((tab) => (
-                    <u-tabpanel key={tab.id} id={`card-panel-${tab.id}`} className="card-tab-panel">
-                        {cards.tab === tab.id && tab.id === 'airport' && airportCard}
-                        {cards.tab === tab.id && tab.id === 'flights' && flightsCard(backToAirport)}
-                        {cards.tab === tab.id && tab.id === 'scenery' && sceneryCard(backToAirport)}
-                    </u-tabpanel>
-                ))}
-            </u-tabs>,
-            cardSlot,
-        );
+        return createPortal(<CardTabs tabs={tabs} selected={cards.tab} onSelect={selectTab} onBack={closeAll} />, cardSlot);
     }
 
     return (
