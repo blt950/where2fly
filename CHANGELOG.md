@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.8](https://github.com/blt950/where2fly/compare/v3.1.7...v3.1.8) (2026-11-20)
+
+
+### Bug Fixes
+
+* php version ([5f52805](https://github.com/blt950/where2fly/commit/5f528051b8ff5291dcfcd56e7d3dc348f67736fb))
+
 ## [3.1.7](https://github.com/blt950/where2fly/compare/v3.1.6...v3.1.7) (2026-11-04)
 
 
