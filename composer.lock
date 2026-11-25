@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6618b2ef119d14fafab3cad27bdc19ea",
+    "content-hash": "31537225c8f0d4b250319a5c7950d99d",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -3447,27 +3447,27 @@
         },
         {
             "name": "propaganistas/laravel-disposable-email",
-            "version": "2.5.4",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Propaganistas/Laravel-Disposable-Email.git",
-                "reference": "c8b3d271472e850fd4dacf0533101b84ce30ec93"
+                "reference": "70fef59f57581b270a70100fb94b7e970cb3e701"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Propaganistas/Laravel-Disposable-Email/zipball/c8b3d271472e850fd4dacf0533101b84ce30ec93",
-                "reference": "c8b3d271472e850fd4dacf0533101b84ce30ec93",
+                "url": "https://api.github.com/repos/Propaganistas/Laravel-Disposable-Email/zipball/70fef59f57581b270a70100fb94b7e970cb3e701",
+                "reference": "70fef59f57581b270a70100fb94b7e970cb3e701",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "illuminate/cache": "^10.0|^11.0|^12.0|^13.0",
-                "illuminate/config": "^10.0|^11.0|^12.0|^13.0",
-                "illuminate/console": "^10.0|^11.0|^12.0|^13.0",
-                "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",
-                "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
-                "illuminate/validation": "^10.0|^11.0|^12.0|^13.0",
-                "php": "^8.1"
+                "illuminate/cache": "^12.0|^13.0",
+                "illuminate/config": "^12.0|^13.0",
+                "illuminate/console": "^12.0|^13.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
+                "illuminate/validation": "^12.0|^13.0",
+                "php": "^8.2"
             },
             "require-dev": {
                 "laravel/pint": "^1.14",
@@ -3511,7 +3511,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Propaganistas/Laravel-Disposable-Email/issues",
-                "source": "https://github.com/Propaganistas/Laravel-Disposable-Email/tree/2.5.4"
+                "source": "https://github.com/Propaganistas/Laravel-Disposable-Email/tree/3.0.0"
             },
             "funding": [
                 {
@@ -3519,7 +3519,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-01T03:03:18+00:00"
+            "time": "2026-11-22T19:49:40+00:00",
+            "published-time": "2026-11-22T19:50:37+00:00"
         },
         {
             "name": "psr/clock",
@@ -11084,5 +11085,5 @@
         "php": "^8.5.8"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }

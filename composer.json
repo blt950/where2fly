@@ -14,7 +14,7 @@
         "league/flysystem-aws-s3-v3": "^3.28",
         "matanyadaev/laravel-eloquent-spatial": "^4.7",
         "mjaschen/phpgeo": "^6.0",
-        "propaganistas/laravel-disposable-email": "^2.4",
+        "propaganistas/laravel-disposable-email": "^3.0",
         "ryangjchandler/laravel-cloudflare-turnstile": "^3.0",
         "sentry/sentry-laravel": "^4.3",
         "spatie/laravel-backup": "^10.2.1",
