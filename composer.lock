@@ -3447,16 +3447,16 @@
         },
         {
             "name": "propaganistas/laravel-disposable-email",
-            "version": "2.5.4",
+            "version": "2.5.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Propaganistas/Laravel-Disposable-Email.git",
-                "reference": "c8b3d271472e850fd4dacf0533101b84ce30ec93"
+                "reference": "6c1885d205e9eaba5f8d982b458ae3f76d3e78f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Propaganistas/Laravel-Disposable-Email/zipball/c8b3d271472e850fd4dacf0533101b84ce30ec93",
-                "reference": "c8b3d271472e850fd4dacf0533101b84ce30ec93",
+                "url": "https://api.github.com/repos/Propaganistas/Laravel-Disposable-Email/zipball/6c1885d205e9eaba5f8d982b458ae3f76d3e78f2",
+                "reference": "6c1885d205e9eaba5f8d982b458ae3f76d3e78f2",
                 "shasum": ""
             },
             "require": {
@@ -3511,7 +3511,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Propaganistas/Laravel-Disposable-Email/issues",
-                "source": "https://github.com/Propaganistas/Laravel-Disposable-Email/tree/2.5.4"
+                "source": "https://github.com/Propaganistas/Laravel-Disposable-Email/tree/2.5.5"
             },
             "funding": [
                 {
@@ -3519,7 +3519,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-01T03:03:18+00:00"
+            "time": "2026-11-22T18:59:11+00:00",
+            "published-time": "2026-11-22T19:36:53+00:00"
         },
         {
             "name": "psr/clock",
@@ -11084,5 +11085,5 @@
         "php": "^8.5.8"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }
