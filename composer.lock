@@ -5685,16 +5685,16 @@
         },
         {
             "name": "symfony/intl",
-            "version": "v8.1.10",
+            "version": "v8.1.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/intl.git",
-                "reference": "19c82580068e56d126b3ef4e26c0fe9aa5b71ff7"
+                "reference": "227c7412a581e9d2b2f3647c59c9874e1b48be7a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/intl/zipball/19c82580068e56d126b3ef4e26c0fe9aa5b71ff7",
-                "reference": "19c82580068e56d126b3ef4e26c0fe9aa5b71ff7",
+                "url": "https://api.github.com/repos/symfony/intl/zipball/227c7412a581e9d2b2f3647c59c9874e1b48be7a",
+                "reference": "227c7412a581e9d2b2f3647c59c9874e1b48be7a",
                 "shasum": ""
             },
             "require": {
@@ -5750,7 +5750,7 @@
                 "localization"
             ],
             "support": {
-                "source": "https://github.com/symfony/intl/tree/v8.1.10"
+                "source": "https://github.com/symfony/intl/tree/v8.1.12"
             },
             "funding": [
                 {
@@ -5770,7 +5770,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-27T13:53:09+00:00"
+            "time": "2026-11-23T09:20:57+00:00",
+            "published-time": "2026-11-25T09:30:38+00:00"
         },
         {
             "name": "symfony/mailer",
@@ -11084,5 +11085,5 @@
         "php": "^8.5.8"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }
